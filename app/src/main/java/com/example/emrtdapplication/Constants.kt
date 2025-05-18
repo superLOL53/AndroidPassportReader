@@ -5,9 +5,11 @@ import android.util.Log
 const val ZERO_BYTE : Byte = 0x0
 const val ZERO_SHORT : Short = 0
 const val FILE_SUCCESSFUL_READ = 0
+const val SUCCESS = 0
 const val FILE_UNABLE_TO_SELECT = -1
 const val FILE_UNABLE_TO_READ = -2
 const val NOT_IMPLEMENTED = -3
+const val INVALID_ARGUMENT = -4
 
 const val SELECT_APPLICATION_SUCCESS = 0
 const val UNALBE_TO_SELECT_APPLICATION = -1
@@ -27,6 +29,18 @@ const val MRZ_ID = 11
 const val PACE_ID = 12
 const val SecureAPDU_ID = 13
 
+object TLV_TAGS {
+    const val CONSTRUCT_BIT : Byte = 0x20
+    const val INTEGER : Byte = 0x02
+    const val OBJECT_ID : Byte = 0x06
+    const val OCTET_STRING : Byte = 0x04
+    const val CRYPTOGRAPHIC_REFERENCE : Byte = 0x80.toByte()
+    const val KEY_REFERENCE : Byte = 0x83.toByte()
+    const val KEY_REFERENCE_COMPUTING : Byte = 0x84.toByte()
+    const val CERTIFICATE_HOLDER_AUTHORIZATION_TEMPLATE_1 : Byte = 0x7F
+    const val CERTIFICATE_HOLDER_AUTHORIZATION_TEMPLATE_2 : Byte = 0x4C
+    const val NONCE_QUERY : Byte = 0x7C
+}
 
 object APDUConstants {
     const val TAG = "APDU"
@@ -48,6 +62,7 @@ enum class NfcUse {
 object NfcClassByte {
     const val ZERO : Byte = 0x0
     const val SECURE_MESSAGING : Byte = 0x0c
+    const val COMMAND_CHAINING : Byte = 0x10
 }
 
 object NfcInsByte {
@@ -55,6 +70,8 @@ object NfcInsByte {
     const val READ_BINARY : Byte = 0xB0.toByte()
     const val REQUEST_RANDOM_NUMBER = 0x84.toByte()
     const val EXTERNAL_AUTHENTICATE : Byte = 0x82.toByte()
+    const val MANAGE_SECURITY_ENVIRONMENT : Byte = 0x22
+    const val GENERAL_AUTHENTICATE : Byte = 0x86.toByte()
 }
 
 object NfcP1Byte {
@@ -65,11 +82,13 @@ object NfcP1Byte {
     const val SELECT_DIR_SHORT : Byte = 0x1E
     const val SELECT_CARD_ACCESS_SHORT : Byte = 0x1C
     const val SELECT_CARD_SECURITY_SHORT : Byte = 0x1D
+    const val SET_AUTHENTICATION_TEMPLATE : Byte = 0xC1.toByte()
 }
 
 object NfcP2Byte {
     const val ZERO : Byte = 0x00
     const val SELECT_FILE : Byte = 0x0C
+    const val SET_AUTHENTICATION_TEMPLATE : Byte = 0xA4.toByte()
 }
 
 object NfcRespondCodeSW1 {
@@ -120,9 +139,61 @@ object CardAccessConstants {
     const val ENABLE_LOGGING = true
 }
 
+object PACEInfoConstants {
+    const val TAG = "PACEInfo"
+    const val ENABLE_LOGGING = true
+    const val UNDEFINED : Byte = -1
+    const val id_PACE = "0.4.0.127.0.7.2.2.4"
+    const val DH_GM : Byte = 1
+    const val ECDH_GM : Byte = 2
+    const val DH_IM : Byte = 3
+    const val ECDH_IM : Byte = 4
+    const val ECDH_CAM : Byte = 6
+    const val DES_CBC_CBC : Byte = 1
+    const val AES_CBC_CMAC_128 : Byte = 2
+    const val AES_CBC_CMAC_192 : Byte = 3
+    const val AES_CBC_CMAC_256 : Byte = 4
+    const val MODP_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP : Byte = 0
+    const val MODP_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP : Byte = 1
+    const val MODP_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP : Byte = 2
+    const val NIST_P192 : Byte = 8
+    const val BRAIN_POOL_P192R1 : Byte = 9
+    const val NIST_P224 : Byte = 10
+    const val BRAIN_POOL_P224R1 : Byte = 11
+    const val NIST_P256 : Byte = 12
+    const val BRAIN_POOL_P256R1 : Byte = 13
+    const val BRAIN_POOL_P320R1 : Byte = 14
+    const val NIST_P384 : Byte = 15
+    const val BRAIN_POOL_P384R1 : Byte = 16
+    const val BRAIN_POOL_P512R1 : Byte = 17
+    const val NIST_P521 : Byte = 18
+}
+
+object PACEConstants {
+    const val TAG = "PACE"
+    const val ENABLE_LOGGING = true
+    const val NO_PASSWORD = -1
+    const val NO_PACE_OID = -2
+    const val INVALID_MSE_COMMAND = -3
+    const val INVALID_GENERAL_AUTHENTICATE = -4
+    const val INVALID_NONCE = -5
+    const val INVALID_PACE_OID = -6
+}
+
 object AttributeInfoConstants {
     const val TAG = "AttributeInfoFile"
     const val ENABLE_LOGGING = true
+    const val CARD_CAPABILITY_TAG : Byte = 0x47
+    const val SUPPORT_RECORD_NUMBER : Byte = 0x02
+    const val SUPPORT_SHORT_EF_ID : Byte = 0x04
+    const val SUPPORT_DF_FULL_NAME_SELECTION : Byte = 0x80.toByte()
+    const val UNIT_SIZE : Byte = 0x01
+    const val MASK_UNIT_SIZE : Byte = 0xF
+    const val SUPPORT_COMMAND_CHAINING : Byte = 0x80.toByte()
+    const val SUPPORT_EXTENDED_LENGTHS : Byte = 0x40
+    const val EXTENDED_LENGTH_INFO_IN_ATRINFO : Byte = 0x20
+    const val EXTENDED_LENGTH_TAG_1 : Byte = 0x7F
+    const val EXTENDED_LENGTH_TAG_2 : Byte = 0x66
 }
 
 object CardSecurityConstants {
@@ -154,6 +225,12 @@ object APDUControlConstants {
     const val ERROR_UNABLE_TO_CONNECT = -3
     const val ERROR_ISO_DEP_NOT_SELECTED = -4
     const val ERROR_UNABLE_TO_CLOSE = -5
+}
+
+object TLVCoderConstants {
+    const val TAG = "TLVCoder"
+    const val ENABLE_LOGGING = true
+
 }
 
 object LoggerConstants {
@@ -211,5 +288,6 @@ object Logger {
 
 object TestValues {
     const val MRZ = "PPAUTTROST<<OLIVER>WILLIBALD<<<<<<<<<<<<<<<<\nAP11269226AUT0007076M3503306<<<<<<<<<<<<<<<4"
+    const val CAN = "208472"
     //const val MRZ = "I<UTOL898902C<3<<<<<<<<<<<<<<<\n6908061F9406236UTO<<<<<<<<<<<1\nERIKSSON<<ANNA<MARIA<<<<<<<<<<"
 }

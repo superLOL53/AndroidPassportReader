@@ -20,11 +20,7 @@ class BAC {
         if (newMRZ == null) {
             return Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, BACConstants.ERROR_NO_MRZ, "No MRZ in init function")
         }
-        val mrz = MRZ(newMRZ)
-        if (mrz.extractMRZInformation() != MRZConstants.MRZ_EXTRACTION_SUCCESSFUL) {
-            return Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, BACConstants.ERROR_CANNOT_EXTRACT_MRZ_INFORMATION, "Unable to extract MRZ information")
-        }
-        mrzInformation = mrz.getMRZInfoString()
+        mrzInformation = newMRZ
         return BACConstants.BAC_INIT_SUCCESS
     }
 
@@ -32,6 +28,8 @@ class BAC {
         if (mrzInformation == null) {
             return BACConstants.ERROR_UNINITIALIZED_MRZ_INFORMATION
         }
+        //mrzInformation = "L898902C<369080619406236"
+        Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "MRZ is $mrzInformation")
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Initializing BAC")
         var info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.REQUEST_RANDOM_NUMBER, NfcP1Byte.ZERO, NfcP2Byte.ZERO, true, 0x08, 0))
         if (!(info[info.size-2] == NfcRespondCodeSW1.OK && info[info.size-1] == NfcRespondCodeSW2.OK)) {
@@ -40,10 +38,13 @@ class BAC {
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Random Nonce request OK. Nonce is: ", info)
         val rndIfd = ByteArray(8)
         val kIfd = ByteArray(16)
+        //info = byteArrayOf(0x46, 0x08, 0xF9.toByte(), 0x19, 0x88.toByte(), 0x70, 0x22, 0x12, 0x90.toByte(), 0x00)
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Nonce is:", info)
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Initializing Random number and Key")
         SecureRandom().nextBytes(rndIfd)
         SecureRandom().nextBytes(kIfd)
+        //rndIfd = byteArrayOf(0x78, 0x17, 0x23, 0x86.toByte(), 0x0C, 0x06, 0xC2.toByte(), 0x26)
+        //kIfd = byteArrayOf(0x0B, 0x79, 0x52, 0x40, 0xCB.toByte(), 0x70, 0x49, 0xB0.toByte(), 0x1C, 0x19, 0xB3.toByte(), 0x3E, 0x32, 0x80.toByte(), 0x4F, 0x0B)
         val s = ByteArray(32)
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Concatenate Random numbers and Key")
         for (i in 0..7) {
@@ -73,7 +74,7 @@ class BAC {
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Encryption Key is: ", kEnc)
         val kMAC = computeKeyBAC(kSeed, BACConstants.MAC_COMPUTATION_KEY_VALUE_C)
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "MAC Key is: ", kMAC)
-        val eIfd = encrypt3DES(s, byteArrayOf(0,0,0,0,0,0,0,0), kEnc).slice(0..31).toByteArray()
+        val eIfd = encrypt3DES(s, byteArrayOf(0,0,0,0,0,0,0,0), kEnc)
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Encrypted message is: ", eIfd)
         val mIfd = computeMAC(eIfd, kMAC)
         Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Computed MAC is: ", mIfd)

@@ -114,6 +114,8 @@ class MRZ (private var mrz : String) {
             return ch.digitToInt()
         } else if (ch.isUpperCase()) {
             return ch.code-55
+        } else if (ch.isLowerCase()){
+            return ch.code-87
         } else {
             Logger.log(MRZConstants.TAG, MRZConstants.ENABLE_LOGGING, "Illegal value for check digit computation: $ch")
             return 0

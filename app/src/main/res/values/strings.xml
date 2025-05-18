@@ -3,4 +3,17 @@
     <string name="title_activity_emrtdapplication">eMRTDApplication</string>
     <string name="title_activity_check_nfc">CheckNFC</string>
     <string name="title_activity_main">MainActivity</string>
+    <string name="passportNumber">Enter your passport number</string>
+    <string name="PPN">AP1126922</string>
+    <string name="birthday">Enter your birthday (YYMMDD)</string>
+    <string name="bday">000707</string>
+    <string name="expirationDate">Enter the expiration date (YYMMDD)</string>
+    <string name="eDate">350330</string>
+    <string name="or">OR</string>
+    <string name="can">Enter the CAN number</string>
+    <string name="next">Next</string>
+    <string name="readEMRTD">Hold your passport to the back of your phone. It should automatically recognize and start reading the passport.</string>
+    <string name="cancel">Cancel</string>
+    <string name="enable">Enable</string>
+    <string name="enableNFC">Enable NFC to read from your passport</string>
 </resources>

@@ -4,7 +4,6 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import org.spongycastle.crypto.engines.DESEngine
 import org.spongycastle.crypto.macs.ISO9797Alg3Mac
-import org.spongycastle.crypto.paddings.ISO7816d4Padding
 import org.spongycastle.crypto.params.KeyParameter
 import java.io.IOException
 import javax.crypto.Cipher
@@ -26,29 +25,27 @@ object APDUControl {
 
     fun init(tag: Tag?) : Int {
         if (tag == null) {
-            return Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.ERROR_NO_NFC_TAG, "No tag discovered")
+            return log(APDUControlConstants.ERROR_NO_NFC_TAG, "No tag discovered")
         }
-        Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, "NFC TAG discovered")
+        log("NFC TAG discovered")
         val tagUid = tag.id
-        Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, "TagId: " + bytesToHex(tagUid))
+        log("TagId: " + bytesToHex(tagUid))
         val list = tag.techList
-        Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, "TechList Entries: " + list.size)
+        log("TechList Entries: ${list.size}")
         for (i in list.indices) {
-            Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, "Entry $i: ${list[i]}\n")
+            log("Entry $i: ${list[i]}\n")
         }
         val isodep = IsoDep.get(tag)
-        if (isodep == null) {
-            Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.ERROR_NO_ISO_DEP_SUPPORT, "Iso DEP not supported")
-        }
+            ?: return log(APDUControlConstants.ERROR_NO_ISO_DEP_SUPPORT, "Iso DEP not supported")
         isoDepSupport = true
         isoDep = isodep
-        Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, "Iso DEP supported")
+        log("Iso DEP supported")
         if (nfcTechUse == NfcUse.UNDEFINED) {
             nfcTechUse = NfcUse.ISO_DEP
             maxTransceiveLength = isoDep.maxTransceiveLength
-            Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, "Using ISO DEP")
+            log("Using ISO DEP")
         }
-        return Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.INIT_SUCCESS, "Successfully initialized ISO DEP")
+        return log(APDUControlConstants.INIT_SUCCESS, "Successfully initialized ISO DEP")
     }
 
     fun sendAPDU(apdu : APDU) : ByteArray {
@@ -89,14 +86,14 @@ object APDUControl {
             when (nfcTechUse) {
                 NfcUse.ISO_DEP -> {
                     isoDep.connect()
-                    return Logger.log(EMRTDConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.CONNECT_SUCCESS, "Connected to NFC_ISO_DEP")
+                    return log(APDUControlConstants.CONNECT_SUCCESS, "Connected to NFC_ISO_DEP")
                 }
                 NfcUse.UNDEFINED -> {
-                    return Logger.log(EMRTDConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED, "Can not connect to NFC. No Technology supported/selected")
+                    return log(APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED, "Can not connect to NFC. No Technology supported/selected")
                 }
             }
         } catch (e : IOException) {
-            return Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.ERROR_UNABLE_TO_CONNECT, "Unable to connect to NFC")
+            return log(APDUControlConstants.ERROR_UNABLE_TO_CONNECT, "Unable to connect to NFC")
         }
     }
 
@@ -108,11 +105,11 @@ object APDUControl {
                     return APDUControlConstants.CLOSE_SUCCESS
                 }
                 NfcUse.UNDEFINED -> {
-                    return Logger.log(EMRTDConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.ERROR_UNABLE_TO_CLOSE, "Can not close to NFC. No Technology supported/selected")
+                    return log(APDUControlConstants.ERROR_UNABLE_TO_CLOSE, "Can not close to NFC. No Technology supported/selected")
                 }
             }
         } catch (e : IOException) {
-            return Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, APDUControlConstants.ERROR_UNABLE_TO_CLOSE, "Unable to close NFC")
+            return log(APDUControlConstants.ERROR_UNABLE_TO_CLOSE, "Unable to close NFC")
         }
     }
 
@@ -120,28 +117,69 @@ object APDUControl {
     private fun sendBACEncryptedAPDU(apdu: APDU) : ByteArray {
         val header = apdu.getHeader()
         header[0] = NfcClassByte.SECURE_MESSAGING
+        var newLc = 0.toByte()
         val paddedHeader = addPadding(header)
-        println(paddedHeader.toHexString())
+        log("CmdHeader: " + paddedHeader.toHexString())
         val paddedData = addPadding(apdu.getData())
-        println(paddedData.toHexString())
+        log("Padded Data: " + paddedData.toHexString())
         val encryptedData = encryptBAC(paddedData)
-        println(encryptedData.toHexString())
-        val do87 = byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
-        println(do87.toHexString())
-        val M = paddedHeader + addPadding(do87)
-        println(M.toHexString())
-        println("SSC: " + ssc.toHexString())
+        log("Encrypted Data: " + encryptedData.toHexString())
+        var do8785 : ByteArray? = null
+        if (apdu.getUseLc()) {
+            if (apdu.getHeader()[1] % 2 == 0) {
+                newLc = (newLc + 0x03).toByte()
+                do8785 = byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
+                log("DO87: " + do8785.toHexString())
+            } else {
+                newLc = (newLc + 0x03).toByte()
+                do8785 = byteArrayOf(0x85.toByte(), 0x09, 0x01) + encryptedData
+                log("DO87: " + do8785.toHexString())
+            }
+        }
+        var do97 : ByteArray? = null
+        if (apdu.getUseLe()) {
+            newLc = (newLc + 0x03).toByte()
+            do97 = byteArrayOf(0x97.toByte(), 0x01, apdu.getLe())
+        }
+        var tail : ByteArray? = null
+        if (do8785 != null) {
+            tail = do8785
+        }
+        if (do97 != null) {
+            if (tail == null) {
+                tail = do97
+            } else {
+                tail += do97
+            }
+        }
+        val M = paddedHeader + addPadding(tail!!)
+        log("M: " + M.toHexString())
+        log("SSC: " + ssc.toHexString())
         inc(ssc)
-        println(ssc.toHexString())
+        log("Incremented SSC: " + ssc.toHexString())
         val N = addPadding(ssc + M)
-        println(N.toHexString())
+        log("N: " + N.toHexString())
         val CC = computeMAC(N)
-        println(CC.toHexString())
+        log("CC: " + CC.toHexString())
         val do8e = byteArrayOf(0x8E.toByte(), 0x08) + CC
-        println(do8e.toHexString())
-        val finalApdu = header + 0x15 + do87 + do8e + 0x0
-        println(finalApdu.toHexString())
-        return finalApdu
+        log("DO8E: " + do8e.toHexString())
+        newLc = (newLc + encryptedData.size +  do8e.size).toByte()
+        var finalApdu = header + newLc + tail + do8e + 0x0
+        if (apdu.getUseLc() && apdu.getLcExt() != ZERO_SHORT) {
+            finalApdu += 0x0
+        }
+        log("ProtectedAPDU: " + finalApdu.toHexString())
+        inc(ssc)
+        val rapdu = isoDep.transceive(finalApdu)
+        log("RAPDU: " + rapdu.toHexString())
+        verifyMAC(rapdu)
+        var normalAPDU : ByteArray
+        if ((rapdu[0] == 0x87.toByte() || rapdu[0] == 0x85.toByte()) && rapdu[2] == 0x01.toByte()) {
+            normalAPDU = decryptBAC(rapdu.slice(3..rapdu.size-17).toByteArray()) + rapdu.slice(rapdu.size-2..<rapdu.size).toByteArray()
+        } else {
+            normalAPDU = rapdu.slice(rapdu.size-2..<rapdu.size).toByteArray()
+        }
+        return normalAPDU
     }
 
     private fun inc(bytes: ByteArray) {
@@ -155,16 +193,27 @@ object APDUControl {
 
     private fun computeMAC(m : ByteArray) : ByteArray {
         try {
-            val mac = ISO9797Alg3Mac(DESEngine(), 64, ISO7816d4Padding())
+            val mac = ISO9797Alg3Mac(DESEngine(), 64)
             mac.init(KeyParameter(encryptionKeyMAC))
             mac.update(m, 0, m.size)
             val out = ByteArray(8)
             mac.doFinal(out, 0)
             return out
         } catch (e : Exception) {
-            Logger.log(BACConstants.TAG, BACConstants.ENABLE_LOGGING, "Exception: ${e.message}")
+            log("Exception: ${e.message}")
         }
         return byteArrayOf(0)
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun verifyMAC(rapdu : ByteArray) : Boolean {
+        log("Verifying MAC...")
+        val N = addPadding(ssc + byteArrayOf(0x99.toByte(), 0x02) + rapdu.slice(rapdu.size-2..<rapdu.size).toByteArray())
+        log("N: " + N.toHexString())
+        val CC = computeMAC(N)
+        log("CC': " + CC.toHexString())
+        log("CC: " + rapdu.slice(rapdu.size-10..rapdu.size-3).toByteArray().toHexString())
+        return CC.contentEquals(rapdu.slice(rapdu.size-10..rapdu.size-3).toByteArray())
     }
 
     private fun encryptBAC(bytes: ByteArray) : ByteArray {
@@ -173,6 +222,15 @@ object APDUControl {
         val c = Cipher.getInstance("DESede/CBC/NoPadding")
         c.init(Cipher.ENCRYPT_MODE, k, i)
         return c.doFinal(bytes)
+    }
+
+    private fun decryptBAC(rapdu: ByteArray) : ByteArray {
+        log("Decrypting: ", rapdu)
+        val k = SecretKeySpec(encryptionKeyBAC + encryptionKeyBAC.slice(0..7).toByteArray(), "DESede")
+        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
+        val c = Cipher.getInstance("DESede/CBC/NoPadding")
+        c.init(Cipher.DECRYPT_MODE, k, i)
+        return c.doFinal(rapdu)
     }
 
     private fun addPadding(byteArray: ByteArray) : ByteArray {
@@ -189,5 +247,17 @@ object APDUControl {
 
     private fun sendPACEEncryptedAPDU(apdu: APDU) : ByteArray {
         return byteArrayOf(0)
+    }
+
+    private fun log(msg : String) {
+        Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, msg)
+    }
+    
+    private fun log(msg : String, b : ByteArray) {
+        Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, msg, b)
+    }
+
+    private fun log(errorCode : Int, msg : String) : Int {
+        return Logger.log(APDUControlConstants.TAG, APDUControlConstants.ENABLE_LOGGING, errorCode, msg)
     }
 }

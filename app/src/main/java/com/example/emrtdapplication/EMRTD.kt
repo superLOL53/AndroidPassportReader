@@ -1,12 +1,75 @@
 package com.example.emrtdapplication
 
+import android.app.Activity
+import android.content.Intent
+import android.nfc.NfcAdapter
 import android.nfc.Tag
+import android.os.Bundle
+import android.provider.Settings
+import android.view.View
+import android.widget.Button
+import android.widget.LinearLayout
 
-
-class EMRTD {
+class EMRTD : NfcAdapter.ReaderCallback, Activity() {
+    private lateinit var nfcAdapter : NfcAdapter
     private var bac = BAC()
+    private var ca = CardAccess()
+    private var cs = CardSecurity()
+    private var ai = AttributeInfo()
+    private var dir = Directory()
+    private var id_PACE_OID : ByteArray? = null
+    private var pace = PACE()
+    private var useCAN = false
+    private var MRZ : String? = null
+    private var efcom : EfCom = EfCom()
 
-    fun discoveredTag(tag: Tag?) {
+    @Override
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.emrtd_view)
+        useCAN = intent.getBooleanExtra("UseCAN", useCAN)
+        log("UseCAN is $useCAN")
+        MRZ = intent.getStringExtra("MRZ")
+        log("MRZ is $MRZ")
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this)
+        if (!nfcAdapter.isEnabled) {
+            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
+        } else {
+            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+        }
+        findViewById<Button>(R.id.nfcCancel).setOnClickListener {
+            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+        }
+        findViewById<Button>(R.id.enableNFC).setOnClickListener {
+            startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+        }
+    }
+
+    @Override
+    override fun onResume() {
+        super.onResume()
+        if (!nfcAdapter.isEnabled) {
+            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
+        } else {
+            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+        }
+        val options = Bundle()
+        nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
+                NfcAdapter.FLAG_READER_NFC_B or
+                NfcAdapter.FLAG_READER_NFC_F or
+                NfcAdapter.FLAG_READER_NFC_V or
+                NfcAdapter.FLAG_READER_NFC_BARCODE or
+                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS, options)
+    }
+
+    @Override
+    override fun onPause() {
+        super.onPause()
+        nfcAdapter.disableReaderMode(this)
+    }
+
+    @Override
+    override fun onTagDiscovered(tag: Tag?) {
         if (APDUControl.init(tag) != APDUControlConstants.INIT_SUCCESS) {
             return
         }
@@ -15,17 +78,29 @@ class EMRTD {
         }
         readeMRTDParams()
         APDUControl.closeNFC()
+        Logger.log(ApplicationConstants.TAG, ApplicationConstants.ENABLE_LOGGING, "End of Tag discovered")
     }
 
     private fun readeMRTDParams() {
-        /*Logger.log(TAG, "Reading Parameters")
-        readCardAccess()
-        readDirectory()
-        readAttributeInfo()
-        readCardSecurity()*/
+        Logger.log(EMRTDConstants.TAG, EMRTDConstants.ENABLE_LOGGING, "Reading eMRTD Params...")
+        /*val mrz = MRZ(TestValues.MRZ)
+        mrz.extractMRZInformation()
+        Logger.log(EMRTDConstants.TAG, EMRTDConstants.ENABLE_LOGGING, "Extracted MRZ: ${mrz.getMRZInfoString()}")
+        MRZ = mrz.getMRZInfoString()*/
+        //Logger.log(TAG, "Reading Parameters")
+        //cs.read()
+        //ai.read()
+        //dir.read()
+        //ca.read()
+        //id_PACE_OID = ca.getPACEInfo().getPACEOID()
         selecteMRTDApplication()
-        bac.init(TestValues.MRZ)
+        bac.init(MRZ)
         bac.bacProtocol()
+        Logger.log(EMRTDConstants.TAG, EMRTDConstants.ENABLE_LOGGING, "Reading EFCOM...")
+        efcom.read()
+        Logger.log(EMRTDConstants.TAG, EMRTDConstants.ENABLE_LOGGING, "Read EFCOM")
+        //pace.init(null, TestValues.CAN, id_PACE_OID)
+        //pace.PACE_Protoccol()
     }
 
     private fun selecteMRTDApplication() : Int {
@@ -40,5 +115,9 @@ class EMRTD {
                 "Could not select LDS1. Error Code: ", info)
         }
 
+    }
+
+    private fun log(msg : String) {
+        Logger.log(EMRTDConstants.TAG, EMRTDConstants.ENABLE_LOGGING, msg)
     }
 }
