@@ -15,7 +15,12 @@ class EfCom : EMRTDFile {
         if (info[info.size-2] != NfcRespondCodeSW1.OK || info[info.size-1] != NfcRespondCodeSW2.OK) {
             return log(FILE_UNABLE_TO_SELECT, "Cannot select EFCOM File. Error Code: " + info.toHexString())
         }
-        info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.READ_BINARY, NfcP1Byte.ZERO, NfcP2Byte.ZERO, true, 0x04, ZERO_SHORT))
+        info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.READ_BINARY, NfcP1Byte.ZERO, NfcP2Byte.ZERO, true, 0x02, ZERO_SHORT))
+        if (info[info.size-2] != NfcRespondCodeSW1.OK || info[info.size-1] != NfcRespondCodeSW2.OK) {
+            return log(FILE_UNABLE_TO_READ, "Cannot read EFCOM File. Error Code: " + info.toHexString())
+        }
+        val Le = (2 + info[1]).toByte()
+        info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.READ_BINARY, NfcP1Byte.ZERO, NfcP2Byte.ZERO, true, Le, ZERO_SHORT))
         if (info[info.size-2] != NfcRespondCodeSW1.OK || info[info.size-1] != NfcRespondCodeSW2.OK) {
             return log(FILE_UNABLE_TO_READ, "Cannot read EFCOM File. Error Code: " + info.toHexString())
         }
@@ -29,36 +34,41 @@ class EfCom : EMRTDFile {
     private fun parse(contents : ByteArray) : Int {
         log("Parsing: ", contents)
         val decode = TLVCoder().decode(contents)
+        log("Decoded TLV Structure")
         var i = 0
         if (decode[i].getTag()[0] != EFCOMConstants.TAG60) {
-            return FILE_UNABLE_TO_READ
+            return log(FILE_UNABLE_TO_READ, "Return TAG60")
         }
         i++
         if (decode[i].getTag()[0] != EFCOMConstants.LDS_VERSION_TAG_1 || decode[i].getTag()[1] != EFCOMConstants.LDS_VERSION_TAG_2) {
-            return FILE_UNABLE_TO_READ
+            return log(FILE_UNABLE_TO_READ, "Return LDS Version ${decode[i].getTag()}")
         }
         var value = decode[i].getValue()
         if (value == null || decode[i].getLength() != 4.toByte()) {
-            return FILE_UNABLE_TO_READ
+            return log(FILE_UNABLE_TO_READ, "Return LDS Length ${decode[i].getLength()}")
         }
-        LDS_Version = value[0]*10 + value[1]
-        LDS_UpdateLevel = value[2]*10 + value[3]
+        LDS_Version = (value[0] - 48)*10 + value[1] - 48
+        LDS_UpdateLevel = (value[2] - 48)*10 + value[3] - 48
         i++
         if (decode[i].getTag()[0] != EFCOMConstants.UNICODE_VERSION_TAG_1 || decode[i].getTag()[1] != EFCOMConstants.UNICODE_VERSION_TAG_2) {
-            return FILE_UNABLE_TO_READ
+            return log(FILE_UNABLE_TO_READ, "Return Unicode Version ${decode[i].getTag()}")
         }
         value = decode[i].getValue()
         if (value == null || decode[i].getLength() != 6.toByte()) {
-            return FILE_UNABLE_TO_READ
+            return log(FILE_UNABLE_TO_READ, "Return Unicode Length ${decode[i].getLength()}")
         }
-        unicodeMajorVersion = value[0]*10 + value[1]
-        unicodeMinorVersion = value[2]*10 + value[3]
-        unicodeReleaseVersion = value[4]*10 + value[5]
+        unicodeMajorVersion = (value[0] - 48)*10 + value[1] - 48
+        unicodeMinorVersion = (value[2] - 48)*10 + value[3] - 48
+        unicodeReleaseVersion = (value[4] - 48)*10 + value[5] - 48
         i++
         if (decode[i].getTag()[0] != EFCOMConstants.TAG_LIST_TAG) {
-            return FILE_UNABLE_TO_READ
+            return log(FILE_UNABLE_TO_READ, "Return Tag list ${decode[i].getTag()}")
         }
         tagList = decode[i].getValue()
+        log("Decoded: ")
+        log("LDS: $LDS_Version, $LDS_UpdateLevel")
+        log("Unicode: $unicodeMajorVersion, $unicodeMinorVersion, $unicodeReleaseVersion")
+        tagList?.let { log("Tag list: ", it) }
         return FILE_SUCCESSFUL_READ
     }
 

@@ -20,7 +20,7 @@ class TLVCoder {
                 val value = tlv.slice(i+tag.size+1..i+tag.size+length).toByteArray()
                 Logger.log(TLVCoderConstants.TAG, TLVCoderConstants.ENABLE_LOGGING, "Value is", value)
                 contents.add(TLV(tag, length, value))
-                i += length + 2
+                i += length + tag.size + 1
             } else {
                 Logger.log(TLVCoderConstants.TAG, TLVCoderConstants.ENABLE_LOGGING, "Value is empty")
                 contents.add(TLV(tag, length, null))
@@ -51,10 +51,10 @@ class TLVCoder {
     }
 
     private fun isOneByteLength(b : Byte) : Boolean {
-        return b in 0..126
+        return (b and 0x1F) in 0..30
     }
 
     private fun isTwoByteLength(b1: Byte) : Boolean {
-        return b1.toInt() == 0x7F
+        return b1 and 0x1F == 0x1F.toByte()
     }
 }

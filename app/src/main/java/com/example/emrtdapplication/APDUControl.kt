@@ -115,35 +115,12 @@ object APDUControl {
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun sendBACEncryptedAPDU(apdu: APDU) : ByteArray {
-        val header = apdu.getHeader()
-        header[0] = NfcClassByte.SECURE_MESSAGING
-        var newLc = 0.toByte()
-        val paddedHeader = addPadding(header)
-        log("CmdHeader: " + paddedHeader.toHexString())
-        val paddedData = addPadding(apdu.getData())
-        log("Padded Data: " + paddedData.toHexString())
-        val encryptedData = encryptBAC(paddedData)
-        log("Encrypted Data: " + encryptedData.toHexString())
-        var do8785 : ByteArray? = null
-        if (apdu.getUseLc()) {
-            if (apdu.getHeader()[1] % 2 == 0) {
-                newLc = (newLc + 0x03).toByte()
-                do8785 = byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
-                log("DO87: " + do8785.toHexString())
-            } else {
-                newLc = (newLc + 0x03).toByte()
-                do8785 = byteArrayOf(0x85.toByte(), 0x09, 0x01) + encryptedData
-                log("DO87: " + do8785.toHexString())
-            }
-        }
-        var do97 : ByteArray? = null
-        if (apdu.getUseLe()) {
-            newLc = (newLc + 0x03).toByte()
-            do97 = byteArrayOf(0x97.toByte(), 0x01, apdu.getLe())
-        }
+        val headerSM = headerSM(apdu)
+        val dataSM = dataSM(apdu)
+        val do97 = do97(apdu)
         var tail : ByteArray? = null
-        if (do8785 != null) {
-            tail = do8785
+        if (dataSM != null) {
+            tail = dataSM
         }
         if (do97 != null) {
             if (tail == null) {
@@ -152,19 +129,20 @@ object APDUControl {
                 tail += do97
             }
         }
-        val M = paddedHeader + addPadding(tail!!)
-        log("M: " + M.toHexString())
-        log("SSC: " + ssc.toHexString())
-        inc(ssc)
-        log("Incremented SSC: " + ssc.toHexString())
-        val N = addPadding(ssc + M)
-        log("N: " + N.toHexString())
-        val CC = computeMAC(N)
-        log("CC: " + CC.toHexString())
-        val do8e = byteArrayOf(0x8E.toByte(), 0x08) + CC
-        log("DO8E: " + do8e.toHexString())
-        newLc = (newLc + encryptedData.size +  do8e.size).toByte()
-        var finalApdu = header + newLc + tail + do8e + 0x0
+        var M = addPadding(headerSM)
+        if (tail != null) {
+            M += tail
+        }
+        val do8e = do8E08(M)
+        var newLc = do8e.size.toByte()
+        if (tail != null) {
+            newLc = (newLc + tail.size).toByte()
+        }
+        var finalApdu = headerSM + newLc
+        if (tail != null) {
+            finalApdu += tail
+        }
+        finalApdu += do8e + 0x0
         if (apdu.getUseLc() && apdu.getLcExt() != ZERO_SHORT) {
             finalApdu += 0x0
         }
@@ -173,13 +151,76 @@ object APDUControl {
         val rapdu = isoDep.transceive(finalApdu)
         log("RAPDU: " + rapdu.toHexString())
         verifyMAC(rapdu)
-        var normalAPDU : ByteArray
-        if ((rapdu[0] == 0x87.toByte() || rapdu[0] == 0x85.toByte()) && rapdu[2] == 0x01.toByte()) {
-            normalAPDU = decryptBAC(rapdu.slice(3..rapdu.size-17).toByteArray()) + rapdu.slice(rapdu.size-2..<rapdu.size).toByteArray()
+        return extractAPDU(rapdu)
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun headerSM(apdu: APDU) : ByteArray {
+        val header = apdu.getHeader()
+        header[0] = NfcClassByte.SECURE_MESSAGING
+        log("CmdHeader: " + header.toHexString())
+        return header
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun dataSM(apdu: APDU) : ByteArray? {
+        val paddedData = addPadding(apdu.getData())
+        log("Padded Data: " + paddedData.toHexString())
+        val encryptedData = encryptBAC(paddedData)
+        log("Encrypted Data: " + encryptedData.toHexString())
+        var do8785 : ByteArray? = null
+        if (apdu.getUseLc()) {
+            if (apdu.getHeader()[1] % 2 == 0) {
+                do8785 = byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
+                log("DO87: " + do8785.toHexString())
+            } else {
+                do8785 = byteArrayOf(0x85.toByte(), 0x09, 0x01) + encryptedData
+                log("DO85: " + do8785.toHexString())
+            }
+        }
+        return do8785
+    }
+
+    private fun do97(apdu: APDU) : ByteArray? {
+        var do97 : ByteArray? = null
+        if (apdu.getUseLe()) {
+            do97 = byteArrayOf(0x97.toByte(), 0x01, apdu.getLe())
+        }
+        return do97
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private fun do8E08(m : ByteArray) : ByteArray {
+        log("M: " + m.toHexString())
+        log("SSC: " + ssc.toHexString())
+        inc(ssc)
+        log("Incremented SSC: " + ssc.toHexString())
+        val N = addPadding(ssc + m)
+        log("N: " + N.toHexString())
+        val CC = computeMAC(N)
+        log("CC: " + CC.toHexString())
+        val do8e = byteArrayOf(0x8E.toByte(), 0x08) + CC
+        log("DO8E: " + do8e.toHexString())
+        return do8e
+    }
+
+    private fun extractAPDU(bytes: ByteArray) : ByteArray {
+        val normalAPDU : ByteArray
+        if ((bytes[0] == 0x87.toByte() || bytes[0] == 0x85.toByte()) && bytes[2] == 0x01.toByte()) {
+            normalAPDU = removePadding(decryptBAC(bytes.slice(3..bytes.size-17).toByteArray())) + bytes.slice(bytes.size-2..<bytes.size).toByteArray()
         } else {
-            normalAPDU = rapdu.slice(rapdu.size-2..<rapdu.size).toByteArray()
+            normalAPDU = bytes.slice(bytes.size-2..<bytes.size).toByteArray()
         }
         return normalAPDU
+    }
+
+    private fun removePadding(bytes: ByteArray) : ByteArray {
+        val last = bytes.lastIndexOf(0x80.toByte())
+        if (last == -1) {
+            return bytes
+        } else {
+            return bytes.slice(0..<last).toByteArray()
+        }
     }
 
     private fun inc(bytes: ByteArray) {
@@ -236,7 +277,7 @@ object APDUControl {
     private fun addPadding(byteArray: ByteArray) : ByteArray {
         val pad = 8 - byteArray.size % 8
         if (pad == 8) {
-            return byteArray
+            return byteArray + byteArrayOf(0x80.toByte(), 0,0,0,0,0,0,0)
         }
         var padArray = byteArray + 0x80.toByte()
         for (i in 1..pad-1) {
