@@ -11,6 +11,9 @@
       <SelectionState runConfigName="ApplicationeMRTD">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
+      <SelectionState runConfigName="ApplicationEMRTD">
+        <option name="selectionMode" value="DROPDOWN" />
+      </SelectionState>
     </selectionStates>
   </component>
 </project>

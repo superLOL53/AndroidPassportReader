@@ -6,6 +6,25 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 
+/**
+ * Constants for the ManualInput class
+ */
+const val TAG = "ManualInput"
+const val ENABLE_LOGGING = true
+const val UPPER_CASE_DIGIT = 55
+const val LOWER_CASE_DIGIT = 87
+const val NAME_LENGTH = 8
+const val DATE_LENGTH = 6
+
+
+/** Class for manual input from the user. The manual input consists of:
+ * Passport number, birthday and expiration date
+ * OR
+ * CAN number
+ * One of these is needed to derive keys to establish secure messaging between the reader and the document.
+ * Forwards the MRZ information or CAN to the next activity (EMRTD)
+ */
+//TODO: By invalid input provide a popup view and explain in detail how the input should be filled
 class ManualInput : Activity() {
     private var name : String? = null
     private var expirationDate : String? = null
@@ -39,6 +58,10 @@ class ManualInput : Activity() {
         }
     }
 
+    /**
+     * Parsing the manual input and checks for validity of the input.
+     * @return The MRZ information inclusive the check digits or null if any validity check fails
+     */
     private fun parse() : String? {
         if (can != null && can!!.isNotEmpty()) {
             log("CAN is given. Not using MRZ. CAN: ${can!!.length} $can")
@@ -51,14 +74,14 @@ class ManualInput : Activity() {
             if (birthday == null) {
                 log("No birthday given")
                 return null
-            } else if (birthday!!.length != 6) {
+            } else if (birthday!!.length != DATE_LENGTH) {
                 log("Invalid date for birthday: " + birthday!!)
                 return null
             }
             if (expirationDate == null) {
                 log("No expiration date given")
                 return null
-            } else if (expirationDate!!.length != 6) {
+            } else if (expirationDate!!.length != DATE_LENGTH) {
                 log("Invalid expiration date")
                 return null
             }
@@ -66,9 +89,13 @@ class ManualInput : Activity() {
         }
     }
 
+    /**
+     * Builds the MRZ information based on the validated input inclusive the check digit
+     * @return The MRZ information inclusive the check digits
+     */
     private fun computeCheckDigit() : String {
         val sb = StringBuilder()
-        val nameCD = name?.slice(0..8) ?: ""
+        val nameCD = name?.slice(0..NAME_LENGTH) ?: ""
         sb.append(nameCD)
         log("Name is $nameCD")
         sb.append(checkDigit(nameCD))
@@ -81,6 +108,11 @@ class ManualInput : Activity() {
         return sb.toString()
     }
 
+    /**
+     * Computes the check digit for a string
+     * @param s: The string for which the check digit is computed
+     * @return The check digit as a char
+     */
     private fun checkDigit(s : String) : Char {
         log("String is $s")
         var checkDigit = 0
@@ -94,24 +126,28 @@ class ManualInput : Activity() {
         return (checkDigit % 10).toString()[0]
     }
 
+    /**
+     * Converts a char value to its corresponding value according to the ICAO specification
+     * @param ch: The char to convert
+     * @return The corresponding numeric value of the char
+     */
     private fun computeValueForCheckDigit(ch: Char) : Int {
-        if (ch.isDigit()) {
-            return ch.digitToInt()
+        return if (ch.isDigit()) {
+            ch.digitToInt()
         } else if (ch.isUpperCase()) {
-            return ch.code-55
+            ch.code-UPPER_CASE_DIGIT
         } else if (ch.isLowerCase()){
-            return ch.code-87
+            ch.code-LOWER_CASE_DIGIT
         } else {
-            return 0
+            0
         }
     }
 
+    /**
+     * Logs messages in the android logcat
+     * @param msg: The message to be printed in the log
+     */
     private fun log(msg : String) {
-        Logger.log(ManualInputConstants.TAG, ManualInputConstants.ENABLE_LOGGING, msg)
+        Logger.log(TAG, ENABLE_LOGGING, msg)
     }
-}
-
-object ManualInputConstants {
-    const val TAG = "ManualInput"
-    const val ENABLE_LOGGING = true
 }

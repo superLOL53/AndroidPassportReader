@@ -15,7 +15,7 @@
         android:theme="@style/Theme.EMRTDApplication"
         tools:targetApi="31">
         <activity
-            android:name=".ApplicationeMRTD"
+            android:name=".ApplicationEMRTD"
             android:exported="true"
             android:label="eMRTDApplication"
             android:theme="@style/Theme.EMRTDApplication">

@@ -16,4 +16,6 @@
     <string name="cancel">Cancel</string>
     <string name="enable">Enable</string>
     <string name="enableNFC">Enable NFC to read from your passport</string>
+    <string name="canNumber">208472</string>
+    <string name="help">Help for filling out the manual input</string>
 </resources>

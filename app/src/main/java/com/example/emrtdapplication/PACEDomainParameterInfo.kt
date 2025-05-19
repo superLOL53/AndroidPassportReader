@@ -1,12 +1,14 @@
 package com.example.emrtdapplication
 
+/**
+ * Class representing the parameters for the supported cryptographic asymmetric PACE protocol
+ */
 class PACEDomainParameterInfo {
-    private var protocol : Byte = PACEInfoConstants.UNDEFINED
-    private var domainParameter : Byte = PACEInfoConstants.UNDEFINED
-    private var parameterId : Byte = PACEInfoConstants.UNDEFINED
+    private var protocol : Byte = UNDEFINED
+    private var domainParameter : Byte = UNDEFINED
+    private var parameterId : Byte = UNDEFINED
 
     fun setProtocol(tlv: TLV) : Int {
-        
         return NOT_IMPLEMENTED
     }
 

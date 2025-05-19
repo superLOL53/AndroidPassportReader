@@ -2,8 +2,28 @@ package com.example.emrtdapplication
 
 import kotlin.experimental.and
 
-class AttributeInfo : EMRTDFile {
+/**
+ * Constants for the class AttributeInfo
+ */
+const val AI_TAG = "ai"
+const val AI_ENABLE_LOGGING = true
+const val CARD_CAPABILITY_TAG : Byte = 0x47
+const val SUPPORT_RECORD_NUMBER : Byte = 0x02
+const val SUPPORT_SHORT_EF_ID : Byte = 0x04
+const val SUPPORT_DF_FULL_NAME_SELECTION : Byte = 0x80.toByte()
+const val UNIT_SIZE : Byte = 0x01
+const val MASK_UNIT_SIZE : Byte = 0xF
+const val SUPPORT_COMMAND_CHAINING : Byte = 0x80.toByte()
+const val SUPPORT_EXTENDED_LENGTHS : Byte = 0x40
+const val EXTENDED_LENGTH_INFO_IN_ATRINFO : Byte = 0x20
+const val EXTENDED_LENGTH_TAG_1 : Byte = 0x7F
+const val EXTENDED_LENGTH_TAG_2 : Byte = 0x66
 
+/**
+ * Class for reading, parsing and storing information from EF.ATR/INFO file from the EMRTD
+ */
+class AttributeInfo {
+    //Variables for storing the information
     private var supportFullDFNameSelection = false
     private var supportShortEFNameSelection = false
     private var supportRecordNumber = false
@@ -13,61 +33,36 @@ class AttributeInfo : EMRTDFile {
     private var maxAPDUTransferBytes = 0
     private var maxAPDUReceiveBytes = 0
 
-    @OptIn(ExperimentalStdlibApi::class)
-    override fun read() : Int {
+    /**
+     * Reading the EF.ATR/INFO file from the EMRTD
+     * @return The return value to indicate success(0), unable to select the file(-1) or unable to read the file(-2)
+     */
+    fun read() : Int {
         reset()
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Select Attribute Info")
+        log("Select Attribute Info")
         var info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.SELECT, NfcP1Byte.SELECT_EF, NfcP2Byte.SELECT_FILE, true, 0x02, ZERO_SHORT, byteArrayOf(0x2F, 0x01)))
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Select Attribute info answer: " + info.toHexString())
+        log("Select Attribute info answer: ", info)
         if (!(info[info.size-2] == NfcRespondCodeSW1.OK && info[info.size-1] == NfcRespondCodeSW2.OK)) {
-            return Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, FILE_UNABLE_TO_SELECT, "Could not select Attribute info file. Error Code: " + info.toHexString())
+            return log(FILE_UNABLE_TO_SELECT, "Could not select Attribute info file. Error Code: ", info)
         }
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Attribute info answer: " + info.toHexString())
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Read Attribute Info")
+        log("Attribute info answer: ", info)
+        log("Read Attribute Info")
         info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.READ_BINARY, NfcP1Byte.ZERO, NfcP2Byte.ZERO, true, 0x26, ZERO_SHORT))
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Attribute info answer: " + info.toHexString())
+        log("Attribute info answer: ", info)
         if (!(info[info.size-2] == NfcRespondCodeSW1.OK && info[info.size-1] == NfcRespondCodeSW2.OK)) {
-            return Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, FILE_UNABLE_TO_READ, "Could not read Attribute info file. Error Code: " + info.toHexString())
+            return log(FILE_UNABLE_TO_READ, "Could not read Attribute info file. Error Code: ", info)
         }
-        return Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, parse(info.slice(0..info.size-3).toByteArray()), "Read Attribute info file. Contents are: " + info.toHexString())
+        if (parse(info.slice(0..info.size-3).toByteArray()) != FILE_SUCCESSFUL_READ) {
+            reset()
+            return log(FILE_UNABLE_TO_READ, "Unable to read Attribute info file. Contents are: ", info)
+        } else {
+            return log(FILE_SUCCESSFUL_READ, "Successfully read Attribute info file. Contents are: ", info)
+        }
     }
 
-    override fun getData() : Int {
-        return -1
-    }
-
-    fun getMaxAPDUTransferBytes() : Int {
-        return maxAPDUTransferBytes
-    }
-
-    fun getMaxAPDUReceiveBytes() : Int {
-        return maxAPDUReceiveBytes
-    }
-
-    fun getSupportFullDFName() : Boolean {
-        return supportFullDFNameSelection
-    }
-
-    fun getSupportShortEFName() : Boolean {
-        return supportShortEFNameSelection
-    }
-
-    fun getSupportRecordNumber() : Boolean {
-        return supportRecordNumber
-    }
-
-    fun getSupportCommandChaining() : Boolean {
-        return supportCommandChaining
-    }
-
-    fun getSupportExtendedLength() : Boolean {
-        return supportExtendedLength
-    }
-
-    fun getExtendedInfoInFile() : Boolean {
-        return extendedLengthInfoInFile
-    }
-
+    /**
+     * Deletes all information stored in the class
+     */
     private fun reset() {
         maxAPDUReceiveBytes = 0
         maxAPDUTransferBytes = 0
@@ -79,18 +74,25 @@ class AttributeInfo : EMRTDFile {
         extendedLengthInfoInFile = false
     }
 
+    /**
+     * Parsing the contents of the EF.ATR/INFO file. The file is structured as a TLV structure. The information
+     * contained in the EF.ATR/INFO file is stored in the variables of this class
+     * @param contents: The contents of the EF.ATR/INFO file without the respond code of the APDU
+     * @return Success(0) or Failure(-1) on parsing the data
+     */
+    //TODO: Refactor
     private fun parse(contents : ByteArray) : Int {
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Parsing...")
+        log( "Parsing...")
         val decode = TLVCoder().decode(contents)
         var code = FILE_SUCCESSFUL_READ
         var i = 0
         while (i < decode.size) {
             var tlv = decode[i]
             when (tlv.getTag()[0]) {
-                AttributeInfoConstants.CARD_CAPABILITY_TAG -> code = parseCardCapabilities(tlv)
-                AttributeInfoConstants.EXTENDED_LENGTH_TAG_1 -> {
+                CARD_CAPABILITY_TAG -> code = parseCardCapabilities(tlv)
+                EXTENDED_LENGTH_TAG_1 -> {
                     when (tlv.getTag()[1]) {
-                        AttributeInfoConstants.EXTENDED_LENGTH_TAG_2 -> {
+                        EXTENDED_LENGTH_TAG_2 -> {
                             val length = tlv.getLength().toInt()
                             tlv = decode[i+1]
                             var curLength = tlv.getLength().toInt() + tlv.getTag().size + 1
@@ -99,24 +101,29 @@ class AttributeInfo : EMRTDFile {
                             curLength += tlv.getLength().toInt() + tlv.getTag().size + 1
                             maxAPDUReceiveBytes = byteArrayToInt(tlv.getValue())
                             if (length != curLength || maxAPDUReceiveBytes < 1000 || maxAPDUTransferBytes < 1000) {
-                                return Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, FILE_UNABLE_TO_READ, "Extended Length Information: Length mismatch")
+                                return log(FILE_UNABLE_TO_READ, "Extended Length Information: Length mismatch")
                             }
                             i += 2
                         }
-                        else -> Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, FILE_SUCCESSFUL_READ, "Unknown Tag", tlv.getTag())
+                        else -> return log(FILE_UNABLE_TO_READ, "Unknown Tag", tlv.getTag())
                     }
                 }
-                else -> Logger.log(AttributeInfoConstants.TAG,AttributeInfoConstants.ENABLE_LOGGING,FILE_SUCCESSFUL_READ,"Unknown Tag",tlv.getTag())
+                else -> return log(FILE_UNABLE_TO_READ,"Unknown Tag",tlv.getTag())
             }
             if (code != FILE_SUCCESSFUL_READ) {
                 return code
             }
             i++
         }
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Parsing successful")
+        log("Parsing successful")
         return code
     }
 
+    /**
+     * Parses the card capability information
+     * @param tlv: The TLV containing the card capability information
+     * @return Success(0) or unable to read(-2)
+     */
     private fun parseCardCapabilities(tlv: TLV) : Int {
         if (tlv.getLength() != 0x3.toByte() || tlv.getValue() == null || tlv.getValue()!!.size != 3) {
             return FILE_UNABLE_TO_READ
@@ -130,56 +137,112 @@ class AttributeInfo : EMRTDFile {
         return FILE_SUCCESSFUL_READ
     }
 
+    /**
+     * Parses the first byte in the card capability information
+     * @param byte: The first byte of the card capability
+     */
     private fun parseByte1(byte: Byte) {
-        if (byte and AttributeInfoConstants.SUPPORT_DF_FULL_NAME_SELECTION == AttributeInfoConstants.SUPPORT_DF_FULL_NAME_SELECTION) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Full DF Name Selection supported")
+        if (byte and SUPPORT_DF_FULL_NAME_SELECTION == SUPPORT_DF_FULL_NAME_SELECTION) {
+            log("Full DF Name Selection supported")
             supportFullDFNameSelection = true
         }
-        if (byte and AttributeInfoConstants.SUPPORT_SHORT_EF_ID == AttributeInfoConstants.SUPPORT_SHORT_EF_ID) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Short EF Name Selection supported")
+        if (byte and SUPPORT_SHORT_EF_ID == SUPPORT_SHORT_EF_ID) {
+            log("Short EF Name Selection supported")
             supportShortEFNameSelection = true
         }
-        if (byte and AttributeInfoConstants.SUPPORT_RECORD_NUMBER == AttributeInfoConstants.SUPPORT_RECORD_NUMBER) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Record Number supported")
+        if (byte and SUPPORT_RECORD_NUMBER == SUPPORT_RECORD_NUMBER) {
+            log("Record Number supported")
             supportRecordNumber = true
         }
     }
 
+    /**
+     * Parses the second byte in the card capability information
+     * @param byte: The second byte of the card capability
+     * @return Success (0) or unable to read(-2) based on the validity of the information
+     */
     private fun parseByte2(byte: Byte) : Int {
-        return if (byte and AttributeInfoConstants.MASK_UNIT_SIZE == AttributeInfoConstants.UNIT_SIZE) {
+        return if (byte and MASK_UNIT_SIZE == UNIT_SIZE) {
             FILE_SUCCESSFUL_READ
         } else {
             FILE_UNABLE_TO_READ
         }
     }
 
+    /**
+     * Parses the third byte in the card capability information
+     * @param byte: The third byte of the card capability
+     */
     private fun parseByte3(byte: Byte) {
-        if (byte and AttributeInfoConstants.SUPPORT_COMMAND_CHAINING == AttributeInfoConstants.SUPPORT_COMMAND_CHAINING) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Command Chaining supported")
+        if (byte and SUPPORT_COMMAND_CHAINING == SUPPORT_COMMAND_CHAINING) {
+            log("Command Chaining supported")
             supportCommandChaining = true
         }
-        if (byte and AttributeInfoConstants.SUPPORT_EXTENDED_LENGTHS == AttributeInfoConstants.SUPPORT_EXTENDED_LENGTHS) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Extended Length supported")
+        if (byte and SUPPORT_EXTENDED_LENGTHS == SUPPORT_EXTENDED_LENGTHS) {
+            log("Extended Length supported")
             supportExtendedLength = true
         }
-        if (byte and AttributeInfoConstants.EXTENDED_LENGTH_INFO_IN_ATRINFO == AttributeInfoConstants.EXTENDED_LENGTH_INFO_IN_ATRINFO) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Extended Length info in file")
+        if (byte and EXTENDED_LENGTH_INFO_IN_ATRINFO == EXTENDED_LENGTH_INFO_IN_ATRINFO) {
+            log("Extended Length info in file")
             extendedLengthInfoInFile = true
         }
     }
 
+    /**
+     * Function to convert a byte array into an integer
+     * @param b: The byte array to convert
+     * @return The integer value of the byte array
+     */
     private fun byteArrayToInt(b : ByteArray?) : Int {
         if (b != null) {
-            Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Byte Array to convert", b)
+            log("Byte Array to convert", b)
         }
         if (b == null || b.size > 4) {
-            return Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, FILE_UNABLE_TO_READ, "Invalid byte array for convertion to integer")
+            return log(FILE_UNABLE_TO_READ, "Invalid byte array for conversion to integer")
         }
         var i = 0
         for (byte : Byte in b) {
             i = i*256 + byte.toInt()
         }
-        Logger.log(AttributeInfoConstants.TAG, AttributeInfoConstants.ENABLE_LOGGING, "Integer is $i")
+        log("Integer is $i")
         return i
+    }
+
+    /**
+     * Logs message in the android logcat
+     * @param msg: The message to be printed in the log
+     */
+    private fun log(msg: String) {
+        Logger.log(AI_TAG, AI_ENABLE_LOGGING, msg)
+    }
+
+    /**
+     * Logs message in the android logcat
+     * @param msg: The message to be printed in the log
+     * @param error: The error code to be printed and propagated
+     * @return The error code
+     */
+    private fun log(error : Int, msg : String) : Int {
+        return Logger.log(AI_TAG, AI_ENABLE_LOGGING, error, msg)
+    }
+
+    /**
+     * Logs message in the android logcat
+     * @param msg: The message to be printed in the log
+     * @param b: The byte array to be printed in the log as hexadecimal bytes
+     */
+    private fun log(msg : String, b : ByteArray) {
+        return Logger.log(AI_TAG, AI_ENABLE_LOGGING, msg, b)
+    }
+
+    /**
+     * Logs message in the android logcat
+     * @param msg: The message to be printed in the log
+     * @param error: The error code to be printed and propagated
+     * @param b: The byte array to be printed in the log as hexadecimal bytes
+     * @return The error code
+     */
+    private fun log(error : Int, msg : String, b: ByteArray) : Int {
+        return Logger.log(AI_TAG, AI_ENABLE_LOGGING, error, msg, b)
     }
 }
