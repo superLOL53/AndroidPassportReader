@@ -1,9 +1,10 @@
-package com.example.emrtdapplication
+package com.example.emrtdapplication.utils
 
 const val ZERO_BYTE : Byte = 0x0
 const val ZERO_SHORT : Short = 0
 const val FILE_SUCCESSFUL_READ = 0
 const val SUCCESS = 0
+const val FAILURE = -1
 const val FILE_UNABLE_TO_SELECT = -1
 const val FILE_UNABLE_TO_READ = -2
 const val NOT_IMPLEMENTED = -3
@@ -18,6 +19,14 @@ object TLV_TAGS {
     const val CRYPTOGRAPHIC_REFERENCE : Byte = 0x80.toByte()
     const val KEY_REFERENCE : Byte = 0x83.toByte()
     const val NONCE_QUERY : Byte = 0x7C
+    const val DYNAMIC_AUTHENTICATION_DATA : Byte = 0x7C
+    const val MAPPING_DATA : Byte = 0x81.toByte()
+    const val PUBLIC_KEY : Byte = 0x83.toByte()
+    const val TERMINAL_AUTHENTICATION_TOKEN : Byte = 0x85.toByte()
+    const val EC_PUBLIC_POINT : Byte = 0x86.toByte()
+    const val OID : Byte = 0x06
+    const val UNSIGNED_INTEGER : Byte = 0x84.toByte()
+    const val SEQUENCE: Byte = 0x30
 }
 
 object NfcClassByte {

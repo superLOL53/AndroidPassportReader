@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import com.example.emrtdapplication.utils.Logger
 
 /**
  * Constants for the ManualInput class
@@ -95,7 +96,16 @@ class ManualInput : Activity() {
      */
     private fun computeCheckDigit() : String {
         val sb = StringBuilder()
-        val nameCD = name?.slice(0..NAME_LENGTH) ?: ""
+        val nameCD = if (name == null) {
+            ""
+        } else if (name!!.length <= NAME_LENGTH) {
+            while (name!!.length <= NAME_LENGTH) {
+                name = "$name<"
+            }
+            name!!
+        } else {
+            name!!.slice(0..NAME_LENGTH)
+        }
         sb.append(nameCD)
         log("Name is $nameCD")
         sb.append(checkDigit(nameCD))

@@ -18,4 +18,6 @@
     <string name="enableNFC">Enable NFC to read from your passport</string>
     <string name="canNumber">208472</string>
     <string name="help">Help for filling out the manual input</string>
+    <string name="oldppn">U1194584</string>
+    <string name="oldeDate">260801</string>
 </resources>

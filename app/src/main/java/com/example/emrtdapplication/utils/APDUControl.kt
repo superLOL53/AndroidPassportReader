@@ -1,4 +1,4 @@
-package com.example.emrtdapplication
+package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
@@ -7,7 +7,6 @@ import org.spongycastle.crypto.macs.ISO9797Alg3Mac
 import org.spongycastle.crypto.params.KeyParameter
 import java.io.IOException
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
@@ -35,18 +34,17 @@ const val ERROR_UNABLE_TO_CLOSE = -5
 /**
  * Class for interacting with the EMRTD. All interactions with the EMRTD (e.g. transceive-calls) go through here
  */
-object APDUControl {
+class APDUControl {
     private var isoDepSupport : Boolean = false
-    private lateinit var isoDep :IsoDep
+    lateinit var isoDep :IsoDep
     private var nfcTechUse : NfcUse = NfcUse.UNDEFINED
     private var maxTransceiveLength : Int = 0
 
-    var useBAC = false
-    private var encryptionKeyBAC = byteArrayOf(0)
+    var sendEncryptedAPDU = false
+    var isAES = false
+    private var encryptionKey = byteArrayOf(0)
     private var encryptionKeyMAC = byteArrayOf(0)
     private var ssc = byteArrayOf(0)
-
-    private var usePACE = false
 
     /**
      * Initialize communication with the EMRTD
@@ -55,27 +53,17 @@ object APDUControl {
      */
     fun init(tag: Tag?) : Int {
         if (tag == null) {
-            return log(ERROR_NO_NFC_TAG, "No tag discovered")
-        }
-        log("NFC TAG discovered")
-        val tagUid = tag.id
-        log("TagId: ", tagUid)
-        val list = tag.techList
-        log("TechList Entries: ${list.size}")
-        for (i in list.indices) {
-            log("Entry $i: ${list[i]}\n")
+            return ERROR_NO_NFC_TAG
         }
         val isoDep = IsoDep.get(tag)
-            ?: return log(ERROR_NO_ISO_DEP_SUPPORT, "Iso DEP not supported")
+            ?: return ERROR_NO_ISO_DEP_SUPPORT
         isoDepSupport = true
         this.isoDep = isoDep
-        log("Iso DEP supported")
         if (nfcTechUse == NfcUse.UNDEFINED) {
             nfcTechUse = NfcUse.ISO_DEP
             maxTransceiveLength = this.isoDep.maxTransceiveLength
-            log("Using ISO DEP")
         }
-        return log(INIT_SUCCESS, "Successfully initialized ISO DEP")
+        return INIT_SUCCESS
     }
 
     /**
@@ -85,15 +73,16 @@ object APDUControl {
      * @return The received APDU from the EMRTD
      */
     fun sendAPDU(apdu : APDU) : ByteArray {
-        if (useBAC) {
-            return sendBACEncryptedAPDU(apdu)
-        } else if (usePACE) {
-            return sendPACEEncryptedAPDU(apdu)
+        if (sendEncryptedAPDU) {
+            return sendEncryptedAPDU(apdu)
         } else {
-            usePACE = false
-            useBAC = false
-            return isoDep.transceive(apdu.getByteArray())
+            sendEncryptedAPDU = false
+            return sendISODEP(apdu)
         }
+    }
+
+    private fun sendISODEP(apdu: APDU) : ByteArray {
+        return isoDep.transceive(apdu.getByteArray())
     }
 
     /**
@@ -101,7 +90,7 @@ object APDUControl {
      * @param key: The BAC encryption key
      */
     fun setEncryptionKeyBAC(key : ByteArray) {
-        encryptionKeyBAC = key
+        encryptionKey = key
     }
 
     /**
@@ -128,14 +117,14 @@ object APDUControl {
             when (nfcTechUse) {
                 NfcUse.ISO_DEP -> {
                     isoDep.connect()
-                    return log(CONNECT_SUCCESS, "Connected to NFC_ISO_DEP")
+                    return CONNECT_SUCCESS
                 }
                 NfcUse.UNDEFINED -> {
-                    return log(ERROR_ISO_DEP_NOT_SELECTED, "Can not connect to NFC. No Technology supported/selected")
+                    return ERROR_ISO_DEP_NOT_SELECTED
                 }
             }
         } catch (e : IOException) {
-            return log(ERROR_UNABLE_TO_CONNECT, "Unable to connect to NFC")
+            return ERROR_UNABLE_TO_CONNECT
         }
     }
 
@@ -151,12 +140,20 @@ object APDUControl {
                     return CLOSE_SUCCESS
                 }
                 NfcUse.UNDEFINED -> {
-                    return log(ERROR_UNABLE_TO_CLOSE, "Can not close to NFC. No Technology supported/selected")
+                    return ERROR_UNABLE_TO_CLOSE
                 }
             }
         } catch (e : IOException) {
-            return log(ERROR_UNABLE_TO_CLOSE, "Unable to close NFC")
+            return ERROR_UNABLE_TO_CLOSE
         }
+    }
+
+    fun checkResponse(bytes: ByteArray): Boolean {
+        return !(bytes.size < 2 || bytes[bytes.size-2] != NfcRespondCodeSW1.OK || bytes[bytes.size-1] != NfcRespondCodeSW2.OK)
+    }
+
+    fun removeRespondCodes(bytes: ByteArray): ByteArray {
+        return bytes.slice(0..bytes.size-3).toByteArray()
     }
 
     /**
@@ -165,7 +162,7 @@ object APDUControl {
      * @param apdu: The APDU to be encrypted and sent to the EMRTD
      * @return The verified and decrypted APDU received from the EMRTD
      */
-    private fun sendBACEncryptedAPDU(apdu: APDU) : ByteArray {
+    private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         val headerSM = headerSM(apdu)
         val dataSM = dataSM(apdu)
         val do97 = do97(apdu)
@@ -185,23 +182,26 @@ object APDUControl {
             m += tail
         }
         val do8e = do8E08(m)
-        var newLc = do8e.size.toByte()
+        var length = do8e.size
         if (tail != null) {
-            newLc = (newLc + tail.size).toByte()
+            length += tail.size
         }
+        val newLc = lcField(length, apdu.getUseLcExt() || apdu.getUseLeExt())
         var finalApdu = headerSM + newLc
         if (tail != null) {
             finalApdu += tail
         }
         finalApdu += do8e + 0x0
-        if (apdu.getUseLc() && apdu.getLcExt() != ZERO_SHORT) {
+        if (apdu.getUseLeExt() || apdu.getUseLcExt()) {
             finalApdu += 0x0
         }
         log("ProtectedAPDU: ", finalApdu)
         inc()
         val rapdu = isoDep.transceive(finalApdu)
         log("RAPDU: ", rapdu)
-        verifyMAC(rapdu)
+        if (rapdu.size > 13) {
+            verifyMAC(rapdu)
+        }
         return extractAPDU(rapdu)
     }
 
@@ -213,8 +213,15 @@ object APDUControl {
     private fun headerSM(apdu: APDU) : ByteArray {
         val header = apdu.getHeader()
         header[0] = NfcClassByte.SECURE_MESSAGING
-        log("CmdHeader: ", header)
         return header
+    }
+
+    private fun lcField(length : Int, useExtendedLength : Boolean = false) : ByteArray {
+        return if (length > 256 || useExtendedLength) {
+            byteArrayOf(0, (length/256).toByte(), (length % 256).toByte())
+        } else {
+            byteArrayOf(length.toByte())
+        }
     }
 
     /**
@@ -224,17 +231,13 @@ object APDUControl {
      */
     private fun dataSM(apdu: APDU) : ByteArray? {
         val paddedData = addPadding(apdu.getData())
-        log("Padded Data: ", paddedData)
-        val encryptedData = encryptBAC(paddedData)
-        log("Encrypted Data: ", encryptedData)
+        val encryptedData = encrypt(paddedData)
         var do8785 : ByteArray? = null
         if (apdu.getUseLc()) {
-            if (apdu.getHeader()[1] % 2 == 0) {
-                do8785 = byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
-                log("DO87: ", do8785)
+            do8785 = if (apdu.getHeader()[1] % 2 == 0) {
+                byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
             } else {
-                do8785 = byteArrayOf(0x85.toByte(), 0x09, 0x01) + encryptedData
-                log("DO85: ", do8785)
+                byteArrayOf(0x85.toByte(), 0x09, 0x01) + encryptedData
             }
         }
         return do8785
@@ -248,7 +251,11 @@ object APDUControl {
     private fun do97(apdu: APDU) : ByteArray? {
         var do97 : ByteArray? = null
         if (apdu.getUseLe()) {
-            do97 = byteArrayOf(0x97.toByte(), 0x01, apdu.getLe())
+            do97 = if (apdu.getUseLeExt()) {
+                byteArrayOf(0x97.toByte(), 0x02, (apdu.getLe()/256).toByte(), (apdu.getLe()%256).toByte())
+            } else {
+                byteArrayOf(0x97.toByte(), 0x01, 0)
+            }
         }
         return do97
     }
@@ -259,16 +266,16 @@ object APDUControl {
      * @return The byte array containing the bytes 0x8E, 0x08 and the computed MAC
      */
     private fun do8E08(m : ByteArray) : ByteArray {
-        log("M: ", m)
-        log("SSC: ", ssc)
+        //log("M: ", m)
+        //log("SSC: ", ssc)
         inc()
-        log("Incremented SSC: ", ssc)
+        //log("Incremented SSC: ", ssc)
         val n = addPadding(ssc + m)
-        log("N: ", n)
+        //log("N: ", n)
         val cc = computeMAC(n)
-        log("CC: ", cc)
+        //log("CC: ", cc)
         val do8e = byteArrayOf(0x8E.toByte(), 0x08) + cc
-        log("DO8E: ", do8e)
+        //log("DO8E: ", do8e)
         return do8e
     }
 
@@ -278,8 +285,13 @@ object APDUControl {
      * @return The decrypted APDU without padding
      */
     private fun extractAPDU(bytes: ByteArray) : ByteArray {
-        val normalAPDU : ByteArray = if ((bytes[0] == 0x87.toByte() || bytes[0] == 0x85.toByte()) && bytes[2] == 0x01.toByte()) {
-            removePadding(decryptBAC(bytes.slice(3..bytes.size-17).toByteArray())) + bytes.slice(bytes.size-2..<bytes.size).toByteArray()
+        val normalAPDU : ByteArray = if (bytes[0] == 0x87.toByte() || bytes[0] == 0x85.toByte()) {
+            val l = if (bytes[1] < 0) {
+                (bytes[1] + 128) + 3
+            } else {
+                3
+            }
+            removePadding(decrypt(bytes.slice(l..bytes.size-17).toByteArray())) + bytes.slice(bytes.size-2..<bytes.size).toByteArray()
         } else {
             bytes.slice(bytes.size-2..<bytes.size).toByteArray()
         }
@@ -337,12 +349,8 @@ object APDUControl {
      * @return True if the MAC verification succeeds, otherwise False
      */
     private fun verifyMAC(rapdu : ByteArray) : Boolean {
-        log("Verifying MAC...")
-        val n = addPadding(ssc + byteArrayOf(0x99.toByte(), 0x02) + rapdu.slice(rapdu.size-2..<rapdu.size).toByteArray())
-        log("N: ", n)
+        val n = addPadding(ssc + rapdu.slice(0..rapdu.size-13))
         val cc = computeMAC(n)
-        log("CC': ", cc)
-        log("CC: ", rapdu.slice(rapdu.size-10..rapdu.size-3).toByteArray())
         return cc.contentEquals(rapdu.slice(rapdu.size-10..rapdu.size-3).toByteArray())
     }
 
@@ -351,11 +359,40 @@ object APDUControl {
      * @param bytes: The byte array to be encrypted with BAC
      * @return The encrypted byte array
      */
-    private fun encryptBAC(bytes: ByteArray) : ByteArray {
-        val k = SecretKeySpec(encryptionKeyBAC + encryptionKeyBAC.slice(0..7).toByteArray(), "DESede")
-        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
+    private fun encrypt(bytes: ByteArray) : ByteArray {
+        if (isAES) {
+            return encryptAES(bytes)
+        } else {
+            return encrypt3DES(bytes)
+        }
+    }
+
+    private fun encryptAES(bytes: ByteArray) : ByteArray {
+        val k = SecretKeySpec(encryptionKey, "AES")
+        val c = Cipher.getInstance("AES/CBC/NoPadding")
+        c.init(Cipher.ENCRYPT_MODE, k)
+        return c.doFinal(bytes)
+    }
+
+    private fun encrypt3DES(bytes: ByteArray) : ByteArray {
+        val k = SecretKeySpec(encryptionKey + encryptionKey.slice(0..7).toByteArray(), "DESede")
         val c = Cipher.getInstance("DESede/CBC/NoPadding")
-        c.init(Cipher.ENCRYPT_MODE, k, i)
+        c.init(Cipher.ENCRYPT_MODE, k)
+        return c.doFinal(bytes)
+    }
+
+    private fun decrypt(bytes: ByteArray) : ByteArray {
+        return if (isAES) {
+            decryptAES(bytes)
+        } else {
+            decrypt3DES(bytes)
+        }
+    }
+
+    private fun decryptAES(bytes: ByteArray) : ByteArray {
+        val k = SecretKeySpec(encryptionKey, "AES")
+        val c = Cipher.getInstance("AES/CBC/NoPadding")
+        c.init(Cipher.DECRYPT_MODE, k)
         return c.doFinal(bytes)
     }
 
@@ -364,12 +401,10 @@ object APDUControl {
      * @param data: The encrypted data of the received APDU
      * @return The decrypted data
      */
-    private fun decryptBAC(data: ByteArray) : ByteArray {
-        log("Decrypting: ", data)
-        val k = SecretKeySpec(encryptionKeyBAC + encryptionKeyBAC.slice(0..7).toByteArray(), "DESede")
-        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
+    private fun decrypt3DES(data: ByteArray) : ByteArray {
+        val k = SecretKeySpec(encryptionKey + encryptionKey.slice(0..7).toByteArray(), "DESede")
         val c = Cipher.getInstance("DESede/CBC/NoPadding")
-        c.init(Cipher.DECRYPT_MODE, k, i)
+        c.init(Cipher.DECRYPT_MODE, k)
         return c.doFinal(data)
     }
 
@@ -391,15 +426,6 @@ object APDUControl {
     }
 
     /**
-     * Sends an PACE encrypted APDU to the EMRTD. Currently not implemented
-     * @param apdu: The apdu to be encrypted by PACE
-     * @return The PACE encrypted APDU as byte array
-     */
-    private fun sendPACEEncryptedAPDU(apdu: APDU) : ByteArray {
-        return apdu.getByteArray()
-    }
-
-    /**
      * Logs message in the android logcat
      * @param msg: The message to be printed in the log
      */
@@ -414,15 +440,5 @@ object APDUControl {
      */
     private fun log(msg : String, b : ByteArray) {
         Logger.log(AC_TAG, AC_ENABLE_LOGGING, msg, b)
-    }
-
-    /**
-     * Logs message in the android logcat
-     * @param msg: The message to be printed in the log
-     * @param error: The error code to be printed and propagated
-     * @return The error code
-     */
-    private fun log(error : Int, msg : String) : Int {
-        return Logger.log(AC_TAG, AC_ENABLE_LOGGING, error, msg)
     }
 }

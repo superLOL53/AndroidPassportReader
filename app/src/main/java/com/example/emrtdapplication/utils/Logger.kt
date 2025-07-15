@@ -1,4 +1,4 @@
-package com.example.emrtdapplication
+package com.example.emrtdapplication.utils
 
 import android.util.Log
 
