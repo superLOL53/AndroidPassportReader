@@ -2,8 +2,7 @@ package com.example.emrtdapplication
 
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.Crypto.computeKey
-import com.example.emrtdapplication.utils.Crypto.hash
+import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.NfcClassByte
 import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
@@ -42,8 +41,8 @@ class MockTest {
     @Test
     fun tests() {
         val K = "T22000129364081251010318".toByteArray()
-        val seed = hash("SHA-1", K)
-        val key = computeKey("SHA-1", seed, 3.toByte())
+        val seed = Crypto().hash("SHA-1", K)
+        val key = Crypto().computeKey("SHA-1", seed, 3.toByte())
         println(K.toHexString())
         println(seed.toHexString())
         println(key.toHexString())

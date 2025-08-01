@@ -6,7 +6,7 @@ import com.example.emrtdapplication.utils.NOT_IMPLEMENTED
 
 class DG7(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x07
+    public override val shortEFIdentifier: Byte = 0x07
     override val EFTag: Byte = 0x67
 
     override fun parse(): Int {

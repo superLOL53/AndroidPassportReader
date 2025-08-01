@@ -28,34 +28,44 @@ const val ADDITIONAL_BIOMETRICS_APPLICATION_ID: Byte = 0x03
 /**
  * Class representing the EF.DIR file from the EMRTD
  */
-class Directory(private var apduControl: APDUControl) {
+class Directory {
+    private var apduControl : APDUControl? = null
     private var hasTravelRecordsApplication = false
     private var hasVisaRecordsApplication = false
     private var hasAdditionalBiometricsApplication = false
 
+    constructor(apduControl: APDUControl) {
+        this.apduControl = apduControl
+    }
+
+    constructor(rawFileContent: ByteArray) {
+        if (parseData(rawFileContent) != SUCCESS) {
+            throw IllegalArgumentException("Unable to parse file content!")
+        }
+    }
     /**
      * Reading the EF.DIR file from the EMRTD
      * @return The return value to indicate success(0), unable to select the file(-1) or unable to read the file(-2)
      */
     fun read() : Int {
-        var info = apduControl.sendAPDU(APDU(
+        var info = apduControl!!.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(DIR_ID_1, DIR_ID_2)))
-        if (!apduControl.checkResponse(info)) {
+        if (!apduControl!!.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
-        info = apduControl.sendAPDU(APDU(
+        info = apduControl!!.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO, 0
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!apduControl!!.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
-        return parseData(info)
+        return parseData(apduControl!!.removeRespondCodes(info))
     }
 
     /**

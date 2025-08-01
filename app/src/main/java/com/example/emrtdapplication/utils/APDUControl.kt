@@ -2,11 +2,9 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
-import org.spongycastle.crypto.engines.DESEngine
-import org.spongycastle.crypto.macs.ISO9797Alg3Mac
-import org.spongycastle.crypto.params.KeyParameter
 import java.io.IOException
 import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
 /**
@@ -34,9 +32,9 @@ const val ERROR_UNABLE_TO_CLOSE = -5
 /**
  * Class for interacting with the EMRTD. All interactions with the EMRTD (e.g. transceive-calls) go through here
  */
-class APDUControl {
+class APDUControl(private val crypto: Crypto = Crypto()) {
     private var isoDepSupport : Boolean = false
-    lateinit var isoDep :IsoDep
+    private var isoDep : IsoDep? = null
     private var nfcTechUse : NfcUse = NfcUse.UNDEFINED
     private var maxTransceiveLength : Int = 0
 
@@ -61,7 +59,7 @@ class APDUControl {
         this.isoDep = isoDep
         if (nfcTechUse == NfcUse.UNDEFINED) {
             nfcTechUse = NfcUse.ISO_DEP
-            maxTransceiveLength = this.isoDep.maxTransceiveLength
+            maxTransceiveLength = this.isoDep!!.maxTransceiveLength
         }
         return INIT_SUCCESS
     }
@@ -82,7 +80,7 @@ class APDUControl {
     }
 
     private fun sendISODEP(apdu: APDU) : ByteArray {
-        return isoDep.transceive(apdu.getByteArray())
+        return isoDep!!.transceive(apdu.getByteArray())
     }
 
     /**
@@ -116,7 +114,7 @@ class APDUControl {
         try {
             when (nfcTechUse) {
                 NfcUse.ISO_DEP -> {
-                    isoDep.connect()
+                    isoDep!!.connect()
                     return CONNECT_SUCCESS
                 }
                 NfcUse.UNDEFINED -> {
@@ -136,7 +134,7 @@ class APDUControl {
         try {
             when (nfcTechUse) {
                 NfcUse.ISO_DEP -> {
-                    isoDep.close()
+                    isoDep!!.close()
                     return CLOSE_SUCCESS
                 }
                 NfcUse.UNDEFINED -> {
@@ -163,6 +161,7 @@ class APDUControl {
      * @return The verified and decrypted APDU received from the EMRTD
      */
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
+        inc()
         val headerSM = headerSM(apdu)
         val dataSM = dataSM(apdu)
         val do97 = do97(apdu)
@@ -197,7 +196,7 @@ class APDUControl {
         }
         log("ProtectedAPDU: ", finalApdu)
         inc()
-        val rapdu = isoDep.transceive(finalApdu)
+        val rapdu = isoDep!!.transceive(finalApdu)
         log("RAPDU: ", rapdu)
         if (rapdu.size > 13) {
             verifyMAC(rapdu)
@@ -254,7 +253,7 @@ class APDUControl {
             do97 = if (apdu.getUseLeExt()) {
                 byteArrayOf(0x97.toByte(), 0x02, (apdu.getLe()/256).toByte(), (apdu.getLe()%256).toByte())
             } else {
-                byteArrayOf(0x97.toByte(), 0x01, 0)
+                byteArrayOf(0x97.toByte(), 0x01, apdu.getLe().toByte())
             }
         }
         return do97
@@ -268,7 +267,6 @@ class APDUControl {
     private fun do8E08(m : ByteArray) : ByteArray {
         //log("M: ", m)
         //log("SSC: ", ssc)
-        inc()
         //log("Incremented SSC: ", ssc)
         val n = addPadding(ssc + m)
         //log("N: ", n)
@@ -291,7 +289,7 @@ class APDUControl {
             } else {
                 3
             }
-            removePadding(decrypt(bytes.slice(l..bytes.size-17).toByteArray())) + bytes.slice(bytes.size-2..<bytes.size).toByteArray()
+            crypto.removePadding(decrypt(bytes.slice(l..bytes.size-17).toByteArray())) + bytes.slice(bytes.size-2..<bytes.size).toByteArray()
         } else {
             bytes.slice(bytes.size-2..<bytes.size).toByteArray()
         }
@@ -330,7 +328,7 @@ class APDUControl {
      * @return The computed MAC of the input
      */
     private fun computeMAC(m : ByteArray) : ByteArray {
-        try {
+        /*try {
             val mac = ISO9797Alg3Mac(DESEngine(), 64)
             mac.init(KeyParameter(encryptionKeyMAC))
             mac.update(m, 0, m.size)
@@ -340,7 +338,12 @@ class APDUControl {
         } catch (e : Exception) {
             log("Exception: ${e.message}")
         }
-        return byteArrayOf(0)
+        return byteArrayOf(0)*/
+        return if (isAES) {
+            crypto.computeCMAC(m, encryptionKeyMAC)
+        } else {
+            crypto.computeMAC(m, encryptionKeyMAC, usePadding = false)
+        }
     }
 
     /**
@@ -361,9 +364,11 @@ class APDUControl {
      */
     private fun encrypt(bytes: ByteArray) : ByteArray {
         if (isAES) {
-            return encryptAES(bytes)
+            return crypto.cipherAES(bytes, encryptionKey)
+            //return encryptAES(bytes)
         } else {
-            return encrypt3DES(bytes)
+            return crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray())
+            //return encrypt3DES(bytes)
         }
     }
 
@@ -377,15 +382,18 @@ class APDUControl {
     private fun encrypt3DES(bytes: ByteArray) : ByteArray {
         val k = SecretKeySpec(encryptionKey + encryptionKey.slice(0..7).toByteArray(), "DESede")
         val c = Cipher.getInstance("DESede/CBC/NoPadding")
-        c.init(Cipher.ENCRYPT_MODE, k)
+        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
+        c.init(Cipher.ENCRYPT_MODE, k,i)
         return c.doFinal(bytes)
     }
 
     private fun decrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
-            decryptAES(bytes)
+            crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE)
+            //decryptAES(bytes)
         } else {
-            decrypt3DES(bytes)
+            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray(), Cipher.DECRYPT_MODE)
+            //decrypt3DES(bytes)
         }
     }
 
@@ -404,7 +412,8 @@ class APDUControl {
     private fun decrypt3DES(data: ByteArray) : ByteArray {
         val k = SecretKeySpec(encryptionKey + encryptionKey.slice(0..7).toByteArray(), "DESede")
         val c = Cipher.getInstance("DESede/CBC/NoPadding")
-        c.init(Cipher.DECRYPT_MODE, k)
+        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
+        c.init(Cipher.DECRYPT_MODE, k, i)
         return c.doFinal(data)
     }
 
@@ -414,7 +423,7 @@ class APDUControl {
      * @return The padded byte array
      */
     private fun addPadding(byteArray: ByteArray) : ByteArray {
-        val pad = 8 - byteArray.size % 8
+        /*val pad = 8 - byteArray.size % 8
         if (pad == 8) {
             return byteArray + byteArrayOf(0x80.toByte(), 0,0,0,0,0,0,0)
         }
@@ -422,7 +431,12 @@ class APDUControl {
         for (i in 1..<pad) {
             padArray += 0x00
         }
-        return padArray
+        return padArray*/
+        return if (isAES) {
+            crypto.addPadding(byteArray, encryptionKey.size)
+        } else {
+            crypto.addPadding(byteArray, 8)
+        }
     }
 
     /**

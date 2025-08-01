@@ -1,5 +1,8 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
+import com.example.emrtdapplication.PACE_INFO_TYPE
+import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FILE_SUCCESSFUL_READ
@@ -9,23 +12,18 @@ import com.example.emrtdapplication.utils.NfcClassByte
 import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
-import com.example.emrtdapplication.utils.TLVSequence
-
-/**
- * Constants for CardAccess class
- */
-const val CA_TAG = "ca"
-const val CA_ENABLE_LOGGING = true
-const val CA_ID_1: Byte = 0x01
-const val CA_ID_2: Byte = 0x1C
+import com.example.emrtdapplication.utils.TLV
 
 /**
  * Class for reading, parsing and storing the information of EF.CardAccess from the EMRTD
  */
 class CardAccess(private var apduControl: APDUControl) {
+    private val CA_ID_1: Byte = 0x01
+    private val CA_ID_2: Byte = 0x1C
+
     //Variables containing the information from EF.CardAccess
-    private var paceInfo = PACEInfo()
-    private var paceDomainParams = PACEDomainParameterInfo()
+    val paceInfos = ArrayList<PACEInfo>()
+    val paceDomainParams = ArrayList<PACEDomainParameterInfo>()
 
     /**
      * Reading the EF.CardAccess file from the EMRTD.
@@ -58,13 +56,19 @@ class CardAccess(private var apduControl: APDUControl) {
      * @return The return value indicating Success(0) or unable to read from file(-2)
      */
     private fun parse(b : ByteArray) : Int {
-        val tlv = TLVSequence(b)
-        if (tlv.getTLVSequence().isEmpty() || tlv.getTLVSequence()[0].getTLVSequence() == null) {
+        val tlv = TLV(b)
+        if (tlv.getTLVSequence() == null || !tlv.isConstruct()) {
             return FILE_UNABLE_TO_READ
         }
-        paceInfo.setInfo(tlv.getTLVSequence()[0].getTLVSequence()!!.getTLVSequence()[0])
-        if (tlv.getTLVSequence().size >= 2) {
-            paceDomainParams.setDomainParameter(tlv.getTLVSequence()[1])
+        for (sequence in tlv.getTLVSequence()!!.getTLVSequence()) {
+            val si = SecurityInfo(sequence.toByteArray())
+            if (si.type != PACE_INFO_TYPE && si.type != PACE_DOMAIN_PARAMETER_INFO_TYPE) {
+                throw IllegalArgumentException()
+            } else if (si.type == PACE_INFO_TYPE) {
+                paceInfos.add(PACEInfo(sequence.toByteArray()))
+            } else {
+                paceDomainParams.add(PACEDomainParameterInfo((sequence.toByteArray())))
+            }
         }
         return FILE_SUCCESSFUL_READ
     }
@@ -73,7 +77,11 @@ class CardAccess(private var apduControl: APDUControl) {
      * Returns the PACE information stored on EF.CardAccess
      * @return The PACE information
      */
-    fun getPACEInfo() : PACEInfo {
-        return paceInfo
+    fun getPACEInfo() : ArrayList<PACEInfo> {
+        return paceInfos
+    }
+
+    fun getPACEDomainParameters() : ArrayList<PACEDomainParameterInfo> {
+        return paceDomainParams
     }
 }

@@ -1,50 +1,26 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.utils.INVALID_ARGUMENT
-import com.example.emrtdapplication.utils.NOT_IMPLEMENTED
-import com.example.emrtdapplication.utils.SUCCESS
-import com.example.emrtdapplication.utils.TLV
+import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV_TAGS
-import java.math.BigInteger
+import org.spongycastle.asn1.ASN1InputStream
+import org.spongycastle.asn1.x509.AlgorithmIdentifier
 
 /**
  * Class representing the parameters for the supported cryptographic asymmetric PACE protocol
  */
-class PACEDomainParameterInfo {
-    private var algorithm: ByteArray? = null
-    private var version: Int = -1
-    private var primeField: ByteArray? = null
-    private var p: BigInteger? = null
-    private var q: BigInteger? = null
-    private var g: BigInteger? = null
-    private var a: BigInteger? = null
-    private var b: BigInteger? = null
-    private var x: BigInteger? = null
-    private var y: BigInteger? = null
-    private var n: BigInteger? = null
-    private var f: BigInteger? = null
+class PACEDomainParameterInfo(rawFileContent : ByteArray) : SecurityInfo(rawFileContent) {
+    var parameterId : Int?
+        private set
+    var algorithmIdentifier : AlgorithmIdentifier
+        private set
 
-    fun setDomainParameter(tlv: TLV) : Int {
-        if (!tlv.isConstruct() || tlv.getTLVSequence() == null) {
-            return INVALID_ARGUMENT
+    init {
+        algorithmIdentifier = AlgorithmIdentifier.getInstance(ASN1InputStream(requiredData.toByteArray()).readAllBytes())
+        parameterId = if (optionalData == null || optionalData!!.getTag().size != 1 || optionalData!!.getTag()[0] != TLV_TAGS.INTEGER ||
+            optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {
+            null
+        } else {
+            optionalData!!.getValue()!![0].toInt()
         }
-        for (tag in tlv.getTLVSequence()!!.getTLVSequence()) {
-            when (tag.getTag()[0]) {
-                TLV_TAGS.OID -> algorithm = tag.getValue()
-                TLV_TAGS.SEQUENCE -> parseDomainParameters(tag)
-            }
-        }
-        return SUCCESS
-    }
-
-    private fun parseDomainParameters(tlv: TLV) : Int {
-        if (!tlv.isConstruct() || tlv.getTLVSequence() == null) {
-            return INVALID_ARGUMENT
-        }
-        for (i in tlv.getTLVSequence()!!.getTLVSequence().indices) {
-            val tag = tlv.getTLVSequence()!!.getTLVSequence()[i]
-
-        }
-        return NOT_IMPLEMENTED
     }
 }

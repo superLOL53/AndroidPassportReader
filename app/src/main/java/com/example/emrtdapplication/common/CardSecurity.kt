@@ -1,26 +1,29 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.EF_DIR_TYPE
+import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
+import com.example.emrtdapplication.PACE_INFO_TYPE
+import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FILE_UNABLE_TO_SELECT
-import com.example.emrtdapplication.utils.NOT_IMPLEMENTED
 import com.example.emrtdapplication.utils.NfcClassByte
 import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
-
-/**
- * Constants for the CardSecurity class
- */
-const val CS_TAG = "cs"
-const val CS_ENABLE_LOGGING = true
-const val CS_ID_1: Byte = 0x01
-const val CS_ID_2: Byte = 0x1D
+import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.utils.TLVSequence
 
 /**
  * Class for reading, parsing and storing information from the EF.CardSecurity file
  */
 class CardSecurity(private var apduControl: APDUControl) {
+    private val CS_ID_1: Byte = 0x01
+    private val CS_ID_2: Byte = 0x1D
+    val securityInfos = ArrayList<SecurityInfo>()
 
     /**
      * Reading the EF.CardSecurity file from the EMRTD.
@@ -47,8 +50,19 @@ class CardSecurity(private var apduControl: APDUControl) {
         return parseData(info)
     }
 
-    //TODO: Implement
     private fun parseData(byteArray: ByteArray) : Int {
-        return NOT_IMPLEMENTED
+        val tlv = TLVSequence(byteArray)
+        for (sequence in tlv.getTLVSequence()) {
+            val si = SecurityInfo(sequence.toByteArray())
+            when (si.type) {
+                CHIP_AUTHENTICATION_TYPE -> securityInfos.add(ChipAuthenticationInfo(sequence.toByteArray()))
+                CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> securityInfos.add(ChipAuthenticationPublicKeyInfo(sequence.toByteArray()))
+                TERMINAL_AUTHENTICATION_TYPE -> securityInfos.add(TerminalAuthenticationInfo(sequence.toByteArray()))
+                EF_DIR_TYPE -> securityInfos.add(EFDIRInfo(sequence.toByteArray()))
+                PACE_INFO_TYPE -> securityInfos.add(PACEInfo(sequence.toByteArray()))
+                PACE_DOMAIN_PARAMETER_INFO_TYPE -> securityInfos.add(PACEDomainParameterInfo(sequence.toByteArray()))
+            }
+        }
+        return SUCCESS
     }
 }

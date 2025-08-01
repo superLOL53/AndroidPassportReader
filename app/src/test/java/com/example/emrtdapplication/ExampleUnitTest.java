@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
+import com.example.emrtdapplication.LDS1.EfSod;
 import com.example.emrtdapplication.common.PACE;
 import com.example.emrtdapplication.common.PaceEC;
 import com.example.emrtdapplication.utils.APDU;
@@ -51,7 +52,8 @@ public class ExampleUnitTest {
         //apduControl.sendAPDU(apdu);
         PaceEC pace = new PaceEC();
         pace.paceProtocol();
-
+        //EfSod ef = new EfSod(new APDUControl());
+        //ef.parse();
     }
 
 

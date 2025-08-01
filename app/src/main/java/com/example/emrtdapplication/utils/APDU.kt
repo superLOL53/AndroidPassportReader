@@ -206,7 +206,7 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
                 }
             }
         }
-        log("APDU Array: ", ba)
+        //log("APDU Array: ", ba)
         return ba
     }
 

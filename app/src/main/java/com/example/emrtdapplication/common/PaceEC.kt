@@ -1,20 +1,18 @@
 package com.example.emrtdapplication.common
 
-import android.os.Build
-import androidx.annotation.RequiresApi
-import com.example.emrtdapplication.utils.Crypto
-import org.spongycastle.asn1.x9.ECNamedCurveTable
-import org.spongycastle.crypto.params.ECDomainParameters
-import org.spongycastle.crypto.params.ECPrivateKeyParameters
-import org.spongycastle.crypto.params.ECPublicKeyParameters
-import java.math.BigInteger
-import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
+import android.annotation.SuppressLint
+import org.spongycastle.asn1.ASN1InputStream
+import org.spongycastle.asn1.DERSequence
+import org.spongycastle.asn1.x509.Certificate
+import org.spongycastle.util.io.pem.PemObject
+import java.io.FileInputStream
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 
 class PaceEC {
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    @SuppressLint("NewApi")
     @OptIn(ExperimentalStdlibApi::class)
     fun paceProtocol() {
         // ECDH Generic Mapping Example
@@ -112,8 +110,8 @@ class PaceEC {
                     "49400306254C8AE8EE9DD812A804C0B6" +
                     "6E8CAFC14F84D8258950A91B44126EE6", 16
         )
-        val H = Crypto.calculateDHAgreement(DHPrivateKeyParameters(tprk, dh1024), DHPublicKeyParameters(cpub, dh1024))
-        val g = Crypto.genericMappingDH(dh1024.g, nonce.toByteArray(), dh1024.p, H)
+        val H = Crypto().calculateDHAgreement(DHPrivateKeyParameters(tprk, dh1024), DHPublicKeyParameters(cpub, dh1024))
+        val g = Crypto().genericMappingDH(dh1024.g, nonce.toByteArray(), dh1024.p, H)
         println("g: " + g.toByteArray().toHexString())
         /*val ka = DHBasicAgreement()
         ka.init(DHPrivateKeyParameters(tprk, dh1024))
@@ -121,7 +119,7 @@ class PaceEC {
         println("H: " + H.toByteArray().toHexString())
         val G = dh1024.g.modPow(nonce, dh1024.p).multiply(H).mod(dh1024.p)
         println("G: " + G.toByteArray().toHexString())*/
-        val ktprk = BigInteger("89CCD99B0E8D3B1F11E1296DCA68EC53411CF2CA", 16)
+        val ktprk = BigInteger("0089CCD99B0E8D3B1F11E1296DCA68EC53411CF2CA", 16)
         val ktpub = BigInteger(
             "00907D89E2D425A178AA81AF4A7774EC" +
                     "8E388C115CAE67031E85EECE520BD911" +
@@ -132,7 +130,7 @@ class PaceEC {
                     "36B7747D1671E6D692A3C7D40A0C3C5C" +
                     "E397545D015C175EB5130551EDBC2EE5D4", 16
         )
-        val kcprk = BigInteger("A5B780126B7C980E9FCEA1D4539DA1D27C342DFA", 16)
+        val kcprk = BigInteger("00A5B780126B7C980E9FCEA1D4539DA1D27C342DFA", 16)
         val kcpub = BigInteger(
             "075693D9AE941877573E634B6E644F8E" +
                     "60AF17A0076B8B123D9201074D36152B" +
@@ -144,8 +142,8 @@ class PaceEC {
                     "6D866C79CE0584E49687FF61BC29AEA1", 16
         )
         val params = DHParameters(dh1024.p, g, dh1024.q)
-        val secret = Crypto.calculateDHAgreement(DHPrivateKeyParameters(kcprk, params), DHPublicKeyParameters(ktpub, params))
-        val macKey = Crypto.computeKey("SHA-1", secret.toByteArray(), 2).slice(0..15).toByteArray()
+        val secret = Crypto().calculateDHAgreement(DHPrivateKeyParameters(kcprk, params), DHPublicKeyParameters(ktpub, params))
+        val macKey = Crypto().computeKey("SHA-1", secret.toByteArray(), 2).slice(0..15).toByteArray()
 
         /*val kka = DHBasicAgreement()
         kka.init(DHPrivateKeyParameters(kcprk, DHParameters(dh1024.p, G, dh1024.q)))
@@ -166,7 +164,7 @@ class PaceEC {
         val k = md.digest().slice(0..15).toByteArray()
         println("AES MAC key: " + k.toHexString() + ", length: " + k.size*8)*/
         val m = BigInteger("7F49818F060A04007F00070202040102848180075693D9AE941877573E634B6E644F8E60AF17A0076B8B123D9201074D36152BD8B3A213F53820C42ADC79AB5D0AEEC3AEFB91394DA476BD97B9B14D0A65C1FC71A0E019CB08AF55E1F729005FBA7E3FA5DC41899238A250767A6D46DB974064386CD456743585F8E5D90CC8B4004B1F6D866C79CE0584E49687FF61BC29AEA1", 16).toByteArray()
-        val token = Crypto.computeCMAC(m, macKey)
+        val token = Crypto().computeCMAC(m, macKey)
         println("Token: " + token.toHexString())*/
         /*val cmac = CMac(AESEngine(), 64)
         cmac.init(KeyParameter(k))
@@ -337,37 +335,113 @@ class PaceEC {
         println("Token: " + token.toHexString())*/
 
         //ECCAM
+        /*val crypto = Crypto()
         val bp256 = ECNamedCurveTable.getByName("brainpoolp256r1")
-        val s = java.math.BigInteger("658B860BC94DF6F044FCE6D5C82CF8E5", 16).toByteArray()
+        val ss = java.math.BigInteger("658B860BC94DF6F044FCE6D5C82CF8E5", 16).toByteArray()
         val cprk = BigInteger("009E56A6B59C95D06ECE5CD10F983BB2F4F1943528E577F23881D89D8C3BBEE0AA", 16)
         val tpubx = BigInteger("7F1D410ADB7DDB3B84BF1030800981A9105D7457B4A3ADE002384F3086C67EDE", 16)
         val tpuby = BigInteger("1AB889104A27DB6D842B019020FBF3CEACB0DC627F7BDCAC29969E19D0E553C1", 16)
         var pub = ECPublicKeyParameters(bp256.curve.createPoint(tpubx, tpuby), ECDomainParameters(bp256.curve, bp256.g, bp256.n, bp256.h))
         var priv = ECPrivateKeyParameters(cprk, ECDomainParameters(bp256.curve, bp256.g, bp256.n, bp256.h))
-        val x = Crypto.calculateECDHAgreement(priv, pub)
-        val h = Crypto.getECPointFromBigInteger(x, ECDomainParameters(bp256.curve, bp256.g, bp256.n, bp256.h))
-        val g = Crypto.genericMappingEC(bp256.g, s, h)
+        val x = crypto.calculateECDHAgreement(priv, pub)
+        val h = crypto.getECPointFromBigInteger(x, ECDomainParameters(bp256.curve, bp256.g, bp256.n, bp256.h))
+        val g = crypto.genericMappingEC(bp256.g, ss, h)
         val tprk = BigInteger("76ECFDAA9841C323A3F5FC5E88B88DB3EFF7E35EBF57A7E6946CB630006C2120", 16)
         val cpubx = BigInteger("02AD566F3C6EC7F9324509AD50A51FA52030782A4968FCFEDF737DAEA9933331", 16)
         val cpuby = BigInteger("11C3B9B4C2287789BD137E7F8AA882E2A3C633CCD6ECC2C63C57AD401A09C2E1", 16)
         val params = ECDomainParameters(bp256.curve, g, bp256.n, bp256.h)
         priv = ECPrivateKeyParameters(tprk, params)
         pub = ECPublicKeyParameters(bp256.curve.createPoint(cpubx, cpuby), params)
-        val secret = Crypto.calculateECDHAgreement(priv, pub)
-        val encKey = Crypto.computeKey("SHA-1", secret.toByteArray(), 1).slice(0..15).toByteArray()
-        val macKey = Crypto.computeKey("SHA-1", secret.toByteArray(), 2).slice(0..15).toByteArray()
+        val secret = crypto.calculateECDHAgreement(priv, pub)
+        val encKey = crypto.computeKey("SHA-1", secret.toByteArray(), 1).slice(0..15).toByteArray()
+        val macKey = crypto.computeKey("SHA-1", secret.toByteArray(), 2).slice(0..15).toByteArray()
         val t = BigInteger("7F494F060A04007F0007020204060286410402AD566F3C6EC7F9324509AD50A51FA52030782A4968FCFEDF737DAEA993333111C3B9B4C2287789BD137E7F8AA882E2A3C633CCD6ECC2C63C57AD401A09C2E1", 16).toByteArray()
-        val token = Crypto.computeCMAC(t, macKey)
+        val token = crypto.computeCMAC(t, macKey)
         println("EncKey: " + encKey.toHexString())
         println("MacKey: " + macKey.toHexString())
         println("Token: " + token.toHexString())
-        val c = Cipher.getInstance("AES/CBC/NoPadding")
+        var c = Cipher.getInstance("AES/CBC/NoPadding")
 
         c.init(Cipher.ENCRYPT_MODE, SecretKeySpec(encKey, "AES"), IvParameterSpec(ByteArray(16)))
         val iv = c.doFinal(byteArrayOf(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1))
         //val iv = Crypto.encrypt3DES(byteArrayOf(-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1), encKey + encKey.slice(0..7).toByteArray())
         println("iv: " + iv.toHexString())
+        val info = BigInteger("3062060904007F000702020102305230" +
+                "0C060704007F0007010202010D034200" +
+                "041872709494399E7470A6431BE25E83" +
+                "EEE24FEA568C2ED28DB48E05DB3A610D" +
+                "C884D256A40E35EFCB59BF6753D3A489" +
+                "D28C7A4D973C2DA138A6E7A4A08F68E1" +
+                "6F02010D", 16).toByteArray()
+        val input = ASN1InputStream(info)
+        val seq = DERSequence.getInstance(input.readAllBytes())
+        val publicKeyInfo = SubjectPublicKeyInfo.getInstance(DERSequence.getInstance(seq.getObjectAt(1)))
+        /*val string = TreeSet<String>()
+        for (p in Security.getProviders()) {
+            p.services.stream().filter {it.type.equals("Cipher")}
+            .map {it.algorithm}
+                .forEach { string.add(it) }
+        }
+        string.forEach { println(it) }*/
+        //val ec = org.spongycastle.crypto.ec.ECElGamalDecryptor()
+        //ec.init(ECPublicKeyParameters())
+        //ec.init()
+        //Security.addProvider()
         //pub = ECPublicKeyParameters(bp256.curve.decodePoint(BigInteger("00041872709494399E7470A6431BE25E83EEE24FEA568C2ED28DB48E05DB3A610DC884D256A40E35EFCB59BF6753D3A489D28C7A4D973C2DA138A6E7A4A08F68E16F0201", 16).toByteArray()), params)
 
-    }
+        val cipher = Cipher.getInstance("AES/CBC/NoPadding")
+        cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(encKey, "AES"), IvParameterSpec(iv))
+        val decrypted = cipher.doFinal(BigInteger("1EEA964DAAE372AC990E3EFDE6333353" +
+                "BFC89A6704D93DA8798CF77F5B7A54BD" +
+                "10CBA372B42BE0B9B5F28AA8DE2F4F92", 16).toByteArray()).slice(0..31).toByteArray()
+        println("Decrypted CA Data: " + decrypted.toHexString())
+        println("CA Public Key: " + publicKeyInfo.publicKeyData.bytes.toHexString())
+        val domainParams = ECDomainParameters(bp256.curve, bp256.g, bp256.n, bp256.h)
+        val ka = ECDHBasicAgreement()
+        ka.init(ECPrivateKeyParameters(BigInteger(decrypted), domainParams))
+        val s = ka.calculateAgreement(ECPublicKeyParameters(bp256.curve.decodePoint(publicKeyInfo.publicKeyData.bytes), domainParams))
+        println(crypto.getECPointFromBigInteger(s, domainParams))*/
+
+        //Decrypting nonce
+        /*val z = byteArrayOf(0x85.toByte(), 0x4D, 0x8D.toByte(), 0xF5.toByte(), 0x82.toByte(), 0x7F, 0xA6.toByte(), 0x85.toByte(), 0x2D, 0x1A, 0x4F, 0xA7.toByte(), 0x01, 0xCD.toByte(), 0xDD.toByte(), 0xCA.toByte())
+        val mrz = "C11T002JM496081222310314"
+        //val mrz = BigInteger("7E2D2A41C74EA0B38CD36F863939BFA8E9032AAD", 16)
+        val crypto = Crypto()
+        //val k = crypto.hash("SHA-1", mrz.toByteArray())
+        val k = byteArrayOf(0x00) + java.math.BigInteger("36D272F5C350ACAC50C3F572D23600", 16).toByteArray()
+        println(k.toHexString())
+        val kpi = crypto.computeKey("SHA-1", k, 1, true).slice(0..15).toByteArray()
+        //kpi += kpi.slice(0..7).toByteArray()
+        println(kpi.toHexString())
+        println(crypto.computeKey("SHA-1", k, 2, true).slice(0..15).toByteArray().toHexString())*/
+        //val key = SecretKeySpec(kpi, "AES")
+        //val c = Cipher.getInstance("AES/CBC/NoPadding")
+        //val i = IvParameterSpec(ByteArray(16))
+        //c.init(Cipher.DECRYPT_MODE, key, i)
+        //val s = c.doFinal(z)
+        //println(s.toHexString())
+
+        val csca = FileInputStream("sampledata/CSCAAUSTRIAcacert005.crt")
+        val certs = csca.readAllBytes()
+        val input = ASN1InputStream(certs)
+        val seq = DERSequence.getInstance(input.readObject())
+        //println(ASN1Dump.dumpAsString(seq))
+        val tag = DERSequence.getInstance(seq.getObjectAt(0))
+        val ml = Certificate.getInstance(seq)
+        val kf = KeyFactory.getInstance(ml.subjectPublicKeyInfo.algorithm.algorithm.id)
+        //val pubKey = PublicKeyFactory.createKey(ml.subjectPublicKeyInfo.encoded)
+        val po = PemObject(ml.subjectPublicKeyInfo.algorithm.algorithm.id, ml.subjectPublicKeyInfo.publicKeyData.bytes)
+        println(po.content.toHexString())
+        //ml.subjectPublicKeyInfo.parsePublicKey().encoded
+        val pubKey = kf.generatePublic(X509EncodedKeySpec(po.content))
+        val sign = Signature.getInstance(ml.signatureAlgorithm.algorithm.id)
+        sign.initVerify(pubKey)
+        sign.update(ml.tbsCertificate.encoded)
+        sign.verify(ml.signature.bytes)
+
+        //val cert = CertificateFactory.getInstance("X.509")
+        //val ml = cert.generateCertificate(csca)
+        //ml.verify(ml.publicKey)
+
+   }
 }

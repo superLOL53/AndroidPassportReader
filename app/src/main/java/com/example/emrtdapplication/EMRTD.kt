@@ -1,5 +1,6 @@
 package com.example.emrtdapplication
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.nfc.NfcAdapter
@@ -91,7 +92,24 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
     private var DG14 : DG14 = DG14(apduControl)
     private var DG15 : DG15 = DG15(apduControl)
     private var DG16 : DG16 = DG16(apduControl)
-
+    private var efMap = mapOf<Byte, ElementaryFileTemplate>(
+        DG1.shortEFIdentifier to DG1,
+        DG2.shortEFIdentifier to DG2,
+        DG3.shortEFIdentifier to DG3,
+        DG4.shortEFIdentifier to DG4,
+        DG5.shortEFIdentifier to DG5,
+        DG6.shortEFIdentifier to DG6,
+        DG7.shortEFIdentifier to DG7,
+        DG8.shortEFIdentifier to DG8,
+        DG9.shortEFIdentifier to DG9,
+        DG10.shortEFIdentifier to DG10,
+        DG11.shortEFIdentifier to DG11,
+        DG12.shortEFIdentifier to DG12,
+        DG13.shortEFIdentifier to DG13,
+        DG14.shortEFIdentifier to DG14,
+        DG15.shortEFIdentifier to DG15,
+        DG16.shortEFIdentifier to DG16,
+    )
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -154,8 +172,6 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
      * Reading EMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
      * @return Success(0) if everything was read without error or Failure(-1) if something went wrong
      */
-    //TODO: Return value to indicate overall success or failure
-    //TODO: Refactor code
     private fun readeMRTDParams() {
         log("Reading EMRTD Params...")
         /*val mrz = MRZ(TestValues.MRZ)
@@ -175,11 +191,17 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
         /*if (dir.read() != SUCCESS) {
             log("Unable to read Directory")
         }*/
-        /*if (ca.read() != SUCCESS) {
+        if (ca.read() != SUCCESS) {
             log("Unable to read Card Access")
         }
-        idPaceOid = ca.getPACEInfo().getPaceOid()*/
-        if (selectEMRTDApplication() != SUCCESS) {
+        val list = ca.getPACEInfo()
+        for (info in list) {
+            if (info.parameterId != null) {
+                idPaceOid = info.protocol
+                break
+            }
+        }
+        /*if (selectEMRTDApplication() != SUCCESS) {
             log("Unable to select LDS1")
             return
         }
@@ -191,35 +213,25 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
             log("Unable to do BAC protocol successfully")
             return
         }
-        readLDS1Files()
+        readLDS1Files()*/
         //pace.init(mrz, useCAN, idPaceOid, ca.getPACEInfo().getParameterID())
         //pace.paceProtocol()
         log("Finished Reading")
     }
 
+    @SuppressLint("NewApi")
     private fun readLDS1Files() {
-        if (efCOM.read() != SUCCESS) {
-            log("Unable to read EF COM")
+        //if (efCOM.read() != SUCCESS) {
+        //    log("Unable to read EF COM")
+        //}
+        /*for (ef in efMap) {
+            ef.value.read()
         }
-        DG1.read()
-        DG2.read()
-        DG3.read()
-        DG4.read()
-        DG5.read()
-        DG6.read()
-        DG7.read()
-        DG8.read()
-        DG9.read()
-        DG10.read()
-        DG11.read()
-        DG12.read()
-        DG13.read()
-        DG14.read()
-        DG15.read()
-        DG16.read()
         if (efSod.read() != SUCCESS) {
             log("Unable to read EF SOD")
         }
+        efSod.parse()
+        efSod.checkHashes(efMap)*/
     }
 
     /**

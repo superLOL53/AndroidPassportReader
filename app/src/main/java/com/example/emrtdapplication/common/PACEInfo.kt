@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.INVALID_ARGUMENT
 import com.example.emrtdapplication.utils.SUCCESS
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLV_TAGS
 
 /**
@@ -42,79 +42,53 @@ const val NIST_P521 : Byte = 18
 /**
  * Class representing information about the PACE protocol
  */
-class PACEInfo {
-    private var asymmetricProtocol : Byte = UNDEFINED
-    private var symmetricProtocol : Byte = UNDEFINED
-    private var version = -1
-    private var parameterId : Byte = UNDEFINED
-    private var idPACEOid : ByteArray? = null
+class PACEInfo(rawFileContent : ByteArray): SecurityInfo(rawFileContent) {
+    var asymmetricProtocol : Byte = UNDEFINED
+        private set
+    var symmetricProtocol : Byte = UNDEFINED
+        private set
+    var version = -1
+        private set
+    var parameterId : Byte? = null
+        private set
 
-    /**
-     * Sets the PACE info variables
-     * @param tlv: The TLV structure containing information about the supported PACE protocol
-     * @return Success(0) or invalid argument(-4)
-     */
-    fun setInfo(tlv: TLV) : Int {
-        if (!tlv.getIsValid() || tlv.getTag().size != 1 || tlv.getTag()[0] != PACE_INFO_TAG) {
-            return INVALID_ARGUMENT
+    init {
+        if (extractProtocols() != SUCCESS) {
+            throw IllegalArgumentException("Invalid protocols for PACE")
         }
-        for (i in tlv.getTLVSequence()!!.getTLVSequence().indices) {
-            val tag = tlv.getTLVSequence()!!.getTLVSequence()[i]
-            if (!tag.getIsValid() || tag.getTag().size != 1 || tag.getLength() > Byte.MAX_VALUE) {
-                return INVALID_ARGUMENT
-            }
-            if (tag.getTag()[0] == OID_TAG) {
-                idPACEOid = tag.getValue()
-                if (extractProtocols() != SUCCESS) {
-                    return INVALID_ARGUMENT
-                }
-            } else if (tag.getTag()[0] == TLV_TAGS.INTEGER) {
-                if (i == 1) {
-                    version = tag.getValue()?.get(0)?.toInt() ?: 0
-                } else if (i == 2) {
-                    parameterId = tag.getValue()?.get(0) ?: 0
-                    if (!(parameterId in 0..2 || parameterId in 8..18)) {
-                        return INVALID_ARGUMENT
-                    }
-                }
-            } else {
-                return INVALID_ARGUMENT
-            }
+        if (requiredData.getTag().size != 1 || requiredData.getTag()[0] != TLV_TAGS.INTEGER ||
+            requiredData.getValue() == null || requiredData.getValue()!!.size != 1 || requiredData.getValue()!![0].toInt() != 2) {
+            throw IllegalArgumentException("Invalid version for PACE protocol")
+        } else {
+            version = 2
         }
-        return SUCCESS
-    }
-
-    fun getPaceOid(): ByteArray? {
-        return idPACEOid
-    }
-
-    fun getParameterID(): Byte {
-        return parameterId
-    }
-
-    fun getVersion(): Int {
-        return version
-    }
-
-    fun getSymmetricProtocol(): Byte {
-        return symmetricProtocol
-    }
-
-    fun getAsymmetricProtocol(): Byte {
-        return asymmetricProtocol
+        if (optionalData != null) {
+            if (optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {
+                throw IllegalArgumentException("Invalid parameter tag")
+            }
+            parameterId = optionalData!!.getValue()!![0]
+            if (!(parameterId!! in 0..2 || parameterId!! in 8..18)) {
+                throw IllegalArgumentException("Invalid parameter identifier for PACE")
+            }
+        } else {
+            parameterId = null
+        }
     }
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun extractProtocols(): Int {
-        if (idPACEOid == null || !idPACEOid!!.toHexString().startsWith(ID_PACE) || idPACEOid!!.size != 10) {
+        if (!protocol.toHexString().startsWith(ID_PACE) || protocol.size != 10) {
             return INVALID_ARGUMENT
         }
-        asymmetricProtocol = idPACEOid!![8]
+        asymmetricProtocol = protocol[8]
         if (!(asymmetricProtocol in 1..4 || asymmetricProtocol.toInt() == 6)) {
             return INVALID_ARGUMENT
         }
-        symmetricProtocol = idPACEOid!![9]
+        symmetricProtocol = protocol[9]
         if (symmetricProtocol !in 1..4) {
+            return INVALID_ARGUMENT
+        }
+        if (asymmetricProtocol.toInt() == 6 && symmetricProtocol.toInt() == 1) {
             return INVALID_ARGUMENT
         }
         return SUCCESS

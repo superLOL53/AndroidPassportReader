@@ -9,12 +9,17 @@ import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.SUCCESS
+import java.security.MessageDigest
 
-abstract class ElementaryFileTemplate(private val apduControl: APDUControl) {
+abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     protected abstract var rawFileContent: ByteArray?
-    protected abstract val shortEFIdentifier: Byte
-    protected abstract val EFTag: Byte
+    abstract val shortEFIdentifier: Byte
     protected open val longEFIdentifier: Byte = 0x01
+    protected abstract val EFTag: Byte
+    protected var contentStart = -1
+    var matchHash = false
+    var isPresent = false
+        private set
 
     fun read() : Int {
         var info = apduControl.sendAPDU(
@@ -40,6 +45,7 @@ abstract class ElementaryFileTemplate(private val apduControl: APDUControl) {
             return FILE_UNABLE_TO_READ
         }
         val le = if (info[1] < 0) {
+            contentStart = 2 + info[1]+128
             var l = 0
             for (i in 0..<(info[1]+128)) {
                 l = l*256 + info[i+2]
@@ -47,6 +53,7 @@ abstract class ElementaryFileTemplate(private val apduControl: APDUControl) {
             l += 2 + (info[1] + 128)
             l
         } else {
+            contentStart = 2
             2 + info[1]
         }
         //Read the whole EF file
@@ -62,7 +69,17 @@ abstract class ElementaryFileTemplate(private val apduControl: APDUControl) {
             return FILE_UNABLE_TO_READ
         }
         rawFileContent = apduControl.removeRespondCodes(info)
+        isPresent = true
         return SUCCESS
+    }
+
+    fun hash(hashName : String) : ByteArray? {
+        if (rawFileContent == null) {
+            return null
+        }
+        val md = MessageDigest.getInstance(hashName)
+        md.update(rawFileContent!!)
+        return md.digest()
     }
 
     abstract fun parse() : Int;

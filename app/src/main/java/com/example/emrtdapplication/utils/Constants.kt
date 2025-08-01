@@ -42,6 +42,7 @@ object NfcInsByte {
     const val EXTERNAL_AUTHENTICATE : Byte = 0x82.toByte()
     const val MANAGE_SECURITY_ENVIRONMENT : Byte = 0x22
     const val GENERAL_AUTHENTICATE : Byte = 0x86.toByte()
+    const val INTERNAL_AUTHENTICATE : Byte = 0x88.toByte()
 }
 
 object NfcP1Byte {
