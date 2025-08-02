@@ -2,14 +2,17 @@ package com.example.emrtdapplication.LDS1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.utils.BiometricInformationGroupTemplate
 import com.example.emrtdapplication.utils.FAILURE
-import com.example.emrtdapplication.utils.NOT_IMPLEMENTED
+import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
 class DG2(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x02
     override val EFTag: Byte = 0x75
+    var biometricInformation : BiometricInformationGroupTemplate? = null
+        private set
 
 
     override fun parse(): Int {
@@ -17,8 +20,13 @@ class DG2(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         var tlv = TLV(rawFileContent!!)
-
-        return NOT_IMPLEMENTED
+        if (tlv.getTag().size != 1 || tlv.getTag()[0] != EFTag ||
+            tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size != 1) {
+            return FAILURE
+        }
+        tlv = tlv.getTLVSequence()!!.getTLVSequence()[0]
+        biometricInformation = BiometricInformationGroupTemplate(tlv)
+        return SUCCESS
     }
 
 }

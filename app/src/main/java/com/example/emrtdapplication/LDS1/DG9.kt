@@ -1,15 +1,20 @@
 package com.example.emrtdapplication.LDS1
 
-import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.NOT_IMPLEMENTED
+import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
+import com.example.emrtdapplication.utils.TLV
 
-class DG9(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
+class DG9(apduControl: APDUControl) : ElementaryFilesToBeDefined<TLV>(apduControl) {
+
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x09
     override val EFTag: Byte = 0x69
 
-    override fun parse(): Int {
-        return NOT_IMPLEMENTED
+    override fun add(tlv: TLV, list: ArrayList<TLV>) {
+        list.add(tlv)
+    }
+
+    override fun toTypedArray(list: ArrayList<TLV>) {
+        tlvs = list.toTypedArray()
     }
 }
