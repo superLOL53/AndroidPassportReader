@@ -48,7 +48,7 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             contentStart = 2 + info[1]+128
             var l = 0
             for (i in 0..<(info[1]+128)) {
-                l = l*256 + info[i+2]
+                l = l*256 + info[i+2].toUByte().toInt()
             }
             l += 2 + (info[1] + 128)
             l

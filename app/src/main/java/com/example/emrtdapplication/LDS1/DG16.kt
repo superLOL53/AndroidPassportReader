@@ -46,12 +46,12 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         var telephone: String? = null
         var address: String? = null
         for (tag in person.getTLVSequence()!!.getTLVSequence()) {
-            if (person.getTag()[0] == 0x5F.toByte()) {
-                when (person.getTag()[1].toInt()) {
-                    0x50 -> dateRecorded = person.getValue()?.decodeToString()
-                    0x51 -> name = person.getValue()?.decodeToString()
-                    0x52 -> telephone = person.getValue()?.decodeToString()
-                    0x53 -> address = person.getValue()?.decodeToString()
+            if (tag.getTag()[0] == 0x5F.toByte()) {
+                when (tag.getTag()[1].toInt()) {
+                    0x50 -> dateRecorded = tag.getValue()?.decodeToString()
+                    0x51 -> name = tag.getValue()?.decodeToString()
+                    0x52 -> telephone = tag.getValue()?.decodeToString()
+                    0x53 -> address = tag.getValue()?.decodeToString()
                 }
             }
         }
