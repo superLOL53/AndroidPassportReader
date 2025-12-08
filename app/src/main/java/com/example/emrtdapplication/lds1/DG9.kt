@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.LDS1
+package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined

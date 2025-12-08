@@ -1,13 +1,13 @@
-package com.example.emrtdapplication.LDS1
+package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
 import com.example.emrtdapplication.utils.TLV
 
-class DG8(apduControl: APDUControl) : ElementaryFilesToBeDefined<TLV>(apduControl) {
+class DG10(apduControl: APDUControl) : ElementaryFilesToBeDefined<TLV>(apduControl) {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x08
-    override val EFTag: Byte = 0x68
+    public override val shortEFIdentifier: Byte = 0x0A
+    override val EFTag: Byte = 0x6A
 
     override fun add(tlv: TLV, list: ArrayList<TLV>) {
         list.add(tlv)
@@ -16,5 +16,4 @@ class DG8(apduControl: APDUControl) : ElementaryFilesToBeDefined<TLV>(apduContro
     override fun toTypedArray(list: ArrayList<TLV>) {
         tlvs = list.toTypedArray()
     }
-
 }

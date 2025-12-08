@@ -7,33 +7,52 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import android.provider.Settings
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import com.example.emrtdapplication.LDS1.BAC
-import com.example.emrtdapplication.LDS1.DG1
-import com.example.emrtdapplication.LDS1.DG10
-import com.example.emrtdapplication.LDS1.DG11
-import com.example.emrtdapplication.LDS1.DG12
-import com.example.emrtdapplication.LDS1.DG13
-import com.example.emrtdapplication.LDS1.DG14
-import com.example.emrtdapplication.LDS1.DG15
-import com.example.emrtdapplication.LDS1.DG16
-import com.example.emrtdapplication.LDS1.DG2
-import com.example.emrtdapplication.LDS1.DG3
-import com.example.emrtdapplication.LDS1.DG4
-import com.example.emrtdapplication.LDS1.DG5
-import com.example.emrtdapplication.LDS1.DG6
-import com.example.emrtdapplication.LDS1.DG7
-import com.example.emrtdapplication.LDS1.DG8
-import com.example.emrtdapplication.LDS1.DG9
-import com.example.emrtdapplication.LDS1.EfCom
-import com.example.emrtdapplication.LDS1.EfSod
+import android.widget.TextView
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.LiveData
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.AbstractListDetailFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupWithNavController
+import com.example.emrtdapplication.lds1.BAC
+import com.example.emrtdapplication.lds1.DG1
+import com.example.emrtdapplication.lds1.DG10
+import com.example.emrtdapplication.lds1.DG11
+import com.example.emrtdapplication.lds1.DG12
+import com.example.emrtdapplication.lds1.DG13
+import com.example.emrtdapplication.lds1.DG14
+import com.example.emrtdapplication.lds1.DG15
+import com.example.emrtdapplication.lds1.DG16
+import com.example.emrtdapplication.lds1.DG2
+import com.example.emrtdapplication.lds1.DG3
+import com.example.emrtdapplication.lds1.DG4
+import com.example.emrtdapplication.lds1.DG5
+import com.example.emrtdapplication.lds1.DG6
+import com.example.emrtdapplication.lds1.DG7
+import com.example.emrtdapplication.lds1.DG8
+import com.example.emrtdapplication.lds1.DG9
+import com.example.emrtdapplication.lds1.EfCom
+import com.example.emrtdapplication.lds1.EfSod
 import com.example.emrtdapplication.common.AttributeInfo
 import com.example.emrtdapplication.common.CardAccess
 import com.example.emrtdapplication.common.CardSecurity
 import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
+import com.example.emrtdapplication.databinding.Lds1Binding
+import com.example.emrtdapplication.display.displayLDS1
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.CONNECT_SUCCESS
@@ -48,6 +67,7 @@ import com.example.emrtdapplication.utils.NfcRespondCodeSW2
 import com.example.emrtdapplication.utils.SELECT_APPLICATION_SUCCESS
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.UNABLE_TO_SELECT_APPLICATION
+import com.google.android.material.navigation.NavigationView
 
 /**
  * Constants for the EMRTD class
@@ -61,8 +81,9 @@ const val EMRTD_ENABLE_LOGGING = true
 //TODO: Write functions to select LDS2 applications (Travel Records, Visa Records and Additional Biometrics)
 //TODO: Make loading screen to indicate reading in progress or finished
 //TODO: Make class for each application? Ask the user which application to read? Or read everything at once?
-class EMRTD : NfcAdapter.ReaderCallback, Activity() {
+class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     //TODO: Get rid of all warnings, implement PACE, Refactor code, Testing
+    private lateinit var lds1Binding: Lds1Binding
     private lateinit var nfcAdapter : NfcAdapter
     private var apduControl = APDUControl()
     private var bac = BAC(apduControl)
@@ -110,6 +131,7 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
         DG15.shortEFIdentifier to DG15,
         DG16.shortEFIdentifier to DG16,
     )
+
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,15 +152,27 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
         findViewById<Button>(R.id.enableNFC).setOnClickListener {
             startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
         }
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        //setSupportActionBar(toolbar)
+        val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout);
+        val navigationView = findViewById<NavigationView>(R.id.nvView);
+
+        navigationView.setNavigationItemSelectedListener(this);
+
+        val drawerToggle = ActionBarDrawerToggle(this,drawerLayout,null,
+            0,0);
+
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState()
     }
 
     @Override
     override fun onResume() {
         super.onResume()
         if (!nfcAdapter.isEnabled) {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
+            //findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
         } else {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+            //findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
         }
         val options = Bundle()
         nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
@@ -157,6 +191,10 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
 
     @Override
     override fun onTagDiscovered(tag: Tag?) {
+        runOnUiThread {
+            findViewById<LinearLayout>(R.id.beforeRead).visibility = View.GONE
+            findViewById<LinearLayout>(R.id.Reading).visibility = View.VISIBLE
+        }
         if (apduControl.init(tag) != INIT_SUCCESS) {
             return
         }
@@ -166,6 +204,12 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
         readeMRTDParams()
         apduControl.closeNFC()
         log("End of Tag discovered")
+        runOnUiThread {
+            findViewById<LinearLayout>(R.id.Reading).visibility = View.GONE
+            findViewById<DrawerLayout>(R.id.drawerLayout).visibility = View.VISIBLE
+            lds1Binding = DataBindingUtil.setContentView(this, R.layout.lds1)
+            lds1Binding.dg1 = DG1
+        }
     }
 
     /**
@@ -201,7 +245,7 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
                 break
             }
         }
-        /*if (selectEMRTDApplication() != SUCCESS) {
+        if (selectEMRTDApplication() != SUCCESS) {
             log("Unable to select LDS1")
             return
         }
@@ -213,7 +257,7 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
             log("Unable to do BAC protocol successfully")
             return
         }
-        readLDS1Files()*/
+        readLDS1Files()
         //pace.init(mrz, useCAN, idPaceOid, ca.getPACEInfo().getParameterID())
         //pace.paceProtocol()
         log("Finished Reading")
@@ -221,17 +265,18 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
 
     @SuppressLint("NewApi")
     private fun readLDS1Files() {
-        //if (efCOM.read() != SUCCESS) {
-        //    log("Unable to read EF COM")
-        //}
-        /*for (ef in efMap) {
+        if (efCOM.read() != SUCCESS) {
+            log("Unable to read EF COM")
+        }
+        for (ef in efMap) {
             ef.value.read()
         }
+        DG1.parse()
         if (efSod.read() != SUCCESS) {
             log("Unable to read EF SOD")
         }
         efSod.parse()
-        efSod.checkHashes(efMap)*/
+        efSod.checkHashes(efMap)
     }
 
     /**
@@ -265,5 +310,21 @@ class EMRTD : NfcAdapter.ReaderCallback, Activity() {
      */
     private fun log(error : Int, msg : String, b: ByteArray) : Int {
         return Logger.log(EMRTD_TAG, EMRTD_ENABLE_LOGGING, error, msg, b)
+    }
+
+    override fun onNavigationItemSelected(p0: MenuItem): Boolean {
+        val fm = supportFragmentManager
+        val trans = fm.beginTransaction()
+        var frag : Fragment? = null
+        when (p0.itemId) {
+            R.id.nav_lds1 -> frag = displayLDS1()
+        }
+        if (frag == null) {
+            return false
+        }
+        trans.replace(R.id.flContent, frag)
+        trans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+        trans.commit()
+        return true
     }
 }

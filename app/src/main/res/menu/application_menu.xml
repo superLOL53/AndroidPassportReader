@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_lds1"
+        android:title="@string/main" />
+    <item
+        android:id="@+id/nav_travel"
+        android:title="@string/travel_records" />
+    <item
+        android:id="@+id/nav_visa"
+        android:title="@string/visa_records" />
+    <item
+        android:id="@+id/nav_biometrics"
+        android:title="@string/additional_biometrics" />
+</menu>

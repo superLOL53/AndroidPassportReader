@@ -1,32 +1,16 @@
 package com.example.emrtdapplication;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-import com.example.emrtdapplication.LDS1.EfSod;
-import com.example.emrtdapplication.common.PACE;
 import com.example.emrtdapplication.common.PaceEC;
 import com.example.emrtdapplication.utils.APDU;
 import com.example.emrtdapplication.utils.APDUControl;
-import com.example.emrtdapplication.utils.Crypto;
 import com.example.emrtdapplication.utils.NfcClassByte;
 import com.example.emrtdapplication.utils.NfcInsByte;
 import com.example.emrtdapplication.utils.NfcP1Byte;
 import com.example.emrtdapplication.utils.NfcP2Byte;
-
-import java.lang.reflect.InvocationTargetException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
-
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import kotlin.text.HexFormat;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

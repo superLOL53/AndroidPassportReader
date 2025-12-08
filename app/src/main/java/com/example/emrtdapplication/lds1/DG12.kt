@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.LDS1
+package com.example.emrtdapplication.lds1
 
 import android.media.Image
 import com.example.emrtdapplication.ElementaryFileTemplate

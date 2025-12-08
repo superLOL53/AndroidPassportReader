@@ -15,9 +15,18 @@
     <string name="readEMRTD">Hold your passport to the back of your phone. It should automatically recognize and start reading the passport.</string>
     <string name="cancel">Cancel</string>
     <string name="enable">Enable</string>
-    <string name="enableNFC">Enable NFC to read from your passport</string>
+    <string name="enableNFC">Enable NFC to read\nfrom your passport</string>
     <string name="canNumber">208472</string>
     <string name="help">Help for filling out the manual input</string>
     <string name="oldppn">U1194584</string>
     <string name="oldeDate">260801</string>
+    <string name="progress">Reading passport …</string>
+    <string name="dg1">Data Group 1</string>
+    <string name="name">Name:</string>
+    <string name="bd">Birthday</string>
+    <string name="sex">Sex</string>
+    <string name="additional_biometrics">Additional Biometrics</string>
+    <string name="visa_records">Visa Records</string>
+    <string name="travel_records">Travel Records</string>
+    <string name="main">Main</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.LDS1
+package com.example.emrtdapplication.lds1
 
 import kotlin.test.BeforeTest
 import kotlin.test.Test

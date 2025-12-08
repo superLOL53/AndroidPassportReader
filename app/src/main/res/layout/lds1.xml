@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+        <variable
+            name="dg1"
+            type="com.example.emrtdapplication.lds1.DG1" />
+    </data>
+    <TableLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+
+        <TableRow
+            android:gravity="center">
+
+            <TextView
+                android:text="@string/dg1"
+                android:gravity="center"/>
+
+        </TableRow>
+
+        <TableRow
+            android:gravity="center">
+
+            <TextView
+                android:text="@string/name"
+                android:gravity="center"/>
+
+            <TextView
+                android:id="@+id/name"
+                android:text="@{dg1.holderName}"
+                android:gravity="center"/>
+        </TableRow>
+
+        <TableRow
+            android:gravity="center">
+
+            <TextView
+                android:text="@string/bd"
+                android:gravity="center"/>
+
+            <TextView
+                android:text="@{dg1.dateOfBirth}"
+                android:gravity="center"/>
+    </TableRow>
+
+        <TableRow
+            android:gravity="center">
+
+            <TextView
+                android:text="@string/sex"
+                android:gravity="center"/>
+
+            <TextView
+                android:text="@{Character.toString(dg1.sex)}"
+                android:gravity="center"/>
+</TableRow>
+    </TableLayout>
+
+
+</layout>
+
+<!--     <data>
+        <import type="com.example.emrtdapplication.lds1.DG1"/>
+        <variable name="DG1" type="com.example.emrtdapplication.lds1.DG1" />
+        <variable name="defaultName" type="String" android:value="John Doe"/>
+        <variable name="sex" type="String" android:value="Unknown"/>
+    </data>
+-->
