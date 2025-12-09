@@ -12,6 +12,7 @@ const val INVALID_ARGUMENT = -4
 
 const val SELECT_APPLICATION_SUCCESS = 0
 const val UNABLE_TO_SELECT_APPLICATION = -1
+const val ADDITIONAL_ENCRYPTION_LENGTH = 30
 
 object TLV_TAGS {
     const val CONSTRUCT_BIT : Byte = 0x20

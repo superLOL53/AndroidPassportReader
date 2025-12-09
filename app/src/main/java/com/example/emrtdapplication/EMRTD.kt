@@ -1,7 +1,6 @@
 package com.example.emrtdapplication
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
@@ -10,23 +9,15 @@ import android.provider.Settings
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.DataBindingUtil
-import androidx.databinding.ViewDataBinding
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.LiveData
-import androidx.navigation.findNavController
-import androidx.navigation.fragment.AbstractListDetailFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupWithNavController
 import com.example.emrtdapplication.lds1.BAC
 import com.example.emrtdapplication.lds1.DG1
 import com.example.emrtdapplication.lds1.DG10
@@ -53,6 +44,7 @@ import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
 import com.example.emrtdapplication.databinding.Lds1Binding
 import com.example.emrtdapplication.display.displayLDS1
+import com.example.emrtdapplication.utils.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.CONNECT_SUCCESS
@@ -209,6 +201,33 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             findViewById<DrawerLayout>(R.id.drawerLayout).visibility = View.VISIBLE
             lds1Binding = DataBindingUtil.setContentView(this, R.layout.lds1)
             lds1Binding.dg1 = DG1
+            lds1Binding.dg2 = DG2
+            if (DG2.biometricInformation != null && DG2.biometricInformation!!.biometricInformations != null) {
+                for (bios in DG2.biometricInformation!!.biometricInformations) {
+                    if (bios == null) continue
+                    val image = bios.biometricDataBlock.facialRecordData.image
+                    val view = ImageView(this)
+                    view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT)
+                    view.setImageBitmap(image)
+                    findViewById<LinearLayout>(R.id.dg2layout).addView(view)
+                }
+            }
+            if (DG3.biometricInformation != null && DG3.biometricInformation!!.biometricInformations != null) {
+                for (bios in DG3.biometricInformation!!.biometricInformations) {
+                    if (bios == null) continue
+                    val image = bios.biometricDataBlock.facialRecordData.image
+                    val view = ImageView(this)
+                    view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT)
+                    view.setImageBitmap(image)
+                    findViewById<LinearLayout>(R.id.dg3layout).addView(view)
+
+                }
+            }
+            //Removing rows if values are null:
+            //val table = findViewById<TableLayout>(R.id.lds1table)
+            //table.removeView(findViewById<TableRow>(R.id.name))
         }
     }
 
@@ -226,12 +245,19 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         /*if (cs.read() != SUCCESS) {
             log("Unable to read Card Security")
         }*/
-        /*if (ai.read() != SUCCESS) {
+        if (ai.read() != SUCCESS) {
             log("Unable to read AttributeInfo")
             return
         } else {
             log("Successfully read AI")
-        }*/
+        }
+        if (ai.getExtendedLengthInfoInFile()) {
+            apduControl.maxResponseLength = ai.getMaxReceiveLength() - ADDITIONAL_ENCRYPTION_LENGTH
+            apduControl.maxCommandLength = ai.getMaxTransferLength() - ADDITIONAL_ENCRYPTION_LENGTH
+        } else {
+            apduControl.maxResponseLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
+            apduControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
+        }
         /*if (dir.read() != SUCCESS) {
             log("Unable to read Directory")
         }*/
@@ -270,13 +296,13 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         }
         for (ef in efMap) {
             ef.value.read()
+            ef.value.parse()
         }
-        DG1.parse()
-        if (efSod.read() != SUCCESS) {
+        /*if (efSod.read() != SUCCESS) {
             log("Unable to read EF SOD")
         }
         efSod.parse()
-        efSod.checkHashes(efMap)
+        efSod.checkHashes(efMap)*/
     }
 
     /**

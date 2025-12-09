@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.utils
 
+import android.widget.ImageView
+
 class BiometricInformationGroupTemplate(groupTemplate: TLV) {
     var biometricInformations : Array<BiometricInformationTemplate?>?
         private set
@@ -21,7 +23,7 @@ class BiometricInformationGroupTemplate(groupTemplate: TLV) {
                 throw IllegalArgumentException("Number of Biometric Templates is not equal to the actual number of templates")
             }
             val info = ArrayList<BiometricInformationTemplate>()
-            for (i in 1..groupTemplate.getTLVSequence()!!.getTLVSequence().size) {
+            for (i in 1..<groupTemplate.getTLVSequence()!!.getTLVSequence().size) {
                 try {
                     info.add(BiometricInformationTemplate(groupTemplate.getTLVSequence()!!.getTLVSequence()[i]))
                 } catch (e : Exception) {
@@ -30,6 +32,5 @@ class BiometricInformationGroupTemplate(groupTemplate: TLV) {
             }
             biometricInformations = info.toTypedArray()
         }
-
     }
 }

@@ -33,6 +33,8 @@ const val ERROR_UNABLE_TO_CLOSE = -5
  * Class for interacting with the EMRTD. All interactions with the EMRTD (e.g. transceive-calls) go through here
  */
 class APDUControl(private val crypto: Crypto = Crypto()) {
+    var maxResponseLength = 0
+    var maxCommandLength = 0
     private var isoDepSupport : Boolean = false
     private var isoDep : IsoDep? = null
     private var nfcTechUse : NfcUse = NfcUse.UNDEFINED

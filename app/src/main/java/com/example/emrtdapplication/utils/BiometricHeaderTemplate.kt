@@ -22,15 +22,15 @@ class BiometricHeaderTemplate(private val biometricHeaderTemplate : TLV) {
             if (tlv.getTag().size != 1) {
                 throw IllegalArgumentException("Illegal Tag in the Biometric Header Template")
             }
-            when (tlv.getTag()[0].toInt()) {
-                0x80 -> setHeaderVersion(tlv.getValue())
-                0x81 -> biometricType = tlv.getValue()
-                0x82 -> setSubType(tlv.getValue())
-                0x83 -> creationTime = tlv.getValue()
-                0x85 -> validityPeriod = tlv.getValue()
-                0x86 -> setCreator(tlv.getValue())
-                0x87 -> owner = setOwner(tlv.getValue())
-                0x88 -> type = setFormatType(tlv.getValue())
+            when (tlv.getTag()[0]) {
+                0x80.toByte() -> setHeaderVersion(tlv.getValue())
+                0x81.toByte() -> biometricType = tlv.getValue()
+                0x82.toByte() -> setSubType(tlv.getValue())
+                0x83.toByte() -> creationTime = tlv.getValue()
+                0x84.toByte() -> validityPeriod = tlv.getValue()
+                0x86.toByte() -> setCreator(tlv.getValue())
+                0x87.toByte() -> owner = setOwner(tlv.getValue())
+                0x88.toByte() -> type = setFormatType(tlv.getValue())
             }
         }
         if (owner == null || type == null) {
@@ -41,23 +41,26 @@ class BiometricHeaderTemplate(private val biometricHeaderTemplate : TLV) {
     }
 
     private fun setHeaderVersion(header : ByteArray?) {
-        if (header == null || header.size != 2) {
+        if (header == null) return
+        if (header.size != 2) {
             throw IllegalArgumentException("Header version has invalid length")
         }
         headerVersion = (header[0]*256 + header[1]).toShort()
     }
 
     private fun setSubType(subType : ByteArray?) {
-        if (subType == null || subType.size != 1) {
+        if (subType == null) return
+        if (subType.size != 1) {
             throw IllegalArgumentException("Invalid Subtype value")
         }
         biometricSubType = subType[0]
     }
 
     private fun setCreator(creator : ByteArray?) {
-        if (creator == null || creator.size != 4) {
+        if (creator == null) return
+        /*if (creator.size != 2) {
             throw IllegalArgumentException("Invalid length of the biometric reference creator")
-        }
+        }*/
         biometricReferenceDataCreator = 0
         for (b in creator) {
             biometricReferenceDataCreator = biometricReferenceDataCreator!!*256 + b
@@ -65,7 +68,8 @@ class BiometricHeaderTemplate(private val biometricHeaderTemplate : TLV) {
     }
 
     private fun setOwner(owner : ByteArray?) : Short {
-        if (owner == null || owner.size != 2) {
+        if (owner == null) return 0
+        if (owner.size != 2) {
             throw IllegalArgumentException("Invalid length for the owner field")
         }
         return (owner[0]*256 + owner[1]).toShort()

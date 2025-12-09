@@ -57,18 +57,47 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             2 + info[1]
         }
         //Read the whole EF file
-        info = apduControl.sendAPDU(
-            APDU(
-            NfcClassByte.ZERO,
-            NfcInsByte.READ_BINARY,
-            NfcP1Byte.ZERO,
-            NfcP2Byte.ZERO, le
-        )
-        )
-        if (!apduControl.checkResponse(info)) {
-            return FILE_UNABLE_TO_READ
+        if (le >= apduControl.maxResponseLength) {
+            var tmp = ByteArray(le)
+            var p1 : Byte = 0
+            var p2 : Byte = 0
+            var readBytes = 0
+            for (i in 0..le step apduControl.maxResponseLength) {
+                p1 = (i/256).toByte()
+                p2 = (i % 256).toByte()
+                if (le - i > apduControl.maxResponseLength) {
+                    readBytes = apduControl.maxResponseLength
+                } else {
+                    readBytes = le - i
+                }
+                info = apduControl.sendAPDU(
+                    APDU(
+                        NfcClassByte.ZERO,
+                        NfcInsByte.READ_BINARY,
+                        p1,
+                        p2, readBytes
+                    )
+                )
+                if (!apduControl.checkResponse(info)) {
+                    return FILE_UNABLE_TO_READ
+                }
+                apduControl.removeRespondCodes(info).copyInto(tmp, i, 0)
+            }
+            rawFileContent = tmp
+        } else {
+            info = apduControl.sendAPDU(
+                APDU(
+                    NfcClassByte.ZERO,
+                    NfcInsByte.READ_BINARY,
+                    NfcP1Byte.ZERO,
+                    NfcP2Byte.ZERO, le
+                )
+            )
+            if (!apduControl.checkResponse(info)) {
+                return FILE_UNABLE_TO_READ
+            }
+            rawFileContent = apduControl.removeRespondCodes(info)
         }
-        rawFileContent = apduControl.removeRespondCodes(info)
         isPresent = true
         return SUCCESS
     }
@@ -82,5 +111,5 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         return md.digest()
     }
 
-    abstract fun parse() : Int;
+    abstract fun parse() : Int
 }
