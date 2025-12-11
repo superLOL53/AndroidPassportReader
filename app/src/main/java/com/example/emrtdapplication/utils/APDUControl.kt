@@ -63,6 +63,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
             nfcTechUse = NfcUse.ISO_DEP
             maxTransceiveLength = this.isoDep!!.maxTransceiveLength
         }
+        this.isoDep!!.timeout = 2000
         return INIT_SUCCESS
     }
 
@@ -81,7 +82,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         }
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     private fun sendISODEP(apdu: APDU) : ByteArray {
+        log(apdu.getByteArray().toHexString())
         return isoDep!!.transceive(apdu.getByteArray())
     }
 

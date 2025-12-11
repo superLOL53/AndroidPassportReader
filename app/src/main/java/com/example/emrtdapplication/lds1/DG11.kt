@@ -1,6 +1,20 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.Image
+import android.util.AttributeSet
+import android.view.Gravity
+import android.view.View
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
+import androidx.compose.material3.TabRow
+import androidx.compose.ui.graphics.vector.Group
+import androidx.core.view.children
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -33,7 +47,7 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         private set
     var otherTDNumbers : Array<String>? = null
         private set
-    var image : Image? = null
+    var image : Bitmap? = null
         private set
     var otherNames : Array<String>? = null
         private set
@@ -51,7 +65,7 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             if (tag.getTag().size == 2) {
                 if (tag.getTag()[0] == 0x5F.toByte()) {
                     when (tag.getTag()[1].toInt()) {
-                        0x0E -> fullName = tag.getValue()?.decodeToString()
+                        0x0E -> fullName = tag.getValue()?.decodeToString()?.replace('<', ' ')
                         0x10 -> personalNumber = tag.getValue()?.decodeToString()
                         0x2B -> fullDateOfBirth = tag.getValue()?.decodeToString()
                         0x11 -> placeOfBirth = tag.getValue()?.decodeToString()?.replace('<', ' ')
@@ -74,6 +88,70 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
+    fun createViews(parent : TableLayout, context: Context) {
+        var row : TableRow
+        if (fullName != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Full Name: ", fullName!!)
+        }
+        if (otherNames != null) {
+            for (s in otherNames) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Other Name: ", s)
+            }
+        }
+        if (personalNumber != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Personal Number: ", personalNumber!!)
+        }
+        if (fullDateOfBirth != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Full date of birth: ", fullDateOfBirth!!)
+        }
+        if (placeOfBirth != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Place of birth: ", placeOfBirth!!)
+        }
+        if (permanentAddress != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Address: ", permanentAddress!!)
+        }
+        if (telephone != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Telephone: ", telephone!!)
+        }
+        if (profession != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Profession: ", profession!!)
+        }
+        if (title != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Title: ", title!!)
+        }
+        if (personalSummary != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Summary: ", personalSummary!!)
+        }
+        if (otherTDNumbers != null) {
+            for (td in otherTDNumbers) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Other TD number: ", td)
+            }
+        }
+        if (custodyInformation != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Custody information: ", custodyInformation!!)
+        }
+        if (image != null) {
+            val imageView = ImageView(context)
+            imageView.setImageBitmap(image)
+            row = TableRow(context)
+            row.addView(imageView)
+            row.gravity = Gravity.CENTER
+            parent.addView(row)
+        }
+    }
+
     private fun readNames(names : TLV) {
         if (names.getTLVSequence() == null || names.getTLVSequence()!!.getTLVSequence().size < 2) {
             return
@@ -89,7 +167,8 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     }
 
     private fun decodeImage(image : TLV) {
-        //TODO: Implement
+        if (image.getValue() == null) return
+        this.image = BitmapFactory.decodeByteArray(image.getValue()!!, 0, image.getValue()!!.size)
     }
 
     private fun decodeDocumentNumbers(numbers: TLV) {

@@ -1,6 +1,13 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.media.Image
+import android.view.Gravity
+import android.widget.ImageView
+import android.widget.TableLayout
+import android.widget.TableRow
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -21,9 +28,9 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         private set
     var taxExitRequirements : String? = null
         private set
-    var front : Image? = null
+    var front : Bitmap? = null
         private set
-    var rear : Image? = null
+    var rear : Bitmap? = null
         private set
     var documentPersonalizationTime: String? = null
         private set
@@ -51,8 +58,8 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
                         0x26 -> dateOfIssue = tag.getValue()?.decodeToString()
                         0x1B -> endorsements = tag.getValue()?.decodeToString()
                         0x1C -> taxExitRequirements = tag.getValue()?.decodeToString()
-                        0x1D -> decodeImage(tag)
-                        0x1E -> decodeImage(tag)
+                        0x1D -> front = decodeImage(tag)
+                        0x1E -> rear = decodeImage(tag)
                         0x55 -> documentPersonalizationTime = tag.getValue()?.decodeToString()
                         0x56 -> personalizationSystemSerialNumber = tag.getValue()?.decodeToString()
                     }
@@ -60,6 +67,56 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             }
         }
         return NOT_IMPLEMENTED
+    }
+
+    fun createViews(context: Context, parent : TableLayout) {
+        var row : TableRow
+        if (issuingAuthority != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Issuing Authority: ", issuingAuthority!!)
+        }
+        if (dateOfIssue != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Date of issue: ", dateOfIssue!!)
+        }
+        if (otherPersons != null) {
+            for (p in otherPersons) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Other Person: ", p)
+            }
+        }
+        if (endorsements != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Endorsement: ", endorsements!!)
+        }
+        if (taxExitRequirements != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Tax/Exit Requirements: ", taxExitRequirements!!)
+        }
+        if (documentPersonalizationTime != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Document personalization time: ", documentPersonalizationTime!!)
+        }
+        if (personalizationSystemSerialNumber != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Personalization device serial number: ", personalizationSystemSerialNumber!!)
+        }
+        if (front != null) {
+            val imageView = ImageView(context)
+            imageView.setImageBitmap(front)
+            row = TableRow(context)
+            row.addView(imageView)
+            row.gravity = Gravity.CENTER
+            parent.addView(row)
+        }
+        if (rear != null) {
+            val imageView = ImageView(context)
+            imageView.setImageBitmap(rear)
+            row = TableRow(context)
+            row.addView(imageView)
+            row.gravity = Gravity.CENTER
+            parent.addView(row)
+        }
     }
 
     private fun otherPersons(persons: TLV) {
@@ -76,7 +133,8 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         otherPersons = list.toTypedArray()
     }
 
-    private fun decodeImage(tlv: TLV) {
-        //TODO: Implement
+    private fun decodeImage(tlv: TLV) : Bitmap? {
+        if (tlv.getValue() == null) return null
+        return BitmapFactory.decodeByteArray(tlv.getValue()!!, 0, tlv.getValue()!!.size)
     }
 }

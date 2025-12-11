@@ -11,135 +11,146 @@
         <variable
             name="dg3"
             type="com.example.emrtdapplication.lds1.DG3" />
+        <variable
+            name="dg11"
+            type="com.example.emrtdapplication.lds1.DG11" />
     </data>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center">
+        android:gravity="center"
+        android:id="@+id/lds1layout">
 
-        <TableLayout
-            android:id="@+id/dg1layout"
-            android:layout_height="wrap_content"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:visibility="visible">
+            android:layout_height="wrap_content"
+            android:id="@+id/dg1layout">
 
-            <TableRow
-                android:gravity="center">
-                <TextView
-                    android:text="@string/dg1"
-                    android:gravity="center"/>
-            </TableRow>
+            <TableLayout
+                android:id="@+id/dg1table"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:visibility="visible">
 
-            <TableRow
-                android:id="@+id/name"
-                android:gravity="center">
-                <TextView
-                    android:text="@string/name"
-                    android:gravity="center"/>
-                <TextView
-                    android:text="@{dg1.holderName}"
-                    android:gravity="center"/>
-            </TableRow>
+                <TableRow
+                    android:gravity="center">
+                    <TextView
+                        android:text="@string/dg1"
+                        android:gravity="center"/>
+                </TableRow>
 
-            <TableRow
-                android:gravity="center">
-                <TextView
-                    android:text="@string/bd"
-                    android:gravity="center"/>
-                <TextView
-                    android:text="@{dg1.dateOfBirth}"
-                    android:gravity="center"/>
-            </TableRow>
+                <TableRow
+                    android:id="@+id/name"
+                    android:gravity="center">
+                    <TextView
+                        android:text="@string/name"
+                        android:gravity="center"/>
+                    <TextView
+                        android:text="@{dg1.holderName}"
+                        android:gravity="center"/>
+                </TableRow>
 
-            <TableRow
-                android:gravity="center">
-                <TextView
-                    android:text="@string/sex"
-                    android:gravity="center"/>
-                <TextView
-                    android:text="@{Character.toString(dg1.sex)}"
-                    android:gravity="center"/>
-            </TableRow>
+                <TableRow
+                    android:gravity="center">
+                    <TextView
+                        android:text="@string/bd"
+                        android:gravity="center"/>
+                    <TextView
+                        android:text="@{dg1.dateOfBirth}"
+                        android:gravity="center"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/documentCode"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Document Code:"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.documentCode}"/>
-            </TableRow>
+                <TableRow
+                    android:gravity="center">
+                    <TextView
+                        android:text="@string/sex"
+                        android:gravity="center"/>
+                    <TextView
+                        android:text="@{Character.toString(dg1.sex)}"
+                        android:gravity="center"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/issueState"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Issuing State:"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.issuerCode}"/>
-            </TableRow>
+                <TableRow
+                    android:id="@+id/documentCode"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Document Code:"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.documentCode}"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/docNumber"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Document Number"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.documentNumber}"/>
-            </TableRow>
+                <TableRow
+                    android:id="@+id/issueState"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Issuing State:"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.issuerCode}"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/optionalData"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Optional Data:"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.optionalData}"/>
-            </TableRow>
+                <TableRow
+                    android:id="@+id/docNumber"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Document Number"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.documentNumber}"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/expiryDate"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Expiration Date:"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.dateOfExpiry}"/>
-            </TableRow>
+                <TableRow
+                    android:id="@+id/optionalData"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Optional Data:"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.optionalData}"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/nationality"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Nationality"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.nationality}"/>
-            </TableRow>
+                <TableRow
+                    android:id="@+id/expiryDate"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Expiration Date:"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.dateOfExpiry}"/>
+                </TableRow>
 
-            <TableRow
-                android:id="@+id/optionaldocumentdatanumber"
-                android:gravity="center">
-                <TextView
-                    android:gravity="center"
-                    android:text="Optional Data/Document Number"/>
-                <TextView
-                    android:gravity="center"
-                    android:text="@{dg1.optionalDataDocumentNumber}"/>
-            </TableRow>
-        </TableLayout>
+                <TableRow
+                    android:id="@+id/nationality"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Nationality"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.nationality}"/>
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/optionaldocumentdatanumber"
+                    android:gravity="center">
+                    <TextView
+                        android:gravity="center"
+                        android:text="Optional Data/Document Number"/>
+                    <TextView
+                        android:gravity="center"
+                        android:text="@{dg1.optionalDataDocumentNumber}"/>
+                </TableRow>
+            </TableLayout>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -166,6 +177,197 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Data Group 3"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg4layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 4"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg5layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 5"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg6layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 6"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg7layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 7"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg8layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 8"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg9layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 9"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg10layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 10"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg11layout"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:id="@+id/dg11table"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:visibility="visible">
+
+            <TableRow
+                android:gravity="center">
+                <TextView
+                    android:text="@string/dg11"
+                    android:gravity="center"/>
+            </TableRow>
+
+            </TableLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg12layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 12"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg13layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 13"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg14layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 14"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg15layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 15"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/dg16layout"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Data Group 16"/>
 
         </LinearLayout>
 

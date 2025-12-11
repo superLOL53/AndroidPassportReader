@@ -12,7 +12,7 @@ class ChipAuthenticationPublicKeyInfo(rawFileContent: ByteArray) : SecurityInfo(
         private set
 
     init {
-        publicKeyInfo = SubjectPublicKeyInfo.getInstance(ASN1InputStream(requiredData.toByteArray()))
+        publicKeyInfo = SubjectPublicKeyInfo.getInstance(requiredData.toByteArray())
         keyId = if (optionalData != null) {
             if (optionalData!!.getTag().size != 1 || optionalData!!.getTag()[0] != TLV_TAGS.INTEGER ||
                 optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {

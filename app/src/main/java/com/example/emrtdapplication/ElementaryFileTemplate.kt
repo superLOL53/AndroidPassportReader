@@ -1,5 +1,11 @@
 package com.example.emrtdapplication
 
+import android.content.Context
+import android.view.Gravity
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
+import androidx.core.view.children
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FILE_UNABLE_TO_READ
@@ -20,6 +26,8 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     var matchHash = false
     var isPresent = false
         private set
+    var isRead = false
+        private set
 
     fun read() : Int {
         var info = apduControl.sendAPDU(
@@ -32,6 +40,7 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         if (!apduControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
+        isPresent = true
         //Extract the length of the EF file
         info = apduControl.sendAPDU(
             APDU(
@@ -98,7 +107,7 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             }
             rawFileContent = apduControl.removeRespondCodes(info)
         }
-        isPresent = true
+        isRead = true
         return SUCCESS
     }
 
@@ -112,4 +121,27 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     }
 
     abstract fun parse() : Int
+
+    protected fun provideTextForRow(row : TableRow, description : String, value : String) {
+        var i = true
+        for (t in row.children) {
+            if (i) {
+                (t as TextView).text = description
+            } else {
+                (t as TextView).text = value
+            }
+            i = !i
+        }
+    }
+
+    protected fun createRow(context : Context, parent: TableLayout) : TableRow {
+        val row = TableRow(context)
+        row.gravity = Gravity.CENTER
+        val description = TextView(context)
+        val value = TextView(context)
+        row.addView(description)
+        row.addView(value)
+        parent.addView(row)
+        return row
+    }
 }

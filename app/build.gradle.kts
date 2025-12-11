@@ -52,6 +52,7 @@ android {
     }
 }
 dependencies {
+    implementation(libs.jmrtd.jmrtd)
     implementation(libs.core)
     implementation(libs.appcompat)
     implementation(libs.material)

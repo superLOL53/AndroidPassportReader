@@ -1,11 +1,33 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_OID
+import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_OID
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.EF_DIR_OID
+import com.example.emrtdapplication.EF_DIR_TYPE
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
+import com.example.emrtdapplication.PACE_INFO_TYPE
+import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_OID
+import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.common.ActiveAuthenticationInfo
+import com.example.emrtdapplication.common.ChipAuthenticationInfo
+import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
+import com.example.emrtdapplication.common.EFDIRInfo
+import com.example.emrtdapplication.common.PACEDomainParameterInfo
+import com.example.emrtdapplication.common.PACEInfo
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
+import org.bouncycastle.asn1.ASN1ObjectIdentifier
+import org.jmrtd.lds.TerminalAuthenticationInfo
+import org.spongycastle.asn1.ASN1InputStream
 
 class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
@@ -24,9 +46,32 @@ class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val list = ArrayList<SecurityInfo>()
-        for (si in tlv.getTLVSequence()!!.getTLVSequence()) {
+        if (tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size != 1
+            || tlv.getTLVSequence()!!.getTLVSequence()[0].getTLVSequence() == null) return FAILURE
+        for (si in tlv.getTLVSequence()!!.getTLVSequence()[0].getTLVSequence()!!.getTLVSequence()) {
             try {
-                list.add(SecurityInfo(si.toByteArray()))
+                var info : SecurityInfo? = null
+                val oid = ASN1ObjectIdentifier.getInstance(si.getTLVSequence()!!.getTLVSequence()[0].toByteArray())
+                if (oid.id.startsWith(PACE_OID)) {
+                    if (si.getTLVSequence()!!.getTLVSequence()[0].getValue()!!.size == 9) {
+                        info = PACEDomainParameterInfo(si.toByteArray())
+                    } else if (si.getTLVSequence()!!.getTLVSequence()[0].getValue()!!.size == 10) {
+                        info = PACEInfo(si.toByteArray())
+                    }
+                } else if (oid.id.startsWith(ACTIVE_AUTHENTICATION_OID)) {
+                    info = ActiveAuthenticationInfo(si.toByteArray())
+                } else if (oid.id.startsWith(CHIP_AUTHENTICATION_OID)) {
+                    info = ChipAuthenticationInfo(si.toByteArray())
+                } else if (oid.id.startsWith(CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID)) {
+                    info = ChipAuthenticationPublicKeyInfo(si.toByteArray())
+                } else if (oid.id.startsWith(TERMINAL_AUTHENTICATION_OID)) {
+                    info = com.example.emrtdapplication.common.TerminalAuthenticationInfo(si.toByteArray())
+                } else if (oid.id.startsWith(EF_DIR_OID)) {
+                    info = EFDIRInfo(si.toByteArray())
+                }
+                if (info != null) {
+                    list.add(info)
+                }
             } catch (e: Exception) {
                 println(e.message)
             }
