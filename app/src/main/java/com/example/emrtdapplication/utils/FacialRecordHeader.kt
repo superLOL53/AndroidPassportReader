@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.utils
 
-class FacialRecordHeader(private val recordHeader: ByteArray) {
+class FacialRecordHeader(recordHeader: ByteArray) {
     private val formatIdentifier : String
     private val versionNumber : String
     private val recordLength : Int

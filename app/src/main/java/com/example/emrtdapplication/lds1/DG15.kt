@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.text.Layout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -24,7 +26,7 @@ import javax.crypto.Cipher
 class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0F
-    override val EFTag: Byte = 0x6F
+    override val efTag: Byte = 0x6F
     private var publicKeyInfo : SubjectPublicKeyInfo? = null
     private val sha1 : Byte = 0xBC.toByte()
     private val sha224 : Byte = 0x38.toByte()
@@ -43,6 +45,10 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         } catch (e : Exception) {
             return FAILURE
         }
+    }
+
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
     }
 
     fun activeAuthentication(random: SecureRandom = SecureRandom()) : Int {

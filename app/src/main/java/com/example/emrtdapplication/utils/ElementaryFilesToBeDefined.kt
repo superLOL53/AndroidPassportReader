@@ -3,7 +3,7 @@ package com.example.emrtdapplication.utils
 import com.example.emrtdapplication.ElementaryFileTemplate
 
 abstract class ElementaryFilesToBeDefined<T>(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
-    var tlvs : Array<T>? = null
+    var tlvS : Array<T>? = null
         protected set
 
     override fun parse(): Int {
@@ -11,8 +11,9 @@ abstract class ElementaryFilesToBeDefined<T>(apduControl: APDUControl) : Element
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != EFTag ||
-            tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size < 1) {
+        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
+            tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().isEmpty()
+        ) {
             return FAILURE
         }
         if (tlv.getTLVSequence()!!.getTLVSequence().size > 1) {

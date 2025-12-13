@@ -17,7 +17,7 @@ object Logger {
         }
     }
 
-    fun log(tag : String, enableClassLog : Boolean, returnCode : Int, message : String) : Int {
+    /*fun log(tag : String, enableClassLog : Boolean, returnCode : Int, message : String) : Int {
         if (ENABLE_LOGGING) {
             if (enableClassLog) {
                 Log.d(tag, message + RETURN_CODE + returnCode)
@@ -26,7 +26,7 @@ object Logger {
             }
         }
         return returnCode
-    }
+    }*/
 
     @OptIn(ExperimentalStdlibApi::class)
     fun log(tag : String, enableClassLog : Boolean, message : String, info : ByteArray) {

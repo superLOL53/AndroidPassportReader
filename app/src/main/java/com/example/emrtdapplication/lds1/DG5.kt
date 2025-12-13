@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.text.Layout
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.DisplayedPortrait
 import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
@@ -9,13 +11,16 @@ class DG5(apduControl: APDUControl) : ElementaryFilesToBeDefined<DisplayedPortra
 
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x05
-    override val EFTag: Byte = 0x65
+    override val efTag: Byte = 0x65
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
+    }
 
     override fun add(tlv: TLV, list: ArrayList<DisplayedPortrait>) {
         list.add(DisplayedPortrait(tlv))
     }
 
     override fun toTypedArray(list: ArrayList<DisplayedPortrait>) {
-        tlvs = list.toTypedArray()
+        tlvS = list.toTypedArray()
     }
 }

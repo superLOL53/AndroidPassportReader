@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.INVALID_ARGUMENT
 import com.example.emrtdapplication.utils.SUCCESS
@@ -77,7 +78,7 @@ class PACEInfo(rawFileContent : ByteArray): SecurityInfo(rawFileContent) {
 
     @OptIn(ExperimentalStdlibApi::class)
     private fun extractProtocols(): Int {
-        if (!protocol.toHexString().startsWith(ID_PACE) || protocol.size != 10) {
+        if (!objectIdentifier.startsWith(PACE_OID) || objectIdentifier.split(".").size != 11) {
             return INVALID_ARGUMENT
         }
         asymmetricProtocol = protocol[8]

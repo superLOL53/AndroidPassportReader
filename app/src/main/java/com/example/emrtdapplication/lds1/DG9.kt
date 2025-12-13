@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.text.Layout
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
 import com.example.emrtdapplication.utils.TLV
@@ -8,13 +10,16 @@ class DG9(apduControl: APDUControl) : ElementaryFilesToBeDefined<TLV>(apduContro
 
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x09
-    override val EFTag: Byte = 0x69
+    override val efTag: Byte = 0x69
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
+    }
 
     override fun add(tlv: TLV, list: ArrayList<TLV>) {
         list.add(tlv)
     }
 
     override fun toTypedArray(list: ArrayList<TLV>) {
-        tlvs = list.toTypedArray()
+        tlvS = list.toTypedArray()
     }
 }

@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.text.Layout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FILE_SUCCESSFUL_READ
@@ -29,7 +31,7 @@ class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
     private var unicodeReleaseVersion = 0
     private var tagList : ByteArray? = null
 
-    override val EFTag: Byte = 0x60
+    override val efTag: Byte = 0x60
     override val shortEFIdentifier: Byte = 0x1E
     override var rawFileContent: ByteArray? = null
 
@@ -38,7 +40,7 @@ class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
             return SUCCESS
         }
         val decode = TLV(rawFileContent!!)
-        if (decode.getTag()[0] != EFTag) {
+        if (decode.getTag()[0] != efTag) {
             return FILE_UNABLE_TO_READ
         }
         for (tag in decode.getTLVSequence()!!.getTLVSequence()) {
@@ -81,6 +83,10 @@ class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
             }
         }
         return FILE_SUCCESSFUL_READ
+    }
+
+    override fun createViews(context: Context, parent: Layout) {
+        // TODO: Implement
     }
 
     private fun computeVersion(b1: Byte, b2: Byte): Int {

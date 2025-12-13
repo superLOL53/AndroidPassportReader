@@ -6,7 +6,6 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import android.provider.Settings
-import android.text.Layout
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
@@ -51,7 +50,6 @@ import com.example.emrtdapplication.utils.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.CONNECT_SUCCESS
-import com.example.emrtdapplication.utils.Certificate
 import com.example.emrtdapplication.utils.INIT_SUCCESS
 import com.example.emrtdapplication.utils.Logger
 import com.example.emrtdapplication.utils.NfcClassByte
@@ -62,14 +60,13 @@ import com.example.emrtdapplication.utils.NfcRespondCodeSW1
 import com.example.emrtdapplication.utils.NfcRespondCodeSW2
 import com.example.emrtdapplication.utils.SELECT_APPLICATION_SUCCESS
 import com.example.emrtdapplication.utils.SUCCESS
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.UNABLE_TO_SELECT_APPLICATION
 import com.google.android.material.navigation.NavigationView
-import org.spongycastle.asn1.ASN1InputStream
-import org.spongycastle.asn1.ocsp.Signature
+import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.spongycastle.asn1.x509.Certificate
+import java.io.BufferedInputStream
 import java.security.SecureRandom
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
+import java.security.Security
 
 /**
  * Constants for the EMRTD class
@@ -140,6 +137,9 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val prov = BouncyCastleProvider()
+        Security.removeProvider("BC")
+        Security.addProvider(prov)
         setContentView(R.layout.emrtd_view)
         useCAN = intent.getBooleanExtra("UseCAN", useCAN)
         log("UseCAN is $useCAN")
@@ -182,7 +182,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
                 val buffer = ByteArray(path.available())
                 path.read(buffer)
                 path.close()
-                tmpCerts.add(Certificate(TLV(buffer)))
+                tmpCerts.add(Certificate.getInstance(buffer))
             }
         }
         certs = tmpCerts.toTypedArray()
@@ -381,18 +381,24 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
 
     @SuppressLint("NewApi")
     private fun readLDS1Files() {
-        if (efCOM.read() != SUCCESS) {
+        /*if (efCOM.read() != SUCCESS) {
             log("Unable to read EF COM")
         }
         for (ef in efMap) {
             ef.value.read()
             ef.value.parse()
-        }
+        }*/
         if (efSod.read() != SUCCESS) {
             log("Unable to read EF SOD")
         }
+        val stream = assets.open("certificates/CSCAAUSTRIAcacert005.crt")
+        //val path = FileInputStream("/home/oliver/StudioProjects/AndroidPassportReader/app/src/main/assets/certificates/CSCAAUSTRIAcacert005.crt")
+        val buffer = BufferedInputStream(stream)
+        val arr = buffer.readAllBytes()
+        val cert = org.spongycastle.asn1.x509.Certificate.getInstance(arr)
         efSod.parse()
         efSod.checkHashes(efMap)
+        efSod.passiveAuthentication(org.spongycastle.asn1.x509.Certificate.getInstance(arr))
         //val sig = Signature.getInstance(certs?.get(0)?.signatureAlgorithm?.oid.toString())
         DG15.activeAuthentication(SecureRandom())
     }

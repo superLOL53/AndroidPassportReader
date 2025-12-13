@@ -3,7 +3,7 @@ package com.example.emrtdapplication.lds1
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.Image
+import android.text.Layout
 import android.view.Gravity
 import android.widget.ImageView
 import android.widget.TableLayout
@@ -17,7 +17,7 @@ import com.example.emrtdapplication.utils.TLV
 class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0C
-    override val EFTag: Byte = 0x6C
+    override val efTag: Byte = 0x6C
     var issuingAuthority : String? = null
         private set
     var dateOfIssue : String? = null
@@ -42,7 +42,7 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != EFTag ||
+        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
             tlv.getTLVSequence() == null) {
             return FAILURE
         }
@@ -67,6 +67,10 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             }
         }
         return NOT_IMPLEMENTED
+    }
+
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
     }
 
     fun createViews(context: Context, parent : TableLayout) {

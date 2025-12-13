@@ -3,18 +3,11 @@ package com.example.emrtdapplication.lds1
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.media.Image
-import android.util.AttributeSet
+import android.text.Layout
 import android.view.Gravity
-import android.view.View
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
-import android.widget.TextView
-import androidx.compose.material3.TabRow
-import androidx.compose.ui.graphics.vector.Group
-import androidx.core.view.children
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -24,7 +17,7 @@ import com.example.emrtdapplication.utils.TLV
 class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0B
-    override val EFTag: Byte = 0x6B
+    override val efTag: Byte = 0x6B
     var fullName : String? = null
         private set
     var personalNumber : String? = null
@@ -57,7 +50,7 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != EFTag ||
+        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
             tlv.getTLVSequence() == null) {
             return FAILURE
         }
@@ -86,6 +79,10 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             }
         }
         return SUCCESS
+    }
+
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
     }
 
     fun createViews(parent : TableLayout, context: Context) {

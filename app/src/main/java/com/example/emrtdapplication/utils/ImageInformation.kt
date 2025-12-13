@@ -25,6 +25,13 @@ class ImageInformation(imageInfo: ByteArray) {
     }
 
     private fun getFaceImageType(type: Byte) : String {
-        return "Unspecified"
+        return when (type) {
+            0.toByte() -> "Unspecified"
+            1.toByte() -> "Basic"
+            2.toByte() -> "Full Frontal"
+            3.toByte() -> "Token Frontal"
+            4.toByte() -> "Other"
+            else -> "Unknown/Reserved"
+        }
     }
 }

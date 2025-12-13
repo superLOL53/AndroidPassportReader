@@ -1,6 +1,7 @@
 package com.example.emrtdapplication
 
 import android.content.Context
+import android.text.Layout
 import android.view.Gravity
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -21,7 +22,7 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     protected abstract var rawFileContent: ByteArray?
     abstract val shortEFIdentifier: Byte
     protected open val longEFIdentifier: Byte = 0x01
-    protected abstract val EFTag: Byte
+    protected abstract val efTag: Byte
     protected var contentStart = -1
     var matchHash = false
     var isPresent = false
@@ -67,17 +68,17 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         }
         //Read the whole EF file
         if (le >= apduControl.maxResponseLength) {
-            var tmp = ByteArray(le)
-            var p1 : Byte = 0
-            var p2 : Byte = 0
-            var readBytes = 0
+            val tmp = ByteArray(le)
+            var p1 : Byte
+            var p2 : Byte
+            var readBytes : Int
             for (i in 0..le step apduControl.maxResponseLength) {
                 p1 = (i/256).toByte()
                 p2 = (i % 256).toByte()
-                if (le - i > apduControl.maxResponseLength) {
-                    readBytes = apduControl.maxResponseLength
+                readBytes = if (le - i > apduControl.maxResponseLength) {
+                    apduControl.maxResponseLength
                 } else {
-                    readBytes = le - i
+                    le - i
                 }
                 info = apduControl.sendAPDU(
                     APDU(
@@ -144,4 +145,6 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         parent.addView(row)
         return row
     }
+
+    abstract fun createViews(context: Context, parent: Layout)
 }

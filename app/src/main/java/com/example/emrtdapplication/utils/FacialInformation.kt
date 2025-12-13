@@ -1,8 +1,6 @@
 package com.example.emrtdapplication.utils
 
-import kotlin.math.exp
-//TODO: Refine class
-class FacialInformation(private val facialInformation: ByteArray) {
+class FacialInformation(facialInformation: ByteArray) {
     val faceImageBlockLength : Int
     val featurePoints : Int
     val gender : String
@@ -29,18 +27,65 @@ class FacialInformation(private val facialInformation: ByteArray) {
     }
 
     private fun setGender(gender: Byte) : String {
-        return "Unknown"
+        return when (gender) {
+            0.toByte() -> "Unspecified"
+            1.toByte() -> "Male"
+            2.toByte() -> "Female"
+            3.toByte() -> "Unknown"
+            else -> "Unknown"
+        }
     }
 
     private fun setEyeColor(color: Byte) : String {
-        return "Unknown"
+        return when (color) {
+            0.toByte() -> "Unspecified"
+            1.toByte() -> "Black"
+            2.toByte() -> "Blue"
+            3.toByte() -> "Brown"
+            4.toByte() -> "Gray"
+            5.toByte() -> "Green"
+            6.toByte() -> "Multi-Coloured"
+            7.toByte() -> "Pink"
+            8.toByte() -> "Other or Unknown"
+            else -> "Unknown"
+        }
     }
 
     private fun setHairColor(color: Byte) : String {
-        return "Unknown"
+        return when (color) {
+            0.toByte() -> "Unspecified"
+            1.toByte() -> "Bald"
+            2.toByte() -> "Black"
+            3.toByte() -> "Blonde"
+            4.toByte() -> "Brown"
+            5.toByte() -> "Gray"
+            6.toByte() -> "White"
+            7.toByte() -> "Red"
+            8.toByte() -> "Green"
+            9.toByte() -> "Blue"
+            0xFF.toByte() -> "Unknown or Other"
+            else -> "Reserved (Unknown)"
+        }
     }
 
     private fun setExpression(highByte: Byte, lowByte: Byte) : String {
+        if (highByte == 0.toByte()) {
+            when (lowByte) {
+                0.toByte() -> "Unspecified"
+                1.toByte() -> "Neutral"
+                2.toByte() -> "Smile (closed mouth)"
+                3.toByte() -> "Smile"
+                4.toByte() -> "Raised eyebrows"
+                5.toByte() -> "Eyes looking away from camera"
+                6.toByte() -> "Squinting"
+                7.toByte() -> "Frowning"
+                else -> "Reserved"
+            }
+        } else if (highByte > 0) {
+            return "Reserved"
+        } else {
+            return "Vendor specific"
+        }
         return "Unspecified"
     }
 }

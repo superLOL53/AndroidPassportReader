@@ -1,20 +1,15 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.text.Layout
 import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_OID
-import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.CHIP_AUTHENTICATION_OID
 import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.EF_DIR_OID
-import com.example.emrtdapplication.EF_DIR_TYPE
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
-import com.example.emrtdapplication.PACE_INFO_TYPE
 import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_OID
-import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.common.ActiveAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
@@ -26,13 +21,11 @@ import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
-import org.jmrtd.lds.TerminalAuthenticationInfo
-import org.spongycastle.asn1.ASN1InputStream
 
 class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0E
-    override val EFTag: Byte = 0x6E
+    override val efTag: Byte = 0x6E
     var securityInfos: Array<SecurityInfo>? = null
         private set
 
@@ -41,7 +34,7 @@ class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != EFTag ||
+        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
             tlv.getTLVSequence() == null) {
             return FAILURE
         }
@@ -78,5 +71,9 @@ class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
         securityInfos = list.toTypedArray()
         return SUCCESS
+    }
+
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
     }
 }

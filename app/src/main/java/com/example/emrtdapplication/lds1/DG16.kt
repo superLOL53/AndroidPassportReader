@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import android.content.Context
+import android.text.Layout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -11,7 +13,7 @@ import kotlin.experimental.and
 class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x10
-    override val EFTag: Byte = 0x70
+    override val efTag: Byte = 0x70
     var persons: Array<Person>? = null
             private set
 
@@ -20,7 +22,7 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != EFTag ||
+        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
             tlv.getTLVSequence() == null) {
             return FAILURE
         }
@@ -35,6 +37,10 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
         persons = list.toTypedArray()
         return SUCCESS
+    }
+
+    override fun createViews(context: Context, parent: Layout) {
+        //TODO: Implement
     }
 
     private fun getPerson(person: TLV) : Person? {
