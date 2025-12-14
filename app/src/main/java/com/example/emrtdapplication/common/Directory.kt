@@ -26,23 +26,27 @@ const val TRAVEL_RECORDS_APPLICATION_ID: Byte = 0x01
 const val VISA_RECORDS_APPLICATION_ID: Byte = 0x02
 const val ADDITIONAL_BIOMETRICS_APPLICATION_ID: Byte = 0x03
 /**
- * Class representing the EF.DIR file from the EMRTD
+ * Implements the EF.DIR file. Required if LDS2 applications are supported
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property hasTravelRecordsApplication Indicates if the eMRTD supports the Travel Records application
+ * @property hasVisaRecordsApplication Indicates if the eMRTD supports the Visa Record application
+ * @property hasAdditionalBiometricsApplication Indicates if the eMRTD supports the Additional Biometric application
  */
-class Directory {
-    private var apduControl : APDUControl? = null
+class Directory() {
+    private var apduControl: APDUControl? = null
     private var hasTravelRecordsApplication = false
     private var hasVisaRecordsApplication = false
     private var hasAdditionalBiometricsApplication = false
 
-    constructor(apduControl: APDUControl) {
+    constructor(apduControl: APDUControl) : this() {
         this.apduControl = apduControl
     }
 
-    constructor(rawFileContent: ByteArray) {
-        if (parseData(rawFileContent) != SUCCESS) {
-            throw IllegalArgumentException("Unable to parse file content!")
-        }
+    constructor(byteArray: ByteArray) : this() {
+        parseData(byteArray)
     }
+
     /**
      * Reading the EF.DIR file from the EMRTD
      * @return The return value to indicate success(0), unable to select the file(-1) or unable to read the file(-2)
@@ -70,7 +74,7 @@ class Directory {
 
     /**
      * Parses the data from the EF.DIR file. Currently not implemented
-     * @return Not implemented(-3)
+     * @return [FILE_SUCCESSFUL_READ] if the file was parsed correctly, otherwise [FILE_UNABLE_TO_READ]
      */
     private fun parseData(byteArray: ByteArray) :Int {
         var tlv: TLV
@@ -85,6 +89,11 @@ class Directory {
         return FILE_SUCCESSFUL_READ
     }
 
+    /**
+     * Parses the content of the file
+     * @param tlv The TLV structure containing the file content
+     * @return [FILE_UNABLE_TO_READ] if the content cannot be parsed correctly, otherwise [SUCCESS]
+     */
     @OptIn(ExperimentalStdlibApi::class)
     private fun parseTLV(tlv: TLV) : Int {
         if (!tlv.getIsValid() || tlv.getTag().size != 1 || tlv.getTag()[1] != APPLICATION_TEMPLATE_TAG || tlv.getLength() != TEMPLATE_LENGTH) {

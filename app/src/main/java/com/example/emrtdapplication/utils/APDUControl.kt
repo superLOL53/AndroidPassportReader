@@ -30,7 +30,19 @@ const val ERROR_ISO_DEP_NOT_SELECTED = -4
 const val ERROR_UNABLE_TO_CLOSE = -5
 
 /**
- * Class for interacting with the EMRTD. All interactions with the EMRTD (e.g. transceive-calls) go through here
+ * Class for sending and receiving APDUs from the ePassport
+ * @property crypto Class for doing cryptography (e.g, en-/decrypting, padding, MAC computation)
+ * @property maxResponseLength The maximum length of the received APDU
+ * @property maxCommandLength The maximum length of the sending APDU
+ * @property isoDepSupport Indicates the support for ISO DEP of the discovered tag
+ * @property isoDep Used to transceive APDUs to and from the ePassport
+ * @property nfcTechUse Tells the NFC Technology to use (ISODEP, NfcA, NfcB,...)
+ * @property maxTransceiveLength The maximum length for APDUs according to [isoDep]
+ * @property sendEncryptedAPDU Tells if the APDU should be sent as an encrypted APDU
+ * @property isAES Tells if the encryption uses AES
+ * @property encryptionKey The key used to encrypt the APDU
+ * @property encryptionKeyMAC The key used to generate the MAC of the APDU
+ * @property ssc The sequence counter used for the MAC computation
  */
 class APDUControl(private val crypto: Crypto = Crypto()) {
     var maxResponseLength = 0
@@ -39,7 +51,6 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     private var isoDep : IsoDep? = null
     private var nfcTechUse : NfcUse = NfcUse.UNDEFINED
     private var maxTransceiveLength : Int = 0
-
     var sendEncryptedAPDU = false
     var isAES = false
     private var encryptionKey = byteArrayOf(0)
@@ -82,6 +93,11 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         }
     }
 
+    /**
+     * Send and receive unencrypted APDUs
+     * @param apdu The APDU to send
+     * @return The received byte array from the ePassport
+     */
     @OptIn(ExperimentalStdlibApi::class)
     private fun sendISODEP(apdu: APDU) : ByteArray {
         log(apdu.getByteArray().toHexString())
@@ -151,16 +167,26 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         }
     }
 
+    /**
+     * Checks if the ePassport responded with OK status codes
+     * @param bytes The byte array for checking the respond codes
+     * @return True if the ePassport responded with an OK status code, otherwise false
+     */
     fun checkResponse(bytes: ByteArray): Boolean {
         return !(bytes.size < 2 || bytes[bytes.size-2] != NfcRespondCodeSW1.OK || bytes[bytes.size-1] != NfcRespondCodeSW2.OK)
     }
 
+    /**
+     * Removes the 2 byte respond codes from the byte array
+     * @param bytes The byte array from which the respond codes are removed
+     * @return The byte array without respond codes
+     */
     fun removeRespondCodes(bytes: ByteArray): ByteArray {
         return bytes.slice(0..bytes.size-3).toByteArray()
     }
 
     /**
-     * Builds and sends BAC encrypted APDUs. The received APDU from the EMRTD is verified, decrypted and
+     * Builds and sends encrypted APDUs. The received APDU from the EMRTD is verified, decrypted and
      * returned
      * @param apdu: The APDU to be encrypted and sent to the EMRTD
      * @return The verified and decrypted APDU received from the EMRTD
@@ -190,13 +216,13 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         if (tail != null) {
             length += tail.size
         }
-        val newLc = lcField(length, apdu.getUseLcExt() || apdu.getUseLeExt())
+        val newLc = lcField(length, apdu.useLcExt || apdu.useLeExt)
         var finalApdu = headerSM + newLc
         if (tail != null) {
             finalApdu += tail
         }
         finalApdu += do8e + 0x0
-        if (apdu.getUseLeExt() || apdu.getUseLcExt()) {
+        if (apdu.useLeExt || apdu.useLcExt) {
             finalApdu += 0x0
         }
         log("ProtectedAPDU: ", finalApdu)
@@ -220,6 +246,12 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         return header
     }
 
+    /**
+     * Builds the byte array containing the Lc field of the APDU
+     * @param length The length of the data in the APDU to be sent
+     * @param useExtendedLength If extended length should be used
+     * @return The Lc field of the APDU as a byte array
+     */
     private fun lcField(length : Int, useExtendedLength : Boolean = false) : ByteArray {
         return if (length > 256 || useExtendedLength) {
             byteArrayOf(0, (length/256).toByte(), (length % 256).toByte())
@@ -234,10 +266,10 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return The byte array containing the formatted encrypted data or null if there is no data
      */
     private fun dataSM(apdu: APDU) : ByteArray? {
-        val paddedData = addPadding(apdu.getData())
+        val paddedData = addPadding(apdu.data)
         val encryptedData = encrypt(paddedData)
         var do8785 : ByteArray? = null
-        if (apdu.getUseLc()) {
+        if (apdu.useLc) {
             do8785 = if (apdu.getHeader()[1] % 2 == 0) {
                 byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
             } else {
@@ -254,18 +286,18 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      */
     private fun do97(apdu: APDU) : ByteArray? {
         var do97 : ByteArray? = null
-        if (apdu.getUseLe()) {
-            do97 = if (apdu.getUseLeExt()) {
-                byteArrayOf(0x97.toByte(), 0x02, (apdu.getLe()/256).toByte(), (apdu.getLe()%256).toByte())
+        if (apdu.useLe) {
+            do97 = if (apdu.useLeExt) {
+                byteArrayOf(0x97.toByte(), 0x02, (apdu.le/256).toByte(), (apdu.le%256).toByte())
             } else {
-                byteArrayOf(0x97.toByte(), 0x01, apdu.getLe().toByte())
+                byteArrayOf(0x97.toByte(), 0x01, apdu.le.toByte())
             }
         }
         return do97
     }
 
     /**
-     * Appends the bytes 0x8E and 0x08 a
+     * Builds the DO8E08 byte array
      * @param m: The byte array for which the MAC is calculated
      * @return The byte array containing the bytes 0x8E, 0x08 and the computed MAC
      */
@@ -301,7 +333,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         return normalAPDU
     }
 
-    /**
+    /*/**
      * Removes the padding of the input array
      * @param bytes: The byte array for which the padding is removed
      * @return The byte array without padding
@@ -313,7 +345,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         } else {
             bytes.slice(0..<last).toByteArray()
         }
-    }
+    }*/
 
     /**
      * Increments the sequence counter by 1
@@ -363,20 +395,20 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     }
 
     /**
-     * Encrypt a byte array with BAC
+     * Encrypt a byte array
      * @param bytes: The byte array to be encrypted with BAC
      * @return The encrypted byte array
      */
     private fun encrypt(bytes: ByteArray) : ByteArray {
-        if (isAES) {
-            return crypto.cipherAES(bytes, encryptionKey)
+        return if (isAES) {
+            crypto.cipherAES(bytes, encryptionKey)
             //return encryptAES(bytes)
         } else {
-            return crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray())
+            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray())
             //return encrypt3DES(bytes)
         }
     }
-
+/*
     private fun encryptAES(bytes: ByteArray) : ByteArray {
         val k = SecretKeySpec(encryptionKey, "AES")
         val c = Cipher.getInstance("AES/CBC/NoPadding")
@@ -390,8 +422,13 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
         c.init(Cipher.ENCRYPT_MODE, k,i)
         return c.doFinal(bytes)
-    }
+    }*/
 
+    /**
+     * Decrypts the
+     * @param bytes The ByteArray to be decrypted with AES or 3DES
+     * @return The decrypted ByteArray
+     */
     private fun decrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
             crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE)
@@ -401,7 +438,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
             //decrypt3DES(bytes)
         }
     }
-
+/*
     private fun decryptAES(bytes: ByteArray) : ByteArray {
         val k = SecretKeySpec(encryptionKey, "AES")
         val c = Cipher.getInstance("AES/CBC/NoPadding")
@@ -420,7 +457,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
         c.init(Cipher.DECRYPT_MODE, k, i)
         return c.doFinal(data)
-    }
+    }*/
 
     /**
      * Adds padding to the byte array

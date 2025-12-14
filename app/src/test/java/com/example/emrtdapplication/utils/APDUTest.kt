@@ -22,7 +22,7 @@ class APDUTest {
             val test = l[i].toByte()
             apdu = APDU(test, test, test, test, l[i])
             assertArrayEquals(byteArrayOf(test,test,test,test), apdu.getHeader())
-            assertArrayEquals(ByteArray(0), apdu.getData())
+            assertArrayEquals(ByteArray(0), apdu.data)
             when (l[i]) {
                 0 -> assertArrayEquals(byteArrayOf(test, test, test, test), apdu.getByteArray())
                 1 -> assertArrayEquals(byteArrayOf(test, test, test, test, test), apdu.getByteArray())
@@ -45,7 +45,7 @@ class APDUTest {
             apdu = APDU(test, test, test, test, ByteArray(l[i]))
             assertArrayEquals(byteArrayOf(test,test,test,test), apdu.getHeader())
             if (l[i] != LC_EXT_MAX+1) {
-                assertArrayEquals(ByteArray(l[i]), apdu.getData())
+                assertArrayEquals(ByteArray(l[i]), apdu.data)
             }
             when (l[i]) {
                 0 -> assertArrayEquals(byteArrayOf(test, test, test, test), apdu.getByteArray())

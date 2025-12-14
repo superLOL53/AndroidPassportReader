@@ -47,20 +47,20 @@ class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
                 val oid = ASN1ObjectIdentifier.getInstance(si.getTLVSequence()!!.getTLVSequence()[0].toByteArray())
                 if (oid.id.startsWith(PACE_OID)) {
                     if (si.getTLVSequence()!!.getTLVSequence()[0].getValue()!!.size == 9) {
-                        info = PACEDomainParameterInfo(si.toByteArray())
+                        info = PACEDomainParameterInfo(si)
                     } else if (si.getTLVSequence()!!.getTLVSequence()[0].getValue()!!.size == 10) {
-                        info = PACEInfo(si.toByteArray())
+                        info = PACEInfo(si)
                     }
                 } else if (oid.id.startsWith(ACTIVE_AUTHENTICATION_OID)) {
-                    info = ActiveAuthenticationInfo(si.toByteArray())
+                    info = ActiveAuthenticationInfo(si)
                 } else if (oid.id.startsWith(CHIP_AUTHENTICATION_OID)) {
-                    info = ChipAuthenticationInfo(si.toByteArray())
+                    info = ChipAuthenticationInfo(si)
                 } else if (oid.id.startsWith(CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID)) {
-                    info = ChipAuthenticationPublicKeyInfo(si.toByteArray())
+                    info = ChipAuthenticationPublicKeyInfo(si)
                 } else if (oid.id.startsWith(TERMINAL_AUTHENTICATION_OID)) {
-                    info = com.example.emrtdapplication.common.TerminalAuthenticationInfo(si.toByteArray())
+                    info = com.example.emrtdapplication.common.TerminalAuthenticationInfo(si)
                 } else if (oid.id.startsWith(EF_DIR_OID)) {
-                    info = EFDIRInfo(si.toByteArray())
+                    info = EFDIRInfo(si)
                 }
                 if (info != null) {
                     list.add(info)

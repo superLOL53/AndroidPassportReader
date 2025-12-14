@@ -4,6 +4,7 @@ import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.INVALID_ARGUMENT
 import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLV_TAGS
 
 /**
@@ -41,9 +42,39 @@ const val BRAIN_POOL_P512R1 : Byte = 17
 const val NIST_P521 : Byte = 18
 
 /**
- * Class representing information about the PACE protocol
+ * Inherits from [SecurityInfo] and implements the ASN1 Sequence PACEInfo:
+ *
+ *      PACEInfo ::= SEQUENCE {
+ *          protocol OBJECT IDENTIFIER(
+ *                  id-PACE-DH-GM-3DES-CBC-CBC |
+ *                  id-PACE-DH-GM-AES-CBC-CMAC-128 |
+ *                  id-PACE-DH-GM-AES-CBC-CMAC-192 |
+ *                  id-PACE-DH-GM-AES-CBC-CMAC-256 |
+ *                  id-PACE-ECDH-GM-3DES-CBC-CBC |
+ *                  id-PACE-ECDH-GM-AES-CBC-CMAC-128 |
+ *                  id-PACE-ECDH-GM-AES-CBC-CMAC-192 |
+ *                  id-PACE-ECDH-GM-AES-CBC-CMAC-256 |
+ *                  id-PACE-DH-IM-3DES-CBC-CBC |
+ *                  id-PACE-DH-IM-AES-CBC-CMAC-128 |
+ *                  id-PACE-DH-IM-AES-CBC-CMAC-192 |
+ *                  id-PACE-DH-IM-AES-CBC-CMAC-256 |
+ *                  id-PACE-ECDH-IM-3DES-CBC-CBC |
+ *                  id-PACE-ECDH-IM-AES-CBC-CMAC-128 |
+ *                  id-PACE-ECDH-IM-AES-CBC-CMAC-192 |
+ *                  id-PACE-ECDH-IM-AES-CBC-CMAC-256 |
+ *                  id-PACE-ECDH-CAM-AES-CBC-CMAC-128 |
+ *                  id-PACE-ECDH-CAM-AES-CBC-CMAC-192 |
+ *                  id-PACE-ECDH-CAM-AES-CBC-CMAC-256),
+ *          version INTEGER, -- MUST be 2
+ *          parameterId INTEGER OPTIONAL
+ *      }
+ *
+ * @property asymmetricProtocol The asymmetric protocol identifier to use for PACE. Must be one of DH-IM, DH-GM, ECDH-IM, ECDH-GM and ECDH-CAM
+ * @property symmetricProtocol The symmetric protocol identifier to use for PACE. Must be one of 3DES-CBC-CBC, AES-CBC-CMAC-128, AES-CBC-CMAC-192 and AES-CBC-CMAC-256
+ * @property version The protocol version. Must be 2
+ * @property parameterId The parameter identifier for the asymmetric protocol
  */
-class PACEInfo(rawFileContent : ByteArray): SecurityInfo(rawFileContent) {
+class PACEInfo(tlv: TLV): SecurityInfo(tlv) {
     var asymmetricProtocol : Byte = UNDEFINED
         private set
     var symmetricProtocol : Byte = UNDEFINED
@@ -76,6 +107,10 @@ class PACEInfo(rawFileContent : ByteArray): SecurityInfo(rawFileContent) {
         }
     }
 
+    /**
+     * Extract and validate the asymmetric and symmetric protocols and their combination
+     * @return [SUCCESS] or [INVALID_ARGUMENT] if the protocols are invalid
+     */
     @OptIn(ExperimentalStdlibApi::class)
     private fun extractProtocols(): Int {
         if (!objectIdentifier.startsWith(PACE_OID) || objectIdentifier.split(".").size != 11) {

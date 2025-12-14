@@ -1,9 +1,30 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLV_TAGS
 
-class ChipAuthenticationInfo(rawFileContent: ByteArray) : SecurityInfo(rawFileContent) {
+/**
+ * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationInfo:
+ *
+ *      ChipAuthenticationInfo ::= SEQUENCE {
+ *          protocol    OBJECT IDENTIFIER(
+ *                      id-CA-DH-3DES-CBC-CBC |
+ *                      id-CA-DH-AES-CBC-CMAC-128 |
+ *                      id-CA-DH-AES-CBC-CMAC-192 |
+ *                      id-CA-DH-AES-CBC-CMAC-256 |
+ *                      id-CA-ECDH-3DES-CBC-CBC |
+ *                      id-CA-ECDH-AES-CBC-CMAC-128 |
+ *                      id-CA-ECDH-AES-CBC-CMAC-192 |
+ *                      id-CA-ECDH-AES-CBC-CMAC-256),
+ *          version INTEGER, -- MUST be 1
+ *          keyId INTEGER OPTIONAL
+ *      }
+ *
+ * @property version Protocol version, must be 1
+ * @property keyId Id of the public key if multiple public keys for chip authentication are present
+ */
+class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
     var version : Int
         private set
     var keyId : Int?

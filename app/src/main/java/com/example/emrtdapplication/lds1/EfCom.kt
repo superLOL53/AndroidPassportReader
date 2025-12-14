@@ -20,7 +20,18 @@ const val UNICODE_VERSION_LENGTH = 0x06
 const val TAG_LIST_TAG : Byte = 0x5C
 
 /**
- * Class for reading, parsing and storing information of EF.COM File
+ * Implements the EF.COM file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property ldsVersion
+ * @property ldsUpdateLevel
+ * @property unicodeMajorVersion
+ * @property unicodeMinorVersion
+ * @property unicodeReleaseVersion
+ * @property tagList
+ * @property efTag
+ * @property shortEFIdentifier
+ * @property rawFileContent
  */
 class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
     //Variables for storing the information from EF.COM

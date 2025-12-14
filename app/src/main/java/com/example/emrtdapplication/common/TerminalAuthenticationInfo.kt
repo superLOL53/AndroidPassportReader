@@ -1,9 +1,20 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLV_TAGS
 
-class TerminalAuthenticationInfo(rawFileContent: ByteArray) : SecurityInfo(rawFileContent) {
+/**
+ * Inherits from [SecurityInfo] and implements the ASN1 Sequence TerminalAuthenticationInfo:
+ *
+ *      TerminalAuthenticationInfo ::= SEQUENCE {
+ *          protocol OBJECT IDENTIFIER(id-TA),
+ *          version INTEGER -- MUST be 1
+ *      }
+ *
+ * @property version The protocol version. Must be one
+ */
+class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
     var version : Int
         private set
 

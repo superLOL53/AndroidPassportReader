@@ -37,18 +37,35 @@ const val AI_EXTENDED_LENGTH_INFORMATION_NUMBER_OF_TAGS = 2
 const val INTEGER_MAX_BYTEARRAY_SIZE = 4
 
 /**
- * Class for reading, parsing and storing information from EF.ATR/INFO file from the EMRTD
+ * Implements the EF.ATR/INFO EF. The file is optional if only LDS1 application is present on the ePassport
+ * @property apduControl Used for sending and receiving APDUs
+ * @property supportFullDFNameSelection Indicates support for full DF name selection
+ * @property supportShortEFNameSelection Indicates support for short DF name selection
+ * @property supportRecordNumber
+ * @property supportCommandChaining Indicates support for APDU command chaining
+ * @property supportExtendedLength Indicates support for extended length APDUs
+ * @property extendedLengthInfoInFile Indicates that the EF.ATR/INFO contains the maximum length for command and response APDUs
+ * @property maxAPDUTransferBytes The maximum bytes that can be sent with a single APDU
+ * @property maxAPDUReceiveBytes The maximum bytes that can be received from a single APDU
  */
 class AttributeInfo(private var apduControl: APDUControl) {
     //Variables for storing the information
-    private var supportFullDFNameSelection = false
-    private var supportShortEFNameSelection = false
-    private var supportRecordNumber = false
-    private var supportCommandChaining = false
-    private var supportExtendedLength = false
-    private var extendedLengthInfoInFile = false
-    private var maxAPDUTransferBytes = 0
-    private var maxAPDUReceiveBytes = 0
+    var supportFullDFNameSelection = false
+        private set
+    var supportShortEFNameSelection = false
+        private set
+    var supportRecordNumber = false
+        private set
+    var supportCommandChaining = false
+        private set
+    var supportExtendedLength = false
+        private set
+    var extendedLengthInfoInFile = false
+        private set
+    var maxAPDUTransferBytes = 0
+        private set
+    var maxAPDUReceiveBytes = 0
+        private set
 
     /**
      * Reading the EF.ATR/INFO file from the EMRTD
@@ -84,38 +101,6 @@ class AttributeInfo(private var apduControl: APDUControl) {
         } else {
             return FILE_SUCCESSFUL_READ
         }
-    }
-
-    fun getSupportFullDFName() : Boolean {
-        return supportFullDFNameSelection
-    }
-
-    fun getSupportShortEFName() : Boolean {
-        return supportShortEFNameSelection
-    }
-
-    fun getSupportRecordNumber() : Boolean {
-        return supportRecordNumber
-    }
-
-    fun getSupportCommandChaining() : Boolean {
-        return supportCommandChaining
-    }
-
-    fun getSupportExtendedLength() : Boolean {
-        return supportExtendedLength
-    }
-
-    fun getExtendedLengthInfoInFile() : Boolean {
-        return extendedLengthInfoInFile
-    }
-
-    fun getMaxTransferLength() : Int {
-        return maxAPDUTransferBytes
-    }
-
-    fun getMaxReceiveLength() : Int {
-        return maxAPDUReceiveBytes
     }
 
     /**
@@ -218,6 +203,9 @@ class AttributeInfo(private var apduControl: APDUControl) {
         }
     }
 
+    /**
+     * Parses the extended length info in the file.
+     */
     private fun parseExtendedLengthInfo(lengthInfo: ArrayList<TLV>) {
         if (lengthInfo[0].getValue() != null) {
             maxAPDUTransferBytes = byteArrayToInt(lengthInfo[0].getValue()!!)

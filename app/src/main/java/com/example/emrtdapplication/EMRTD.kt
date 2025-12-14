@@ -76,6 +76,7 @@ const val EMRTD_ENABLE_LOGGING = true
 /**
  * Main class for reading EMRTD. Selects the application to read (LDS1 EMRTD application, Travel Records application
  * Visa Records application and Additional Biometrics application) and reads available files.
+ *
  */
 //TODO: Write functions to select LDS2 applications (Travel Records, Visa Records and Additional Biometrics)
 //TODO: Make loading screen to indicate reading in progress or finished
@@ -341,9 +342,9 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         } else {
             log("Successfully read AI")
         }
-        if (ai.getExtendedLengthInfoInFile()) {
-            apduControl.maxResponseLength = ai.getMaxReceiveLength() - ADDITIONAL_ENCRYPTION_LENGTH
-            apduControl.maxCommandLength = ai.getMaxTransferLength() - ADDITIONAL_ENCRYPTION_LENGTH
+        if (ai.extendedLengthInfoInFile) {
+            apduControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
+            apduControl.maxCommandLength = ai.maxAPDUTransferBytes - ADDITIONAL_ENCRYPTION_LENGTH
         } else {
             apduControl.maxResponseLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
             apduControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
@@ -354,7 +355,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         if (ca.read() != SUCCESS) {
             log("Unable to read Card Access")
         }
-        val list = ca.getPACEInfo()
+        val list = ca.paceInfos
         for (info in list) {
             if (info.parameterId != null) {
                 idPaceOid = info.protocol
@@ -396,9 +397,24 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         val buffer = BufferedInputStream(stream)
         val arr = buffer.readAllBytes()
         val cert = org.spongycastle.asn1.x509.Certificate.getInstance(arr)
+        /*try {
+            val spec = X509EncodedKeySpec(cert.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(cert.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
+            val pub = fac!!.generatePublic(spec)
+            val sign = Signature.getInstance(cert.signatureAlgorithm.algorithm.id, "BC")
+            sign.initVerify(pub)
+            sign.update(cert.tbsCertificate.encoded)
+            val isValid = sign.verify(cert.signature.bytes)
+            println(isValid)
+        } catch (e : Exception) {
+            println(e)
+        }*/
+        //val cf = java.security.cert.CertificateFactory.getInstance("X.509", "BC")
+        //val cert = cf.generateCertificate(stream)
+        //val isValid = cert.verify(cert.publicKey, "BC")
         efSod.parse()
         efSod.checkHashes(efMap)
-        efSod.passiveAuthentication(org.spongycastle.asn1.x509.Certificate.getInstance(arr))
+        efSod.passiveAuthentication(cert)
         //val sig = Signature.getInstance(certs?.get(0)?.signatureAlgorithm?.oid.toString())
         DG15.activeAuthentication(SecureRandom())
     }

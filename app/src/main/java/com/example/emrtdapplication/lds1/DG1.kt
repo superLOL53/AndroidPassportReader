@@ -8,6 +8,29 @@ import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
+/**
+ * Implements the DG1 file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property rawFileContent The file content represented as a byte array
+ * @property shortEFIdentifier The short EF id
+ * @property efTag The tag of the EF
+ * @property documentCode The code/type of the document
+ * @property issuerCode The issuing State or organization
+ * @property documentNumber The document number
+ * @property checkDigitDocumentNumber The check digit of the [documentNumber]
+ * @property optionalDataDocumentNumber Optional data or the least significant characters of the [documentNumber] if it exceeds 9 characters
+ * @property dateOfBirth The date of birth of the eMRTD holder
+ * @property checkDigitDateOfBirth The check digit of the [dateOfBirth]
+ * @property sex The sex of the eMRTD holder
+ * @property dateOfExpiry The expiration date of the eMRTD
+ * @property checkDigitDateOfExpiry The check digit of the expiration date
+ * @property nationality The nationality of the eMRTD holder
+ * @property optionalData Optional data
+ * @property compositeCheckDigit
+ * @property holderName The name of the eMRTD holder
+ * @property checkDigit
+ */
 class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x01
@@ -68,10 +91,20 @@ class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         }
     }
 
+    /**
+     * Create the views for the information in the file
+     * @param context The context in which the view is generated
+     * @param parent The parent of the to create views
+     */
     override fun createViews(context: Context, parent: Layout) {
         //TODO: Implement
     }
 
+    /**
+     * Decodes the MRZ for TD1 size eMRTDs
+     * @param mrz The MRZ of the eMRTD
+     * @return [SUCCESS]
+     */
     private fun decodeTD1MRZ(mrz : ByteArray) : Int {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
@@ -90,6 +123,11 @@ class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
+    /**
+     * Decodes the MRZ for TD2 size eMRTDs
+     * @param mrz The MRZ of the eMRTD
+     * @return [SUCCESS]
+     */
     private fun decodeTD2MRZ(mrz : ByteArray) : Int {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
@@ -107,6 +145,11 @@ class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
+    /**
+     * Decodes the MRZ for TD3 size eMRTDs
+     * @param mrz The MRZ of the eMRTD
+     * @return [SUCCESS]
+     */
     private fun decodeTD3MRZ(mrz : ByteArray) : Int {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")

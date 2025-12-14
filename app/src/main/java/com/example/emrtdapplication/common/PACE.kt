@@ -38,8 +38,21 @@ const val INVALID_GENERAL_AUTHENTICATE = -4
 const val INVALID_NONCE = -5
 const val POSITIVE_NUMBER = 1
 /**
- * Class implementing the PACE protocol.
+ * Implements the PACE protocol.
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property crypto Used for cryptographic operations
+ * @property mrzInformation The MRZ information of the eMRTD
+ * @property useCAN If the CAN is used for deriving keys
+ * @property useLongConstants Indicates if integrated mapping uses the long(256 bits) or short(128 bits) c0 and c1 constants
+ * @property idPACEOid The object identifier of the PACE protocol to use
+ * @property encKey The encryption key
+ * @property macKey The MAC key
+ * @property parameters The ID of the parameters to use
+ * @property chipAuthenticationData The data for the chip authentication protocol. Only used with PACE-CAM.
+ * @property chipPublicKey The public key for the chip authentication protocol. Only used with PACE-CAM.
  */
+//TODO: Documentation
 class PACE(private var apduControl: APDUControl, private val crypto : Crypto = Crypto(), private val random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
     private var useCAN = false
@@ -48,8 +61,10 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
     private var encKey : ByteArray? = null
     private var macKey : ByteArray? = null
     private var parameters : Byte = -1
-    private var chipAuthenticationData: ByteArray? = null
-    private var chipPublicKey: ECPublicKeyParameters? = null
+    var chipAuthenticationData: ByteArray? = null
+        private set
+    var chipPublicKey: ECPublicKeyParameters? = null
+        private set
 
     /**
      * Initializes the PACE protocol with the MRZ information or CAN from the manual input.
@@ -120,14 +135,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         }
     }
 
-    fun getCAData() : ByteArray? {
-        return chipAuthenticationData
-    }
-
-    fun getChipPublicKey() : ECPublicKeyParameters? {
-        return chipPublicKey
-    }
-
+    /**
+     * Implements the PACE EC GM protocol
+     * @param nonce The nonce used for generic mapping
+     * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
+     */
     private fun paceECGM(nonce: ByteArray) : Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
@@ -144,6 +156,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
     }
 
+    /**
+     * Implements the PACE DH GM protocol
+     * @param nonce The nonce used for generic mapping
+     * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
+     */
     private fun paceDHGM(nonce: ByteArray) : Int {
         var params = getDHParams() ?: return INVALID_ARGUMENT
         var keys = crypto.generateDHKeyPair(params)
@@ -158,6 +175,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
     }
 
+    /**
+     * Implements the PACE EC IM protocol
+     * @param nonce The nonce used for generic mapping
+     * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
+     */
     private fun paceECIM(nonce: ByteArray) : Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParams = ECDomainParameters(params.curve, params.g, params.n, params.h)
@@ -179,6 +201,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
     }
 
+    /**
+     * Implements the PACE DH IM protocol
+     * @param nonce The nonce used for generic mapping
+     * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
+     */
     private fun paceDHIM(nonce: ByteArray) : Int {
         var params = getDHParams() ?: return INVALID_ARGUMENT
         var t = ByteArray(nonce.size)
@@ -198,6 +225,12 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
     }
 
+
+    /**
+     * Implements the PACE EC CAM protocol
+     * @param nonce The nonce used for generic mapping
+     * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
+     */
     private fun paceECCAM(nonce: ByteArray) : Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParams = ECDomainParameters(params.curve, params.g, params.n, params.h)
@@ -214,6 +247,10 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey, true)
     }
 
+    /**
+     * Get the DH parameters associated with the [parameters] ID or null
+     * @return [DHParameters] or null
+     */
     private fun getDHParams() : DHParameters? {
         return when (parameters) {
             MODP_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_1024_160
@@ -222,7 +259,10 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
             else -> null
         }
     }
-
+    /**
+     * Get the EC parameters associated with the [parameters] ID or null
+     * @return [X9ECParameters] or null
+     */
     private fun getECParams() : X9ECParameters? {
         return when (parameters) {
             NIST_P192 -> ECNamedCurveTable.getByName("P-192")
@@ -240,6 +280,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         }
     }
 
+    /**
+     * Compute the keys used for communicating with the eMRTD
+     * @param secret The secret for computing the keys
+     * @param seed The seed for computing the keys
+     */
     private fun computeKeys(secret: ByteArray, seed : Byte = 1) {
         val key = if (secret[0] == 0.toByte()) {
             secret.slice(1..<secret.size).toByteArray()
@@ -276,18 +321,35 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         }
     }
 
+    /**
+     * Generate and check the tokens for PACE with EC
+     * @param publicKey The public key from the phone
+     * @param chipPublicKey The public key from the eMRTD
+     * @param isCAM Indicates if PACE with CAM is used
+     */
     private fun tokenAuthentication(publicKey: ECPublicKeyParameters, chipPublicKey: ECPublicKeyParameters, isCAM: Boolean = false) : Int {
         val token = generateTokenData(publicKey)
         val chipToken = generateTokenData(chipPublicKey)
         return checkToken(token, chipToken, isCAM)
     }
 
+    /**
+     * Generate and check the tokens for PACE with DH
+     * @param publicKey The public key from the phone
+     * @param chipPublicKey The public key from the eMRTD
+     */
     private fun tokenAuthentication(publicKey: DHPublicKeyParameters, chipPublicKey: DHPublicKeyParameters) : Int {
         val token = generateTokenData(publicKey)
         val chipToken = generateTokenData(chipPublicKey)
         return checkToken(token, chipToken)
     }
 
+    /**
+     * Checks the generated and exchanged tokens
+     * @param token The token generated by the phone
+     * @param chipToken The token generated by the eMRTD
+     * @param isCAM Indicates if PACE with CAM is used
+     */
     private fun checkToken(token: ByteArray, chipToken: ByteArray, isCAM: Boolean = false) : Int {
         var data = TLV(TLV_TAGS.TERMINAL_AUTHENTICATION_TOKEN, computeToken(chipToken))
         data = TLV(TLV_TAGS.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
@@ -315,6 +377,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         }
     }
 
+    /**
+     * Computes the token for the byte array
+     * @param byteArray The byte array for which the token is computed
+     * @return The token as a ByteArray
+     */
     private fun computeToken(byteArray: ByteArray) : ByteArray {
         return if (idPACEOid!![idPACEOid!!.size-1] == DES_CBC_CBC) {
             crypto.computeMAC(byteArray, macKey!!)

@@ -16,8 +16,24 @@ import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.utils.FAILURE
 import java.security.MessageDigest
+import com.example.emrtdapplication.lds1.EfSod
+import java.security.NoSuchAlgorithmException
+import java.security.Provider
 
+/**
+ * Abstract class representing elementary files (EF)
+ *
+ * @property rawFileContent Content of the EF if it is present in the ePassport, otherwise null
+ * @property shortEFIdentifier Short EF identifier for the EF
+ * @property longEFIdentifier Long EF identifier for the EF
+ * @property efTag The Tag associated with the EF
+ * @property contentStart The position in the [rawFileContent] where the actual content of the EF starts
+ * @property matchHash Tells if the hash in the [EfSod] matches.
+ * @property isPresent Indicates if the ePassport contains the EF.
+ * @property isRead Indicates if the whole EF was read from the ePassport.
+ */
 abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     protected abstract var rawFileContent: ByteArray?
     abstract val shortEFIdentifier: Byte
@@ -30,6 +46,13 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     var isRead = false
         private set
 
+    /**
+     * Reads the EF and stores the content in [rawFileContent]
+     * @return One of the following:
+     * - [FILE_UNABLE_TO_SELECT] if no file with the EF identifier was found in the ePassport
+     * - [FILE_UNABLE_TO_READ] if the file could not be read from the ePassport
+     * - [SUCCESS] if the whole file was successfully read from the ePassport
+     */
     fun read() : Int {
         var info = apduControl.sendAPDU(
             APDU(
@@ -112,6 +135,12 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         return SUCCESS
     }
 
+    /**
+     * Computes the Hash of the [rawFileContent]
+     * @param hashName The hash algorithm used to hash the file content
+     * @return The hash of the file content
+     * @throws NoSuchAlgorithmException if the hash algorithm is not supported by any [Provider]
+     */
     fun hash(hashName : String) : ByteArray? {
         if (rawFileContent == null) {
             return null
@@ -121,6 +150,10 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         return md.digest()
     }
 
+    /**
+     * Parses the file content according to the ICAO specification
+     * @return [SUCCESS] if the file content was successfully parsed, otherwise [FAILURE]
+     */
     abstract fun parse() : Int
 
     protected fun provideTextForRow(row : TableRow, description : String, value : String) {

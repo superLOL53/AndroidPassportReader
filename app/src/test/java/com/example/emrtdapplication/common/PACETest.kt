@@ -545,12 +545,12 @@ class PACETest {
         assertArrayEquals(BigInteger("4B1C06491ED5140CA2B537D344C6C0B1", 16).toByteArray(), keys.lastValue)
 
         assertArrayEquals(BigInteger("A234236AA9B9621E8EFB73B5245C0E09" +
-                "D2576E5277183C1208BDD55280CAE8B3", 16).toByteArray(), pace.getChipPublicKey()!!.q.xCoord.toBigInteger().toByteArray())
+                "D2576E5277183C1208BDD55280CAE8B3", 16).toByteArray(), pace.chipPublicKey!!.q.xCoord.toBigInteger().toByteArray())
         assertArrayEquals(BigInteger("04F365713A356E65A451E165ECC9AC0A" +
-                "C46E3771342C8FE5AEDD092685338E23",16).toByteArray(), pace.getChipPublicKey()!!.q.yCoord.toBigInteger().toByteArray())
+                "C46E3771342C8FE5AEDD092685338E23",16).toByteArray(), pace.chipPublicKey!!.q.yCoord.toBigInteger().toByteArray())
 
         assertArrayEquals(BigInteger("85DC3FA93D0952BFA82F5FD189EE75BD" +
-                "82F11D1F0B8ED4BF5319AC9B53C426B3", 16).toByteArray().slice(1..32).toByteArray(), pace.getCAData())
+                "82F11D1F0B8ED4BF5319AC9B53C426B3", 16).toByteArray().slice(1..32).toByteArray(), pace.chipAuthenticationData)
         assertEquals(SUCCESS, result)
     }
 }

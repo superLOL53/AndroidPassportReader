@@ -15,13 +15,18 @@ import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.TLV
 
 /**
- * Class for reading, parsing and storing the information of EF.CardAccess from the EMRTD
+ * Implements the EF.CardAccess file. This file is required if PACE is implemented.
+ * The file contains ASN1 Sequences of [PACEInfo] and/or [PACEDomainParameterInfo]
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property CA_ID_1 First byte of the file id
+ * @property CA_ID_2 Second byte of the file id, which is also the short EF id
+ * @property paceInfos Array list of [PACEInfo] contained in the file
+ * @property paceDomainParams Array list of [PACEDomainParameterInfo] contained in the file
  */
 class CardAccess(private var apduControl: APDUControl) {
     private val CA_ID_1: Byte = 0x01
     private val CA_ID_2: Byte = 0x1C
-
-    //Variables containing the information from EF.CardAccess
     val paceInfos = ArrayList<PACEInfo>()
     val paceDomainParams = ArrayList<PACEDomainParameterInfo>()
 
@@ -61,27 +66,15 @@ class CardAccess(private var apduControl: APDUControl) {
             return FILE_UNABLE_TO_READ
         }
         for (sequence in tlv.getTLVSequence()!!.getTLVSequence()) {
-            val si = SecurityInfo(sequence.toByteArray())
+            val si = SecurityInfo(sequence)
             if (si.type != PACE_INFO_TYPE && si.type != PACE_DOMAIN_PARAMETER_INFO_TYPE) {
                 throw IllegalArgumentException()
             } else if (si.type == PACE_INFO_TYPE) {
-                paceInfos.add(PACEInfo(sequence.toByteArray()))
+                paceInfos.add(PACEInfo(sequence))
             } else {
-                paceDomainParams.add(PACEDomainParameterInfo((sequence.toByteArray())))
+                paceDomainParams.add(PACEDomainParameterInfo((sequence)))
             }
         }
         return FILE_SUCCESSFUL_READ
-    }
-
-    /**
-     * Returns the PACE information stored on EF.CardAccess
-     * @return The PACE information
-     */
-    fun getPACEInfo() : ArrayList<PACEInfo> {
-        return paceInfos
-    }
-
-    fun getPACEDomainParameters() : ArrayList<PACEDomainParameterInfo> {
-        return paceDomainParams
     }
 }

@@ -28,7 +28,11 @@ const val ERROR_INVALID_NONCE = -5
 const val ERROR_NO_MRZ = -6
 
 /**
- * Class implementing the BAC protocol.
+ * Implements the Basic Access Control (BAC) protocol
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property crypto Used for cryptographic operations
+ * @property mrzInformation The MRZ of the eMRTD
  */
 class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Crypto(), private var random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null

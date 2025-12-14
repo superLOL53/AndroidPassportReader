@@ -15,19 +15,33 @@ const val LE_EXT_MAX = 65536
 
 /**
  * Class representing an APDU
- * @param classByte: The CLASS byte of the APDU
- * @param insByte: The INS byte of the APDU
- * @param p1Byte: The P1 byte of the APDU
- * @param p2Byte: The P2 byte of the APDU
+ * @property classByte The CLASS byte of the APDU
+ * @property insByte The INS byte of the APDU
+ * @property p1Byte The P1 byte of the APDU
+ * @property p2Byte The P2 byte of the APDU
+ * @property data The data to be send with the APDU.
+ * @property lc The length of the data of the APDU
+ * @property useLc Indicates if the Lc field and in extent the [data] is sent with the APDU
+ * @property useLcExt Indicates if the APDU uses the extended length for the [lc]
+ * @property le The expected length of the received APDU
+ * @property useLe Indicates if the received APDU contains any data
+ * @property useLeExt Indicates if the APDU uses extended length for [le]
  */
 class APDU(private val classByte: Byte, private val insByte: Byte, private val p1Byte: Byte, private val p2Byte: Byte) {
-    private var lc : Int = 0
-    private var useLc = false
-    private var useLcExt = false
-    private var data : ByteArray = ByteArray(0)
-    private var le : Int = 0
-    private var useLe = false
-    private var useLeExt = false
+    var lc : Int = 0
+        private set
+    var useLc = false
+        private set
+    var useLcExt = false
+        private set
+    var data : ByteArray = ByteArray(0)
+        private set
+    var le : Int = 0
+        private set
+    var useLe = false
+        private set
+    var useLeExt = false
+        private set
 
     /**
      * Class representing an APDU
@@ -74,6 +88,9 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
         calculateLe(le)
     }
 
+    /**
+     *
+     */
     private fun calculateLe(le: Int) {
         if (le < LE_MIN || LE_EXT_MAX < le) {
             return
@@ -94,63 +111,10 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
     }
 
     /**
-     * Returns the data of the APDU
-     * @return The byte array containing the data of the APDU
-     */
-    fun getData() : ByteArray {
-        return data
-    }
-
-    /**
-     * Returns the expected length of the reply APDU
-     * @return The expected length of the reply APDU
-     */
-    fun getLe() : Int {
-        return le
-    }
-
-    /**
-     * Returns if the Le field is used in the APDU
-     * @return True if Le is used in the APDU otherwise False
-     */
-    fun getUseLe() : Boolean {
-        return useLe
-    }
-
-    fun getUseLeExt(): Boolean {
-        return useLeExt
-    }
-
-    fun getLc() : Int {
-        return lc
-    }
-
-    /**
-     * Returns if the Lc field is used in the APDU
-     * @return True if Lc is used in the APDU otherwise False
-     */
-    fun getUseLc() : Boolean {
-        return useLc
-    }
-
-    fun getUseLcExt() : Boolean {
-        return useLcExt
-    }
-
-    /**
      * Returns the whole APDU in a single byte array
      * @return The APDU as a byte array
      */
     fun getByteArray() : ByteArray {
-        //log("Class Byte: ${classByte.toString(16)}")
-        //log("INS Byte: " + insByte.toString(16))
-        //log("P1 Byte: " + p1Byte.toString(16))
-        //log("P2 Byte: " + p2Byte.toString(16))
-        //log("Lc Byte: " + lc.toString(16))
-        //log("LcExt Short: " + lcExt.toString(16))
-        //log("Le Byte: "+ le.toString(16))
-        //log("LeExt Byte: " + leExt.toString(16))
-        //log("Data Array: ", data)
         var apduLength = MIN_APDU_LENGTH
         if (useLe) {
             apduLength += if (useLeExt) {

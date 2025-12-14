@@ -12,6 +12,7 @@ class DG5(apduControl: APDUControl) : ElementaryFilesToBeDefined<DisplayedPortra
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x05
     override val efTag: Byte = 0x65
+
     override fun createViews(context: Context, parent: Layout) {
         //TODO: Implement
     }

@@ -16,14 +16,24 @@ import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLVSequence
+import org.spongycastle.asn1.cms.SignedData
 
 /**
- * Class for reading, parsing and storing information from the EF.CardSecurity file
+ * Implements the EF.CardSecurity file. Required if PACE with CAM, Terminal Authentication or Chip Authentication is supported.
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property CS_ID_1 First byte of the file id
+ * @property CS_ID_2 Second byte of the file id, also the short EF id
+ * @property securityInfos Array list of [SecurityInfo] contained in the file
+ * @property signedData
  */
+
+//TODO: Test implementation, see how the file is actually implemented, signed data vs. security infos
 class CardSecurity(private var apduControl: APDUControl) {
     private val CS_ID_1: Byte = 0x01
     private val CS_ID_2: Byte = 0x1D
     val securityInfos = ArrayList<SecurityInfo>()
+    var signedData : SignedData? = null
 
     /**
      * Reading the EF.CardSecurity file from the EMRTD.
@@ -53,14 +63,14 @@ class CardSecurity(private var apduControl: APDUControl) {
     private fun parseData(byteArray: ByteArray) : Int {
         val tlv = TLVSequence(byteArray)
         for (sequence in tlv.getTLVSequence()) {
-            val si = SecurityInfo(sequence.toByteArray())
+            val si = SecurityInfo(sequence)
             when (si.type) {
-                CHIP_AUTHENTICATION_TYPE -> securityInfos.add(ChipAuthenticationInfo(sequence.toByteArray()))
-                CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> securityInfos.add(ChipAuthenticationPublicKeyInfo(sequence.toByteArray()))
-                TERMINAL_AUTHENTICATION_TYPE -> securityInfos.add(TerminalAuthenticationInfo(sequence.toByteArray()))
-                EF_DIR_TYPE -> securityInfos.add(EFDIRInfo(sequence.toByteArray()))
-                PACE_INFO_TYPE -> securityInfos.add(PACEInfo(sequence.toByteArray()))
-                PACE_DOMAIN_PARAMETER_INFO_TYPE -> securityInfos.add(PACEDomainParameterInfo(sequence.toByteArray()))
+                CHIP_AUTHENTICATION_TYPE -> securityInfos.add(ChipAuthenticationInfo(sequence))
+                CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> securityInfos.add(ChipAuthenticationPublicKeyInfo(sequence))
+                TERMINAL_AUTHENTICATION_TYPE -> securityInfos.add(TerminalAuthenticationInfo(sequence))
+                EF_DIR_TYPE -> securityInfos.add(EFDIRInfo(sequence))
+                PACE_INFO_TYPE -> securityInfos.add(PACEInfo(sequence))
+                PACE_DOMAIN_PARAMETER_INFO_TYPE -> securityInfos.add(PACEDomainParameterInfo(sequence))
             }
         }
         return SUCCESS

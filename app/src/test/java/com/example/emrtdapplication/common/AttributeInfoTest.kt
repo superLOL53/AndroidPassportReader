@@ -29,13 +29,13 @@ class AttributeInfoTest {
 
         val ai = AttributeInfo(apduControl)
         ai.read()
-        assertEquals(true, ai.getSupportFullDFName())
-        assertEquals(true, ai.getSupportShortEFName())
-        assertEquals(true, ai.getExtendedLengthInfoInFile())
-        assertEquals(true, ai.getSupportRecordNumber())
-        assertEquals(true, ai.getSupportCommandChaining())
-        assertEquals(true, ai.getSupportExtendedLength())
-        assertEquals(0xFF, ai.getMaxTransferLength())
-        assertEquals(0xFF, ai.getMaxReceiveLength())
+        assertEquals(true, ai.supportFullDFNameSelection)
+        assertEquals(true, ai.supportShortEFNameSelection)
+        assertEquals(true, ai.extendedLengthInfoInFile)
+        assertEquals(true, ai.supportRecordNumber)
+        assertEquals(true, ai.supportCommandChaining)
+        assertEquals(true, ai.supportExtendedLength)
+        assertEquals(0xFF, ai.maxAPDUTransferBytes)
+        assertEquals(0xFF, ai.maxAPDUReceiveBytes)
     }
 }

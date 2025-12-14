@@ -19,15 +19,25 @@ const val DATE_LENGTH = 6
 
 
 /** Class for manual input from the user. The manual input consists of:
+ *
  * Passport number, birthday and expiration date
+ *
  * OR
+ *
  * CAN number
+ *
  * One of these is needed to derive keys to establish secure messaging between the reader and the document.
  * Forwards the MRZ information or CAN to the next activity (EMRTD)
+ *
+ * @property passportNr The passport number
+ * @property expirationDate The expiration date of the passport
+ * @property birthday The birthday of the passport holder
+ * @property can The CAN number of the passport
+ * @property checkDigitSequence The byte sequence used to compute the check digit number
+ *
  */
-//TODO: By invalid input provide a popup view and explain in detail how the input should be filled
 class ManualInput : Activity() {
-    private var name : String? = null
+    private var passportNr : String? = null
     private var expirationDate : String? = null
     private var birthday : String? = null
     private var can : String? = null
@@ -38,7 +48,7 @@ class ManualInput : Activity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.manual_input)
         findViewById<Button>(R.id.next).setOnClickListener{
-            name = findViewById<EditText>(R.id.passportNr).text.toString()
+            passportNr = findViewById<EditText>(R.id.passportNr).text.toString()
             birthday = findViewById<EditText>(R.id.birthday).text.toString()
             expirationDate = findViewById<EditText>(R.id.expirationDate).text.toString()
             can = findViewById<EditText>(R.id.can).text.toString()
@@ -68,7 +78,7 @@ class ManualInput : Activity() {
             log("CAN is given. Not using MRZ. CAN: ${can!!.length} $can")
             return can
         } else {
-            if (name == null) {
+            if (passportNr == null) {
                 log("No name given")
                 return null
             }
@@ -96,15 +106,15 @@ class ManualInput : Activity() {
      */
     private fun computeCheckDigit() : String {
         val sb = StringBuilder()
-        val nameCD = if (name == null) {
+        val nameCD = if (passportNr == null) {
             ""
-        } else if (name!!.length <= NAME_LENGTH) {
-            while (name!!.length <= NAME_LENGTH) {
-                name = "$name<"
+        } else if (passportNr!!.length <= NAME_LENGTH) {
+            while (passportNr!!.length <= NAME_LENGTH) {
+                passportNr = "$passportNr<"
             }
-            name!!
+            passportNr!!
         } else {
-            name!!.slice(0..NAME_LENGTH)
+            passportNr!!.slice(0..NAME_LENGTH)
         }
         sb.append(nameCD)
         log("Name is $nameCD")

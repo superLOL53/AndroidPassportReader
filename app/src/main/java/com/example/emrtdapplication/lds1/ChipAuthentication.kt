@@ -26,6 +26,7 @@ const val ID_PK = "0.4.0.127.0.7.2.2.1"
 const val ID_PK_DH = "0.4.0.127.0.7.2.2.1.1"
 const val ID_PK_ECDH = "0.4.0.127.0.7.2.2.1.2"
 
+//TODO: Implement
 class ChipAuthentication(private val apduControl: APDUControl, private val chipAuthenticationData : ByteArray,
                          private val iv : ByteArray, private val publicKeyInfo: SubjectPublicKeyInfo,
                          private val random: SecureRandom = SecureRandom(), crypto: Crypto = Crypto()

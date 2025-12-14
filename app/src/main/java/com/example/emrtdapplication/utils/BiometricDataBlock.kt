@@ -1,7 +1,10 @@
 package com.example.emrtdapplication.utils
 
-//TODO: Implement
-class BiometricDataBlock(private val biometricDataBlock : TLV) {
+/**
+ * Class representing a Biometric Data Block (BDB) according to ISO/IEC19794-4
+ */
+//TODO: Refine for different types of biometrics
+class BiometricDataBlock(biometricDataBlock : TLV) {
     val facialRecordHeader : FacialRecordHeader
     val facialRecordData : FacialRecordData
 

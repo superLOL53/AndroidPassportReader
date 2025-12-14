@@ -32,12 +32,12 @@ class CardAccessTest {
             .thenReturn(BigInteger("31143012060A04007F0007020204020202010202010D9000", 16).toByteArray())
         val ca = CardAccess(apduControl)
         ca.read()
-        assertEquals(1, ca.getPACEInfo().size)
-        assertEquals(2, ca.getPACEInfo()[0].version)
-        assertEquals(0x02, ca.getPACEInfo()[0].asymmetricProtocol)
-        assertEquals(0x02, ca.getPACEInfo()[0].symmetricProtocol)
-        assertEquals(0x0D, ca.getPACEInfo()[0].parameterId)
-        assertArrayEquals(byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x02, 0x02), ca.getPACEInfo()[0].protocol)
+        assertEquals(1, ca.paceInfos.size)
+        assertEquals(2, ca.paceInfos[0].version)
+        assertEquals(0x02, ca.paceInfos[0].asymmetricProtocol)
+        assertEquals(0x02, ca.paceInfos[0].symmetricProtocol)
+        assertEquals(0x0D, ca.paceInfos[0].parameterId)
+        assertArrayEquals(byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x02, 0x02), ca.paceInfos[0].protocol)
     }
 
 }

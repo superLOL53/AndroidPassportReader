@@ -10,6 +10,9 @@ import java.security.KeyFactory
 import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 
+/**
+ * Test class for PACE EC and other stuff. Not relevant for actual implementation
+ */
 class PaceEC {
 
     @SuppressLint("NewApi")

@@ -1,11 +1,23 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLV_TAGS
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 
-class ChipAuthenticationPublicKeyInfo(rawFileContent: ByteArray) : SecurityInfo(rawFileContent) {
+/**
+ * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationPublicKeyInfo:
+ *
+ *      ChipAuthenticationInfo ::= SEQUENCE {
+ *          protocol OBJECT IDENTIFIER(id-PK-DH | id-PK-ECDH),
+ *          chipAuthenticationPublicKey SubjectPublicKeyInfo,
+ *          keyId INTEGER OPTIONAL
+ *      }
+ * @property publicKeyInfo The public key encoded as [SubjectPublicKeyInfo]
+ * @property keyId Id of the public key if multiple public keys are present
+ */
+class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv) {
     var publicKeyInfo : SubjectPublicKeyInfo
         private set
     var keyId : Int?

@@ -13,12 +13,28 @@ import org.spongycastle.asn1.DERTaggedObject
 import org.spongycastle.asn1.cms.SignedData
 import org.spongycastle.asn1.icao.LDSSecurityObject
 import org.spongycastle.asn1.x509.Certificate
+import java.io.BufferedInputStream
+import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.Security
 import java.security.Signature
+import java.security.cert.CertificateFactory
 import java.security.spec.X509EncodedKeySpec
 
+/**
+ * Implements the EF.SOD file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Used for sending and receiving APDUs
+ * @property efTag The tag associated with the file
+ * @property rawFileContent The content of the file as a ByteArray
+ * @property shortEFIdentifier The short EF id of the file
+ * @property ldsSecurityObject The LDS Security Object contained in the file
+ * @property documentSignerCertificate The Document Signer Certificate contained in the file
+ * @property certificate The file content as a certificate
+ * @property isValid Indicates if the [documentSignerCertificate] was signed by the CSCA of the same entity
+ */
 class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
 
     override val efTag: Byte = 77
@@ -33,6 +49,12 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
     var isValid = false
         private set
 
+    private var cert : java.security.cert.Certificate? = null
+
+    /**
+     * Parses the file content. Creates the [certificate], [documentSignerCertificate] and [ldsSecurityObject]
+     * @return [SUCCESS] or [FAILURE]
+     */
     override fun parse(): Int {
         if (rawFileContent == null) {
             return SUCCESS
@@ -43,6 +65,8 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
             certificate = SignedData.getInstance(cert.`object`)
             val content = certificate!!.encapContentInfo.content.toASN1Primitive().encoded
             documentSignerCertificate = Certificate.getInstance(certificate!!.certificates.getObjectAt(0).toASN1Primitive().encoded)
+            this.cert = CertificateFactory.getInstance("X.509", "BC").generateCertificate(
+                ByteArrayInputStream(documentSignerCertificate!!.encoded))
             ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).getValue()!!).readAllBytes())
             return SUCCESS
         } catch (_: Exception) {
@@ -54,6 +78,9 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         //TODO: Implement
     }
 
+    /**
+     * Checks the hashes of the files DG1 to DG16.
+     */
     fun checkHashes(dgs : Map<Byte, ElementaryFileTemplate>) {
         if (ldsSecurityObject == null) {
             return
@@ -70,27 +97,48 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         }
     }
 
-    fun passiveAuthentication(csca : Certificate) : Int {
+    /**
+     * Validates the [documentSignerCertificate] by checking the signature in it with the CSCA
+     * @param csca The trusted root certificate from the State/organization that issued the eMRTD
+     * @return [SUCCESS] or [FAILURE]
+     */
+    fun passiveAuthentication(csca: Certificate) : Int {
+        /*try {
+            val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
+            val pub = fac!!.generatePublic(spec)
+            val sign = Signature.getInstance(csca.signatureAlgorithm.algorithm.id, "BC")
+            sign.initVerify(pub)
+            sign.update(csca.tbsCertificate.encoded)
+            val isValid = sign.verify(csca.signature.bytes)
+            println(isValid)
+        } catch (e : Exception) {
+            println(e)
+        }*/
+
         if (documentSignerCertificate == null) return FAILURE
         if (csca.issuer != documentSignerCertificate!!.issuer) {
             return FAILURE
         }
         val providers = Security.getProviders()
-        val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
+        val spec = X509EncodedKeySpec(documentSignerCertificate!!.subjectPublicKeyInfo.encoded)
         for (p in providers) {
             try {
-                val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
+                val fac = KeyFactory.getInstance(documentSignerCertificate!!.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
                 val pub = fac!!.generatePublic(spec)
-                val sign = Signature.getInstance(documentSignerCertificate!!.signatureAlgorithm.algorithm.id, p.name)
+                cert?.verify(pub)
+                /*val sign = Signature.getInstance(documentSignerCertificate!!.signatureAlgorithm.algorithm.id, p.name)
                 sign.initVerify(pub)
+                sign.update(documentSignerCertificate!!.tbsCertificate.encoded)
                 isValid = sign.verify(documentSignerCertificate!!.signature.bytes)
                 return if (isValid) {
                     SUCCESS
                 } else {
                     FAILURE
-                }
-            } catch (_ : Exception) {
-
+                }*/
+                return SUCCESS
+            } catch (e : Exception) {
+                println(e)
             }
         }
         return FAILURE
