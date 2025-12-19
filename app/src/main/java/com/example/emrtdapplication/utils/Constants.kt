@@ -51,12 +51,14 @@ object NfcP1Byte {
     const val SELECT_EF : Byte = 0x02
     const val SELECT_DF : Byte = 0x04
     const val SET_AUTHENTICATION_TEMPLATE : Byte = 0xC1.toByte()
+    const val SET_KEY_AGREEMENT_TEMPLATE : Byte = 0x41
 }
 
 object NfcP2Byte {
     const val ZERO : Byte = 0x00
     const val SELECT_FILE : Byte = 0x0C
     const val SET_AUTHENTICATION_TEMPLATE : Byte = 0xA4.toByte()
+    const val SET_KEY_AGREEMENT_TEMPLATE : Byte = 0xA6.toByte()
 }
 
 object NfcRespondCodeSW1 {

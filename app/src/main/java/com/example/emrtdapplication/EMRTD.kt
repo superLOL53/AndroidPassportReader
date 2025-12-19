@@ -15,7 +15,6 @@ import android.widget.TableLayout
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -42,10 +41,13 @@ import com.example.emrtdapplication.lds1.EfSod
 import com.example.emrtdapplication.common.AttributeInfo
 import com.example.emrtdapplication.common.CardAccess
 import com.example.emrtdapplication.common.CardSecurity
+import com.example.emrtdapplication.common.ChipAuthenticationInfo
+import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
 import com.example.emrtdapplication.databinding.Lds1Binding
 import com.example.emrtdapplication.display.displayLDS1
+import com.example.emrtdapplication.lds1.ChipAuthentication
 import com.example.emrtdapplication.utils.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -63,10 +65,12 @@ import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.UNABLE_TO_SELECT_APPLICATION
 import com.google.android.material.navigation.NavigationView
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.spongycastle.asn1.x509.Certificate
 import java.io.BufferedInputStream
 import java.security.SecureRandom
 import java.security.Security
+import java.security.cert.Certificate
+import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 
 /**
  * Constants for the EMRTD class
@@ -132,7 +136,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         DG15.shortEFIdentifier to DG15,
         DG16.shortEFIdentifier to DG16,
     )
-    private var certs : Array<Certificate>? = null
+    private var certs : Array<X509Certificate>? = null
 
 
     @Override
@@ -156,37 +160,13 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         } else {
             findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
         }
-        findViewById<Button>(R.id.nfcCancel).setOnClickListener {
+        val cancel = findViewById<Button>(R.id.nfcCancel)
+        cancel.setOnClickListener {
             findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
         }
         findViewById<Button>(R.id.enableNFC).setOnClickListener {
             startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
         }
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        //setSupportActionBar(toolbar)
-        val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout);
-        val navigationView = findViewById<NavigationView>(R.id.nvView);
-
-        navigationView.setNavigationItemSelectedListener(this);
-
-        val drawerToggle = ActionBarDrawerToggle(this,drawerLayout,null,
-            0,0);
-
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState()
-
-        val directory = resources.assets.list("certificates")
-        val tmpCerts = ArrayList<Certificate>()
-        if (directory != null) {
-            for (file in directory) {
-                val path  = assets.open("certificates/$file")
-                val buffer = ByteArray(path.available())
-                path.read(buffer)
-                path.close()
-                tmpCerts.add(Certificate.getInstance(buffer))
-            }
-        }
-        certs = tmpCerts.toTypedArray()
     }
 
     @Override
@@ -228,8 +208,20 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         apduControl.closeNFC()
         log("End of Tag discovered")
         runOnUiThread {
+            //val toolbar = findViewById<Toolbar>(R.id.toolbar)
+            //setSupportActionBar(toolbar)
+            val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout);
+            val navigationView = findViewById<NavigationView>(R.id.nvView);
+
+            navigationView.setNavigationItemSelectedListener(this);
+
+            val drawerToggle = ActionBarDrawerToggle(this,drawerLayout,null,
+                0,0);
+
+            drawerLayout.addDrawerListener(drawerToggle);
+            drawerToggle.syncState()
             findViewById<LinearLayout>(R.id.Reading).visibility = View.GONE
-            findViewById<DrawerLayout>(R.id.drawerLayout).visibility = View.VISIBLE
+            drawerLayout.visibility = View.VISIBLE
             lds1Binding = DataBindingUtil.setContentView(this, R.layout.lds1)
             lds1Binding.dg1 = DG1
             lds1Binding.dg2 = DG2
@@ -389,14 +381,33 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             ef.value.read()
             ef.value.parse()
         }*/
-        if (efSod.read() != SUCCESS) {
-            log("Unable to read EF SOD")
+        DG14.read()
+        DG14.parse()
+        if (DG14.isRead && DG14.isPresent && DG14.securityInfos != null) {
+            var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null
+            var chipInfo : ChipAuthenticationInfo? = null
+            for (si in DG14.securityInfos!!) {
+                if (si.type == CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE) {
+                    chipPublicKey = si as ChipAuthenticationPublicKeyInfo
+                } else if (si.type == CHIP_AUTHENTICATION_TYPE) {
+                    chipInfo = si as ChipAuthenticationInfo
+                }
+            }
+            if (chipPublicKey != null && chipInfo != null) {
+                val auth = ChipAuthentication(apduControl, null, ByteArray(0),
+                    chipPublicKey.publicKeyInfo, chipAuthenticationInfo = chipInfo)
+                auth.authenticate()
+            }
         }
-        val stream = assets.open("certificates/CSCAAUSTRIAcacert005.crt")
-        //val path = FileInputStream("/home/oliver/StudioProjects/AndroidPassportReader/app/src/main/assets/certificates/CSCAAUSTRIAcacert005.crt")
-        val buffer = BufferedInputStream(stream)
-        val arr = buffer.readAllBytes()
-        val cert = org.spongycastle.asn1.x509.Certificate.getInstance(arr)
+        /*if (efSod.read() != SUCCESS) {
+            log("Unable to read EF SOD")
+        }*/
+        //readCSCAs()
+        //val stream = assets.open("CSCA/AUT/CSCAAUSTRIAcacert005.crt")
+        ///val path = FileInputStream("/home/oliver/StudioProjects/AndroidPassportReader/app/src/main/assets/CSCA/CSCAAUSTRIAcacert005.crt")
+        //val buffer = BufferedInputStream(stream)
+        //val arr = buffer.readAllBytes()
+        //val cert = org.spongycastle.asn1.x509.Certificate.getInstance(arr)
         /*try {
             val spec = X509EncodedKeySpec(cert.subjectPublicKeyInfo.encoded)
             val fac = KeyFactory.getInstance(cert.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
@@ -412,11 +423,11 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         //val cf = java.security.cert.CertificateFactory.getInstance("X.509", "BC")
         //val cert = cf.generateCertificate(stream)
         //val isValid = cert.verify(cert.publicKey, "BC")
-        efSod.parse()
-        efSod.checkHashes(efMap)
-        efSod.passiveAuthentication(cert)
+        //efSod.parse()
+        //efSod.checkHashes(efMap)
+        //efSod.passiveAuthentication(certs)
         //val sig = Signature.getInstance(certs?.get(0)?.signatureAlgorithm?.oid.toString())
-        DG15.activeAuthentication(SecureRandom())
+        //DG15.activeAuthentication(SecureRandom())
     }
 
     /**
@@ -466,5 +477,33 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         trans.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
         trans.commit()
         return true
+    }
+
+    private fun readCSCAs() {
+        val directory = resources.assets.list("CSCA")
+        val tmpCerts = ArrayList<X509Certificate>()
+        if (directory != null && DG1.issuerCode != null) {
+            var path : Array<String>? = null
+            try {
+                path = resources.assets.list("CSCA/${DG1.issuerCode}")
+            } catch (_ : Exception) {
+
+            }
+            if (path != null) {
+                val ce = CertificateFactory.getInstance("X509")
+                for (cert in path) {
+                    try {
+                        val c = ce.generateCertificate(assets.open("CSCA/${DG1.issuerCode}/$cert")) as X509Certificate
+                        //val p = assets.open("CSCA/${DG1.issuerCode}/$cert")
+                        //val stream = BufferedInputStream(p)
+                        //val c = Certificate.getInstance(stream.readAllBytes())
+                        tmpCerts.add(c)
+                    } catch (e : Exception) {
+                        println(e)
+                    }
+                }
+            }
+        }
+        certs = tmpCerts.toTypedArray()
     }
 }

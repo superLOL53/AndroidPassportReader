@@ -7,21 +7,28 @@ import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
+import org.spongycastle.asn1.ASN1GeneralizedTime
+import org.spongycastle.asn1.x509.Certificate
 import org.spongycastle.asn1.ASN1InputStream
+import org.spongycastle.asn1.ASN1ObjectIdentifier
+import org.spongycastle.asn1.ASN1UTCTime
+import org.spongycastle.asn1.DEROctetString
 import org.spongycastle.asn1.DERSequence
 import org.spongycastle.asn1.DERTaggedObject
+import org.spongycastle.asn1.cms.Attributes
 import org.spongycastle.asn1.cms.SignedData
+import org.spongycastle.asn1.cms.SignerInfo
 import org.spongycastle.asn1.icao.LDSSecurityObject
-import org.spongycastle.asn1.x509.Certificate
-import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
-import java.io.InputStream
 import java.math.BigInteger
 import java.security.KeyFactory
+import java.security.MessageDigest
 import java.security.Security
 import java.security.Signature
 import java.security.cert.CertificateFactory
+import java.security.cert.X509Certificate
 import java.security.spec.X509EncodedKeySpec
+import java.util.Date
 
 /**
  * Implements the EF.SOD file and inherits from [ElementaryFileTemplate]
@@ -50,6 +57,22 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         private set
 
     private var cert : java.security.cert.Certificate? = null
+    var isDocumentSignerCertificateValid = false
+        private set
+    var isDocumentSignerCertificateExpired = true
+        private set
+    var isCSCAValid = false
+        private set
+    var isCSCAExpired = true
+        private set
+    var isSignerInfoValid = false
+        private set
+    var isSigningTimeValid = false
+        private set
+    var doesHashMatch = false
+        private set
+    var validContentType = false
+        private set
 
     /**
      * Parses the file content. Creates the [certificate], [documentSignerCertificate] and [ldsSecurityObject]
@@ -99,48 +122,163 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
 
     /**
      * Validates the [documentSignerCertificate] by checking the signature in it with the CSCA
-     * @param csca The trusted root certificate from the State/organization that issued the eMRTD
+     * @param cscas The trusted root certificate(s) from the State/organization that issued the eMRTD
      * @return [SUCCESS] or [FAILURE]
      */
-    fun passiveAuthentication(csca: Certificate) : Int {
-        /*try {
-            val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
-            val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
-            val pub = fac!!.generatePublic(spec)
-            val sign = Signature.getInstance(csca.signatureAlgorithm.algorithm.id, "BC")
-            sign.initVerify(pub)
-            sign.update(csca.tbsCertificate.encoded)
-            val isValid = sign.verify(csca.signature.bytes)
-            println(isValid)
-        } catch (e : Exception) {
-            println(e)
-        }*/
+    @OptIn(ExperimentalStdlibApi::class)
+    fun passiveAuthentication(cscas: Array<X509Certificate>?) : Int {
+        if (cscas == null || cscas.isEmpty() || documentSignerCertificate == null ||
+            certificate == null || ldsSecurityObject == null) return FAILURE
+        try {
+            val signerInfo = SignerInfo.getInstance(certificate!!.signerInfos.getObjectAt(0).toASN1Primitive().encoded)
+            validateSignerInfoSignature(signerInfo)
+            validateLDSSecurityObject(signerInfo)
+        } catch (_ : Exception) {
 
-        if (documentSignerCertificate == null) return FAILURE
-        if (csca.issuer != documentSignerCertificate!!.issuer) {
-            return FAILURE
         }
-        val providers = Security.getProviders()
-        val spec = X509EncodedKeySpec(documentSignerCertificate!!.subjectPublicKeyInfo.encoded)
-        for (p in providers) {
+        val CSCAList = findPossibleCSCA(cscas)
+        if (CSCAList.isEmpty()){
+            return FAILURE
+        } else {
+            for (c in CSCAList) {
+                if (validateDocumentSignerCertificate(c)) {
+                    validateCSCA(c)
+                    break
+                }
+            }
+        }
+        isValid = isCSCAValid && isDocumentSignerCertificateValid && isSignerInfoValid &&
+                isSigningTimeValid && !isCSCAExpired && ! isDocumentSignerCertificateExpired && isRead && isPresent
+        return SUCCESS
+    }
+
+    /**
+     * Finds possible CSCA for the eMRTD among the CSCA certificates a State/Organization issued over time
+     * @param cscas A list of CSCA a State/Organization issued
+     * @return A list of CSCA where the DSA matches with the [documentSignerCertificate] and
+     * the time period of the [documentSignerCertificate] falls within the time period of the CSCA
+     */
+    private fun findPossibleCSCA(cscas: Array<X509Certificate>) : ArrayList<X509Certificate> {
+        val cscaList = ArrayList<X509Certificate>()
+        for (c in cscas) {
+            if (documentSignerCertificate!!.startDate.date.time < c.notBefore.time ||
+                c.notAfter.time < documentSignerCertificate!!.endDate.date.time ||
+                c.sigAlgOID != documentSignerCertificate!!.signatureAlgorithm.algorithm.id) {
+                continue
+            } else {
+                cscaList.add(c)
+            }
+        }
+        return cscaList
+    }
+
+    /**
+     * Validates the CSCA certificate by using its own public key
+     * @param csca The CSCA certificate to verify
+     * @return True if [csca] is verified, otherwise false
+     */
+    private fun validateCSCA(csca: X509Certificate) : Boolean {
+        val time = Date().time
+        isCSCAExpired = time < csca.notBefore.time || csca.notAfter.time < time
+        val spec = X509EncodedKeySpec(csca.publicKey.encoded)
+        for (p in Security.getProviders()) {
             try {
-                val fac = KeyFactory.getInstance(documentSignerCertificate!!.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
+                val fac = KeyFactory.getInstance(csca.publicKey.algorithm, p.name)
                 val pub = fac!!.generatePublic(spec)
-                cert?.verify(pub)
-                /*val sign = Signature.getInstance(documentSignerCertificate!!.signatureAlgorithm.algorithm.id, p.name)
-                sign.initVerify(pub)
-                sign.update(documentSignerCertificate!!.tbsCertificate.encoded)
-                isValid = sign.verify(documentSignerCertificate!!.signature.bytes)
-                return if (isValid) {
-                    SUCCESS
-                } else {
-                    FAILURE
-                }*/
-                return SUCCESS
+                csca.verify(pub, p.name)
+                isCSCAValid = true
+                return true
             } catch (e : Exception) {
                 println(e)
             }
         }
-        return FAILURE
+        isCSCAValid = false
+        return false
+    }
+
+    /**
+     * Validates the [documentSignerCertificate] by using the public key of the [csca] X509 certificate
+     * @param csca The CSCA certificate
+     * @return True if [documentSignerCertificate] is verified, otherwise false
+     */
+    private fun validateDocumentSignerCertificate(csca : X509Certificate) : Boolean {
+        val time = Date().time
+        isDocumentSignerCertificateExpired = time < documentSignerCertificate!!.startDate.date.time || documentSignerCertificate!!.endDate.date.time < time
+        val spec = X509EncodedKeySpec(csca.publicKey.encoded)
+        for (p in Security.getProviders()) {
+            try {
+                val fac = KeyFactory.getInstance(csca.publicKey.algorithm, p.name)
+                val pub = fac!!.generatePublic(spec)
+                val sign = Signature.getInstance(
+                    documentSignerCertificate!!.signatureAlgorithm.algorithm.id,
+                    p.name
+                )
+                sign.initVerify(pub)
+                sign.update(documentSignerCertificate!!.tbsCertificate.encoded)
+                isDocumentSignerCertificateValid = sign.verify(documentSignerCertificate!!.signature.bytes)
+                return isDocumentSignerCertificateValid
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+        isDocumentSignerCertificateValid = false
+        return false
+    }
+
+    /**
+     * Validates the [SignerInfo] field in the [SignedData] [certificate] by verifying the signature with the
+     * [documentSignerCertificate] public key
+     * @param signerInfo The signed attributes of the [SignedData] [certificate]
+     */
+    private fun validateSignerInfoSignature(signerInfo: SignerInfo) {
+        for (p in Security.getProviders()) {
+            try {
+                val dsc = X509EncodedKeySpec(documentSignerCertificate!!.subjectPublicKeyInfo.encoded)
+                val fac = KeyFactory.getInstance(documentSignerCertificate!!.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
+                val pub = fac.generatePublic(dsc)
+                val sign = Signature.getInstance(signerInfo.digestEncryptionAlgorithm.algorithm.id, p.name)
+                sign.initVerify(pub)
+                sign.update(signerInfo.authenticatedAttributes.encoded)
+                isSignerInfoValid = sign.verify(signerInfo.encryptedDigest.octets)
+                return
+            } catch (e: Exception) {
+                println(e)
+            }
+        }
+        isSignerInfoValid = false
+    }
+
+    /**
+     * Validates the [ldsSecurityObject] by comparing the hash of it to the signed hash in the [SignerInfo] field
+     * of the SignedData [certificate] and comparing the signing time in the [SignerInfo] to the
+     * validity period of the [documentSignerCertificate]
+     * @param signerInfo The signed attributes of the [certificate]
+     */
+    private fun validateLDSSecurityObject(signerInfo: SignerInfo) {
+        val md = MessageDigest.getInstance(signerInfo.digestAlgorithm.algorithm.id)
+        md.update(ldsSecurityObject!!.encoded)
+        val hash = md.digest()
+
+        val attr = Attributes.getInstance(signerInfo.authenticatedAttributes.encoded)
+        var originalHash : ByteArray? = null
+        var signingTime : Long = 0
+        var contentType : ASN1ObjectIdentifier? = null
+        for (a in attr.attributes) {
+            when(a.attrType.id) {
+                "1.2.840.113549.1.9.4" -> originalHash = DEROctetString.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded).octets
+                "1.2.840.113549.1.9.5" -> {
+                    if (a.attrValues.getObjectAt(0) is ASN1UTCTime) {
+                        signingTime = ASN1UTCTime.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded).date.time
+                    } else if (a.attrValues.getObjectAt(0) is ASN1GeneralizedTime) {
+                        signingTime = ASN1GeneralizedTime.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded).date.time
+                    }
+                }
+                "1.2.840.113549.1.9.3" -> contentType = ASN1ObjectIdentifier.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded)
+            }
+        }
+
+        validContentType = contentType != null && contentType.id.contentEquals("2.23.136.1.1.1")
+        doesHashMatch = originalHash != null && hash.contentEquals(originalHash)
+        isSigningTimeValid = !(signingTime < documentSignerCertificate!!.startDate.date.time || documentSignerCertificate!!.endDate.date.time < signingTime)
     }
 }

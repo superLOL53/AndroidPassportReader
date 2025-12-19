@@ -26,7 +26,7 @@ class CertificateTest {
 
     @Test
     fun testReadCertificate() {
-        val path = FileInputStream("/home/oliver/StudioProjects/AndroidPassportReader/app/src/main/assets/certificates/CSCAAUSTRIAcacert005.crt")
+        val path = FileInputStream("/home/oliver/StudioProjects/AndroidPassportReader/app/src/main/assets/CSCA/CSCAAUSTRIAcacert005.crt")
         val buffer = BufferedInputStream(path)
         val arr = buffer.readAllBytes()
         //val t = TLV(arr)
