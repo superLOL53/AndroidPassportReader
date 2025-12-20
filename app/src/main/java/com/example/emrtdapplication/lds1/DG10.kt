@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
 import com.example.emrtdapplication.utils.TLV
@@ -10,7 +10,8 @@ class DG10(apduControl: APDUControl) : ElementaryFilesToBeDefined<TLV>(apduContr
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0A
     override val efTag: Byte = 0x6A
-    override fun createViews(context: Context, parent: Layout) {
+
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 

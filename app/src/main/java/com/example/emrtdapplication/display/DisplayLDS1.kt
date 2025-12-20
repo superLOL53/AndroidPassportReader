@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.emrtdapplication.R
 
-class displayLDS1 : Fragment() {
+class DisplayLDS1 : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater,

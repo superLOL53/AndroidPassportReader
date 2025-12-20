@@ -1,7 +1,12 @@
 package com.example.emrtdapplication.utils
 
+/**
+ * Class representing a Tag-Length-Value (TLV) sequence
+ * @param byteArray The byte array containing a TLV sequence
+ * @property tlvSequence A list containing all TLVs that are contained in the byte array
+ */
 class TLVSequence(byteArray: ByteArray) {
-    private val tlvSequence = ArrayList<TLV>()
+    val tlvSequence = ArrayList<TLV>()
 
     init {
         var l = 0
@@ -13,10 +18,14 @@ class TLVSequence(byteArray: ByteArray) {
         }
     }
 
-    fun getTLVSequence(): ArrayList<TLV> {
+    /*fun getTLVSequence(): ArrayList<TLV> {
         return tlvSequence
-    }
+    }*/
 
+    /**
+     * Converts the sequence into a byte array
+     * @return The byte array representing the TLV sequence
+     */
     fun toByteArray(): ByteArray {
         var ba = ByteArray(0)
         for (tlv in tlvSequence) {

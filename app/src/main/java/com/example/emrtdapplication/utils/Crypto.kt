@@ -35,18 +35,16 @@ class Crypto {
         return r.modPow(p.dec().divide(q), p)
     }
 
-    fun integratedMappingEC(t: BigInteger, a: BigInteger, b: BigInteger, p: BigInteger, f: BigInteger) : BigInteger {
+    fun integratedMappingEC(t: BigInteger, a: BigInteger, b: BigInteger, p: BigInteger) : BigInteger {
         val alpha = t.pow(2).negate().mod(p)
-        val X2 = b.multiply(a.modInverse(p)).negate().multiply(BigInteger.ONE.add(alpha.add(alpha.pow(2)).modInverse(p))).mod(p)
-        val X3 = alpha.multiply(X2).mod(p)
-        val h2 = X2.pow(3).add(a.multiply(X2)).add(b).mod(p)
-        //val h3 = X3.pow(3).add(a.multiply(X3)).add(b).mod(p)
-        //val U = t.pow(3).multiply(h2).mod(b)
-        val A = h2.modPow(p.dec().subtract(p.inc().divide(BigInteger("4"))), p)
-        return if (A.pow(2).multiply(h2).mod(p) == BigInteger.ONE) {
-            X2
+        val x2 = b.multiply(a.modInverse(p)).negate().multiply(BigInteger.ONE.add(alpha.add(alpha.pow(2)).modInverse(p))).mod(p)
+        val x3 = alpha.multiply(x2).mod(p)
+        val h2 = x2.pow(3).add(a.multiply(x2)).add(b).mod(p)
+        val aa = h2.modPow(p.dec().subtract(p.inc().divide(BigInteger("4"))), p)
+        return if (aa.pow(2).multiply(h2).mod(p) == BigInteger.ONE) {
+            x2
         } else {
-            X3
+            x3
         }
     }
 

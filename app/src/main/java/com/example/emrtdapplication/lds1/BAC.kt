@@ -15,8 +15,8 @@ import kotlin.experimental.xor
 /**
  * Constants for the class BAC
  */
-const val BAC_TAG = "BAC"
-const val BAC_ENABLE_LOGGING = true
+//const val BAC_TAG = "BAC"
+//const val BAC_ENABLE_LOGGING = true
 const val ENCRYPTION_KEY_VALUE_C : Byte = 1
 const val MAC_COMPUTATION_KEY_VALUE_C : Byte = 2
 const val BAC_PROTOCOL_SUCCESS = 0
@@ -55,7 +55,7 @@ class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Cry
     /**
      * Implements the BAC protocol, derives the cryptographic keys and stores them in the APDUControl class
      * for further application. The LDS1 application has to be selected before BAC can be run.
-     * @return Success(0) if protocol was successful or a negative error code
+     * @return [SUCCESS] if protocol was successful or a negative error code
      */
     fun bacProtocol() : Int {
         if (mrzInformation == null) {

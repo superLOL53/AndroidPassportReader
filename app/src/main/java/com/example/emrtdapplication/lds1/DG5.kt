@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.DisplayedPortrait
 import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
@@ -13,7 +13,7 @@ class DG5(apduControl: APDUControl) : ElementaryFilesToBeDefined<DisplayedPortra
     public override val shortEFIdentifier: Byte = 0x05
     override val efTag: Byte = 0x65
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 

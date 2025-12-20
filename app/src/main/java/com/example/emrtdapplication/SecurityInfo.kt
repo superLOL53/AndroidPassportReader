@@ -69,15 +69,15 @@ open class SecurityInfo(tlv: TLV) {
         private set
 
     init {
-        if (!tlv.getIsValid() || !tlv.isConstruct() || tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size < 2 || 3 < tlv.getTLVSequence()!!.getTLVSequence().size) {
+        if (!tlv.isValid || !tlv.isConstruct() || tlv.list == null || tlv.list!!.tlvSequence.size < 2 || 3 < tlv.list!!.tlvSequence.size) {
             throw IllegalArgumentException("Invalid Sequence for type SecurityInfo")
         }
-        objectIdentifier = ASN1ObjectIdentifier.getInstance(tlv.getTLVSequence()!!.getTLVSequence()[0].toByteArray()).id
-        requiredData = tlv.getTLVSequence()!!.getTLVSequence()[1]
-        protocol = tlv.getTLVSequence()!!.getTLVSequence()[0].getValue()!!
-        if (tlv.getTLVSequence()!!.getTLVSequence().size == 3) {
-            optionalData = tlv.getTLVSequence()!!.getTLVSequence()[2]
-            if (!optionalData!!.getIsValid()) {
+        objectIdentifier = ASN1ObjectIdentifier.getInstance(tlv.list!!.tlvSequence[0].toByteArray()).id
+        requiredData = tlv.list!!.tlvSequence[1]
+        protocol = tlv.list!!.tlvSequence[0].value!!
+        if (tlv.list!!.tlvSequence.size == 3) {
+            optionalData = tlv.list!!.tlvSequence[2]
+            if (!optionalData!!.isValid) {
                 throw IllegalArgumentException("Invalid present optional data for type SecurityInfo")
             }
         }

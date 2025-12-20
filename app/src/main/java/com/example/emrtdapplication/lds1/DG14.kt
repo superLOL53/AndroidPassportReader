@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_OID
 import com.example.emrtdapplication.CHIP_AUTHENTICATION_OID
 import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
@@ -34,21 +34,21 @@ class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
-            tlv.getTLVSequence() == null) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != efTag ||
+            tlv.list == null) {
             return FAILURE
         }
         val list = ArrayList<SecurityInfo>()
-        if (tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size != 1
-            || tlv.getTLVSequence()!!.getTLVSequence()[0].getTLVSequence() == null) return FAILURE
-        for (si in tlv.getTLVSequence()!!.getTLVSequence()[0].getTLVSequence()!!.getTLVSequence()) {
+        if (tlv.list == null || tlv.list!!.tlvSequence.size != 1
+            || tlv.list!!.tlvSequence[0].list == null) return FAILURE
+        for (si in tlv.list!!.tlvSequence[0].list!!.tlvSequence) {
             try {
                 var info : SecurityInfo? = null
-                val oid = ASN1ObjectIdentifier.getInstance(si.getTLVSequence()!!.getTLVSequence()[0].toByteArray())
+                val oid = ASN1ObjectIdentifier.getInstance(si.list!!.tlvSequence[0].toByteArray())
                 if (oid.id.startsWith(PACE_OID)) {
-                    if (si.getTLVSequence()!!.getTLVSequence()[0].getValue()!!.size == 9) {
+                    if (si.list!!.tlvSequence[0].value!!.size == 9) {
                         info = PACEDomainParameterInfo(si)
-                    } else if (si.getTLVSequence()!!.getTLVSequence()[0].getValue()!!.size == 10) {
+                    } else if (si.list!!.tlvSequence[0].value!!.size == 10) {
                         info = PACEInfo(si)
                     }
                 } else if (oid.id.startsWith(ACTIVE_AUTHENTICATION_OID)) {
@@ -73,7 +73,7 @@ class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 }

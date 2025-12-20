@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.utils
 
-class BiometricHeaderTemplate(private val biometricHeaderTemplate : TLV) {
+class BiometricHeaderTemplate(biometricHeaderTemplate : TLV) {
     var headerVersion : Short? = null
     var biometricType : ByteArray? = null
     var biometricSubType : Byte? = null
@@ -11,26 +11,26 @@ class BiometricHeaderTemplate(private val biometricHeaderTemplate : TLV) {
     val formatType : Short
 
     init {
-        if (biometricHeaderTemplate.getTag().size != 1 || biometricHeaderTemplate.getTag()[0] != 0xA1.toByte() ||
-            biometricHeaderTemplate.getTLVSequence() == null || biometricHeaderTemplate.getTLVSequence()!!.getTLVSequence().size < 2 ||
-            8 < biometricHeaderTemplate.getTLVSequence()!!.getTLVSequence().size) {
+        if (biometricHeaderTemplate.tag.size != 1 || biometricHeaderTemplate.tag[0] != 0xA1.toByte() ||
+            biometricHeaderTemplate.list == null || biometricHeaderTemplate.list!!.tlvSequence.size < 2 ||
+            8 < biometricHeaderTemplate.list!!.tlvSequence.size) {
             throw IllegalArgumentException("Biometric Header Template does not conform to the Specification")
         }
         var owner : Short? = null
         var type : Short? = null
-        for (tlv in biometricHeaderTemplate.getTLVSequence()!!.getTLVSequence()) {
-            if (tlv.getTag().size != 1) {
+        for (tlv in biometricHeaderTemplate.list!!.tlvSequence) {
+            if (tlv.tag.size != 1) {
                 throw IllegalArgumentException("Illegal Tag in the Biometric Header Template")
             }
-            when (tlv.getTag()[0]) {
-                0x80.toByte() -> setHeaderVersion(tlv.getValue())
-                0x81.toByte() -> biometricType = tlv.getValue()
-                0x82.toByte() -> setSubType(tlv.getValue())
-                0x83.toByte() -> creationTime = tlv.getValue()
-                0x84.toByte() -> validityPeriod = tlv.getValue()
-                0x86.toByte() -> setCreator(tlv.getValue())
-                0x87.toByte() -> owner = setOwner(tlv.getValue())
-                0x88.toByte() -> type = setFormatType(tlv.getValue())
+            when (tlv.tag[0]) {
+                0x80.toByte() -> setHeaderVersion(tlv.value)
+                0x81.toByte() -> biometricType = tlv.value
+                0x82.toByte() -> setSubType(tlv.value)
+                0x83.toByte() -> creationTime = tlv.value
+                0x84.toByte() -> validityPeriod = tlv.value
+                0x86.toByte() -> setCreator(tlv.value)
+                0x87.toByte() -> owner = setOwner(tlv.value)
+                0x88.toByte() -> type = setFormatType(tlv.value)
             }
         }
         if (owner == null || type == null) {

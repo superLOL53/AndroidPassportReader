@@ -51,7 +51,7 @@ class PACETest {
         `when`(mockCrypto.getECPointFromBigInteger(any(), any())).thenCallRealMethod()
         `when`(mockCrypto.integratedMappingPRNG(any(), any(), any(), any())).thenCallRealMethod()
         `when`(mockCrypto.integratedMappingDH(any(), any(), any())).thenCallRealMethod()
-        `when`(mockCrypto.integratedMappingEC(any(), any(), any(), any(), any())).thenCallRealMethod()
+        `when`(mockCrypto.integratedMappingEC(any(), any(), any(), any())).thenCallRealMethod()
         `when`(mockCrypto.removePadding(any())).thenCallRealMethod()
     }
 

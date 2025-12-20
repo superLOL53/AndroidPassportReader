@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FILE_SUCCESSFUL_READ
@@ -51,29 +51,29 @@ class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
             return SUCCESS
         }
         val decode = TLV(rawFileContent!!)
-        if (decode.getTag()[0] != efTag) {
+        if (decode.tag[0] != efTag) {
             return FILE_UNABLE_TO_READ
         }
-        for (tag in decode.getTLVSequence()!!.getTLVSequence()) {
-            if (!tag.getIsValid()) {
+        for (tag in decode.list!!.tlvSequence) {
+            if (!tag.isValid) {
                 return FILE_UNABLE_TO_READ
             }
-            val value = tag.getValue()
-            when (tag.getTag()[0]) {
+            val value = tag.value
+            when (tag.tag[0]) {
                 VERSION_TAG -> {
-                    if (tag.getTag().size != 2) {
+                    if (tag.tag.size != 2) {
                         return FILE_UNABLE_TO_READ
                     }
-                    when (tag.getTag()[1]) {
+                    when (tag.tag[1]) {
                         LDS_VERSION_TAG -> {
-                            if (tag.getLength() != LDS_VERSION_LENGTH) {
+                            if (tag.length != LDS_VERSION_LENGTH) {
                                 return FILE_UNABLE_TO_READ
                             }
                             ldsVersion = computeVersion(value?.get(0) ?: 0, value?.get(1) ?: 0)
                             ldsUpdateLevel = computeVersion(value?.get(2) ?: 0, value?.get(3) ?: 0)
                         }
                         UNICODE_VERSION_TAG -> {
-                            if (tag.getLength() != UNICODE_VERSION_LENGTH) {
+                            if (tag.length != UNICODE_VERSION_LENGTH) {
                                 return FILE_UNABLE_TO_READ
                             }
                             unicodeMajorVersion = computeVersion(value?.get(0) ?: 0,
@@ -89,14 +89,14 @@ class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
                         else -> FILE_UNABLE_TO_READ
                     }
                 }
-                TAG_LIST_TAG -> tagList = tag.getValue()
+                TAG_LIST_TAG -> tagList = tag.value
                 else -> return FILE_UNABLE_TO_READ
             }
         }
         return FILE_SUCCESSFUL_READ
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         // TODO: Implement
     }
 

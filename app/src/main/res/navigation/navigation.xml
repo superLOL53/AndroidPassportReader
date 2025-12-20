@@ -8,7 +8,7 @@
         android:id="@+id/LDS1"
         android:label="LDS1"
         tools:layout="@layout/lds1"
-        android:name="com.example.emrtdapplication.display.displayLDS1">
+        android:name="com.example.emrtdapplication.display.DisplayLDS1">
     </fragment>
 
     <fragment

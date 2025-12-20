@@ -6,7 +6,7 @@ package com.example.emrtdapplication.utils
 //const val APDU_TAG = "APDU"
 //const val APDU_ENABLE_LOGGING = true
 const val MIN_APDU_LENGTH = 4
-const val LC_MIN = 1
+//const val LC_MIN = 1
 const val LC_MAX = 255
 const val LC_EXT_MAX = 65535
 const val LE_MIN = 1
@@ -180,7 +180,7 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      */
     private fun log(msg: String) {
         Logger.log(APDU_TAG, APDU_ENABLE_LOGGING, msg)
-    }*/
+    }
 
     /**
      * Logs message in the android logcat
@@ -189,5 +189,5 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      */
     private fun log(msg : String, b : ByteArray) {
         return Logger.log("apdu", true, msg, b)
-    }
+    }*/
 }

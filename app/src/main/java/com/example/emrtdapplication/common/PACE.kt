@@ -11,7 +11,7 @@ import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TLV_TAGS
+import com.example.emrtdapplication.utils.TlvTags
 import com.example.emrtdapplication.utils.ZERO_BYTE
 import org.spongycastle.asn1.x9.ECNamedCurveTable
 import org.spongycastle.asn1.x9.X9ECParameters
@@ -29,8 +29,8 @@ import javax.crypto.Cipher
 /**
  * Constants for the PACE class
  */
-const val PACE_TAG = "PACE"
-const val PACE_ENABLE_LOGGING = true
+//const val PACE_TAG = "PACE"
+//const val PACE_ENABLE_LOGGING = true
 const val NO_PASSWORD = -1
 const val NO_PACE_OID = -2
 const val INVALID_MSE_COMMAND = -3
@@ -102,14 +102,14 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         if (idPACEOid == null) {
             return NO_PACE_OID
         }
-        var info = byteArrayOf(TLV_TAGS.CRYPTOGRAPHIC_REFERENCE, idPACEOid!!.size.toByte()) + idPACEOid!! + byteArrayOf(
-            TLV_TAGS.KEY_REFERENCE, 0x01)
-        if (mrzInformation == null) {
+        var info = byteArrayOf(TlvTags.CRYPTOGRAPHIC_REFERENCE, idPACEOid!!.size.toByte()) + idPACEOid!! + byteArrayOf(
+            TlvTags.KEY_REFERENCE, 0x01)
+        info += if (mrzInformation == null) {
             return NO_PASSWORD
         } else if (useCAN) {
-            info += 0x02
+            0x02
         } else {
-            info += 0x01
+            0x01
         }
         val key = crypto.hash("SHA-1", mrzInformation!!.toByteArray())
         computeKeys(key, 3)
@@ -117,12 +117,25 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         if (!apduControl.checkResponse(info)) {
             return INVALID_MSE_COMMAND
         }
-        info = byteArrayOf(TLV_TAGS.NONCE_QUERY, ZERO_BYTE)
-        info = apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, info, 256))
-        if (!apduControl.checkResponse(info)) {
-            return INVALID_GENERAL_AUTHENTICATE
+        info = byteArrayOf(TlvTags.NONCE_QUERY, ZERO_BYTE)
+        try {
+            info = apduControl.sendAPDU(
+                APDU(
+                    NfcClassByte.COMMAND_CHAINING,
+                    NfcInsByte.GENERAL_AUTHENTICATE,
+                    ZERO_BYTE,
+                    ZERO_BYTE,
+                    info,
+                    256
+                )
+            )
+            if (!apduControl.checkResponse(info)) {
+                return INVALID_GENERAL_AUTHENTICATE
+            }
+        } catch (e : Exception) {
+            return FAILURE
         }
-        val z = TLV(apduControl.removeRespondCodes(info)).getTLVSequence()!!.getTLVSequence()[0].getValue()
+        val z = TLV(apduControl.removeRespondCodes(info)).list!!.tlvSequence[0].value
             ?: return INVALID_NONCE
         val s = decryptNonce(z) ?: return INVALID_ARGUMENT
         return when (idPACEOid!![idPACEOid!!.size-2]) {
@@ -144,13 +157,13 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
         var keys = crypto.generateECKeyPair(domainParameters)
-        var publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TLV_TAGS.MAPPING_DATA)
+        var publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.MAPPING_DATA)
         val sa = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         val h = crypto.getECPointFromBigInteger(sa, domainParameters)
         val g = crypto.genericMappingEC(domainParameters.g, nonce, h)
         domainParameters = ECDomainParameters(domainParameters.curve, g, domainParameters.n, domainParameters.h)
         keys = crypto.generateECKeyPair(domainParameters)
-        publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TLV_TAGS.PUBLIC_KEY)
+        publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
         val sharedSecret = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
@@ -164,12 +177,12 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
     private fun paceDHGM(nonce: ByteArray) : Int {
         var params = getDHParams() ?: return INVALID_ARGUMENT
         var keys = crypto.generateDHKeyPair(params)
-        var publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TLV_TAGS.MAPPING_DATA)
+        var publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.MAPPING_DATA)
         val h = crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
         val g = crypto.genericMappingDH(params.g, nonce, params.p, h)
         params = DHParameters(params.p, g, params.q)
         keys = crypto.generateDHKeyPair(params)
-        publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TLV_TAGS.PUBLIC_KEY)
+        publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.PUBLIC_KEY)
         val sharedSecret = crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
@@ -191,11 +204,11 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         }
         sendNonce(t)
         val r = crypto.integratedMappingPRNG(nonce, t, params.curve.field.characteristic, useLongConstants)
-        val x = crypto.integratedMappingEC(r, params.curve.a.toBigInteger(), params.curve.b.toBigInteger(), params.curve.field.characteristic, params.curve.cofactor)
+        val x = crypto.integratedMappingEC(r, params.curve.a.toBigInteger(), params.curve.b.toBigInteger(), params.curve.field.characteristic)
         val g = crypto.getECPointFromBigInteger(x, domainParams)
         domainParams = ECDomainParameters(params.curve, g, params.n, params.h)
         val keys = crypto.generateECKeyPair(domainParams)
-        val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TLV_TAGS.PUBLIC_KEY)
+        val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
         val sharedSecret = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
@@ -219,7 +232,7 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         val g = crypto.integratedMappingDH(r, params.p, params.q)
         params = DHParameters(params.p, g, params.q)
         val keys = crypto.generateDHKeyPair(params)
-        val publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TLV_TAGS.PUBLIC_KEY)
+        val publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.PUBLIC_KEY)
         val sharedSecret = crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
@@ -235,13 +248,13 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParams = ECDomainParameters(params.curve, params.g, params.n, params.h)
         var keys = crypto.generateECKeyPair(domainParams)
-        chipPublicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TLV_TAGS.MAPPING_DATA)
+        chipPublicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.MAPPING_DATA)
         val sa = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, chipPublicKey!!)
         val h = crypto.getECPointFromBigInteger(sa, domainParams)
         val g = crypto.genericMappingEC(domainParams.g, nonce, h)
         domainParams = ECDomainParameters(params.curve, g, params.n, params.h)
         keys = crypto.generateECKeyPair(domainParams)
-        val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TLV_TAGS.PUBLIC_KEY)
+        val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
         val sharedSecret = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey, true)
@@ -351,16 +364,16 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      * @param isCAM Indicates if PACE with CAM is used
      */
     private fun checkToken(token: ByteArray, chipToken: ByteArray, isCAM: Boolean = false) : Int {
-        var data = TLV(TLV_TAGS.TERMINAL_AUTHENTICATION_TOKEN, computeToken(chipToken))
-        data = TLV(TLV_TAGS.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
+        var data = TLV(TlvTags.TERMINAL_AUTHENTICATION_TOKEN, computeToken(chipToken))
+        data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
         val info = apduControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.GENERAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, data.toByteArray(), 256))
         if (!apduControl.checkResponse(info)) {
             return FAILURE
         }
         data = TLV(apduControl.removeRespondCodes(info))
-        val receivedToken = data.getTLVSequence()!!.getTLVSequence()[0].getValue()
+        val receivedToken = data.list!!.tlvSequence[0].value
         if (isCAM) {
-            chipAuthenticationData = data.getTLVSequence()?.getTLVSequence()?.get(1)?.getValue()
+            chipAuthenticationData = data.list?.tlvSequence?.get(1)?.value
             var iv = ByteArray(encKey!!.size)
             iv.fill(-1)
             iv = crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(encKey!!.size))
@@ -390,8 +403,13 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         }
     }
 
+    /**
+     * Generates input data for the token computation
+     * @param publicKey The public key for the token computation
+     * @return Input data for the token computation
+     */
     private fun generateTokenData(publicKey: ECPublicKeyParameters) : ByteArray {
-        val oid = TLV(TLV_TAGS.OID, idPACEOid!!)
+        val oid = TLV(TlvTags.OID, idPACEOid!!)
         var x = publicKey.q.xCoord.toBigInteger().toByteArray()
         if (x[0] == 0.toByte()) {
             x = x.slice(1..<x.size).toByteArray()
@@ -400,51 +418,75 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         if (y[0] == 0.toByte()) {
             y = y.slice(1..<y.size).toByteArray()
         }
-        val pub = TLV(TLV_TAGS.EC_PUBLIC_POINT, byteArrayOf(0x04) + x + y)
+        val pub = TLV(TlvTags.EC_PUBLIC_POINT, byteArrayOf(0x04) + x + y)
         return TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray() + pub.toByteArray()).toByteArray()
     }
 
+    /**
+     * Generates input data for the token computation
+     * @param publicKey The public key for the token computation
+     * @return Input data for the token computation
+     */
     private fun generateTokenData(publicKey: DHPublicKeyParameters) : ByteArray {
-        val oid = TLV(TLV_TAGS.OID, idPACEOid!!)
+        val oid = TLV(TlvTags.OID, idPACEOid!!)
         var key = publicKey.y.toByteArray()
         if (key[0] == 0.toByte()) {
             key = key.slice(1..<key.size).toByteArray()
         }
-        val pub = TLV(TLV_TAGS.UNSIGNED_INTEGER, key)
+        val pub = TLV(TlvTags.UNSIGNED_INTEGER, key)
         return TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray()+pub.toByteArray()).toByteArray()
     }
 
+    /**
+     * Exchange EC public keys with the eMRTD
+     * @param publicKey The public key to send to the eMRTD
+     * @return The EC public key of the eMRTD
+     */
     private fun exchangeKeys(publicKey: ECPublicKeyParameters, tag: Byte) : ECPublicKeyParameters {
         var data = TLV(tag, publicKey.q.getEncoded(false))
-        data = TLV(TLV_TAGS.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
+        data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
         val response = TLV(apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
-        return ECPublicKeyParameters(publicKey.parameters.curve.decodePoint(response.getTLVSequence()!!.getTLVSequence()[0].getValue()!!), publicKey.parameters)
+        return ECPublicKeyParameters(publicKey.parameters.curve.decodePoint(response.list!!.tlvSequence[0].value!!), publicKey.parameters)
     }
 
+    /**
+     * Exchange DH public keys with the eMRTD
+     * @param publicKey The public key to send to the eMRTD
+     * @return The DH public key of the eMRTD
+     */
     private fun exchangeKeys(publicKey: DHPublicKeyParameters, tag: Byte) : DHPublicKeyParameters {
         var key = publicKey.y.toByteArray()
         if (key[0] == 0.toByte()) {
             key = key.slice(1..<key.size).toByteArray()
         }
         var data = TLV(tag, key)
-        data = TLV(TLV_TAGS.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
+        data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
         val response = TLV(apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
-        return DHPublicKeyParameters(BigInteger(POSITIVE_NUMBER, response.getTLVSequence()!!.getTLVSequence()[0].getValue()!!), publicKey.parameters)
+        return DHPublicKeyParameters(BigInteger(POSITIVE_NUMBER, response.list!!.tlvSequence[0].value!!), publicKey.parameters)
     }
 
+    /**
+     * Sends a nonce to the eMRTD
+     * @param nonce The nonce to send to the eMRTD
+     */
     private fun sendNonce(nonce: ByteArray) {
-        var data = TLV(TLV_TAGS.MAPPING_DATA, nonce)
-        data = TLV(TLV_TAGS.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
+        var data = TLV(TlvTags.MAPPING_DATA, nonce)
+        data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
         apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256))
     }
 
+    /**
+     * Decrypts a nonce received from the eMRTD
+     * @param nonce The nonce to decrypt
+     * @return The decrypted nonce or null
+     */
     private fun decryptNonce(nonce: ByteArray) : ByteArray? {
-        when(idPACEOid!![idPACEOid!!.size-1]) {
-            AES_CBC_CMAC_128 -> return crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE, ByteArray(16))
-            AES_CBC_CMAC_192 -> return crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            AES_CBC_CMAC_256 -> return crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            DES_CBC_CBC -> return crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+        return when(idPACEOid!![idPACEOid!!.size-1]) {
+            AES_CBC_CMAC_128 -> crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE, ByteArray(16))
+            AES_CBC_CMAC_192 -> crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            AES_CBC_CMAC_256 -> crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            DES_CBC_CBC -> crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            else -> null
         }
-        return null
     }
 }

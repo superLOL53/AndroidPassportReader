@@ -1,7 +1,10 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -22,13 +25,13 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
-            tlv.getTLVSequence() == null) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != efTag ||
+            tlv.list == null) {
             return FAILURE
         }
         val list = ArrayList<Person>()
-        for (tag in tlv.getTLVSequence()!!.getTLVSequence()) {
-            if (tag.getTag().size == 1 && (tag.getTag()[0] and 0xF0.toByte()) == 0xA0.toByte()) {
+        for (tag in tlv.list!!.tlvSequence) {
+            if (tag.tag.size == 1 && (tag.tag[0] and 0xF0.toByte()) == 0xA0.toByte()) {
                 val p = getPerson(tag)
                 if (p != null) {
                     list.add(p)
@@ -39,25 +42,48 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
-    override fun createViews(context: Context, parent: Layout) {
-        //TODO: Implement
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        if (persons == null) return
+        var i = 0
+        for (p in persons) {
+            val table = TableLayout(context)
+            table.layoutParams = TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
+                TableLayout.LayoutParams.WRAP_CONTENT)
+            parent.addView(table)
+            var row = TableRow(context)
+            row.layoutParams = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,
+                TableRow.LayoutParams.WRAP_CONTENT)
+            table.addView(row)
+            val text = TextView(context)
+            text.text = "Person $i"
+            row.addView(text)
+            i++
+            row = createRow(context, table)
+            provideTextForRow(row, "Name:", p.name)
+            row = createRow(context, table)
+            provideTextForRow(row, "Address:", p.address)
+            row = createRow(context, table)
+            provideTextForRow(row, "Telephone:", p.telephone)
+            row = createRow(context, table)
+            provideTextForRow(row, "Date data recorded:", p.date)
+        }
     }
 
     private fun getPerson(person: TLV) : Person? {
-        if (person.getTLVSequence() == null || person.getTLVSequence()!!.getTLVSequence().size != 4) {
+        if (person.list == null || person.list!!.tlvSequence.size != 4) {
             return null
         }
         var dateRecorded: String? = null
         var name: String? = null
         var telephone: String? = null
         var address: String? = null
-        for (tag in person.getTLVSequence()!!.getTLVSequence()) {
-            if (tag.getTag()[0] == 0x5F.toByte()) {
-                when (tag.getTag()[1].toInt()) {
-                    0x50 -> dateRecorded = tag.getValue()?.decodeToString()
-                    0x51 -> name = tag.getValue()?.decodeToString()
-                    0x52 -> telephone = tag.getValue()?.decodeToString()
-                    0x53 -> address = tag.getValue()?.decodeToString()
+        for (tag in person.list!!.tlvSequence) {
+            if (tag.tag[0] == 0x5F.toByte()) {
+                when (tag.tag[1].toInt()) {
+                    0x50 -> dateRecorded = tag.value?.decodeToString()
+                    0x51 -> name = tag.value?.decodeToString()
+                    0x52 -> telephone = tag.value?.decodeToString()
+                    0x53 -> address = tag.value?.decodeToString()
                 }
             }
         }

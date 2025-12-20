@@ -429,7 +429,7 @@ class PaceEC {
         val input = ASN1InputStream(certs)
         val seq = DERSequence.getInstance(input.readObject())
         //println(ASN1Dump.dumpAsString(seq))
-        val tag = DERSequence.getInstance(seq.getObjectAt(0))
+        //val tag = DERSequence.getInstance(seq.getObjectAt(0))
         val ml = Certificate.getInstance(seq)
         val kf = KeyFactory.getInstance(ml.subjectPublicKeyInfo.algorithm.algorithm.id)
         //val pubKey = PublicKeyFactory.createKey(ml.subjectPublicKeyInfo.encoded)

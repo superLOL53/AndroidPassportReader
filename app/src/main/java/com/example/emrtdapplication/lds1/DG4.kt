@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.BiometricInformationGroupTemplate
@@ -21,11 +21,11 @@ class DG4(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         var tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
-            tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size < 1) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != efTag ||
+            tlv.list == null || tlv.list!!.tlvSequence.isEmpty()) {
             return FAILURE
         }
-        tlv = tlv.getTLVSequence()!!.getTLVSequence()[0]
+        tlv = tlv.list!!.tlvSequence[0]
         biometricInformation = BiometricInformationGroupTemplate(tlv)
         if (biometricInformation != null && biometricInformation!!.biometricInformations != null) {
             for (bit in biometricInformation!!.biometricInformations!!) {
@@ -38,7 +38,7 @@ class DG4(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 }

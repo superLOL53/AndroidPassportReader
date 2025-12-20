@@ -9,8 +9,8 @@ import android.provider.Settings
 import android.view.MenuItem
 import android.view.View
 import android.widget.Button
-import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ProgressBar
 import android.widget.TableLayout
 import android.widget.TextView
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -46,7 +46,7 @@ import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
 import com.example.emrtdapplication.databinding.Lds1Binding
-import com.example.emrtdapplication.display.displayLDS1
+import com.example.emrtdapplication.display.DisplayLDS1
 import com.example.emrtdapplication.lds1.ChipAuthentication
 import com.example.emrtdapplication.utils.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.utils.APDU
@@ -65,10 +65,8 @@ import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.UNABLE_TO_SELECT_APPLICATION
 import com.google.android.material.navigation.NavigationView
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import java.io.BufferedInputStream
 import java.security.SecureRandom
 import java.security.Security
-import java.security.cert.Certificate
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
@@ -102,39 +100,39 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
     private var mrz : String? = null
     private var efCOM : EfCom = EfCom(apduControl)
     private var efSod: EfSod = EfSod(apduControl)
-    private var DG1 : DG1 = DG1(apduControl)
-    private var DG2 : DG2 = DG2(apduControl)
-    private var DG3 : DG3 = DG3(apduControl)
-    private var DG4 : DG4 = DG4(apduControl)
-    private var DG5 : DG5 = DG5(apduControl)
-    private var DG6 : DG6 = DG6(apduControl)
-    private var DG7 : DG7 = DG7(apduControl)
-    private var DG8 : DG8 = DG8(apduControl)
-    private var DG9 : DG9 = DG9(apduControl)
-    private var DG10 : DG10 = DG10(apduControl)
-    private var DG11 : DG11 = DG11(apduControl)
-    private var DG12 : DG12 = DG12(apduControl)
-    private var DG13 : DG13 = DG13(apduControl)
-    private var DG14 : DG14 = DG14(apduControl)
-    private var DG15 : DG15 = DG15(apduControl)
-    private var DG16 : DG16 = DG16(apduControl)
-    private var efMap = mapOf<Byte, ElementaryFileTemplate>(
-        DG1.shortEFIdentifier to DG1,
-        DG2.shortEFIdentifier to DG2,
-        DG3.shortEFIdentifier to DG3,
-        DG4.shortEFIdentifier to DG4,
-        DG5.shortEFIdentifier to DG5,
-        DG6.shortEFIdentifier to DG6,
-        DG7.shortEFIdentifier to DG7,
-        DG8.shortEFIdentifier to DG8,
-        DG9.shortEFIdentifier to DG9,
-        DG10.shortEFIdentifier to DG10,
-        DG11.shortEFIdentifier to DG11,
-        DG12.shortEFIdentifier to DG12,
-        DG13.shortEFIdentifier to DG13,
-        DG14.shortEFIdentifier to DG14,
-        DG15.shortEFIdentifier to DG15,
-        DG16.shortEFIdentifier to DG16,
+    private var dg1 : DG1 = DG1(apduControl)
+    private var dg2 : DG2 = DG2(apduControl)
+    private var dg3 : DG3 = DG3(apduControl)
+    private var dg4 : DG4 = DG4(apduControl)
+    private var dg5 : DG5 = DG5(apduControl)
+    private var dg6 : DG6 = DG6(apduControl)
+    private var dg7 : DG7 = DG7(apduControl)
+    private var dg8 : DG8 = DG8(apduControl)
+    private var dg9 : DG9 = DG9(apduControl)
+    private var dg10 : DG10 = DG10(apduControl)
+    private var dg11 : DG11 = DG11(apduControl)
+    private var dg12 : DG12 = DG12(apduControl)
+    private var dg13 : DG13 = DG13(apduControl)
+    private var dg14 : DG14 = DG14(apduControl)
+    private var dg15 : DG15 = DG15(apduControl)
+    private var dg16 : DG16 = DG16(apduControl)
+    private var efMap = mapOf(
+        dg1.shortEFIdentifier to dg1,
+        dg2.shortEFIdentifier to dg2,
+        dg3.shortEFIdentifier to dg3,
+        dg4.shortEFIdentifier to dg4,
+        dg5.shortEFIdentifier to dg5,
+        dg6.shortEFIdentifier to dg6,
+        dg7.shortEFIdentifier to dg7,
+        dg8.shortEFIdentifier to dg8,
+        dg9.shortEFIdentifier to dg9,
+        dg10.shortEFIdentifier to dg10,
+        dg11.shortEFIdentifier to dg11,
+        dg12.shortEFIdentifier to dg12,
+        dg13.shortEFIdentifier to dg13,
+        dg14.shortEFIdentifier to dg14,
+        dg15.shortEFIdentifier to dg15,
+        dg16.shortEFIdentifier to dg16,
     )
     private var certs : Array<X509Certificate>? = null
 
@@ -152,9 +150,9 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         log("MRZ is $mrz")
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         val b = Bundle()
-        b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 1000000)
+        b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 10000)
         nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
-                NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, Bundle())
+                NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, b)
         if (!nfcAdapter.isEnabled) {
             findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
         } else {
@@ -210,50 +208,27 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         runOnUiThread {
             //val toolbar = findViewById<Toolbar>(R.id.toolbar)
             //setSupportActionBar(toolbar)
-            val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout);
-            val navigationView = findViewById<NavigationView>(R.id.nvView);
+            val drawerLayout = findViewById<DrawerLayout>(R.id.drawerLayout)
+            val navigationView = findViewById<NavigationView>(R.id.nvView)
 
-            navigationView.setNavigationItemSelectedListener(this);
+            navigationView.setNavigationItemSelectedListener(this)
 
             val drawerToggle = ActionBarDrawerToggle(this,drawerLayout,null,
-                0,0);
+                0,0)
 
-            drawerLayout.addDrawerListener(drawerToggle);
+            drawerLayout.addDrawerListener(drawerToggle)
             drawerToggle.syncState()
             findViewById<LinearLayout>(R.id.Reading).visibility = View.GONE
             drawerLayout.visibility = View.VISIBLE
             lds1Binding = DataBindingUtil.setContentView(this, R.layout.lds1)
-            lds1Binding.dg1 = DG1
-            lds1Binding.dg2 = DG2
-            lds1Binding.dg11 = DG11
+            lds1Binding.dg1 = dg1
+            lds1Binding.dg2 = dg2
+            lds1Binding.dg11 = dg11
             try {
                 val dg1layout = findViewById<LinearLayout>(R.id.dg1layout)
                 lds1ViewLayout = dg1layout.parent as LinearLayout
-            } catch (e:Exception) {
+            } catch (_ :Exception) {
 
-            }
-            if (DG2.biometricInformation != null && DG2.biometricInformation!!.biometricInformations != null) {
-                for (bios in DG2.biometricInformation!!.biometricInformations) {
-                    if (bios == null) continue
-                    val image = bios.biometricDataBlock.facialRecordData.image
-                    val view = ImageView(this)
-                    view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT)
-                    view.setImageBitmap(image)
-                    findViewById<LinearLayout>(R.id.dg2layout).addView(view)
-                }
-            }
-            if (DG3.biometricInformation != null && DG3.biometricInformation!!.biometricInformations != null) {
-                for (bios in DG3.biometricInformation!!.biometricInformations) {
-                    if (bios == null) continue
-                    val image = bios.biometricDataBlock.facialRecordData.image
-                    val view = ImageView(this)
-                    view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT)
-                    view.setImageBitmap(image)
-                    findViewById<LinearLayout>(R.id.dg3layout).addView(view)
-
-                }
             }
             for (ef in efMap) {
                 if (!ef.value.isPresent) {
@@ -286,45 +261,57 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
                     unableReadView.text = "Unable to read file from passport"
                     when (ef.key) {
                         0x01.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x02.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x03.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x04.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x05.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x06.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x07.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x08.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x09.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x0A.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x0B.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x0C.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x0D.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x0E.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x0F.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                        0x10.toByte() -> findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
+                        0x02.toByte() -> findViewById<LinearLayout>(R.id.dg2layout).addView(unableReadView)
+                        0x03.toByte() -> findViewById<LinearLayout>(R.id.dg3layout).addView(unableReadView)
+                        0x04.toByte() -> findViewById<LinearLayout>(R.id.dg4layout).addView(unableReadView)
+                        0x05.toByte() -> findViewById<LinearLayout>(R.id.dg5layout).addView(unableReadView)
+                        0x06.toByte() -> findViewById<LinearLayout>(R.id.dg6layout).addView(unableReadView)
+                        0x07.toByte() -> findViewById<LinearLayout>(R.id.dg7layout).addView(unableReadView)
+                        0x08.toByte() -> findViewById<LinearLayout>(R.id.dg8layout).addView(unableReadView)
+                        0x09.toByte() -> findViewById<LinearLayout>(R.id.dg9layout).addView(unableReadView)
+                        0x0A.toByte() -> findViewById<LinearLayout>(R.id.dg10layout).addView(unableReadView)
+                        0x0B.toByte() -> findViewById<LinearLayout>(R.id.dg11layout).addView(unableReadView)
+                        0x0C.toByte() -> findViewById<LinearLayout>(R.id.dg12layout).addView(unableReadView)
+                        0x0D.toByte() -> findViewById<LinearLayout>(R.id.dg13layout).addView(unableReadView)
+                        0x0E.toByte() -> findViewById<LinearLayout>(R.id.dg14layout).addView(unableReadView)
+                        0x0F.toByte() -> findViewById<LinearLayout>(R.id.dg15layout).addView(unableReadView)
+                        0x10.toByte() -> findViewById<LinearLayout>(R.id.dg16layout).addView(unableReadView)
                     }
                 } else {
-                    if (ef.key == 0xB.toByte()) {
-                        DG11.createViews(findViewById<TableLayout>(R.id.dg11table), this)
+                    when (ef.key) {
+                        0x01.toByte() -> dg1.createViews(this, findViewById<TableLayout>(R.id.dg1table))
+                        0x02.toByte() -> dg2.createViews(this, findViewById<LinearLayout>(R.id.dg2layout))
+                        0x03.toByte() -> dg3.createViews(this, findViewById<LinearLayout>(R.id.dg3layout))
+                        0x04.toByte() -> dg4.createViews(this, findViewById<TableLayout>(R.id.dg4layout))
+                        0x05.toByte() -> dg5.createViews(this, findViewById<TableLayout>(R.id.dg5layout))
+                        0x06.toByte() -> dg6.createViews(this, findViewById<TableLayout>(R.id.dg6layout))
+                        0x07.toByte() -> dg7.createViews(this, findViewById<TableLayout>(R.id.dg7layout))
+                        0x08.toByte() -> dg8.createViews(this, findViewById<TableLayout>(R.id.dg8layout))
+                        0x09.toByte() -> dg9.createViews(this, findViewById<TableLayout>(R.id.dg9layout))
+                        0x0A.toByte() -> dg10.createViews(this, findViewById<TableLayout>(R.id.dg10layout))
+                        0x0B.toByte() -> dg11.createViews(this, findViewById(R.id.dg11table))
+                        0x0C.toByte() -> dg12.createViews(this, findViewById<TableLayout>(R.id.dg12layout))
+                        0x0D.toByte() -> dg13.createViews(this, findViewById<TableLayout>(R.id.dg13layout))
+                        0x0E.toByte() -> dg14.createViews(this, findViewById<TableLayout>(R.id.dg14layout))
+                        0x0F.toByte() -> dg15.createViews(this, findViewById<TableLayout>(R.id.dg15layout))
+                        0x10.toByte() -> dg16.createViews(this, findViewById<TableLayout>(R.id.dg16layout))
                     }
                 }
             }
-            //Removing rows if values are null:
-            //val table = findViewById<TableLayout>(R.id.lds1table)
-            //table.removeView(findViewById<TableRow>(R.id.name))
         }
     }
 
     /**
      * Reading EMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
-     * @return Success(0) if everything was read without error or Failure(-1) if something went wrong
      */
     private fun readeMRTDParams() {
+        val progressText = findViewById<TextView>(R.id.progressBarText)
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
+        runOnUiThread {
+            progressBar.progress = progressBar.min
+            progressText.text = "Reading common files..."
+        }
         log("Reading EMRTD Params...")
-        /*val mrz = MRZ(TestValues.MRZ)
-        mrz.extractMRZInformation()
-        Logger.log(EMRTDConstants.TAG, EMRTDConstants.ENABLE_LOGGING, "Extracted MRZ: ${mrz.getMRZInfoString()}")
-        MRZ = mrz.getMRZInfoString()*/
-        //Logger.log(TAG, "Reading Parameters")
         if (cs.read() != SUCCESS) {
             log("Unable to read Card Security")
         }
@@ -354,8 +341,12 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
                 break
             }
         }
-        /*pace.init(mrz, useCAN, idPaceOid, ca.getPACEInfo()[0].parameterId!!)
-        pace.paceProtocol()*/
+        runOnUiThread {
+            progressBar.incrementProgressBy(10)
+            progressText.text = "Initialize secure messaging..."
+        }
+        pace.init(mrz, useCAN, idPaceOid, ca.paceInfos[0].parameterId!!)
+        pace.paceProtocol()
         if (selectEMRTDApplication() != SUCCESS) {
             log("Unable to select LDS1")
             return
@@ -369,24 +360,37 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             return
         }
         readLDS1Files()
+        verifyEMRTD()
+        runOnUiThread {
+            progressBar.incrementProgressBy(5)
+            progressText.text = "Passport verified"
+        }
         log("Finished Reading")
     }
 
-    @SuppressLint("NewApi")
-    private fun readLDS1Files() {
-        /*if (efCOM.read() != SUCCESS) {
-            log("Unable to read EF COM")
+    private fun verifyEMRTD() {
+        val progressText = findViewById<TextView>(R.id.progressBarText)
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
+        runOnUiThread {
+            progressBar.incrementProgressBy(5)
+            progressText.text = "Reading CSCAs..."
         }
-        for (ef in efMap) {
-            ef.value.read()
-            ef.value.parse()
-        }*/
-        DG14.read()
-        DG14.parse()
-        if (DG14.isRead && DG14.isPresent && DG14.securityInfos != null) {
+        readCSCAs()
+        runOnUiThread {
+            progressBar.incrementProgressBy(5)
+            progressText.text = "Perform passive authentication..."
+        }
+        efSod.checkHashes(efMap)
+        efSod.passiveAuthentication(certs)
+        runOnUiThread {
+            progressBar.incrementProgressBy(5)
+            progressText.text = "Authenticate chip..."
+        }
+        dg15.activeAuthentication(SecureRandom())
+        if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null
             var chipInfo : ChipAuthenticationInfo? = null
-            for (si in DG14.securityInfos!!) {
+            for (si in dg14.securityInfos!!) {
                 if (si.type == CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE) {
                     chipPublicKey = si as ChipAuthenticationPublicKeyInfo
                 } else if (si.type == CHIP_AUTHENTICATION_TYPE) {
@@ -399,35 +403,38 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
                 auth.authenticate()
             }
         }
-        /*if (efSod.read() != SUCCESS) {
+    }
+
+    /**
+     * Read all files that can be present in LDS1 application
+     */
+    @SuppressLint("NewApi")
+    private fun readLDS1Files() {
+        val progressText = findViewById<TextView>(R.id.progressBarText)
+        val progressBar = findViewById<ProgressBar>(R.id.progressBar)
+        runOnUiThread {
+            progressBar.incrementProgressBy(3)
+            progressText.text = "Reading EF.COM file..."
+        }
+        if (efCOM.read() != SUCCESS) {
+            log("Unable to read EF COM")
+        }
+        for (ef in efMap) {
+            runOnUiThread {
+                progressBar.incrementProgressBy(4)
+                progressText.text = "Reading DG${ef.key} file..."
+            }
+            ef.value.read()
+            ef.value.parse()
+        }
+        runOnUiThread {
+            progressBar.incrementProgressBy(3)
+            progressText.text = "Reading EF.SOD file..."
+        }
+        if (efSod.read() != SUCCESS) {
             log("Unable to read EF SOD")
-        }*/
-        //readCSCAs()
-        //val stream = assets.open("CSCA/AUT/CSCAAUSTRIAcacert005.crt")
-        ///val path = FileInputStream("/home/oliver/StudioProjects/AndroidPassportReader/app/src/main/assets/CSCA/CSCAAUSTRIAcacert005.crt")
-        //val buffer = BufferedInputStream(stream)
-        //val arr = buffer.readAllBytes()
-        //val cert = org.spongycastle.asn1.x509.Certificate.getInstance(arr)
-        /*try {
-            val spec = X509EncodedKeySpec(cert.subjectPublicKeyInfo.encoded)
-            val fac = KeyFactory.getInstance(cert.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
-            val pub = fac!!.generatePublic(spec)
-            val sign = Signature.getInstance(cert.signatureAlgorithm.algorithm.id, "BC")
-            sign.initVerify(pub)
-            sign.update(cert.tbsCertificate.encoded)
-            val isValid = sign.verify(cert.signature.bytes)
-            println(isValid)
-        } catch (e : Exception) {
-            println(e)
-        }*/
-        //val cf = java.security.cert.CertificateFactory.getInstance("X.509", "BC")
-        //val cert = cf.generateCertificate(stream)
-        //val isValid = cert.verify(cert.publicKey, "BC")
-        //efSod.parse()
-        //efSod.checkHashes(efMap)
-        //efSod.passiveAuthentication(certs)
-        //val sig = Signature.getInstance(certs?.get(0)?.signatureAlgorithm?.oid.toString())
-        //DG15.activeAuthentication(SecureRandom())
+        }
+        efSod.parse()
     }
 
     /**
@@ -468,7 +475,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         val trans = fm.beginTransaction()
         var frag : Fragment? = null
         when (p0.itemId) {
-            R.id.nav_lds1 -> frag = displayLDS1()
+            R.id.nav_lds1 -> frag = DisplayLDS1()
         }
         if (frag == null) {
             return false
@@ -482,10 +489,10 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
     private fun readCSCAs() {
         val directory = resources.assets.list("CSCA")
         val tmpCerts = ArrayList<X509Certificate>()
-        if (directory != null && DG1.issuerCode != null) {
+        if (directory != null && dg1.issuerCode != null) {
             var path : Array<String>? = null
             try {
-                path = resources.assets.list("CSCA/${DG1.issuerCode}")
+                path = resources.assets.list("CSCA/${dg1.issuerCode}")
             } catch (_ : Exception) {
 
             }
@@ -493,10 +500,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
                 val ce = CertificateFactory.getInstance("X509")
                 for (cert in path) {
                     try {
-                        val c = ce.generateCertificate(assets.open("CSCA/${DG1.issuerCode}/$cert")) as X509Certificate
-                        //val p = assets.open("CSCA/${DG1.issuerCode}/$cert")
-                        //val stream = BufferedInputStream(p)
-                        //val c = Certificate.getInstance(stream.readAllBytes())
+                        val c = ce.generateCertificate(assets.open("CSCA/${dg1.issuerCode}/$cert")) as X509Certificate
                         tmpCerts.add(c)
                     } catch (e : Exception) {
                         println(e)

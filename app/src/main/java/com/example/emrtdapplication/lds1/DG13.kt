@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.SUCCESS
@@ -15,7 +15,7 @@ class DG13(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 }

@@ -4,35 +4,60 @@ import kotlin.experimental.and
 import kotlin.experimental.or
 /**
  * Class representing a TLV structure
- * @param tag: The tag of the TLV
- * @param length: The length of the value param
- * @param value: The byte array containing the value. In case of a construct this is empty
+ * @property tag The tag of the TLV structure
+ * @property length The length of the TLV value
+ * @property value The byte array containing the value if the TLV structure is not a construct
+ * @property list A list of TLV structures contained in the TLV structure if it is a construct
+ * @property isValid Tells if the TLV is valid
  */
 class TLV {
-    private val tag: ByteArray
-    private var length: Int
-    private var value: ByteArray? = null
-    private var list: TLVSequence? = null
-    private var isValid: Boolean = true
+    val tag: ByteArray
+    var length: Int
+        private set
+    var value: ByteArray? = null
+        private set
+    var list: TLVSequence? = null
+        private set
+    var isValid: Boolean = true
+        private set
 
+    /**
+     * Converts the byte array into a TLV structure
+     * @param ba The byte array containing a TLV structure
+     */
     constructor(ba: ByteArray) {
         this.tag = getTag(ba)
         this.length = getLength(ba, tag.size)
         decode(ba)
     }
 
+    /**
+     * Constructs a TLV structure from the given [tag] and [value]
+     * @param tag The tag of the TLV
+     * @param value The value of the TLV
+     */
     constructor(tag: Byte, value: ByteArray) {
         this.tag = byteArrayOf(tag)
         this.length = value.size
         decode(value, 0)
     }
 
+    /**
+     * Constructs a TLV structure from the given [tag] and [value]
+     * @param tag The tag of the TLV
+     * @param value The value of the TLV
+     */
     constructor(tag: ByteArray, value: ByteArray) {
         this.tag = tag
         this.length = value.size
         decode(value,0)
     }
 
+    /**
+     * Constructs a TLV structure from the given [tag] and [sequence]
+     * @param tag The tag of the TLV
+     * @param sequence A list of TLV structures
+     */
     constructor(tag:Byte, sequence: TLVSequence) {
         this.tag = byteArrayOf(tag)
         this.length = sequence.toByteArray().size
@@ -40,6 +65,11 @@ class TLV {
         this.value = null
     }
 
+    /**
+     * Constructs a TLV structure from the given [tag] and [sequence]
+     * @param tag The tag of the TLV
+     * @param sequence A list of TLV structures
+     */
     constructor(tag:ByteArray, sequence: TLVSequence) {
         this.tag = tag
         this.length = sequence.toByteArray().size
@@ -47,6 +77,10 @@ class TLV {
         this.value = null
     }
 
+    /**
+     * Decodes the byte array into a TLV structure
+     * @param ba The byte array containing a TLV structure
+     */
     private fun decode(ba: ByteArray) {
         val l = if (tag.size < ba.size && ba[tag.size] < 0) {
             (ba[tag.size] and 0x7F) + 1
@@ -56,6 +90,11 @@ class TLV {
         decode(ba, l)
     }
 
+    /**
+     * Decodes the byte array into a TLV structure
+     * @param ba The byte array containing a TLV structure
+     * @param l The index where the value of the TLV starts in the byte array
+     */
     private fun decode(ba: ByteArray, l: Int) {
         if (l+length > ba.size) {
             isValid = false
@@ -71,7 +110,7 @@ class TLV {
         }
     }
 
-    fun getTag() : ByteArray {
+    /*fun getTag() : ByteArray {
         return tag
     }
 
@@ -87,10 +126,17 @@ class TLV {
         return list
     }
 
+    fun getIsValid(): Boolean {
+        return isValid
+    }*/
+
     fun isConstruct(): Boolean {
-        return tag.isEmpty() || (tag[0] and TLV_TAGS.CONSTRUCT_BIT) == TLV_TAGS.CONSTRUCT_BIT
+        return tag.isEmpty() || (tag[0] and TlvTags.CONSTRUCT_BIT) == TlvTags.CONSTRUCT_BIT
     }
 
+    /**
+     * Converts the TLV structure into a byte array
+     */
     fun toByteArray(): ByteArray {
         val ba = tag+getLengthByteArray()
         return if (!isValid) {
@@ -102,10 +148,11 @@ class TLV {
         }
     }
 
-    fun getIsValid(): Boolean {
-        return isValid
-    }
-
+    /**
+     * Gets the tag of the TLV structure encoded as a byte array
+     * @param ba The byte array containing a TLV structure
+     * @return The tag of the TLV in the byte array
+     */
     private fun getTag(ba: ByteArray): ByteArray {
         if (ba.isEmpty()) {
             isValid = false
@@ -129,6 +176,12 @@ class TLV {
         }
     }
 
+    /**
+     * Decodes the length of the TLV contained in the byte array
+     * @param ba The TLV structure as a byte array
+     * @param offset Index where the encoded length starts
+     * @return The length of the value of the TLV
+     */
     private fun getLength(ba: ByteArray, offset: Int): Int {
         if (offset >= ba.size) {
             isValid = false
@@ -150,6 +203,10 @@ class TLV {
         }
     }
 
+    /**
+     * Converts the length of the value of the TLV into a
+     * byte array containing the length according to TLV rules
+     */
     private fun getLengthByteArray(): ByteArray {
         if (!isValid) {
             return ByteArray(1)

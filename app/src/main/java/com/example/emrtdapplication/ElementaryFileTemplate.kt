@@ -1,8 +1,8 @@
 package com.example.emrtdapplication
 
 import android.content.Context
-import android.text.Layout
 import android.view.Gravity
+import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
@@ -156,6 +156,12 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
      */
     abstract fun parse() : Int
 
+    /**
+     * Fill in the text for [row] with [description] and [value]
+     * @param row The row to fill in texts
+     * @param description The meaning of the [value]
+     * @param value The value of the row
+     */
     protected fun provideTextForRow(row : TableRow, description : String, value : String) {
         var i = true
         for (t in row.children) {
@@ -168,16 +174,27 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
         }
     }
 
-    protected fun createRow(context : Context, parent: TableLayout) : TableRow {
+    /**
+     * Creates a row in a [TableLayout] to display information in the file
+     * @param context The context of the view
+     * @param parent The parent layout of the created row
+     * @return The created row
+     */
+    protected fun createRow(context : Context, parent: LinearLayout) : TableRow {
         val row = TableRow(context)
         row.gravity = Gravity.CENTER
         val description = TextView(context)
+        description.gravity = Gravity.CENTER
         val value = TextView(context)
+        value.gravity = Gravity.CENTER
         row.addView(description)
         row.addView(value)
         parent.addView(row)
         return row
     }
 
-    abstract fun createViews(context: Context, parent: Layout)
+    /**
+     * Create views to display contents of the file in the app
+     */
+    abstract fun <T : LinearLayout> createViews(context: Context, parent: T)
 }

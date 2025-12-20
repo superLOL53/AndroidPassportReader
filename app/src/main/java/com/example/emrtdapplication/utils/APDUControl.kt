@@ -4,8 +4,6 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import java.io.IOException
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
-import javax.crypto.spec.SecretKeySpec
 
 /**
  * Enum class for NFC types. EMRTD uses ISO DEP as communication protocol. All other are insufficient and not used.
@@ -142,7 +140,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
                     return ERROR_ISO_DEP_NOT_SELECTED
                 }
             }
-        } catch (e : IOException) {
+        } catch (_ : IOException) {
             return ERROR_UNABLE_TO_CONNECT
         }
     }
@@ -162,7 +160,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
                     return ERROR_UNABLE_TO_CLOSE
                 }
             }
-        } catch (e : IOException) {
+        } catch (_ : IOException) {
             return ERROR_UNABLE_TO_CLOSE
         }
     }

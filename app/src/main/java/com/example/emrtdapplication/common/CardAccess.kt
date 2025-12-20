@@ -19,14 +19,14 @@ import com.example.emrtdapplication.utils.TLV
  * The file contains ASN1 Sequences of [PACEInfo] and/or [PACEDomainParameterInfo]
  *
  * @property apduControl Used for sending and receiving APDUs
- * @property CA_ID_1 First byte of the file id
- * @property CA_ID_2 Second byte of the file id, which is also the short EF id
+ * @property caID1 First byte of the file id
+ * @property caID2 Second byte of the file id, which is also the short EF id
  * @property paceInfos Array list of [PACEInfo] contained in the file
  * @property paceDomainParams Array list of [PACEDomainParameterInfo] contained in the file
  */
 class CardAccess(private var apduControl: APDUControl) {
-    private val CA_ID_1: Byte = 0x01
-    private val CA_ID_2: Byte = 0x1C
+    private val caID1: Byte = 0x01
+    private val caID2: Byte = 0x1C
     val paceInfos = ArrayList<PACEInfo>()
     val paceDomainParams = ArrayList<PACEDomainParameterInfo>()
 
@@ -39,7 +39,7 @@ class CardAccess(private var apduControl: APDUControl) {
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
-            NfcP2Byte.SELECT_FILE, byteArrayOf(CA_ID_1, CA_ID_2)))
+            NfcP2Byte.SELECT_FILE, byteArrayOf(caID1, caID2)))
         if (!apduControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
@@ -62,10 +62,10 @@ class CardAccess(private var apduControl: APDUControl) {
      */
     private fun parse(b : ByteArray) : Int {
         val tlv = TLV(b)
-        if (tlv.getTLVSequence() == null || !tlv.isConstruct()) {
+        if (tlv.list == null || !tlv.isConstruct()) {
             return FILE_UNABLE_TO_READ
         }
-        for (sequence in tlv.getTLVSequence()!!.getTLVSequence()) {
+        for (sequence in tlv.list!!.tlvSequence) {
             val si = SecurityInfo(sequence)
             if (si.type != PACE_INFO_TYPE && si.type != PACE_DOMAIN_PARAMETER_INFO_TYPE) {
                 throw IllegalArgumentException()

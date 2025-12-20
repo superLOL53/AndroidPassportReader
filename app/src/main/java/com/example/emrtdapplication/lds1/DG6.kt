@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -18,13 +18,13 @@ class DG6(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != efTag) {
             return FAILURE
         }
         return SUCCESS
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 }

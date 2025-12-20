@@ -2,7 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TLV_TAGS
+import com.example.emrtdapplication.utils.TlvTags
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence TerminalAuthenticationInfo:
@@ -19,9 +19,9 @@ class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
         private set
 
     init {
-        version = if (!requiredData.getIsValid() || requiredData.getTag().size != 1 ||
-            requiredData.getTag()[0] != TLV_TAGS.INTEGER || requiredData.getValue() == null ||
-            requiredData.getValue()!!.size != 1 || requiredData.getValue()!![0].toInt() != 1) {
+        version = if (!requiredData.isValid || requiredData.tag.size != 1 ||
+            requiredData.tag[0] != TlvTags.INTEGER || requiredData.value == null ||
+            requiredData.value!!.size != 1 || requiredData.value!![0].toInt() != 1) {
             throw IllegalArgumentException()
         } else {
             1

@@ -22,16 +22,16 @@ import org.spongycastle.asn1.cms.SignedData
  * Implements the EF.CardSecurity file. Required if PACE with CAM, Terminal Authentication or Chip Authentication is supported.
  *
  * @property apduControl Used for sending and receiving APDUs
- * @property CS_ID_1 First byte of the file id
- * @property CS_ID_2 Second byte of the file id, also the short EF id
+ * @property csID1 First byte of the file id
+ * @property csID2 Second byte of the file id, also the short EF id
  * @property securityInfos Array list of [SecurityInfo] contained in the file
  * @property signedData
  */
 
 //TODO: Test implementation, see how the file is actually implemented, signed data vs. security infos
 class CardSecurity(private var apduControl: APDUControl) {
-    private val CS_ID_1: Byte = 0x01
-    private val CS_ID_2: Byte = 0x1D
+    private val csID1: Byte = 0x01
+    private val csID2: Byte = 0x1D
     val securityInfos = ArrayList<SecurityInfo>()
     var signedData : SignedData? = null
 
@@ -44,7 +44,7 @@ class CardSecurity(private var apduControl: APDUControl) {
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
-            NfcP2Byte.SELECT_FILE, byteArrayOf(CS_ID_1, CS_ID_2)))
+            NfcP2Byte.SELECT_FILE, byteArrayOf(csID1, csID2)))
         if (!apduControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
@@ -60,9 +60,14 @@ class CardSecurity(private var apduControl: APDUControl) {
         return parseData(info)
     }
 
+    /**
+     * Parses the content of the file
+     * @param byteArray The content of the file
+     * @return [SUCCESS]
+     */
     private fun parseData(byteArray: ByteArray) : Int {
         val tlv = TLVSequence(byteArray)
-        for (sequence in tlv.getTLVSequence()) {
+        for (sequence in tlv.tlvSequence) {
             val si = SecurityInfo(sequence)
             when (si.type) {
                 CHIP_AUTHENTICATION_TYPE -> securityInfos.add(ChipAuthenticationInfo(sequence))

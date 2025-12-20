@@ -11,16 +11,16 @@ abstract class ElementaryFilesToBeDefined<T>(apduControl: APDUControl) : Element
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
-            tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().isEmpty()
+        if (tlv.tag.size != 1 || tlv.tag[0] != efTag ||
+            tlv.list == null || tlv.list!!.tlvSequence.isEmpty()
         ) {
             return FAILURE
         }
-        if (tlv.getTLVSequence()!!.getTLVSequence().size > 1) {
+        if (tlv.list!!.tlvSequence.size > 1) {
             val list = ArrayList<T>()
-            for (i in 1..<tlv.getTLVSequence()!!.getTLVSequence().size) {
+            for (i in 1..<tlv.list!!.tlvSequence.size) {
                 try {
-                    val el = tlv.getTLVSequence()!!.getTLVSequence()[i]
+                    val el = tlv.list!!.tlvSequence[i]
                     add(el, list)
                 } catch (e : Exception) {
                     println(e.message)

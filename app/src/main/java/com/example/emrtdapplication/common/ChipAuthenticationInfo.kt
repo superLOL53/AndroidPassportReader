@@ -2,7 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TLV_TAGS
+import com.example.emrtdapplication.utils.TlvTags
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationInfo:
@@ -31,19 +31,19 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
         private set
 
     init {
-        if (requiredData.getTag().size != 1 || requiredData.getTag()[0] != TLV_TAGS.INTEGER ||
-            requiredData.getValue() == null || requiredData.getValue()!!.size != 1 ||
-            requiredData.getValue()!![0].toInt() != 1) {
+        if (requiredData.tag.size != 1 || requiredData.tag[0] != TlvTags.INTEGER ||
+            requiredData.value == null || requiredData.value!!.size != 1 ||
+            requiredData.value!![0].toInt() != 1) {
             throw IllegalArgumentException()
         } else {
             version = 1
         }
         keyId = if (optionalData != null) {
-            if (optionalData!!.getTag().size != 1 || optionalData!!.getTag()[0] != TLV_TAGS.INTEGER ||
-                optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {
+            if (optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
+                optionalData!!.value == null || optionalData!!.value!!.size != 1) {
                 throw IllegalArgumentException()
             } else {
-                optionalData!!.getValue()!![0].toInt()
+                optionalData!!.value!![0].toInt()
             }
         } else {
             null

@@ -16,8 +16,8 @@ import kotlin.experimental.and
 /**
  * Constants for the class AttributeInfo
  */
-const val AI_TAG = "ai"
-const val AI_ENABLE_LOGGING = true
+//const val AI_TAG = "ai"
+//const val AI_ENABLE_LOGGING = true
 const val CARD_CAPABILITY_TAG : Byte = 0x47
 const val SUPPORT_RECORD_NUMBER : Byte = 0x02
 const val SUPPORT_SHORT_EF_ID : Byte = 0x04
@@ -32,9 +32,9 @@ const val EXTENDED_LENGTH_TAG_2 : Byte = 0x66
 const val AI_ID_1: Byte = 0x2F
 const val AI_ID_2: Byte = 0x01
 const val AI_MIN_LENGTH = 12
-const val AI_EXTENDED_LENGTH_INFORMATION_START = 5
-const val AI_EXTENDED_LENGTH_INFORMATION_NUMBER_OF_TAGS = 2
-const val INTEGER_MAX_BYTEARRAY_SIZE = 4
+//const val AI_EXTENDED_LENGTH_INFORMATION_START = 5
+//const val AI_EXTENDED_LENGTH_INFORMATION_NUMBER_OF_TAGS = 2
+//const val INTEGER_MAX_BYTEARRAY_SIZE = 4
 
 /**
  * Implements the EF.ATR/INFO EF. The file is optional if only LDS1 application is present on the ePassport
@@ -129,10 +129,10 @@ class AttributeInfo(private var apduControl: APDUControl) {
             return FILE_UNABLE_TO_READ
         }
         val decode = TLVSequence(contents)
-        for (tlv in decode.getTLVSequence()) {
-            when (tlv.getTag()[0]) {
+        for (tlv in decode.tlvSequence) {
+            when (tlv.tag[0]) {
                 CARD_CAPABILITY_TAG -> {
-                    val cardCapabilities = tlv.getValue()
+                    val cardCapabilities = tlv.value
                     if (cardCapabilities != null && cardCapabilities.size == 3) {
                         parseByte1(cardCapabilities[0])
                         parseByte2(cardCapabilities[1])
@@ -140,10 +140,10 @@ class AttributeInfo(private var apduControl: APDUControl) {
                     }
                 }
                 EXTENDED_LENGTH_TAG_1 -> {
-                    if (tlv.getTag().size == 2 && tlv.getTag()[1] == EXTENDED_LENGTH_TAG_2) {
-                        val lengthInfo = tlv.getTLVSequence()
-                        if (lengthInfo != null && lengthInfo.getTLVSequence().size == 2) {
-                            parseExtendedLengthInfo(lengthInfo.getTLVSequence())
+                    if (tlv.tag.size == 2 && tlv.tag[1] == EXTENDED_LENGTH_TAG_2) {
+                        val lengthInfo = tlv.list
+                        if (lengthInfo != null && lengthInfo.tlvSequence.size == 2) {
+                            parseExtendedLengthInfo(lengthInfo.tlvSequence)
                         }
                     }
                 }
@@ -207,11 +207,11 @@ class AttributeInfo(private var apduControl: APDUControl) {
      * Parses the extended length info in the file.
      */
     private fun parseExtendedLengthInfo(lengthInfo: ArrayList<TLV>) {
-        if (lengthInfo[0].getValue() != null) {
-            maxAPDUTransferBytes = byteArrayToInt(lengthInfo[0].getValue()!!)
+        if (lengthInfo[0].value != null) {
+            maxAPDUTransferBytes = byteArrayToInt(lengthInfo[0].value!!)
         }
-        if (lengthInfo[1].getValue() != null) {
-            maxAPDUReceiveBytes = byteArrayToInt(lengthInfo[1].getValue()!!)
+        if (lengthInfo[1].value != null) {
+            maxAPDUReceiveBytes = byteArrayToInt(lengthInfo[1].value!!)
         }
     }
 

@@ -5,18 +5,18 @@ import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.INVALID_ARGUMENT
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TLV_TAGS
+import com.example.emrtdapplication.utils.TlvTags
 
 /**
  * Constants for the PACEInfo class
  */
-const val PI_TAG = "PACEInfo"
-const val PI_ENABLE_LOGGING = true
+//const val PI_TAG = "PACEInfo"
+//const val PI_ENABLE_LOGGING = true
 const val UNDEFINED : Byte = -1
-const val PACE_INFO_TAG: Byte = 0x30
-const val OID_TAG: Byte = 0x06
-const val OID_LENGTH = 10
-const val ID_PACE = "04007f0007020204"
+//const val PACE_INFO_TAG: Byte = 0x30
+//const val OID_TAG: Byte = 0x06
+//const val OID_LENGTH = 10
+//const val ID_PACE = "04007f0007020204"
 const val DH_GM : Byte = 1
 const val ECDH_GM : Byte = 2
 const val DH_IM : Byte = 3
@@ -88,17 +88,17 @@ class PACEInfo(tlv: TLV): SecurityInfo(tlv) {
         if (extractProtocols() != SUCCESS) {
             throw IllegalArgumentException("Invalid protocols for PACE")
         }
-        if (requiredData.getTag().size != 1 || requiredData.getTag()[0] != TLV_TAGS.INTEGER ||
-            requiredData.getValue() == null || requiredData.getValue()!!.size != 1 || requiredData.getValue()!![0].toInt() != 2) {
+        if (requiredData.tag.size != 1 || requiredData.tag[0] != TlvTags.INTEGER ||
+            requiredData.value == null || requiredData.value!!.size != 1 || requiredData.value!![0].toInt() != 2) {
             throw IllegalArgumentException("Invalid version for PACE protocol")
         } else {
             version = 2
         }
         if (optionalData != null) {
-            if (optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {
+            if (optionalData!!.value == null || optionalData!!.value!!.size != 1) {
                 throw IllegalArgumentException("Invalid parameter tag")
             }
-            parameterId = optionalData!!.getValue()!![0]
+            parameterId = optionalData!!.value!![0]
             if (!(parameterId!! in 0..2 || parameterId!! in 8..18)) {
                 throw IllegalArgumentException("Invalid parameter identifier for PACE")
             }

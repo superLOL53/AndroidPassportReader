@@ -96,22 +96,22 @@ class Directory() {
      */
     @OptIn(ExperimentalStdlibApi::class)
     private fun parseTLV(tlv: TLV) : Int {
-        if (!tlv.getIsValid() || tlv.getTag().size != 1 || tlv.getTag()[1] != APPLICATION_TEMPLATE_TAG || tlv.getLength() != TEMPLATE_LENGTH) {
+        if (!tlv.isValid || tlv.tag.size != 1 || tlv.tag[0] != APPLICATION_TEMPLATE_TAG || tlv.length != TEMPLATE_LENGTH) {
             return FILE_UNABLE_TO_READ
         }
-        val innerTLV = tlv.getValue()?.let { TLV(it) }
-        if (!innerTLV!!.getIsValid() || tlv.getTag().size != 1 || tlv.getTag()[0] != INTERNATIONAL_AID_TAG || innerTLV.getLength() != AID_LENGTH || innerTLV.getValue()!!.toHexString().startsWith(
+        val innerTLV = tlv.value?.let { TLV(it) }
+        if (innerTLV == null || !innerTLV.isValid || innerTLV.tag.size != 1 || tlv.tag[0] != INTERNATIONAL_AID_TAG || innerTLV.length != AID_LENGTH || innerTLV.value!!.toHexString().startsWith(
                 AID)) {
             return FILE_UNABLE_TO_READ
         }
-        when (innerTLV.getValue()?.get(5)) {
+        when (innerTLV.value?.get(5)) {
             LDS1_ID_1 -> {
-                if (innerTLV.getValue()!![6] != LDS1_ID_2) {
+                if (innerTLV.value!![6] != LDS1_ID_2) {
                     return FILE_UNABLE_TO_READ
                 }
             }
             LDS2_ID -> {
-                when (innerTLV.getValue()!![6]) {
+                when (innerTLV.value!![6]) {
                     TRAVEL_RECORDS_APPLICATION_ID -> hasTravelRecordsApplication = true
                     VISA_RECORDS_APPLICATION_ID -> hasVisaRecordsApplication = true
                     ADDITIONAL_BIOMETRICS_APPLICATION_ID -> hasAdditionalBiometricsApplication = true

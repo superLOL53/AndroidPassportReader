@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -90,14 +90,14 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
             documentSignerCertificate = Certificate.getInstance(certificate!!.certificates.getObjectAt(0).toASN1Primitive().encoded)
             this.cert = CertificateFactory.getInstance("X.509", "BC").generateCertificate(
                 ByteArrayInputStream(documentSignerCertificate!!.encoded))
-            ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).getValue()!!).readAllBytes())
+            ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).value!!).readAllBytes())
             return SUCCESS
         } catch (_: Exception) {
             return FAILURE
         }
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 
@@ -136,11 +136,11 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         } catch (_ : Exception) {
 
         }
-        val CSCAList = findPossibleCSCA(cscas)
-        if (CSCAList.isEmpty()){
+        val listCSCA = findPossibleCSCA(cscas)
+        if (listCSCA.isEmpty()){
             return FAILURE
         } else {
-            for (c in CSCAList) {
+            for (c in listCSCA) {
                 if (validateDocumentSignerCertificate(c)) {
                     validateCSCA(c)
                     break

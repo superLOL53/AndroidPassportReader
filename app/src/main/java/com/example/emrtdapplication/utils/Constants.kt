@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.utils
 
 const val ZERO_BYTE : Byte = 0x0
-const val ZERO_SHORT : Short = 0
+//const val ZERO_SHORT : Short = 0
 const val FILE_SUCCESSFUL_READ = 0
 const val SUCCESS = 0
 const val FAILURE = -1
@@ -14,7 +14,7 @@ const val SELECT_APPLICATION_SUCCESS = 0
 const val UNABLE_TO_SELECT_APPLICATION = -1
 const val ADDITIONAL_ENCRYPTION_LENGTH = 30
 
-object TLV_TAGS {
+object TlvTags {
     const val CONSTRUCT_BIT : Byte = 0x20
     const val INTEGER : Byte = 0x02
     const val CRYPTOGRAPHIC_REFERENCE : Byte = 0x80.toByte()
@@ -27,7 +27,7 @@ object TLV_TAGS {
     const val EC_PUBLIC_POINT : Byte = 0x86.toByte()
     const val OID : Byte = 0x06
     const val UNSIGNED_INTEGER : Byte = 0x84.toByte()
-    const val SEQUENCE: Byte = 0x30
+    //const val SEQUENCE: Byte = 0x30
 }
 
 object NfcClassByte {

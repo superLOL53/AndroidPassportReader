@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -11,7 +11,6 @@ import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.SUCCESS
-import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import org.spongycastle.crypto.digests.SHA1Digest
 import org.spongycastle.crypto.digests.SHA224Digest
@@ -39,15 +38,14 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         try {
-            val input = ASN1InputStream(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
-            publicKeyInfo = SubjectPublicKeyInfo.getInstance(input)
+            publicKeyInfo = SubjectPublicKeyInfo.getInstance(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
             return SUCCESS
-        } catch (e : Exception) {
+        } catch (_ : Exception) {
             return FAILURE
         }
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 

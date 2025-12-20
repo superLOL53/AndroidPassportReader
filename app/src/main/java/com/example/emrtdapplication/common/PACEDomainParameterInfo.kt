@@ -2,7 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TLV_TAGS
+import com.example.emrtdapplication.utils.TlvTags
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.x509.AlgorithmIdentifier
 
@@ -31,11 +31,11 @@ class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv) {
 
     init {
         algorithmIdentifier = AlgorithmIdentifier.getInstance(ASN1InputStream(requiredData.toByteArray()).readAllBytes())
-        parameterId = if (optionalData == null || optionalData!!.getTag().size != 1 || optionalData!!.getTag()[0] != TLV_TAGS.INTEGER ||
-            optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {
+        parameterId = if (optionalData == null || optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
+            optionalData!!.value == null || optionalData!!.value!!.size != 1) {
             null
         } else {
-            optionalData!!.getValue()!![0].toInt()
+            optionalData!!.value!![0].toInt()
         }
     }
 }

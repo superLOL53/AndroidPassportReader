@@ -2,8 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TLV_TAGS
-import org.spongycastle.asn1.ASN1InputStream
+import com.example.emrtdapplication.utils.TlvTags
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 
 /**
@@ -26,11 +25,11 @@ class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv) {
     init {
         publicKeyInfo = SubjectPublicKeyInfo.getInstance(requiredData.toByteArray())
         keyId = if (optionalData != null) {
-            if (optionalData!!.getTag().size != 1 || optionalData!!.getTag()[0] != TLV_TAGS.INTEGER ||
-                optionalData!!.getValue() == null || optionalData!!.getValue()!!.size != 1) {
+            if (optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
+                optionalData!!.value == null || optionalData!!.value!!.size != 1) {
                 throw IllegalArgumentException()
             } else {
-                optionalData!!.getValue()!![0].toInt()
+                optionalData!!.value!![0].toInt()
             }
         } else {
             null

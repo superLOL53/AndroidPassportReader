@@ -1,7 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
-import android.text.Layout
+import android.widget.LinearLayout
+import android.widget.TableRow
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
@@ -72,17 +73,17 @@ class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         var tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != 0x61.toByte()) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != 0x61.toByte()) {
             return FAILURE
         }
-        if (tlv.getTLVSequence() == null || tlv.getTLVSequence()!!.getTLVSequence().size != 1) {
+        if (tlv.list == null || tlv.list!!.tlvSequence.size != 1) {
             return FAILURE
         }
-        tlv = tlv.getTLVSequence()!!.getTLVSequence()[0]
-        if (tlv.getTag().size != 2 || tlv.getTag()[0] != 0x5F.toByte() || tlv.getTag()[1] != 0x1F.toByte() || tlv.getValue() == null) {
+        tlv = tlv.list!!.tlvSequence[0]
+        if (tlv.tag.size != 2 || tlv.tag[0] != 0x5F.toByte() || tlv.tag[1] != 0x1F.toByte() || tlv.value == null) {
             return FAILURE
         }
-        val mrz = tlv.getValue()!!
+        val mrz = tlv.value!!
         return when(mrz.size) {
             90 -> decodeTD1MRZ(mrz)
             72 -> decodeTD2MRZ(mrz)
@@ -96,8 +97,48 @@ class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
      * @param context The context in which the view is generated
      * @param parent The parent of the to create views
      */
-    override fun createViews(context: Context, parent: Layout) {
-        //TODO: Implement
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        var row : TableRow
+        if (holderName != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Name:", holderName!!)
+        }
+        if (dateOfBirth != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Date of birth:", dateOfBirth!!)
+        }
+        if (sex != 0.toChar()) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Sex:", sex.toString())
+        }
+        if (issuerCode != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Issuer:", issuerCode!!)
+        }
+        if (documentCode != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Document Code:", documentCode!!)
+        }
+        if (documentNumber != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Document Number:", documentNumber!!)
+        }
+        if (optionalDataDocumentNumber != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Optional Data/Document Number:", optionalDataDocumentNumber!!)
+        }
+        if (dateOfExpiry != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Date of expiry:", dateOfExpiry!!)
+        }
+        if (nationality != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Nationality:", nationality!!)
+        }
+        if (optionalData != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Optional Data:", optionalData!!)
+        }
     }
 
     /**

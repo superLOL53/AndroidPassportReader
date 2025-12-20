@@ -3,9 +3,9 @@ package com.example.emrtdapplication.lds1
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.text.Layout
 import android.view.Gravity
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.ElementaryFileTemplate
@@ -42,26 +42,26 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.getTag().size != 1 || tlv.getTag()[0] != efTag ||
-            tlv.getTLVSequence() == null) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != efTag ||
+            tlv.list == null) {
             return FAILURE
         }
-        for (tag in tlv.getTLVSequence()!!.getTLVSequence()) {
-            if (tag.getTag().size == 1) {
-                if (tag.getTag()[0] == 0xA0.toByte()) {
+        for (tag in tlv.list!!.tlvSequence) {
+            if (tag.tag.size == 1) {
+                if (tag.tag[0] == 0xA0.toByte()) {
                     otherPersons(tag)
                 }
-            } else if (tag.getTag().size == 2) {
-                if (tag.getTag()[0] == 0x5F.toByte()) {
-                    when (tag.getTag()[1].toInt()) {
-                        0x19 -> issuingAuthority = tag.getValue()?.decodeToString()
-                        0x26 -> dateOfIssue = tag.getValue()?.decodeToString()
-                        0x1B -> endorsements = tag.getValue()?.decodeToString()
-                        0x1C -> taxExitRequirements = tag.getValue()?.decodeToString()
+            } else if (tag.tag.size == 2) {
+                if (tag.tag[0] == 0x5F.toByte()) {
+                    when (tag.tag[1].toInt()) {
+                        0x19 -> issuingAuthority = tag.value?.decodeToString()
+                        0x26 -> dateOfIssue = tag.value?.decodeToString()
+                        0x1B -> endorsements = tag.value?.decodeToString()
+                        0x1C -> taxExitRequirements = tag.value?.decodeToString()
                         0x1D -> front = decodeImage(tag)
                         0x1E -> rear = decodeImage(tag)
-                        0x55 -> documentPersonalizationTime = tag.getValue()?.decodeToString()
-                        0x56 -> personalizationSystemSerialNumber = tag.getValue()?.decodeToString()
+                        0x55 -> documentPersonalizationTime = tag.value?.decodeToString()
+                        0x56 -> personalizationSystemSerialNumber = tag.value?.decodeToString()
                     }
                 }
             }
@@ -69,7 +69,7 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return NOT_IMPLEMENTED
     }
 
-    override fun createViews(context: Context, parent: Layout) {
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 
@@ -124,21 +124,21 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     }
 
     private fun otherPersons(persons: TLV) {
-        if (persons.getTLVSequence() == null || persons.getTLVSequence()!!.getTLVSequence().size < 2) {
+        if (persons.list == null || persons.list!!.tlvSequence.size < 2) {
             return
         }
         val list = ArrayList<String>()
-        val tlv = persons.getTLVSequence()!!.getTLVSequence()
+        val tlv = persons.list!!.tlvSequence
         for (i in 1..<tlv.size) {
-            if (tlv[i].getValue() != null) {
-                list.add(tlv[i].getValue()!!.decodeToString().replace('<', ' '))
+            if (tlv[i].value != null) {
+                list.add(tlv[i].value!!.decodeToString().replace('<', ' '))
             }
         }
         otherPersons = list.toTypedArray()
     }
 
     private fun decodeImage(tlv: TLV) : Bitmap? {
-        if (tlv.getValue() == null) return null
-        return BitmapFactory.decodeByteArray(tlv.getValue()!!, 0, tlv.getValue()!!.size)
+        if (tlv.value == null) return null
+        return BitmapFactory.decodeByteArray(tlv.value!!, 0, tlv.value!!.size)
     }
 }
