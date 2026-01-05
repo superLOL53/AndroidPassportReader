@@ -18,10 +18,6 @@ class TLVSequence(byteArray: ByteArray) {
         }
     }
 
-    /*fun getTLVSequence(): ArrayList<TLV> {
-        return tlvSequence
-    }*/
-
     /**
      * Converts the sequence into a byte array
      * @return The byte array representing the TLV sequence

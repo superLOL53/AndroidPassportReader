@@ -28,13 +28,12 @@ const val TAG_LIST_TAG : Byte = 0x5C
  * @property unicodeMajorVersion
  * @property unicodeMinorVersion
  * @property unicodeReleaseVersion
- * @property tagList
- * @property efTag
- * @property shortEFIdentifier
- * @property rawFileContent
+ * @property tagList A list of tags representing EF files present on the eMRTD
+ * @property efTag The tag for the file
+ * @property shortEFIdentifier The short EF identifier of the file
+ * @property rawFileContent The contents of the file as a byte array
  */
 class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
-    //Variables for storing the information from EF.COM
     private var ldsVersion = 0
     private var ldsUpdateLevel = 0
     private var unicodeMajorVersion = 0
@@ -96,6 +95,11 @@ class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         return FILE_SUCCESSFUL_READ
     }
 
+    /**
+     * Dynamically create a view for every biometric information in this file.
+     * @param context The context in which to create the view
+     * @param parent The parent of the view to create
+     */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         // TODO: Implement
     }

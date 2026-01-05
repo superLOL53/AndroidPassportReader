@@ -240,7 +240,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      */
     private fun headerSM(apdu: APDU) : ByteArray {
         val header = apdu.getHeader()
-        header[0] = NfcClassByte.SECURE_MESSAGING
+        header[0] = (NfcClassByte.SECURE_MESSAGING.toInt() or (apdu.getHeader()[0].toInt() and 0xF0)).toByte()
         return header
     }
 

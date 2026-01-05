@@ -30,7 +30,6 @@ import com.example.emrtdapplication.utils.TLV
  * @property optionalData Optional data
  * @property compositeCheckDigit
  * @property holderName The name of the eMRTD holder
- * @property checkDigit
  */
 class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
@@ -67,7 +66,10 @@ class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
     var checkDigit = 0.toChar()
         private set
 
-
+    /**
+     * Parses the contents of [rawFileContent]
+     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     */
     override fun parse() : Int {
         if (rawFileContent == null) {
             return FAILURE

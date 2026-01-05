@@ -37,8 +37,6 @@ const val ERROR_NO_MRZ = -6
 class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Crypto(), private var random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
 
-    //private var sr : SecureRandom
-
     /**
      * Initializes the BAC protocol with the MRZ information from the manual input
      * @param newMRZ: The MRZ information used to derive the cryptographic keys for the BAC protocol

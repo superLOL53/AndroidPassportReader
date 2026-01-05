@@ -97,6 +97,11 @@ class EfSod(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
         }
     }
 
+    /**
+     * Dynamically create a view for every biometric information in this file.
+     * @param context The context in which to create the view
+     * @param parent The parent of the view to create
+     */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }

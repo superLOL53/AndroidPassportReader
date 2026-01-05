@@ -13,6 +13,28 @@ import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
+
+/**
+ * Implements the DG2 file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Class for communicating with the eMRTD
+ * @property rawFileContent The file content as a byte array
+ * @property shortEFIdentifier The short EF identifier for DG2
+ * @property efTag The tag of the DG2 file
+ * @property fullName Full name of document holder in national characters
+ * @property personalNumber
+ * @property fullDateOfBirth
+ * @property placeOfBirth
+ * @property permanentAddress
+ * @property telephone
+ * @property profession
+ * @property title
+ * @property personalSummary
+ * @property custodyInformation
+ * @property otherTDNumbers Other valid document numbers of other valid travel documents
+ * @property image Image of citizenship document
+ * @property otherNames Other names of the document holder
+ */
 class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0B
@@ -44,6 +66,10 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     var otherNames : Array<String>? = null
         private set
 
+    /**
+     * Parses the contents of [rawFileContent]
+     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     */
     override fun parse(): Int {
         if (rawFileContent == null) {
             return FAILURE
@@ -80,6 +106,11 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
+    /**
+     * Dynamically create a view for every biometric information in this file.
+     * @param context The context in which to create the view
+     * @param parent The parent of the view to create
+     */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         var row : TableRow
         if (fullName != null) {
@@ -144,6 +175,10 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
     }
 
+    /**
+     * Decodes a TLV structure into names
+     * @param names A TLV structure containing additional names of the document holder
+     */
     private fun readNames(names : TLV) {
         if (names.list == null || names.list!!.tlvSequence.size < 2) {
             return
@@ -158,11 +193,19 @@ class DG11(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         otherNames = list.toTypedArray()
     }
 
+    /**
+     * Decodes an image contained in a TLV structure
+     * @param image A TLV structure containing an image
+     */
     private fun decodeImage(image : TLV) {
         if (image.value == null) return
         this.image = BitmapFactory.decodeByteArray(image.value!!, 0, image.value!!.size)
     }
 
+    /**
+     * Decodes the TLV structure into document numbers
+     * @param numbers A TLV structure containing document numbers of other valid travel documents
+     */
     private fun decodeDocumentNumbers(numbers: TLV) {
         if (numbers.value == null || numbers.value!!.isEmpty()) {
             return

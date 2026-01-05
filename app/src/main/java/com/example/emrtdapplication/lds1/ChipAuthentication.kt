@@ -1,6 +1,7 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
+import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
@@ -13,6 +14,7 @@ import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.jce.interfaces.ECPublicKey
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
+import java.nio.ByteBuffer
 import java.security.KeyFactory
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -42,7 +44,7 @@ const val ID_PK_ECDH = "0.4.0.127.0.7.2.2.1.2"
  */
 //TODO: Implement
 class ChipAuthentication(private val apduControl: APDUControl, private val chipAuthenticationData : ByteArray?,
-                         private val iv : ByteArray, private val publicKeyInfo: SubjectPublicKeyInfo,
+                         private val iv : ByteArray, private val publicKeyInfo: ChipAuthenticationPublicKeyInfo,
                          private val random: SecureRandom = SecureRandom(), private val crypto: Crypto = Crypto(),
                          private val chipAuthenticationInfo: ChipAuthenticationInfo?) {
 
@@ -63,17 +65,25 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     }
 
     private fun authenticate3DES() : Int {
-        val priv = generateKeyPair()
-        if (priv == null) return FAILURE
-        //val pub = generatePublicKey(priv)
-        //if (pub == null) return FAILURE
-        val pubData = TLV(0x91.toByte(), priv.public.encoded)
+        val keyPair = generateKeyPair()
+        if (keyPair == null) return FAILURE
+        val pubData = TLV(0x91.toByte(), keyPair.public.encoded)
+        val keyRef = if (publicKeyInfo.keyId == null) {
+            null
+        } else {
+            TLV(0x84.toByte(), ByteBuffer.allocate(Int.SIZE_BYTES).putInt(publicKeyInfo.keyId!!).array())
+        }
+        val data = if (keyRef != null) {
+            pubData.toByteArray() + keyRef.toByteArray()
+        } else {
+            pubData.toByteArray()
+        }
         val info = apduControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
             NfcP1Byte.SET_KEY_AGREEMENT_TEMPLATE,
             NfcP2Byte.SET_KEY_AGREEMENT_TEMPLATE,
-            pubData.toByteArray()
+            data
         ))
         if (!apduControl.checkResponse(info)) {
             return FAILURE
@@ -84,7 +94,7 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     private fun authenticateAES() : Int {
         val keyPair = generateKeyPair()
         if (keyPair == null) return FAILURE
-        val protocol = TLV(0x80.toByte(), chipAuthenticationInfo!!.protocol + 0x1)
+        val protocol = TLV(0x80.toByte(), chipAuthenticationInfo!!.protocol)
         val ar = protocol.toByteArray()
         var info = apduControl.sendAPDU(APDU(
             NfcClassByte.COMMAND_CHAINING,
@@ -114,8 +124,8 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     private fun generateKeyPair() : KeyPair? {
         if (chipAuthenticationInfo == null) return null
         try {
-            val spec = X509EncodedKeySpec(publicKeyInfo.encoded)
-            val kf = KeyFactory.getInstance(publicKeyInfo.algorithm.algorithm.id, "BC")
+            val spec = X509EncodedKeySpec(publicKeyInfo.publicKeyInfo.encoded)
+            val kf = KeyFactory.getInstance(publicKeyInfo.publicKeyInfo.algorithm.algorithm.id, "BC")
             var pub : PublicKey? = null
             var params : AlgorithmParameterSpec? = null
             if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH)) {
@@ -128,7 +138,7 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
                 null
             }
             if (pub == null || params == null) return null
-            val keyfac = KeyPairGenerator.getInstance(publicKeyInfo.algorithm.algorithm.id, "BC")
+            val keyfac = KeyPairGenerator.getInstance(publicKeyInfo.publicKeyInfo.algorithm.algorithm.id, "BC")
             keyfac.initialize(params)
             return keyfac.generateKeyPair()
         } catch (e : Exception) {

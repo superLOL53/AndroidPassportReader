@@ -12,8 +12,27 @@ import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.NOT_IMPLEMENTED
+import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
+
+/**
+ * Implements the DG12 file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Class for communicating with the eMRTD
+ * @property rawFileContent The file content as a byte array
+ * @property shortEFIdentifier The short EF identifier for DG12
+ * @property efTag The tag of the DG12 file
+ * @property issuingAuthority The issuing State or Organization of the eMRTD
+ * @property dateOfIssue The issuing date of the eMRTD
+ * @property otherPersons Name of other person(s)
+ * @property endorsements Endorsements, observations
+ * @property taxExitRequirements Tax and/or Exit requirements
+ * @property front Image of the front of the eMRTD
+ * @property rear Image of the rear of the eMRTD
+ * @property documentPersonalizationTime Date and time of personalization
+ * @property personalizationSystemSerialNumber The serial number of the personalization system
+ */
 class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0C
@@ -37,6 +56,10 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     var personalizationSystemSerialNumber: String? = null
         private set
 
+    /**
+     * Parses the contents of [rawFileContent]
+     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     */
     override fun parse(): Int {
         if (rawFileContent == null) {
             return FAILURE
@@ -69,6 +92,11 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return NOT_IMPLEMENTED
     }
 
+    /**
+     * Dynamically create a view for every biometric information in this file.
+     * @param context The context in which to create the view
+     * @param parent The parent of the view to create
+     */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
@@ -123,6 +151,11 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
     }
 
+    /**
+     * Decodes the TLV structure into a string
+     * @param persons A TLV structure containing the name of a person
+     * @return A list of names
+     */
     private fun otherPersons(persons: TLV) {
         if (persons.list == null || persons.list!!.tlvSequence.size < 2) {
             return
@@ -137,6 +170,11 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         otherPersons = list.toTypedArray()
     }
 
+    /**
+     * Decodes the image contained in the value of [tlv]
+     * @param tlv A TLV structure containing an image
+     * @return Decoded image as a Bitmap or null
+     */
     private fun decodeImage(tlv: TLV) : Bitmap? {
         if (tlv.value == null) return null
         return BitmapFactory.decodeByteArray(tlv.value!!, 0, tlv.value!!.size)

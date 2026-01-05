@@ -399,7 +399,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             }
             if (chipPublicKey != null && chipInfo != null) {
                 val auth = ChipAuthentication(apduControl, null, ByteArray(0),
-                    chipPublicKey.publicKeyInfo, chipAuthenticationInfo = chipInfo)
+                    chipPublicKey, chipAuthenticationInfo = chipInfo)
                 auth.authenticate()
             }
         }

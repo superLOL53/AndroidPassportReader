@@ -22,6 +22,16 @@ import java.security.SecureRandom
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
+
+/**
+ * Implements the DG15 file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Class for communicating with the eMRTD
+ * @property rawFileContent The file content as a byte array
+ * @property shortEFIdentifier The short EF identifier for DG15
+ * @property efTag The tag of the DG15 file
+ * @property isAuthenticated Indicates if the Active Authentication protocol was successful
+ */
 class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0F
@@ -32,7 +42,13 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     private val sha256 : Byte = 0x34.toByte()
     private val sha384 : Byte = 0x36.toByte()
     private val sha512 : Byte = 0x35.toByte()
+    var isAuthenticated = false
+        private set
 
+    /**
+     * Parses the contents of [rawFileContent]
+     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     */
     override fun parse(): Int {
         if (rawFileContent == null) {
             return FAILURE
@@ -45,11 +61,21 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
     }
 
+    /**
+     * Dynamically create a view for every biometric information in this file.
+     * @param context The context in which to create the view
+     * @param parent The parent of the view to create
+     */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         //TODO: Implement
     }
 
+    /**
+     * Implements the Active Authentication protocol
+     * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
+     */
     fun activeAuthentication(random: SecureRandom = SecureRandom()) : Int {
+        isAuthenticated = false
         if (publicKeyInfo == null) {
             return FAILURE
         }
@@ -59,7 +85,13 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         if (!apduControl.checkResponse(response)) {
             return FAILURE
         }
-        response = decrypt(apduControl.removeRespondCodes(response))
+        response = apduControl.removeRespondCodes(response)
+        val d = decrypt(response)
+        if (d == null) {
+            return FAILURE
+        } else {
+            response = d
+        }
         val hashAlgorithm = if (response[response.size-1] == sha1) {
             SHA1Digest()
         } else {
@@ -91,17 +123,29 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         val calculatedHash = ByteArray(hashAlgorithm.digestSize)
         hashAlgorithm.doFinal(calculatedHash, 0)
         return if (hash.contentEquals(calculatedHash)) {
+            isAuthenticated = true
             SUCCESS
         } else {
+            isAuthenticated =false
             FAILURE
         }
     }
 
-    private fun decrypt(byteArray: ByteArray) : ByteArray {
-        val c = Cipher.getInstance(publicKeyInfo!!.algorithm.algorithm.id)
-        val kf = KeyFactory.getInstance(publicKeyInfo!!.algorithm.algorithm.id)
-        val key = kf.generatePublic(X509EncodedKeySpec(publicKeyInfo!!.encoded))
-        c.init(Cipher.DECRYPT_MODE, key)
-        return c.doFinal(byteArray)
+    /**
+     * Decrypts the [byteArray] with the public key in [publicKeyInfo]
+     * @param byteArray The byte array to be decrypted
+     * @return The decrypted byte array or null
+     */
+    private fun decrypt(byteArray: ByteArray) : ByteArray? {
+        try {
+            val c = Cipher.getInstance(publicKeyInfo!!.algorithm.algorithm.id)
+            val kf = KeyFactory.getInstance(publicKeyInfo!!.algorithm.algorithm.id)
+            val key = kf.generatePublic(X509EncodedKeySpec(publicKeyInfo!!.encoded))
+            c.init(Cipher.DECRYPT_MODE, key)
+            return c.doFinal(byteArray)
+        } catch (_ : Exception) {
+
+        }
+        return null
     }
 }

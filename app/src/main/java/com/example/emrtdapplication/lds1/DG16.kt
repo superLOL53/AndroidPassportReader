@@ -13,6 +13,16 @@ import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import kotlin.experimental.and
 
+
+/**
+ * Implements the DG16 file and inherits from [ElementaryFileTemplate]
+ *
+ * @property apduControl Class for communicating with the eMRTD
+ * @property rawFileContent The file content as a byte array
+ * @property shortEFIdentifier The short EF identifier for DG16
+ * @property efTag The tag of the DG16 file
+ * @property persons A list of [Person] for emergency contacts
+ */
 class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x10
@@ -20,6 +30,10 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
     var persons: Array<Person>? = null
             private set
 
+    /**
+     * Parses the contents of [rawFileContent]
+     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     */
     override fun parse(): Int {
         if (rawFileContent == null) {
             return FAILURE
@@ -42,6 +56,11 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         return SUCCESS
     }
 
+    /**
+     * Dynamically create a view for every biometric information in this file.
+     * @param context The context in which to create the view
+     * @param parent The parent of the view to create
+     */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         if (persons == null) return
         var i = 0
@@ -55,7 +74,8 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
                 TableRow.LayoutParams.WRAP_CONTENT)
             table.addView(row)
             val text = TextView(context)
-            text.text = "Person $i"
+            val s = "Emergency Contact $i"
+            text.text = s
             row.addView(text)
             i++
             row = createRow(context, table)
@@ -69,6 +89,11 @@ class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
     }
 
+    /**
+     * Decodes a TLV structure into a [Person]
+     * @param person A TLV structure containing [Person]
+     * @return [Person] if [person] could be decoded correctly, otherwise null
+     */
     private fun getPerson(person: TLV) : Person? {
         if (person.list == null || person.list!!.tlvSequence.size != 4) {
             return null
