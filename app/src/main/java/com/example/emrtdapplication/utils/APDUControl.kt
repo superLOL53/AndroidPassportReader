@@ -6,7 +6,7 @@ import java.io.IOException
 import javax.crypto.Cipher
 
 /**
- * Enum class for NFC types. EMRTD uses ISO DEP as communication protocol. All other are insufficient and not used.
+ * Enum class for NFC types. eMRTD uses ISO DEP as communication protocol. All other are insufficient and not used.
  */
 enum class NfcUse {
     UNDEFINED,
@@ -16,8 +16,6 @@ enum class NfcUse {
 /**
  * Constants for the class APDUControl
  */
-const val AC_TAG = "APDUControl"
-const val AC_ENABLE_LOGGING = true
 const val INIT_SUCCESS = 0
 const val CONNECT_SUCCESS = 1
 const val CLOSE_SUCCESS = 2
@@ -34,7 +32,7 @@ const val ERROR_UNABLE_TO_CLOSE = -5
  * @property maxCommandLength The maximum length of the sending APDU
  * @property isoDepSupport Indicates the support for ISO DEP of the discovered tag
  * @property isoDep Used to transceive APDUs to and from the ePassport
- * @property nfcTechUse Tells the NFC Technology to use (ISODEP, NfcA, NfcB,...)
+ * @property nfcTechUse Tells the NFC Technology to use (ISO DEP, NfcA, NfcB,...)
  * @property maxTransceiveLength The maximum length for APDUs according to [isoDep]
  * @property sendEncryptedAPDU Tells if the APDU should be sent as an encrypted APDU
  * @property isAES Tells if the encryption uses AES
@@ -56,7 +54,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     private var ssc = byteArrayOf(0)
 
     /**
-     * Initialize communication with the EMRTD
+     * Initialize communication with the eMRTD
      * @param tag: The NFC tag to connect to
      * @return Initialize success(0), no NFC tag(-1) or no ISO DEP support(-2)
      */
@@ -77,10 +75,10 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     }
 
     /**
-     * Sends and receives APDUs from the EMRTD. If encryption is used, it sends the APDU to other functions
+     * Sends and receives APDUs from the eMRTD. If encryption is used, it sends the APDU to other functions
      * for further processing
-     * @param apdu: The APDU to be sent to the EMRTD
-     * @return The received APDU from the EMRTD
+     * @param apdu: The APDU to be sent to the eMRTD
+     * @return The received APDU from the eMRTD
      */
     fun sendAPDU(apdu : APDU) : ByteArray {
         if (sendEncryptedAPDU) {
@@ -98,7 +96,6 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      */
     @OptIn(ExperimentalStdlibApi::class)
     private fun sendISODEP(apdu: APDU) : ByteArray {
-        log(apdu.getByteArray().toHexString())
         return isoDep!!.transceive(apdu.getByteArray())
     }
 
@@ -126,7 +123,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     }
 
     /**
-     * Connecting to the EMRTD
+     * Connecting to the eMRTD
      * @return Connect success(1), unable to connect(-3) or iso dep not selected(-4)
      */
     fun connectToNFC() : Int{
@@ -146,7 +143,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     }
 
     /**
-     * Closes the NFC Connection from the EMRTD
+     * Closes the NFC Connection from the eMRTD
      * @return Success (2) or unable to close (-5)
      */
     fun closeNFC() : Int {
@@ -184,10 +181,10 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     }
 
     /**
-     * Builds and sends encrypted APDUs. The received APDU from the EMRTD is verified, decrypted and
+     * Builds and sends encrypted APDUs. The received APDU from the eMRTD is verified, decrypted and
      * returned
-     * @param apdu: The APDU to be encrypted and sent to the EMRTD
-     * @return The verified and decrypted APDU received from the EMRTD
+     * @param apdu: The APDU to be encrypted and sent to the eMRTD
+     * @return The verified and decrypted APDU received from the eMRTD
      */
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         inc()
@@ -223,14 +220,12 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         if (apdu.useLeExt || apdu.useLcExt) {
             finalApdu += 0x0
         }
-        log("ProtectedAPDU: ", finalApdu)
         inc()
-        val rapdu = isoDep!!.transceive(finalApdu)
-        log("RAPDU: ", rapdu)
-        if (rapdu.size > 13) {
-            verifyMAC(rapdu)
+        val rApdu = isoDep!!.transceive(finalApdu)
+        if (rApdu.size > 13) {
+            verifyMAC(rApdu)
         }
-        return extractAPDU(rapdu)
+        return extractAPDU(rApdu)
     }
 
     /**
@@ -313,8 +308,8 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     }
 
     /**
-     * Extracts the APDU from the BAC encrypted APDU received from the EMRTD
-     * @param bytes: The received, encrypted APDU from the EMRTD
+     * Extracts the APDU from the BAC encrypted APDU received from the eMRTD
+     * @param bytes: The received, encrypted APDU from the eMRTD
      * @return The decrypted APDU without padding
      */
     private fun extractAPDU(bytes: ByteArray) : ByteArray {
@@ -330,20 +325,6 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         }
         return normalAPDU
     }
-
-    /*/**
-     * Removes the padding of the input array
-     * @param bytes: The byte array for which the padding is removed
-     * @return The byte array without padding
-     */
-    private fun removePadding(bytes: ByteArray) : ByteArray {
-        val last = bytes.lastIndexOf(0x80.toByte())
-        return if (last == -1) {
-            bytes
-        } else {
-            bytes.slice(0..<last).toByteArray()
-        }
-    }*/
 
     /**
      * Increments the sequence counter by 1
@@ -363,17 +344,6 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return The computed MAC of the input
      */
     private fun computeMAC(m : ByteArray) : ByteArray {
-        /*try {
-            val mac = ISO9797Alg3Mac(DESEngine(), 64)
-            mac.init(KeyParameter(encryptionKeyMAC))
-            mac.update(m, 0, m.size)
-            val out = ByteArray(8)
-            mac.doFinal(out, 0)
-            return out
-        } catch (e : Exception) {
-            log("Exception: ${e.message}")
-        }
-        return byteArrayOf(0)*/
         return if (isAES) {
             crypto.computeCMAC(m, encryptionKeyMAC)
         } else {
@@ -383,13 +353,13 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
 
     /**
      * Verifies the MAC of a received APDU
-     * @param rapdu: The received APDU from the EMRTD
+     * @param rApdu: The received APDU from the eMRTD
      * @return True if the MAC verification succeeds, otherwise False
      */
-    private fun verifyMAC(rapdu : ByteArray) : Boolean {
-        val n = addPadding(ssc + rapdu.slice(0..rapdu.size-13))
+    private fun verifyMAC(rApdu : ByteArray) : Boolean {
+        val n = addPadding(ssc + rApdu.slice(0..rApdu.size-13))
         val cc = computeMAC(n)
-        return cc.contentEquals(rapdu.slice(rapdu.size-10..rapdu.size-3).toByteArray())
+        return cc.contentEquals(rApdu.slice(rApdu.size-10..rApdu.size-3).toByteArray())
     }
 
     /**
@@ -400,27 +370,10 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     private fun encrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
             crypto.cipherAES(bytes, encryptionKey)
-            //return encryptAES(bytes)
         } else {
             crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray())
-            //return encrypt3DES(bytes)
         }
     }
-/*
-    private fun encryptAES(bytes: ByteArray) : ByteArray {
-        val k = SecretKeySpec(encryptionKey, "AES")
-        val c = Cipher.getInstance("AES/CBC/NoPadding")
-        c.init(Cipher.ENCRYPT_MODE, k)
-        return c.doFinal(bytes)
-    }
-
-    private fun encrypt3DES(bytes: ByteArray) : ByteArray {
-        val k = SecretKeySpec(encryptionKey + encryptionKey.slice(0..7).toByteArray(), "DESede")
-        val c = Cipher.getInstance("DESede/CBC/NoPadding")
-        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
-        c.init(Cipher.ENCRYPT_MODE, k,i)
-        return c.doFinal(bytes)
-    }*/
 
     /**
      * Decrypts the
@@ -430,32 +383,10 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     private fun decrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
             crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE)
-            //decryptAES(bytes)
         } else {
             crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray(), Cipher.DECRYPT_MODE)
-            //decrypt3DES(bytes)
         }
     }
-/*
-    private fun decryptAES(bytes: ByteArray) : ByteArray {
-        val k = SecretKeySpec(encryptionKey, "AES")
-        val c = Cipher.getInstance("AES/CBC/NoPadding")
-        c.init(Cipher.DECRYPT_MODE, k)
-        return c.doFinal(bytes)
-    }
-
-    /**
-     * Decrypt BAC encrypted data received from the EMRTD
-     * @param data: The encrypted data of the received APDU
-     * @return The decrypted data
-     */
-    private fun decrypt3DES(data: ByteArray) : ByteArray {
-        val k = SecretKeySpec(encryptionKey + encryptionKey.slice(0..7).toByteArray(), "DESede")
-        val c = Cipher.getInstance("DESede/CBC/NoPadding")
-        val i = IvParameterSpec(byteArrayOf(0,0,0,0,0,0,0,0))
-        c.init(Cipher.DECRYPT_MODE, k, i)
-        return c.doFinal(data)
-    }*/
 
     /**
      * Adds padding to the byte array
@@ -463,36 +394,10 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return The padded byte array
      */
     private fun addPadding(byteArray: ByteArray) : ByteArray {
-        /*val pad = 8 - byteArray.size % 8
-        if (pad == 8) {
-            return byteArray + byteArrayOf(0x80.toByte(), 0,0,0,0,0,0,0)
-        }
-        var padArray = byteArray + 0x80.toByte()
-        for (i in 1..<pad) {
-            padArray += 0x00
-        }
-        return padArray*/
         return if (isAES) {
             crypto.addPadding(byteArray, encryptionKey.size)
         } else {
             crypto.addPadding(byteArray, 8)
         }
-    }
-
-    /**
-     * Logs message in the android logcat
-     * @param msg: The message to be printed in the log
-     */
-    private fun log(msg : String) {
-        Logger.log(AC_TAG, AC_ENABLE_LOGGING, msg)
-    }
-
-    /**
-     * Logs message in the android logcat
-     * @param msg: The message to be printed in the log
-     * @param b: The byte array to be printed in the log as hexadecimal bytes
-     */
-    private fun log(msg : String, b : ByteArray) {
-        Logger.log(AC_TAG, AC_ENABLE_LOGGING, msg, b)
     }
 }

@@ -19,8 +19,10 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
  *
  *      id-icao-mrtd-security-aaProtocolObject OBJECT IDENTIFIER ::= { id-icao-mrtd-security 5 }
  *
+ * @param tlv TLV structure containing an encoded ActiveAuthenticationInfo sequence
  * @property version protocol version
  * @property signatureAlgorithm OID representing the signature algorithm
+ * @throws IllegalArgumentException If [tlv] does not contain an ActiveAuthenticationInfo sequence
  */
 class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
     var version : Int

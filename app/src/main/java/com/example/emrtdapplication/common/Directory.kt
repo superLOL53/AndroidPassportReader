@@ -48,8 +48,8 @@ class Directory() {
     }
 
     /**
-     * Reading the EF.DIR file from the EMRTD
-     * @return The return value to indicate success(0), unable to select the file(-1) or unable to read the file(-2)
+     * Reading the EF.DIR file from the eMRTD
+     * @return [FILE_UNABLE_TO_SELECT], [FILE_UNABLE_TO_READ] or [SUCCESS]
      */
     fun read() : Int {
         var info = apduControl!!.sendAPDU(APDU(
@@ -100,8 +100,8 @@ class Directory() {
             return FILE_UNABLE_TO_READ
         }
         val innerTLV = tlv.value?.let { TLV(it) }
-        if (innerTLV == null || !innerTLV.isValid || innerTLV.tag.size != 1 || tlv.tag[0] != INTERNATIONAL_AID_TAG || innerTLV.length != AID_LENGTH || innerTLV.value!!.toHexString().startsWith(
-                AID)) {
+        if (innerTLV == null || !innerTLV.isValid || innerTLV.tag.size != 1 || tlv.tag[0] != INTERNATIONAL_AID_TAG ||
+            innerTLV.length != AID_LENGTH || innerTLV.value!!.toHexString().startsWith(AID)) {
             return FILE_UNABLE_TO_READ
         }
         when (innerTLV.value?.get(5)) {

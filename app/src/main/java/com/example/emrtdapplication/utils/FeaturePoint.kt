@@ -1,5 +1,13 @@
 package com.example.emrtdapplication.utils
 
+/**
+ * Class representing a feature point on a facial image
+ * @param features Byte array containing a feature point
+ * @property type Type of the feature point. Must be 1
+ * @property point Encoded feature animation point according to ISO/IEC 14496-2
+ * @property horizontalPosition Horizontal pixel position from the upper left pixel
+ * @property verticalPosition Vertical pixel position from the upper left pixel
+ */
 //TODO: Refine class
 class FeaturePoint(features: ByteArray) {
     val type : Byte

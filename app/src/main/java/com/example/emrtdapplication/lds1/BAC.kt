@@ -15,8 +15,6 @@ import kotlin.experimental.xor
 /**
  * Constants for the class BAC
  */
-//const val BAC_TAG = "BAC"
-//const val BAC_ENABLE_LOGGING = true
 const val ENCRYPTION_KEY_VALUE_C : Byte = 1
 const val MAC_COMPUTATION_KEY_VALUE_C : Byte = 2
 const val BAC_PROTOCOL_SUCCESS = 0
@@ -32,6 +30,7 @@ const val ERROR_NO_MRZ = -6
  *
  * @property apduControl Used for sending and receiving APDUs
  * @property crypto Used for cryptographic operations
+ * @property random Secure random number generator
  * @property mrzInformation The MRZ of the eMRTD
  */
 class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Crypto(), private var random: SecureRandom? = SecureRandom()) {
@@ -53,7 +52,7 @@ class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Cry
     /**
      * Implements the BAC protocol, derives the cryptographic keys and stores them in the APDUControl class
      * for further application. The LDS1 application has to be selected before BAC can be run.
-     * @return [SUCCESS] if protocol was successful or a negative error code
+     * @return [BAC_PROTOCOL_SUCCESS] if protocol was successful or a negative error code
      */
     fun bacProtocol() : Int {
         if (mrzInformation == null) {

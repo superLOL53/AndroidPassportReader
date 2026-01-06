@@ -16,8 +16,6 @@ import kotlin.experimental.and
 /**
  * Constants for the class AttributeInfo
  */
-//const val AI_TAG = "ai"
-//const val AI_ENABLE_LOGGING = true
 const val CARD_CAPABILITY_TAG : Byte = 0x47
 const val SUPPORT_RECORD_NUMBER : Byte = 0x02
 const val SUPPORT_SHORT_EF_ID : Byte = 0x04
@@ -32,9 +30,6 @@ const val EXTENDED_LENGTH_TAG_2 : Byte = 0x66
 const val AI_ID_1: Byte = 0x2F
 const val AI_ID_2: Byte = 0x01
 const val AI_MIN_LENGTH = 12
-//const val AI_EXTENDED_LENGTH_INFORMATION_START = 5
-//const val AI_EXTENDED_LENGTH_INFORMATION_NUMBER_OF_TAGS = 2
-//const val INTEGER_MAX_BYTEARRAY_SIZE = 4
 
 /**
  * Implements the EF.ATR/INFO EF. The file is optional if only LDS1 application is present on the ePassport
@@ -49,7 +44,6 @@ const val AI_MIN_LENGTH = 12
  * @property maxAPDUReceiveBytes The maximum bytes that can be received from a single APDU
  */
 class AttributeInfo(private var apduControl: APDUControl) {
-    //Variables for storing the information
     var supportFullDFNameSelection = false
         private set
     var supportShortEFNameSelection = false
@@ -68,30 +62,25 @@ class AttributeInfo(private var apduControl: APDUControl) {
         private set
 
     /**
-     * Reading the EF.ATR/INFO file from the EMRTD
-     * @return The return value to indicate success(0), unable to select the file(-1) or unable to read the file(-2)
+     * Reading the EF.ATR/INFO file from the eMRTD
+     * @return [FILE_UNABLE_TO_SELECT], [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ]
      */
     fun read() : Int {
         reset()
-        //log("Select Attribute Info")
         var info = apduControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(AI_ID_1, AI_ID_2)))
-        //log("Select Attribute info answer: ", info)
         if (!apduControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
-        //log("Attribute info answer: ", info)
-        //log("Read Attribute Info")
         info = apduControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO, 256
         ))
-        //log("Attribute info answer: ", info)
         if (!apduControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
@@ -121,10 +110,9 @@ class AttributeInfo(private var apduControl: APDUControl) {
      * Parsing the contents of the EF.ATR/INFO file. The file is structured as a TLV structure. The information
      * contained in the EF.ATR/INFO file is stored in the variables of this class
      * @param contents: The contents of the EF.ATR/INFO file without the respond code of the APDU
-     * @return Success(0) or Failure(-1) on parsing the data
+     * @return [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ] on parsing the data
      */
     private fun parse(contents : ByteArray) : Int {
-        //log( "Parsing...")
         if (contents.size < AI_MIN_LENGTH) {
             return FILE_UNABLE_TO_READ
         }
@@ -158,15 +146,12 @@ class AttributeInfo(private var apduControl: APDUControl) {
      */
     private fun parseByte1(byte: Byte) {
         if (byte and SUPPORT_DF_FULL_NAME_SELECTION == SUPPORT_DF_FULL_NAME_SELECTION) {
-            //log("Full DF Name Selection supported")
             supportFullDFNameSelection = true
         }
         if (byte and SUPPORT_SHORT_EF_ID == SUPPORT_SHORT_EF_ID) {
-            //log("Short EF Name Selection supported")
             supportShortEFNameSelection = true
         }
         if (byte and SUPPORT_RECORD_NUMBER == SUPPORT_RECORD_NUMBER) {
-            //log("Record Number supported")
             supportRecordNumber = true
         }
     }
@@ -190,21 +175,19 @@ class AttributeInfo(private var apduControl: APDUControl) {
      */
     private fun parseByte3(byte: Byte) {
         if (byte and SUPPORT_COMMAND_CHAINING == SUPPORT_COMMAND_CHAINING) {
-            //log("Command Chaining supported")
             supportCommandChaining = true
         }
         if (byte and SUPPORT_EXTENDED_LENGTHS == SUPPORT_EXTENDED_LENGTHS) {
-            //log("Extended Length supported")
             supportExtendedLength = true
         }
         if (byte and EXTENDED_LENGTH_INFO_IN_ATRINFO == EXTENDED_LENGTH_INFO_IN_ATRINFO) {
-            //log("Extended Length info in file")
             extendedLengthInfoInFile = true
         }
     }
 
     /**
      * Parses the extended length info in the file.
+     * @param lengthInfo List of TLV structures containing the extended length info
      */
     private fun parseExtendedLengthInfo(lengthInfo: ArrayList<TLV>) {
         if (lengthInfo[0].value != null) {

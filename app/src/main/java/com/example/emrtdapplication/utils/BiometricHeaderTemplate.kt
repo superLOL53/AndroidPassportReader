@@ -1,5 +1,18 @@
 package com.example.emrtdapplication.utils
 
+/**
+ * Class representing a Biometric Header Template (BHT)
+ * @param biometricHeaderTemplate A TLV structure encoding a BHT
+ * @property headerVersion Version of the header template
+ * @property biometricType The type of the encoded biometric feature in the Biometric Data Block
+ * @property biometricSubType The subtype of the encoded biometric feature
+ * @property creationTime Time and date the biometric feature was created
+ * @property validityPeriod Valid time period of the biometric feature
+ * @property biometricReferenceDataCreator Creator of the biometric feature
+ * @property formatOwner Owner of the format of the encoded BDB
+ * @property formatType Type of the format of the encoded BDB
+ * @throws IllegalArgumentException If the [biometricHeaderTemplate] contains an invalid encoded BHT
+ */
 class BiometricHeaderTemplate(biometricHeaderTemplate : TLV) {
     var headerVersion : Short? = null
     var biometricType : ByteArray? = null

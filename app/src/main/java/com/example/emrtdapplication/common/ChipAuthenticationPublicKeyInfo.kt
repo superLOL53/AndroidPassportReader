@@ -13,8 +13,11 @@ import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
  *          chipAuthenticationPublicKey SubjectPublicKeyInfo,
  *          keyId INTEGER OPTIONAL
  *      }
+ *
+ * @param tlv TLV structure containing an encoded instance of ChipAuthenticationPublicKeyInfo
  * @property publicKeyInfo The public key encoded as [SubjectPublicKeyInfo]
  * @property keyId Id of the public key if multiple public keys are present
+ * @throws IllegalArgumentException If [tlv] does not contain an instance of ChipAuthenticationPublicKeyInfo
  */
 class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv) {
     var publicKeyInfo : SubjectPublicKeyInfo

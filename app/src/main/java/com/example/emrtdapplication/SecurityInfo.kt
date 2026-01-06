@@ -46,17 +46,15 @@ const val EF_DIR_OID = "2.23.136.1.1.13"
  * [PACEInfo], [PACEDomainParameterInfo], [ActiveAuthenticationInfo],
  * [ChipAuthenticationInfo], [ChipAuthenticationPublicKeyInfo], [TerminalAuthenticationInfo]
  *
+ * @param tlv The [TLV] Structure representing an ASN1 SecurityInfo Sequence
  * @property objectIdentifier The Object Identifier of the protocol as a [String]
  * @property requiredData The required data of the protocol as a [TLV] Structure.
  * @property optionalData Optional data of the protocol as a [TLV] Structure. Can be null.
  * @property type The type of an instance of the class. Can be either unknown for unsupported protocols or one of the supported protocols
  * @property protocol The [objectIdentifier] represented as a [ByteArray]
- *
- * @param tlv The [TLV] Structure representing an ASN1 SecurityInfo Sequence
+ * @throws IllegalArgumentException If [tlv] does not contain any of the subclasses of a SecurityInfo
  */
 open class SecurityInfo(tlv: TLV) {
-    //var rawFileContent : ByteArray = rawFileContent
-    //    private set
     var objectIdentifier : String
         private set
     var requiredData : TLV

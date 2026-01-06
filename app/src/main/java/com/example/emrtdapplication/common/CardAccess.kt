@@ -23,6 +23,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property caID2 Second byte of the file id, which is also the short EF id
  * @property paceInfos Array list of [PACEInfo] contained in the file
  * @property paceDomainParams Array list of [PACEDomainParameterInfo] contained in the file
+ * @throws IllegalArgumentException If the file does not contain [PACEInfo] or [PACEDomainParameterInfo]
  */
 class CardAccess(private var apduControl: APDUControl) {
     private val caID1: Byte = 0x01
@@ -31,8 +32,8 @@ class CardAccess(private var apduControl: APDUControl) {
     val paceDomainParams = ArrayList<PACEDomainParameterInfo>()
 
     /**
-     * Reading the EF.CardAccess file from the EMRTD.
-     * @return The return value indicating success(0), unable to select(-1) or unable to read from file(-2)
+     * Reading the EF.CardAccess file from the eMRTD.
+     * @return [FILE_UNABLE_TO_SELECT], [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ]
      */
     fun read() : Int {
         var info = apduControl.sendAPDU(APDU(
@@ -56,9 +57,10 @@ class CardAccess(private var apduControl: APDUControl) {
     }
 
     /**
-     * Parsing the contents of the EF.CardAccess file read from the EMRTD
+     * Parsing the contents of the EF.CardAccess file read from the eMRTD
      * @param b: The contents of the EF.CardAccess file
-     * @return The return value indicating Success(0) or unable to read from file(-2)
+     * @return [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ]
+     * @throws IllegalArgumentException If [b] does not contain [PACEInfo] or [PACEDomainParameterInfo]
      */
     private fun parse(b : ByteArray) : Int {
         val tlv = TLV(b)

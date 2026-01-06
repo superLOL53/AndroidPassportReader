@@ -71,7 +71,7 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      * @param mrz: The MRZ information from the manual input
      * @param can: The CAN from the manual input
      * @param paceOid: The supported cryptographic PACE protocol
-     * @return Success (0) or error code indicating a failure
+     * @return [SUCCESS] or error code indicating a failure
      */
     fun init(mrz :String?, can : Boolean, paceOid : ByteArray?, parameters: Byte): Int {
         mrzInformation = null
@@ -96,7 +96,7 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
 
     /**
      * Implements the PACE protocol.
-     * @return Success(0) or error code indicating a failure
+     * @return [SUCCESS] or error code indicating a failure
      */
     fun paceProtocol() : Int {
         if (idPACEOid == null) {
@@ -132,7 +132,7 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
             if (!apduControl.checkResponse(info)) {
                 return INVALID_GENERAL_AUTHENTICATE
             }
-        } catch (e : Exception) {
+        } catch (_ : Exception) {
             return FAILURE
         }
         val z = TLV(apduControl.removeRespondCodes(info)).list!!.tlvSequence[0].value
@@ -266,9 +266,9 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      */
     private fun getDHParams() : DHParameters? {
         return when (parameters) {
-            MODP_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_1024_160
-            MODP_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_2048_224
-            MODP_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_2048_256
+            MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_1024_160
+            MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_2048_224
+            MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_2048_256
             else -> null
         }
     }

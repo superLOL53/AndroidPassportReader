@@ -1,6 +1,15 @@
 package com.example.emrtdapplication.utils
 
-class FacialRecordHeader(recordHeader: ByteArray) {
+/**
+ * Class representing a header of a facial Biometric Data Block according to ISO/IEC 19794-5.
+ * @param recordHeader Byte array containing an encoded facial record header
+ * @property formatIdentifier Indicates face image data
+ * @property versionNumber The version of the biometric data encoding
+ * @property recordLength The overall length of the record including the header and data block
+ * @property numberOfFaces Number of faces in the corresponding facial record data block.
+ * @throws IllegalArgumentException If the size of the [recordHeader] is invalid
+ */
+class FacialRecordHeader(recordHeader: ByteArray) : BiometricHeader(BiometricType.FACE) {
     private val formatIdentifier : String
     private val versionNumber : String
     private val recordLength : Int

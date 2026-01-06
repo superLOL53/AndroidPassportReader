@@ -1,4 +1,4 @@
 package com.example.emrtdapplication.lds2
 
-class VisaRecords {
-}
+//TODO: Implement
+class VisaRecords

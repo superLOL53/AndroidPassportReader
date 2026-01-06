@@ -7,7 +7,9 @@ import android.widget.TableLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.BiometricInformationGroupTemplate
+import com.example.emrtdapplication.utils.BiometricType
 import com.example.emrtdapplication.utils.FAILURE
+import com.example.emrtdapplication.utils.FacialRecordData
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
@@ -41,7 +43,7 @@ class DG2(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         tlv = tlv.list!!.tlvSequence[0]
-        biometricInformation = BiometricInformationGroupTemplate(tlv)
+        biometricInformation = BiometricInformationGroupTemplate(tlv, BiometricType.FACE)
         return SUCCESS
     }
 
@@ -51,16 +53,17 @@ class DG2(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
      * @param parent The parent of the view to create
      */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        if (biometricInformation != null && biometricInformation!!.biometricInformations != null) {
-            for (bios in biometricInformation!!.biometricInformations) {
+        if (biometricInformation != null && biometricInformation!!.biometricInformationList != null) {
+            for (bios in biometricInformation!!.biometricInformationList) {
                 if (bios == null) continue
-                val image = bios.biometricDataBlock.facialRecordData.image
+                val biometricData = bios.biometricDataBlock.biometricData as FacialRecordData
+                val image = biometricData.image
                 val view = ImageView(context)
                 view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT)
                 view.setImageBitmap(image)
                 parent.addView(view)
-                val facialInfo = bios.biometricDataBlock.facialRecordData.facialInformation
+                val facialInfo = biometricData.facialInformation
                 val table = TableLayout(context)
                 parent.addView(table)
                 var row = createRow(context, table)

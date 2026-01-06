@@ -12,7 +12,9 @@ import com.example.emrtdapplication.utils.TlvTags
  *          version INTEGER -- MUST be 1
  *      }
  *
+ * @param tlv TLV structure containing an encoded instance of TerminalAuthenticationInfo
  * @property version The protocol version. Must be one
+ * @throws IllegalArgumentException If [tlv] does not contain an encoded instance of TerminalAuthenticationInfo
  */
 class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
     var version : Int

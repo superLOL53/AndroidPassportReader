@@ -5,6 +5,7 @@ import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.BiometricInformationGroupTemplate
+import com.example.emrtdapplication.utils.BiometricType
 import com.example.emrtdapplication.utils.FAILURE
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
@@ -40,9 +41,9 @@ class DG4(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
             return FAILURE
         }
         tlv = tlv.list!!.tlvSequence[0]
-        biometricInformation = BiometricInformationGroupTemplate(tlv)
-        if (biometricInformation != null && biometricInformation!!.biometricInformations != null) {
-            for (bit in biometricInformation!!.biometricInformations!!) {
+        biometricInformation = BiometricInformationGroupTemplate(tlv, BiometricType.IRIS)
+        if (biometricInformation != null && biometricInformation!!.biometricInformationList != null) {
+            for (bit in biometricInformation!!.biometricInformationList!!) {
                 if (bit != null && bit.biometricHeaderTemplate.biometricSubType == null) {
                     biometricInformation = null
                     return FAILURE

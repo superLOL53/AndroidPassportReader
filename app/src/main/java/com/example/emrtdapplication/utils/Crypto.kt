@@ -123,15 +123,6 @@ class Crypto {
         return out
     }
 
-    fun checkCMAC(c: ByteArray, m: ByteArray, key: ByteArray) : Boolean {
-        //val cMac = CMac(AESEngine(), m.size*8)
-        //cMac.init(KeyParameter(key))
-        //cMac.update(c, 0, c.size)
-        //val out = ByteArray(m.size)
-        //cMac.doFinal(out, 0)
-        return m.contentEquals(computeCMAC(c, key, m.size))
-    }
-
     fun checkMAC(c: ByteArray, m: ByteArray, key: ByteArray, usePadding: Boolean = true) : Boolean {
         //val mac = ISO9797Alg3Mac(DESEngine(), m.size*8, ISO7816d4Padding())
         //mac.init(KeyParameter(key))
@@ -174,8 +165,8 @@ class Crypto {
         return c.doFinal(toEncrypt)
     }
 
-    fun computeKey(hashname: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray {
-        val key = hash(hashname, seed + byteArrayOf(ZERO_BYTE, ZERO_BYTE, ZERO_BYTE, c))
+    fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray {
+        val key = hash(hashName, seed + byteArrayOf(ZERO_BYTE, ZERO_BYTE, ZERO_BYTE, c))
         if (is3DES) {
             for (i in key.indices) {
                 if ((key[i] and 0xFE.toByte()).countOneBits() % 2 == 0) {
@@ -188,9 +179,9 @@ class Crypto {
         return key
     }
 
-    fun hash(hashname: String, hashbytes: ByteArray) : ByteArray {
-        val md = MessageDigest.getInstance(hashname)
-        md.update(hashbytes)
+    fun hash(hashName: String, hashBytes: ByteArray) : ByteArray {
+        val md = MessageDigest.getInstance(hashName)
+        md.update(hashBytes)
         return md.digest()
     }
 

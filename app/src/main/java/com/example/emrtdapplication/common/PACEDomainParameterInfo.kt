@@ -20,6 +20,7 @@ import org.spongycastle.asn1.x509.AlgorithmIdentifier
  *              parameterId INTEGER OPTIONAL
  *      }
  *
+ * @param tlv TLV structure containing an encoded instance of PACEDomainParameterInfo
  * @property parameterId The ID of the cryptographic domain parameters
  * @property algorithmIdentifier ASN1 Algorithm Identifier
  */

@@ -8,7 +8,7 @@ import com.example.emrtdapplication.utils.TLV
  *
  *      EFDIRInfo ::= SEQUENCE {
  *          protocol OBJECT IDENTIFIER(id-EFDIR),
- *          eFDIR OCTET STRING
+ *          EFDIR OCTET STRING
  *      }
  *
  * where
@@ -17,6 +17,7 @@ import com.example.emrtdapplication.utils.TLV
  *          id-icao-mrtd-security 13
  *      }
  *
+ * @param tlv TLV structure containing an instance of a EF.DIR file
  * @property efDir The EF.DIR file
  */
 class EFDIRInfo(tlv: TLV) : SecurityInfo(tlv) {

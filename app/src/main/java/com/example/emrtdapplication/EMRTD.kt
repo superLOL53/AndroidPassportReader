@@ -53,7 +53,6 @@ import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.CONNECT_SUCCESS
 import com.example.emrtdapplication.utils.INIT_SUCCESS
-import com.example.emrtdapplication.utils.Logger
 import com.example.emrtdapplication.utils.NfcClassByte
 import com.example.emrtdapplication.utils.NfcInsByte
 import com.example.emrtdapplication.utils.NfcP1Byte
@@ -71,12 +70,7 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
 /**
- * Constants for the EMRTD class
- */
-const val EMRTD_TAG = "EMRTD"
-const val EMRTD_ENABLE_LOGGING = true
-/**
- * Main class for reading EMRTD. Selects the application to read (LDS1 EMRTD application, Travel Records application
+ * Main class for reading eMRTD. Selects the application to read (LDS1 eMRTD application, Travel Records application
  * Visa Records application and Additional Biometrics application) and reads available files.
  *
  */
@@ -145,9 +139,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         Security.addProvider(prov)
         setContentView(R.layout.emrtd_view)
         useCAN = intent.getBooleanExtra("UseCAN", useCAN)
-        log("UseCAN is $useCAN")
         mrz = intent.getStringExtra("MRZ")
-        log("MRZ is $mrz")
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         val b = Bundle()
         b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 10000)
@@ -204,7 +196,6 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         }
         readeMRTDParams()
         apduControl.closeNFC()
-        log("End of Tag discovered")
         runOnUiThread {
             //val toolbar = findViewById<Toolbar>(R.id.toolbar)
             //setSupportActionBar(toolbar)
@@ -251,8 +242,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
                             0x0F.toByte() -> lds1ViewLayout.removeView(findViewById<LinearLayout>(R.id.dg15layout))
                             0x10.toByte() -> lds1ViewLayout.removeView(findViewById<LinearLayout>(R.id.dg16layout))
                         }
-                    } catch (e: Exception) {
-                        log(e.toString())
+                    } catch (_: Exception) {
                     }
                 } else if (!ef.value.isRead) {
                     val unableReadView = TextView(this)
@@ -302,7 +292,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
     }
 
     /**
-     * Reading EMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
+     * Reading eMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
      */
     private fun readeMRTDParams() {
         val progressText = findViewById<TextView>(R.id.progressBarText)
@@ -311,15 +301,9 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             progressBar.progress = progressBar.min
             progressText.text = "Reading common files..."
         }
-        log("Reading EMRTD Params...")
-        if (cs.read() != SUCCESS) {
-            log("Unable to read Card Security")
-        }
+        cs.read()
         if (ai.read() != SUCCESS) {
-            log("Unable to read AttributeInfo")
             return
-        } else {
-            log("Successfully read AI")
         }
         if (ai.extendedLengthInfoInFile) {
             apduControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
@@ -328,12 +312,8 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             apduControl.maxResponseLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
             apduControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
         }
-        if (dir.read() != SUCCESS) {
-            log("Unable to read Directory")
-        }
-        if (ca.read() != SUCCESS) {
-            log("Unable to read Card Access")
-        }
+        dir.read()
+        ca.read()
         val list = ca.paceInfos
         for (info in list) {
             if (info.parameterId != null) {
@@ -348,15 +328,12 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         pace.init(mrz, useCAN, idPaceOid, ca.paceInfos[0].parameterId!!)
         pace.paceProtocol()
         if (selectEMRTDApplication() != SUCCESS) {
-            log("Unable to select LDS1")
             return
         }
         if (bac.init(mrz) != SUCCESS) {
-            log("Unable to initialize BAC")
             return
         }
         if (bac.bacProtocol() != SUCCESS) {
-            log("Unable to do BAC protocol successfully")
             return
         }
         readLDS1Files()
@@ -365,7 +342,6 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             progressBar.incrementProgressBy(5)
             progressText.text = "Passport verified"
         }
-        log("Finished Reading")
     }
 
     private fun verifyEMRTD() {
@@ -416,9 +392,7 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             progressBar.incrementProgressBy(3)
             progressText.text = "Reading EF.COM file..."
         }
-        if (efCOM.read() != SUCCESS) {
-            log("Unable to read EF COM")
-        }
+        efCOM.read()
         for (ef in efMap) {
             runOnUiThread {
                 progressBar.incrementProgressBy(4)
@@ -431,43 +405,23 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
             progressBar.incrementProgressBy(3)
             progressText.text = "Reading EF.SOD file..."
         }
-        if (efSod.read() != SUCCESS) {
-            log("Unable to read EF SOD")
+        if (efSod.read() == SUCCESS) {
+            efSod.parse()
         }
-        efSod.parse()
     }
 
     /**
-     * Selects the LDS1 EMRTD Application which is mandatory for EMRTD
-     * @return Success(0) or Failure(-1)
+     * Selects the LDS1 eMRTD Application which is mandatory for eMRTD
+     * @return [SELECT_APPLICATION_SUCCESS] or [UNABLE_TO_SELECT_APPLICATION]
      */
     private fun selectEMRTDApplication() : Int {
         val info = apduControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.SELECT, NfcP1Byte.SELECT_DF, NfcP2Byte.SELECT_FILE, byteArrayOf(0xA0.toByte(), 0, 0, 2, 0x47, 0x10, 1)))
         return if (info[info.size-2] == NfcRespondCodeSW1.OK && info[info.size-1] == NfcRespondCodeSW2.OK) {
-            log(SELECT_APPLICATION_SUCCESS, "Selected LDS1. Contents are: ", info)
+            SELECT_APPLICATION_SUCCESS
         } else {
-            log(UNABLE_TO_SELECT_APPLICATION, "Could not select LDS1. Error Code: ", info)
+            UNABLE_TO_SELECT_APPLICATION
         }
 
-    }
-
-    /**
-     * Logs the message in the android logcat
-     * @param msg: The message to be printed in the log
-     */
-    private fun log(msg : String) {
-        Logger.log(EMRTD_TAG, EMRTD_ENABLE_LOGGING, msg)
-    }
-
-    /**
-     * Logs message in the android logcat
-     * @param msg: The message to be printed in the log
-     * @param error: The error code to be printed and propagated
-     * @param b: The byte array to be printed in the log as hexadecimal bytes
-     * @return The error code
-     */
-    private fun log(error : Int, msg : String, b: ByteArray) : Int {
-        return Logger.log(EMRTD_TAG, EMRTD_ENABLE_LOGGING, error, msg, b)
     }
 
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
@@ -486,6 +440,9 @@ class EMRTD : NfcAdapter.ReaderCallback, AppCompatActivity(), NavigationView.OnN
         return true
     }
 
+    /**
+     * Read the CSCAs from the issuing country/organization of the eMRTD
+     */
     private fun readCSCAs() {
         val directory = resources.assets.list("CSCA")
         val tmpCerts = ArrayList<X509Certificate>()

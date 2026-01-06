@@ -13,7 +13,6 @@ import com.example.emrtdapplication.utils.NfcP1Byte
 import com.example.emrtdapplication.utils.NfcP2Byte
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.jce.interfaces.ECPublicKey
-import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import java.nio.ByteBuffer
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -138,9 +137,9 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
                 null
             }
             if (pub == null || params == null) return null
-            val keyfac = KeyPairGenerator.getInstance(publicKeyInfo.publicKeyInfo.algorithm.algorithm.id, "BC")
-            keyfac.initialize(params)
-            return keyfac.generateKeyPair()
+            val keyFac = KeyPairGenerator.getInstance(publicKeyInfo.publicKeyInfo.algorithm.algorithm.id, "BC")
+            keyFac.initialize(params)
+            return keyFac.generateKeyPair()
         } catch (e : Exception) {
             println(e)
         }

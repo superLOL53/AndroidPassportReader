@@ -1,4 +1,4 @@
 package com.example.emrtdapplication.lds2
 
-class TravelRecords {
-}
+//TODO: Implement
+class TravelRecords

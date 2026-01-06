@@ -36,8 +36,8 @@ class CardSecurity(private var apduControl: APDUControl) {
     var signedData : SignedData? = null
 
     /**
-     * Reading the EF.CardSecurity file from the EMRTD.
-     * @return The return value indicating Success(0), unable to select the file(-1) or unable to read from the file(-2)
+     * Reading the EF.CardSecurity file from the eMRTD.
+     * @return [FILE_UNABLE_TO_SELECT], [SUCCESS]
      */
     fun read() : Int {
         var info = apduControl.sendAPDU(APDU(
@@ -52,7 +52,7 @@ class CardSecurity(private var apduControl: APDUControl) {
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
-            NfcP2Byte.ZERO, 0xff
+            NfcP2Byte.ZERO, 0x00
         ))
         if (!apduControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
@@ -68,14 +68,29 @@ class CardSecurity(private var apduControl: APDUControl) {
     private fun parseData(byteArray: ByteArray) : Int {
         val tlv = TLVSequence(byteArray)
         for (sequence in tlv.tlvSequence) {
-            val si = SecurityInfo(sequence)
-            when (si.type) {
-                CHIP_AUTHENTICATION_TYPE -> securityInfos.add(ChipAuthenticationInfo(sequence))
-                CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> securityInfos.add(ChipAuthenticationPublicKeyInfo(sequence))
-                TERMINAL_AUTHENTICATION_TYPE -> securityInfos.add(TerminalAuthenticationInfo(sequence))
-                EF_DIR_TYPE -> securityInfos.add(EFDIRInfo(sequence))
-                PACE_INFO_TYPE -> securityInfos.add(PACEInfo(sequence))
-                PACE_DOMAIN_PARAMETER_INFO_TYPE -> securityInfos.add(PACEDomainParameterInfo(sequence))
+            try {
+                val si = SecurityInfo(sequence)
+                when (si.type) {
+                    CHIP_AUTHENTICATION_TYPE -> securityInfos.add(ChipAuthenticationInfo(sequence))
+                    CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> securityInfos.add(
+                        ChipAuthenticationPublicKeyInfo(sequence)
+                    )
+
+                    TERMINAL_AUTHENTICATION_TYPE -> securityInfos.add(
+                        TerminalAuthenticationInfo(
+                            sequence
+                        )
+                    )
+
+                    EF_DIR_TYPE -> securityInfos.add(EFDIRInfo(sequence))
+                    PACE_INFO_TYPE -> securityInfos.add(PACEInfo(sequence))
+                    PACE_DOMAIN_PARAMETER_INFO_TYPE -> securityInfos.add(
+                        PACEDomainParameterInfo(
+                            sequence
+                        )
+                    )
+                }
+            } catch (_ : IllegalArgumentException) {
             }
         }
         return SUCCESS

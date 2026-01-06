@@ -1,5 +1,19 @@
 package com.example.emrtdapplication.utils
 
+/**
+ * Class representing facial information in a facial data record according to ISO/IEC 19794-5
+ * @param facialInformation Byte array containing encoded facial information
+ * @property faceImageBlockLength Length of the facial data record
+ * @property featurePoints Number of feature points in the feature point data block
+ * @property gender Gender of the person in the image
+ * @property eyeColor Eye color of the person in the image
+ * @property hairColor Hair color of the person in the image
+ * @property featureMask Bit mask of features that are present in the image
+ * @property expression Facial expression of the person in the image
+ * @property poseAngle The angle from which the image was taken
+ * @property poseAngleUncertainty The uncertainty of the shooting angles
+ * @throws IllegalArgumentException If [facialInformation] does not contain an encoded facial information
+ */
 class FacialInformation(facialInformation: ByteArray) {
     val faceImageBlockLength : Int
     val featurePoints : Int

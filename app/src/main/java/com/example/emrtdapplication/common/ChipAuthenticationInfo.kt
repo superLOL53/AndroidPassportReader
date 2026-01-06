@@ -21,8 +21,10 @@ import com.example.emrtdapplication.utils.TlvTags
  *          keyId INTEGER OPTIONAL
  *      }
  *
+ * @param tlv TLV structure containing an encoded instance of ChipAuthenticationInfo
  * @property version Protocol version, must be 1
  * @property keyId Id of the public key if multiple public keys for chip authentication are present
+ * @throws IllegalArgumentException If [tlv] does not contain a ChipAuthenticationInfo
  */
 class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
     var version : Int

@@ -1,12 +1,18 @@
 package com.example.emrtdapplication.utils
 
+
 /**
- * Class representing a Biometric Data Block (BDB) according to ISO/IEC19794-4
+ * Class representing a Biometric Data Block (BDB) according to ISO/IEC19794-4.
+ * @param biometricDataBlock A TLV structure containing a BDB for decoding
+ * @property type The type of the biometric feature.
+ * @property biometricHeader Header information about the BDB
+ * @property biometricData The actual biometric information
+ * @throws IllegalArgumentException If the TLV structure does not contain an encoded BDB.
  */
-//TODO: Refine for different types of biometrics
-class BiometricDataBlock(biometricDataBlock : TLV) {
-    val facialRecordHeader : FacialRecordHeader
-    val facialRecordData : FacialRecordData
+class BiometricDataBlock(biometricDataBlock : TLV, val type : BiometricType) {
+
+    val biometricHeader : BiometricHeader
+    val biometricData : BiometricData
 
     init {
         if (biometricDataBlock.tag.size != 2 || biometricDataBlock.tag[1] != 0x2E.toByte() ||
@@ -16,7 +22,19 @@ class BiometricDataBlock(biometricDataBlock : TLV) {
         if (biometricDataBlock.value == null) {
             throw IllegalArgumentException("No value for Biometric Data Block (BDB)")
         }
-        facialRecordHeader = FacialRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
-        facialRecordData = FacialRecordData(biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size).toByteArray())
+        when (type) {
+            BiometricType.FACE -> {
+                biometricHeader = FacialRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
+                biometricData = FacialRecordData(biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size).toByteArray())
+            }
+            BiometricType.IRIS -> {
+                biometricHeader = IrisRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
+                biometricData = IrisRecordData(biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size).toByteArray())
+            }
+            BiometricType.FINGERPRINT -> {
+                biometricHeader = FingerprintRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
+                biometricData = FingerprintRecordData(biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size).toByteArray())
+            }
+        }
     }
 }
