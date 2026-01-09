@@ -1,6 +1,6 @@
 <resources>
-    <string name="app_name">eMRTDApplication</string>
-    <string name="title_activity_emrtdapplication">eMRTDApplication</string>
+    <string name="app_name">Passport Reader</string>
+    <string name="title_activity_emrtdapplication">Passport Reader</string>
     <string name="title_activity_check_nfc">CheckNFC</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="passportNumber">Enter your passport number</string>
@@ -30,4 +30,22 @@
     <string name="travel_records">Travel Records</string>
     <string name="main">Main</string>
     <string name="dg11">Data Group 11</string>
+    <string name="dg12">Data Group 12</string>
+    <string name="reading_common_files">Reading common files…</string>
+    <string name="initialize_secure_messaging">Initialize secure messaging…</string>
+    <string name="passport_verified">Passport verified</string>
+    <string name="reading_cscas">Reading CSCAs…</string>
+    <string name="perform_passive_authentication">Perform passive authentication…</string>
+    <string name="authenticate_chip">Authenticate chip…</string>
+    <string name="reading_ef_com_file">Reading EF.COM file…</string>
+    <string name="reading_ef_sod_file">Reading EF.SOD file…</string>
+    <string name="unable_to_read_file_from_passport">Unable to read file from passport</string>
+    <string name="reading_dg">Reading DG</string>
+    <string name="file"> file…</string>
+    <string name="scan_passport">Scan Passport</string>
+    <string name="exit">Exit</string>
+    <string name="open">Open</string>
+    <string name="close">Close</string>
+    <string name="lds1">LDS1</string>
+
 </resources>

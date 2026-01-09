@@ -19,29 +19,17 @@ import com.example.emrtdapplication.utils.TLVSequence
  */
 class EntryExitRecord(val record: TLVSequence) {
     val state : String
-        private set
     val visaStatus : String?
-        private set
     val date : String
-        private set
     val inspectionAuthority : String
-        private set
     val inspectionLocation : String
-        private set
     val inspectorReference : String
-        private set
     val inspectionResult : String?
-        private set
     val travelMode : String?
-        private set
     val stayDuration : Int?
-        private set
     val conditions : String?
-        private set
     val signature : ByteArray
-        private set
     val certificateReference : Byte
-        private set
 
     init {
         var state1 : String? = null

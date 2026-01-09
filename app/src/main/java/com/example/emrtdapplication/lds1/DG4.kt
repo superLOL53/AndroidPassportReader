@@ -1,12 +1,15 @@
 package com.example.emrtdapplication.lds1
 
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.widget.ImageView
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.BiometricInformationGroupTemplate
 import com.example.emrtdapplication.utils.BiometricType
 import com.example.emrtdapplication.utils.FAILURE
+import com.example.emrtdapplication.utils.FingerprintRecordData
 import com.example.emrtdapplication.utils.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
@@ -59,6 +62,23 @@ class DG4(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
      * @param parent The parent of the view to create
      */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        //TODO: Implement
+        if (biometricInformation != null && biometricInformation!!.biometricInformationList != null) {
+            for (bios in biometricInformation!!.biometricInformationList) {
+                try {
+                    if (bios == null) continue
+                    val biometricData = bios.biometricDataBlock.biometricData as FingerprintRecordData
+                    val image = biometricData.fingerprintData.representationBlocks[0].geImageData()
+                    val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
+                    val view = ImageView(context)
+                    view.layoutParams = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    view.setImageBitmap(bitmap)
+                    parent.addView(view)
+                } catch (_ : Exception) {
+                }
+            }
+        }
     }
 }

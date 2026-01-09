@@ -42,9 +42,7 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     protected var contentStart = -1
     var matchHash = false
     var isPresent = false
-        private set
     var isRead = false
-        private set
 
     /**
      * Reads the EF and stores the content in [rawFileContent]

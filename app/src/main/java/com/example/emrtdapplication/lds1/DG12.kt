@@ -101,7 +101,7 @@ class DG12(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         //TODO: Implement
     }
 
-    fun createViews(context: Context, parent : TableLayout) {
+    fun createView(context: Context, parent : TableLayout) {
         var row : TableRow
         if (issuingAuthority != null) {
             row = createRow(context, parent)

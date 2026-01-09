@@ -20,11 +20,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class Biometric(record: TLV) {
     val biometricData : ByteArray
-        private set
     val signature : ByteArray
-        private set
     val certificateReference : Byte
-        private set
 
     init {
         var biometricData : ByteArray? = null

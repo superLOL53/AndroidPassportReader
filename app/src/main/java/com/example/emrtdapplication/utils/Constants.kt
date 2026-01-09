@@ -27,6 +27,7 @@ object TlvTags {
     const val EC_PUBLIC_POINT : Byte = 0x86.toByte()
     const val OID : Byte = 0x06
     const val UNSIGNED_INTEGER : Byte = 0x84.toByte()
+    const val DO51 : Byte = 0x51
     //const val SEQUENCE: Byte = 0x30
 }
 
@@ -44,10 +45,13 @@ object NfcInsByte {
     const val MANAGE_SECURITY_ENVIRONMENT : Byte = 0x22
     const val GENERAL_AUTHENTICATE : Byte = 0x86.toByte()
     const val INTERNAL_AUTHENTICATE : Byte = 0x88.toByte()
+    const val FILE_AND_MEMORY_MANAGEMENT : Byte = 0x5E
+    const val READ_RECORD : Byte = 0xB2.toByte()
 }
 
 object NfcP1Byte {
     const val ZERO : Byte = 0x00
+    const val EF_ID_IN_DATA_FIELD : Byte = 0x01
     const val SELECT_EF : Byte = 0x02
     const val SELECT_DF : Byte = 0x04
     const val SET_AUTHENTICATION_TEMPLATE : Byte = 0xC1.toByte()
@@ -59,6 +63,8 @@ object NfcP2Byte {
     const val SELECT_FILE : Byte = 0x0C
     const val SET_AUTHENTICATION_TEMPLATE : Byte = 0xA4.toByte()
     const val SET_KEY_AGREEMENT_TEMPLATE : Byte = 0xA6.toByte()
+    const val NUMBER_OF_RECORDS : Byte = 0x04
+    const val READ_SINGLE_RECORD : Byte = 0x04
 }
 
 object NfcRespondCodeSW1 {

@@ -20,11 +20,8 @@ import java.security.cert.CertificateFactory
  */
 class CertificateRecord(record: TLVSequence) {
     val countryCode : String
-        private set
     val serialNumber : ByteArray
-        private set
     val certificate : Certificate
-        private set
 
     init {
         if (record.tlvSequence.size != 2) {

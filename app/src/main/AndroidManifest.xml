@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.NFC" />
 
@@ -13,11 +12,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.EMRTDApplication"
-        tools:targetApi="31">
+        >
         <activity
             android:name=".ApplicationEMRTD"
             android:exported="true"
-            android:label="eMRTDApplication"
+            android:label="Passport Reader"
             android:theme="@style/Theme.EMRTDApplication">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,8 +24,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".EMRTD"/>
         <activity android:name=".ManualInput"/>
+        <activity android:name=".ReadPassport"
+            android:configChanges="screenSize|orientation"/>
+        <activity android:name=".EMRTDView"/>
     </application>
 
 </manifest>

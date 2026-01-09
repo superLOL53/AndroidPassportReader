@@ -2,8 +2,10 @@
   <dictionary name="project">
     <words>
       <w>CMAC</w>
+      <w>CSCA</w>
       <w>ECDH</w>
       <w>EFDIR</w>
+      <w>EMRTD</w>
       <w>Sede</w>
       <w>atrinfo</w>
       <w>brainpoolp</w>

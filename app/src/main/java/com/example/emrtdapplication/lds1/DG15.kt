@@ -67,7 +67,13 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
      * @param parent The parent of the view to create
      */
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        //TODO: Implement
+        if (rawFileContent == null || publicKeyInfo == null) return
+        var row = createRow(context, parent)
+        provideTextForRow(row, "Algorithm Identifier: ", publicKeyInfo!!.algorithm.algorithm.id)
+        //row = createRow(context, parent)
+        //provideTextForRow(row, "Parameters:", publicKeyInfo!!.algorithm.parameters.toString())
+        row = createRow(context, parent)
+        provideTextForRow(row, "Public Key:", publicKeyInfo!!.publicKeyData.string)
     }
 
     /**

@@ -1,10 +1,12 @@
 package com.example.emrtdapplication
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.SpannableStringBuilder
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 
 /**
  * Constants for the ManualInput class
@@ -29,63 +31,84 @@ const val DATE_LENGTH = 6
  * @property passportNr The passport number
  * @property expirationDate The expiration date of the passport
  * @property birthday The birthday of the passport holder
- * @property can The CAN number of the passport
  * @property checkDigitSequence The byte sequence used to compute the check digit number
  *
  */
-class ManualInput : Activity() {
+class ManualInput : AppCompatActivity() {
     private var passportNr : String? = null
     private var expirationDate : String? = null
     private var birthday : String? = null
-    private var can : String? = null
     private var checkDigitSequence = byteArrayOf(7, 3, 1)
+
 
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.manual_input)
+        val passportNumberText = findViewById<EditText>(R.id.passportNr)
+        val birthdayText = findViewById<EditText>(R.id.birthday)
+        val expirationDateText = findViewById<EditText>(R.id.expirationDate)
+        if (savedInstanceState != null) {
+            val number = savedInstanceState.getString("passportNumber")
+            val expirationDate = savedInstanceState.getString("expirationDate")
+            val birthday = savedInstanceState.getString("birthday")
+            if (number != null) {
+                passportNumberText.text = SpannableStringBuilder(number)
+            }
+            if (expirationDate != null) {
+                expirationDateText.text = SpannableStringBuilder(expirationDate)
+            }
+            if (birthday != null) {
+                birthdayText.text = SpannableStringBuilder(birthday)
+            }
+        }
         findViewById<Button>(R.id.next).setOnClickListener{
-            passportNr = findViewById<EditText>(R.id.passportNr).text.toString()
-            birthday = findViewById<EditText>(R.id.birthday).text.toString()
-            expirationDate = findViewById<EditText>(R.id.expirationDate).text.toString()
-            can = findViewById<EditText>(R.id.can).text.toString()
+            passportNr = passportNumberText.text.toString()
+            birthday = birthdayText.text.toString()
+            expirationDate = expirationDateText.text.toString()
             val mrzInfo = parse()
             if (mrzInfo != null) {
-                val eMRTD = Intent(this, EMRTD().javaClass)
-                if (can != null && can!!.isNotEmpty()) {
-                    eMRTD.putExtra("UseCAN", true)
-                } else {
-                    eMRTD.putExtra("UseCAN", false)
-                }
-                eMRTD.putExtra("MRZ", mrzInfo)
-                startActivity(eMRTD)
+                val intent = Intent(this, ReadPassport::class.java)
+                intent.putExtra("MRZ", mrzInfo)
+                startActivity(intent)
+            } else {
+                val info = Toast(this)
+                info.setText("Unable to decode given information. Please make sure you entered everything correctly.")
+                info.duration = Toast.LENGTH_LONG
+                info.show()
             }
         }
     }
+
+    @Override
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("passportNumber", findViewById<EditText>(R.id.passportNr).text.toString())
+        outState.putString("birthday", findViewById<EditText>(R.id.birthday).text.toString())
+        outState.putString("expirationDate", findViewById<EditText>(R.id.expirationDate).text.toString())
+        super.onSaveInstanceState(outState)
+    }
+
+
 
     /**
      * Parsing the manual input and checks for validity of the input.
      * @return The MRZ information inclusive the check digits or null if any validity check fails
      */
     private fun parse() : String? {
-        if (can != null && can!!.isNotEmpty()) {
-            return can
-        } else {
-            if (passportNr == null) {
-                return null
-            }
-            if (birthday == null) {
-                return null
-            } else if (birthday!!.length != DATE_LENGTH) {
-                return null
-            }
-            if (expirationDate == null) {
-                return null
-            } else if (expirationDate!!.length != DATE_LENGTH) {
-                return null
-            }
-            return computeCheckDigit()
+        if (passportNr == null) {
+            return null
         }
+        if (birthday == null) {
+            return null
+        } else if (birthday!!.length != DATE_LENGTH) {
+            return null
+        }
+        if (expirationDate == null) {
+            return null
+        } else if (expirationDate!!.length != DATE_LENGTH) {
+            return null
+        }
+        return computeCheckDigit()
     }
 
     /**

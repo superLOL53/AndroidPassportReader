@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/nav_graph">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/LDS1">
 
     <fragment
         android:id="@+id/LDS1"
         android:label="LDS1"
-        tools:layout="@layout/lds1"
-        android:name="com.example.emrtdapplication.display.DisplayLDS1">
+        tools:layout="@layout/lds1">
     </fragment>
 
     <fragment

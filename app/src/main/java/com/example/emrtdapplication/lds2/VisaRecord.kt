@@ -18,53 +18,29 @@ import com.example.emrtdapplication.utils.TLVSequence
  */
 class VisaRecord(val record: TLVSequence) {
     val state : String
-        private set
     val documentType : String
-        private set
     val machineReadableVisaTypeA : String?
-        private set
     val machineReadableVisaTypeB : String?
-        private set
     val numberOfEntries : Int?
-        private set
     val stayDuration : ByteArray?
-        private set
     val passportNumber : String?
-        private set
     val visaType : ByteArray?
-        private set
     val territoryInformation : ByteArray?
-        private set
     val issuancePlace : String
-        private set
     val issuanceDate : String
-        private set
     val expirationDate : String
-        private set
     val documentNumber : String
-        private set
     val additionalInformation : String?
-        private set
     val holderName : String
-        private set
     val surname : String
-        private set
     val givenName : String
-        private set
     val sex : Char
-        private set
     val birthDate : String
-        private set
     val nationality : String
-        private set
     val mrz : String
-        private set
     val additionalBiometricsReference : Byte?
-        private set
     val signature : ByteArray
-        private set
     val certificateReference : Byte
-        private set
 
     init {
         var state1 : String? = null
