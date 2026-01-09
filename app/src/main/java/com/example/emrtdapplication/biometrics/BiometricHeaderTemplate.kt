@@ -1,4 +1,6 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics
+
+import com.example.emrtdapplication.utils.TLV
 
 /**
  * Class representing a Biometric Header Template (BHT)

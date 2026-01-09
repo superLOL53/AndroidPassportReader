@@ -1,4 +1,7 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics.face
+
+import com.example.emrtdapplication.biometrics.BiometricHeader
+import com.example.emrtdapplication.biometrics.BiometricType
 
 /**
  * Class representing a header of a facial Biometric Data Block according to ISO/IEC 19794-5.

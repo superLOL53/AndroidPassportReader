@@ -3,7 +3,7 @@ package com.example.emrtdapplication.common
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.SUCCESS
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import org.junit.runner.RunWith

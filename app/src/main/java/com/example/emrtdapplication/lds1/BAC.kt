@@ -3,11 +3,11 @@ package com.example.emrtdapplication.lds1
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
-import com.example.emrtdapplication.utils.NfcClassByte
-import com.example.emrtdapplication.utils.NfcInsByte
-import com.example.emrtdapplication.utils.NfcP1Byte
-import com.example.emrtdapplication.utils.NfcP2Byte
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.NfcClassByte
+import com.example.emrtdapplication.constants.NfcInsByte
+import com.example.emrtdapplication.constants.NfcP1Byte
+import com.example.emrtdapplication.constants.NfcP2Byte
+import com.example.emrtdapplication.constants.SUCCESS
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import kotlin.experimental.xor

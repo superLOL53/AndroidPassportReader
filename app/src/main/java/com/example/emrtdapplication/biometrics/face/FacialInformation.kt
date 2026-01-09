@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics.face
 
 /**
  * Class representing facial information in a facial data record according to ISO/IEC 19794-5

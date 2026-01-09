@@ -6,11 +6,11 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.BiometricInformationGroupTemplate
-import com.example.emrtdapplication.utils.BiometricType
-import com.example.emrtdapplication.utils.FAILURE
-import com.example.emrtdapplication.utils.FingerprintRecordData
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.biometrics.BiometricInformationGroupTemplate
+import com.example.emrtdapplication.biometrics.BiometricType
+import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordData
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
 /**

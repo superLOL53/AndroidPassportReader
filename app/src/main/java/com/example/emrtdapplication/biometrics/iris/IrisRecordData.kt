@@ -1,5 +1,7 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics.iris
 
+import com.example.emrtdapplication.biometrics.BiometricData
+import com.example.emrtdapplication.biometrics.BiometricType
 import org.jmrtd.lds.iso39794.IrisImageDataBlock
 import java.io.ByteArrayInputStream
 

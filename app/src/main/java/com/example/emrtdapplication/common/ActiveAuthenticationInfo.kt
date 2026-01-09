@@ -3,7 +3,7 @@ package com.example.emrtdapplication.common
 import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TlvTags
+import com.example.emrtdapplication.constants.TlvTags
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 
 /**

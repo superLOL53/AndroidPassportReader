@@ -2,7 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TlvTags
+import com.example.emrtdapplication.constants.TlvTags
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.x509.AlgorithmIdentifier
 

@@ -1,5 +1,7 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics.fingerprint
 
+import com.example.emrtdapplication.biometrics.BiometricHeader
+import com.example.emrtdapplication.biometrics.BiometricType
 import org.jmrtd.lds.iso19794.FingerInfo
 import java.io.ByteArrayInputStream
 

@@ -4,9 +4,9 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.FILE_SUCCESSFUL_READ
-import com.example.emrtdapplication.utils.FILE_UNABLE_TO_READ
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
+import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
 /**

@@ -10,11 +10,11 @@ import com.example.emrtdapplication.lds1.LDS1Application
 import com.example.emrtdapplication.lds2.AdditionalBiometrics
 import com.example.emrtdapplication.lds2.TravelRecords
 import com.example.emrtdapplication.lds2.VisaRecords
-import com.example.emrtdapplication.utils.ADDITIONAL_ENCRYPTION_LENGTH
+import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.CONNECT_SUCCESS
 import com.example.emrtdapplication.utils.INIT_SUCCESS
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.SUCCESS
 
 /**
  * Main class for reading eMRTD. Selects the application to read (LDS1 eMRTD application, Travel Records application

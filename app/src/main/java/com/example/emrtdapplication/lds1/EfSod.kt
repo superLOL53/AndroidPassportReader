@@ -4,8 +4,8 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.FAILURE
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.ASN1GeneralizedTime
 import org.spongycastle.asn1.x509.Certificate

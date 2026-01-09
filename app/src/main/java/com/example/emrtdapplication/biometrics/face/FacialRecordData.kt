@@ -1,7 +1,9 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics.face
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.example.emrtdapplication.biometrics.BiometricData
+import com.example.emrtdapplication.biometrics.BiometricType
 
 /**
  * Class representing face biometrics data.

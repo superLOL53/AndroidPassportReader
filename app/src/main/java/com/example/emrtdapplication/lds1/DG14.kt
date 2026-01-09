@@ -17,8 +17,8 @@ import com.example.emrtdapplication.common.EFDIRInfo
 import com.example.emrtdapplication.common.PACEDomainParameterInfo
 import com.example.emrtdapplication.common.PACEInfo
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.FAILURE
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 

@@ -7,10 +7,10 @@ import static org.junit.Assert.*;
 import com.example.emrtdapplication.common.PaceEC;
 import com.example.emrtdapplication.utils.APDU;
 import com.example.emrtdapplication.utils.APDUControl;
-import com.example.emrtdapplication.utils.NfcClassByte;
-import com.example.emrtdapplication.utils.NfcInsByte;
-import com.example.emrtdapplication.utils.NfcP1Byte;
-import com.example.emrtdapplication.utils.NfcP2Byte;
+import com.example.emrtdapplication.constants.NfcClassByte;
+import com.example.emrtdapplication.constants.NfcInsByte;
+import com.example.emrtdapplication.constants.NfcP1Byte;
+import com.example.emrtdapplication.constants.NfcP2Byte;
 
 /**
  * Example local unit test, which will execute on the development machine (host).

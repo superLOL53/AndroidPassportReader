@@ -2,10 +2,10 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.utils.INVALID_ARGUMENT
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.INVALID_ARGUMENT
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TlvTags
+import com.example.emrtdapplication.constants.TlvTags
 
 /**
  * Constants for the PACEInfo class

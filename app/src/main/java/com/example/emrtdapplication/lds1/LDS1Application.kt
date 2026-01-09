@@ -10,8 +10,8 @@ import com.example.emrtdapplication.ReadPassport
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.FAILURE
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.constants.SUCCESS
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import kotlin.collections.iterator

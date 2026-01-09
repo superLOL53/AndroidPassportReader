@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.TlvTags
 import kotlin.experimental.and
 import kotlin.experimental.or
 /**

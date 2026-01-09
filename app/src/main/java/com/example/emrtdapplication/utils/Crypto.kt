@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.ZERO_BYTE
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHBasicAgreement
 import org.spongycastle.crypto.agreement.ECDHBasicAgreement

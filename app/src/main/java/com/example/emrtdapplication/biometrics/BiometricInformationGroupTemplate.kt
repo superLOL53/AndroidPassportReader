@@ -1,4 +1,7 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics
+
+import com.example.emrtdapplication.constants.ZERO_BYTE
+import com.example.emrtdapplication.utils.TLV
 
 /**
  * Class implementing Biometric Information Group Template

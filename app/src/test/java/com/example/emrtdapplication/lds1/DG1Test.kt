@@ -2,7 +2,7 @@ package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.SUCCESS
 import org.junit.Assert.assertArrayEquals
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor

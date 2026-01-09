@@ -11,7 +11,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emrtdapplication.utils.SUCCESS
+import com.example.emrtdapplication.constants.SUCCESS
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 import java.security.cert.CertificateFactory

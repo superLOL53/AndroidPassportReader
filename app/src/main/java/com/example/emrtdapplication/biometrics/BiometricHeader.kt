@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics
 
 /**
  * Abstract class for grouping together the different biometric headers in a Biometric Data Block

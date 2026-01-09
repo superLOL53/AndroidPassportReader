@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.utils
+package com.example.emrtdapplication.biometrics.face
 
 /**
  * Class representing a feature point on a facial image

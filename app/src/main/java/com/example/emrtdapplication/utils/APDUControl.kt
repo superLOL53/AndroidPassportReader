@@ -2,6 +2,10 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import com.example.emrtdapplication.constants.NfcClassByte
+import com.example.emrtdapplication.constants.NfcRespondCodeSW1
+import com.example.emrtdapplication.constants.NfcRespondCodeSW2
+import com.example.emrtdapplication.constants.ZERO_BYTE
 import java.io.IOException
 import javax.crypto.Cipher
 

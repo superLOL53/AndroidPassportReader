@@ -2,7 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
-import com.example.emrtdapplication.utils.TlvTags
+import com.example.emrtdapplication.constants.TlvTags
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationInfo:
