@@ -2,6 +2,7 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import com.example.emrtdapplication.constants.APDUControlConstants.APDU_NO_DATA_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
@@ -17,6 +18,25 @@ import javax.crypto.Cipher
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CLOSE
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CONNECT
 import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.MIN_APDU_SIZE_FOR_MAC_VERIFICATION
+import com.example.emrtdapplication.constants.APDUControlConstants.PADDING_SIZE
+import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
+import com.example.emrtdapplication.constants.APDUControlConstants.SECURE_MESSAGING_MASK
+import com.example.emrtdapplication.constants.APDUControlConstants.SINGLE_KEY_SIZE_3DES
+import com.example.emrtdapplication.constants.APDUControlConstants.TIME_OUT
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.TlvTags.DO01
+import com.example.emrtdapplication.constants.TlvTags.DO08
+import com.example.emrtdapplication.constants.TlvTags.DO09
+import com.example.emrtdapplication.constants.TlvTags.DO85
+import com.example.emrtdapplication.constants.TlvTags.DO87
+import com.example.emrtdapplication.constants.TlvTags.DO8E
+import com.example.emrtdapplication.constants.TlvTags.DO97
+import com.example.emrtdapplication.constants.TlvTags.DO97_EXTENDED_LE_LENGTH
+import com.example.emrtdapplication.constants.TlvTags.DO97_LE_LENGTH
+import kotlin.experimental.and
+import kotlin.experimental.or
 
 /**
  * Class for sending and receiving APDUs from the ePassport
@@ -63,7 +83,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
             nfcTechUse = NfcUse.ISO_DEP
             maxTransceiveLength = this.isoDep!!.maxTransceiveLength
         }
-        this.isoDep!!.timeout = 2000
+        this.isoDep!!.timeout = TIME_OUT
         return INIT_SUCCESS
     }
 
@@ -161,7 +181,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return True if the ePassport responded with an OK status code, otherwise false
      */
     fun checkResponse(bytes: ByteArray): Boolean {
-        return !(bytes.size < 2 || bytes[bytes.size-2] != NfcRespondCodeSW1.OK || bytes[bytes.size-1] != NfcRespondCodeSW2.OK)
+        return !(bytes.size < RESPOND_CODE_SIZE || bytes[bytes.size-RESPOND_CODE_SIZE] != NfcRespondCodeSW1.OK || bytes[bytes.size-1] != NfcRespondCodeSW2.OK)
     }
 
     /**
@@ -170,7 +190,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return The byte array without respond codes
      */
     fun removeRespondCodes(bytes: ByteArray): ByteArray {
-        return bytes.slice(0..bytes.size-3).toByteArray()
+        return bytes.slice(0..<bytes.size-RESPOND_CODE_SIZE).toByteArray()
     }
 
     /**
@@ -209,13 +229,13 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         if (tail != null) {
             finalApdu += tail
         }
-        finalApdu += do8e + 0x0
+        finalApdu += do8e + 0
         if (apdu.useLeExt || apdu.useLcExt) {
-            finalApdu += 0x0
+            finalApdu += 0
         }
         inc()
         val rApdu = isoDep!!.transceive(finalApdu)
-        if (rApdu.size > 13) {
+        if (rApdu.size > MIN_APDU_SIZE_FOR_MAC_VERIFICATION) {
             verifyMAC(rApdu)
         }
         return extractAPDU(rApdu)
@@ -228,7 +248,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      */
     private fun headerSM(apdu: APDU) : ByteArray {
         val header = apdu.getHeader()
-        header[0] = (NfcClassByte.SECURE_MESSAGING.toInt() or (apdu.getHeader()[0].toInt() and 0xF0)).toByte()
+        header[0] = (NfcClassByte.SECURE_MESSAGING or (apdu.getHeader()[0] and SECURE_MESSAGING_MASK))
         return header
     }
 
@@ -239,8 +259,8 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return The Lc field of the APDU as a byte array
      */
     private fun lcField(length : Int, useExtendedLength : Boolean = false) : ByteArray {
-        return if (length > 256 || useExtendedLength) {
-            byteArrayOf(0, (length/256).toByte(), (length % 256).toByte())
+        return if (length > UBYTE_MODULO || useExtendedLength) {
+            byteArrayOf(0, (length/UBYTE_MODULO).toByte(), (length % UBYTE_MODULO).toByte())
         } else {
             byteArrayOf(length.toByte())
         }
@@ -257,9 +277,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         var do8785 : ByteArray? = null
         if (apdu.useLc) {
             do8785 = if (apdu.getHeader()[1] % 2 == 0) {
-                byteArrayOf(0x87.toByte(), 0x09, 0x01) + encryptedData
+                byteArrayOf(DO87, DO09, DO01) + encryptedData
             } else {
-                byteArrayOf(0x85.toByte(), 0x09, 0x01) + encryptedData
+                byteArrayOf(DO85, DO09, DO01) + encryptedData
             }
         }
         return do8785
@@ -274,9 +294,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         var do97 : ByteArray? = null
         if (apdu.useLe) {
             do97 = if (apdu.useLeExt) {
-                byteArrayOf(0x97.toByte(), 0x02, (apdu.le/256).toByte(), (apdu.le%256).toByte())
+                byteArrayOf(DO97, DO97_EXTENDED_LE_LENGTH, (apdu.le/UBYTE_MODULO).toByte(), (apdu.le%UBYTE_MODULO).toByte())
             } else {
-                byteArrayOf(0x97.toByte(), 0x01, apdu.le.toByte())
+                byteArrayOf(DO97, DO97_LE_LENGTH, apdu.le.toByte())
             }
         }
         return do97
@@ -295,7 +315,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         //log("N: ", n)
         val cc = computeMAC(n)
         //log("CC: ", cc)
-        val do8e = byteArrayOf(0x8E.toByte(), 0x08) + cc
+        val do8e = byteArrayOf(DO8E, DO08) + cc
         //log("DO8E: ", do8e)
         return do8e
     }
@@ -306,15 +326,15 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return The decrypted APDU without padding
      */
     private fun extractAPDU(bytes: ByteArray) : ByteArray {
-        val normalAPDU : ByteArray = if (bytes[0] == 0x87.toByte() || bytes[0] == 0x85.toByte()) {
+        val normalAPDU : ByteArray = if (bytes[0] == DO87 || bytes[0] == DO85) {
             val l = if (bytes[1] < 0) {
-                (bytes[1] + 128) + 3
+                (bytes[1] + BYTE_MODULO) + 3
             } else {
                 3
             }
-            crypto.removePadding(decrypt(bytes.slice(l..bytes.size-17).toByteArray())) + bytes.slice(bytes.size-2..<bytes.size).toByteArray()
+            crypto.removePadding(decrypt(bytes.slice(l..bytes.size-APDU_NO_DATA_SIZE).toByteArray())) + bytes.slice(bytes.size-RESPOND_CODE_SIZE..<bytes.size).toByteArray()
         } else {
-            bytes.slice(bytes.size-2..<bytes.size).toByteArray()
+            bytes.slice(bytes.size-RESPOND_CODE_SIZE..<bytes.size).toByteArray()
         }
         return normalAPDU
     }
@@ -350,9 +370,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @return True if the MAC verification succeeds, otherwise False
      */
     private fun verifyMAC(rApdu : ByteArray) : Boolean {
-        val n = addPadding(ssc + rApdu.slice(0..rApdu.size-13))
+        val n = addPadding(ssc + rApdu.slice(0..rApdu.size-MIN_APDU_SIZE_FOR_MAC_VERIFICATION))
         val cc = computeMAC(n)
-        return cc.contentEquals(rApdu.slice(rApdu.size-10..rApdu.size-3).toByteArray())
+        return cc.contentEquals(rApdu.slice(rApdu.size-(MIN_APDU_SIZE_FOR_MAC_VERIFICATION-RESPOND_CODE_SIZE-1)..<rApdu.size-RESPOND_CODE_SIZE).toByteArray())
     }
 
     /**
@@ -364,7 +384,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         return if (isAES) {
             crypto.cipherAES(bytes, encryptionKey)
         } else {
-            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray())
+            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray())
         }
     }
 
@@ -377,7 +397,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         return if (isAES) {
             crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE)
         } else {
-            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..7).toByteArray(), Cipher.DECRYPT_MODE)
+            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray(), Cipher.DECRYPT_MODE)
         }
     }
 
@@ -390,7 +410,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         return if (isAES) {
             crypto.addPadding(byteArray, encryptionKey.size)
         } else {
-            crypto.addPadding(byteArray, 8)
+            crypto.addPadding(byteArray, PADDING_SIZE)
         }
     }
 }

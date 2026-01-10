@@ -4,12 +4,13 @@ import com.example.emrtdapplication.ReadPassport
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.constants.VisaRecordsConstants.APPLICATION_ID
 import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_1
 import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_2
+import java.math.BigInteger
 
-//TODO: Implement
 class VisaRecords(apduControl: APDUControl) : LDS2Application(apduControl) {
-    override val applicationIdentifier: ByteArray = byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x02, 0x47, 0x20, 0x02)
+    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray()
     var visaRecords : Array<VisaRecord>? = null
         private set
 

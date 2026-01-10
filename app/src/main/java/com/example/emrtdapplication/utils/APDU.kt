@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.APDUConstants.BYTE_MASK
+import com.example.emrtdapplication.constants.APDUConstants.EXTENDED_LENGTH_SHIFT_COUNT
 import com.example.emrtdapplication.constants.APDUConstants.LC_EXT_MAX
 import com.example.emrtdapplication.constants.APDUConstants.LC_MAX
 import com.example.emrtdapplication.constants.APDUConstants.LE_EXT_MAX
@@ -136,16 +138,16 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
         } else if (!useLc) {
             if (useLeExt) {
                 ba[pos++] = 0
-                ba[pos++] = le.ushr(8).toByte()
-                ba[pos] = (le and 0xFF).toByte()
+                ba[pos++] = le.ushr(EXTENDED_LENGTH_SHIFT_COUNT).toByte()
+                ba[pos] = (le and BYTE_MASK).toByte()
             } else {
                 ba[pos] = le.toByte()
             }
         } else {
             if (useLcExt) {
                 ba[pos++] = 0
-                ba[pos++] = lc.ushr(8).toByte()
-                ba[pos++] = (lc and 0xFF).toByte()
+                ba[pos++] = lc.ushr(EXTENDED_LENGTH_SHIFT_COUNT).toByte()
+                ba[pos++] = (lc and BYTE_MASK).toByte()
             } else {
                 ba[pos++] = lc.toByte()
             }
@@ -155,8 +157,8 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
             if (useLe) {
                 if (useLeExt) {
                     ba[pos++] = 0
-                    ba[pos++] = le.ushr(8).toByte()
-                    ba[pos] = (le and 0xFF).toByte()
+                    ba[pos++] = le.ushr(EXTENDED_LENGTH_SHIFT_COUNT).toByte()
+                    ba[pos] = (le and BYTE_MASK).toByte()
                 } else {
                     ba[pos] = le.toByte()
                 }

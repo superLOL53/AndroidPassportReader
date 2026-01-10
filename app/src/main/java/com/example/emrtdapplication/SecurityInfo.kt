@@ -17,7 +17,9 @@ import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENT
 import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_TYPE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE_SIZE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_TYPE
@@ -80,9 +82,9 @@ open class SecurityInfo(tlv: TLV) {
         }
         if (objectIdentifier.startsWith(PACE_OID)) {
             objectIdentifier.split(".").size
-            if (objectIdentifier.split(".").size == 10) {
+            if (objectIdentifier.split(".").size == PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE) {
                 type = PACE_DOMAIN_PARAMETER_INFO_TYPE
-            } else if (objectIdentifier.split(".").size == 11) {
+            } else if (objectIdentifier.split(".").size == PACE_INFO_TYPE_SIZE) {
                 type = PACE_INFO_TYPE
             }
         } else if (objectIdentifier.startsWith(ACTIVE_AUTHENTICATION_OID)) {

@@ -1,5 +1,10 @@
 package com.example.emrtdapplication.lds2
 
+import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_SIZE
+import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_TAG_1
+import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_SERIAL_NUMBER_TAG
+import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_TAG
+import com.example.emrtdapplication.constants.CertificateRecordConstants.MIN_CERTIFICATE_SERIAL_NUMBER_LENGTH
 import com.example.emrtdapplication.utils.TLVSequence
 import java.io.ByteArrayInputStream
 import java.security.cert.Certificate
@@ -24,22 +29,22 @@ class CertificateRecord(record: TLVSequence) {
     val certificate : Certificate
 
     init {
-        if (record.tlvSequence.size != 2) {
+        if (record.tlvSequence.size != CERTIFICATE_RECORD_SIZE) {
             throw IllegalArgumentException("Certificate record size must be 2!")
         }
-        if (record.tlvSequence[0].tag.size != 2 || record.tlvSequence[0].tag[0] != 0x5F.toByte() ||
-            record.tlvSequence[0].tag[1] != 0x3A.toByte()) {
+        if (record.tlvSequence[0].tag.size != 2 || record.tlvSequence[0].tag[0] != CERTIFICATE_RECORD_TAG_1 ||
+            record.tlvSequence[0].tag[1] != CERTIFICATE_SERIAL_NUMBER_TAG) {
             throw IllegalArgumentException("Invalid tag for certificate serial number")
         }
         if (record.tlvSequence[0].value == null) {
             throw IllegalArgumentException("Empty certificate serial number!")
         }
-        if (record.tlvSequence[0].value!!.size < 3) {
+        if (record.tlvSequence[0].value!!.size < MIN_CERTIFICATE_SERIAL_NUMBER_LENGTH) {
             throw IllegalArgumentException("Content of certificate serial number is too short!")
         }
         countryCode = record.tlvSequence[0].value!!.slice(0..1).toString()
         serialNumber = record.tlvSequence[0].value!!.slice(2..<record.tlvSequence[0].value!!.size).toByteArray()
-        if (record.tlvSequence[1].tag.size != 1 || record.tlvSequence[1].tag[0] != 0x72.toByte()) {
+        if (record.tlvSequence[1].tag.size != 1 || record.tlvSequence[1].tag[0] != CERTIFICATE_TAG) {
             throw IllegalArgumentException("Invalid tag for X.509 certificate")
         }
         var cert : Certificate? = null

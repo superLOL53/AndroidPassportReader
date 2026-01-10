@@ -7,6 +7,9 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.children
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.LONG_EF_ID
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
@@ -37,7 +40,7 @@ import java.security.Provider
 abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
     protected abstract var rawFileContent: ByteArray?
     abstract val shortEFIdentifier: Byte
-    protected open val longEFIdentifier: Byte = 0x01
+    protected open val longEFIdentifier: Byte = LONG_EF_ID
     protected abstract val efTag: Byte
     protected var contentStart = -1
     var matchHash = false
@@ -76,12 +79,12 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             return FILE_UNABLE_TO_READ
         }
         val le = if (info[1] < 0) {
-            contentStart = 2 + info[1]+128
+            contentStart = 2 + info[1]+BYTE_MODULO
             var l = 0
-            for (i in 0..<(info[1]+128)) {
-                l = l*256 + info[i+2].toUByte().toInt()
+            for (i in 0..<(info[1]+BYTE_MODULO)) {
+                l = l*UBYTE_MODULO + info[i+2].toUByte().toInt()
             }
-            l += 2 + (info[1] + 128)
+            l += 2 + (info[1] + BYTE_MODULO)
             l
         } else {
             contentStart = 2
@@ -94,8 +97,8 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             var p2 : Byte
             var readBytes : Int
             for (i in 0..le step apduControl.maxResponseLength) {
-                p1 = (i/256).toByte()
-                p2 = (i % 256).toByte()
+                p1 = (i/UBYTE_MODULO).toByte()
+                p2 = (i % UBYTE_MODULO).toByte()
                 readBytes = if (le - i > apduControl.maxResponseLength) {
                     apduControl.maxResponseLength
                 } else {

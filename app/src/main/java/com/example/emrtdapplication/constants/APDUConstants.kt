@@ -11,4 +11,6 @@ object APDUConstants {
     const val LE_MIN = 1
     const val LE_MAX = 256
     const val LE_EXT_MAX = 65536
+    const val BYTE_MASK = 0xFF
+    const val EXTENDED_LENGTH_SHIFT_COUNT = 8
 }

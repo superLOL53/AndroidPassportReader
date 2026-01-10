@@ -1,5 +1,19 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.CryptoConstants.AES
+import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
+import com.example.emrtdapplication.constants.CryptoConstants.BYTE_TO_BITS
+import com.example.emrtdapplication.constants.CryptoConstants.C_0_128
+import com.example.emrtdapplication.constants.CryptoConstants.C_0_256
+import com.example.emrtdapplication.constants.CryptoConstants.C_1_128
+import com.example.emrtdapplication.constants.CryptoConstants.C_1_256
+import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE
+import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE_CBC_NO_PADDING
+import com.example.emrtdapplication.constants.CryptoConstants.EC_POINT_TAG_SINGLE_COORDINATE
+import com.example.emrtdapplication.constants.CryptoConstants.KEY_3DES_COUNT_ONES
+import com.example.emrtdapplication.constants.CryptoConstants.MAC_SIZE
+import com.example.emrtdapplication.constants.CryptoConstants.MAPPING_CONSTANT
+import com.example.emrtdapplication.constants.CryptoConstants.PAD_START_BYTE
 import com.example.emrtdapplication.constants.ZERO_BYTE
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHBasicAgreement
@@ -50,23 +64,23 @@ class Crypto {
     }
 
     fun integratedMappingPRNG(s: ByteArray, t: ByteArray, p: BigInteger, useLongConstants: Boolean = false) : BigInteger {
-        val c0128 = byteArrayOf(0xa6.toByte(), 0x68, 0x89.toByte(), 0x2a, 0x7c, 0x41, 0xe3.toByte(), 0xca.toByte(), 0x73, 0x9f.toByte(), 0x40, 0xb0.toByte(), 0x57, 0xd8.toByte(), 0x59, 0x04)
-        val c1128 = byteArrayOf(0xa4.toByte(), 0xe1.toByte(), 0x36, 0xac.toByte(), 0x72, 0x5f, 0x73, 0x8b.toByte(), 0x01, 0xc1.toByte(), 0xf6.toByte(), 0x02, 0x17, 0xc1.toByte(), 0x88.toByte(), 0xad.toByte())
-        val c0256 = byteArrayOf(0xd4.toByte(), 0x63, 0xd6.toByte(), 0x52, 0x34, 0x12, 0x4e, 0xf7.toByte(), 0x89.toByte(), 0x70, 0x54, 0x98.toByte(), 0x6d, 0xca.toByte(), 0x0a, 0x17, 0x4e, 0x28, 0xdf.toByte(), 0x75, 0x8c.toByte(), 0xba.toByte(), 0xa0.toByte(), 0x3f, 0x24, 0x06, 0x16, 0x41, 0x4d, 0x5a, 0x16, 0x76)
-        val c1256 = byteArrayOf(0x54, 0xbd.toByte(), 0x72, 0x55, 0xf0.toByte(), 0xaa.toByte(), 0xf8.toByte(), 0x31, 0xbe.toByte(), 0xc3.toByte(), 0x42, 0x3f, 0xcf.toByte(), 0x39, 0xd6.toByte(), 0x9b.toByte(), 0x6c, 0xbf.toByte(), 0x06, 0x66, 0x77, 0xd0.toByte(), 0xfa.toByte(), 0xae.toByte(), 0x5a, 0xad.toByte(), 0xd9.toByte(), 0x9d.toByte(), 0xf8.toByte(), 0xe5.toByte(), 0x35, 0x17)
-        val n = (p.bitLength() + 64)/(8*s.size)+1
-        val cipher = Cipher.getInstance("AES/CBC/NoPadding")
-        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(t, "AES"), IvParameterSpec(ByteArray(s.size)))
+        val c0128 = BigInteger(C_0_128, 16).toByteArray()
+        val c1128 = BigInteger(C_1_128, 16).toByteArray()
+        val c0256 = BigInteger(C_0_256, 16).toByteArray()
+        val c1256 = BigInteger(C_1_256, 16).toByteArray()
+        val n = (p.bitLength() + MAPPING_CONSTANT)/(BYTE_TO_BITS*s.size)+1
+        val cipher = Cipher.getInstance(AES_CBC_NO_PADDING)
+        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(t, AES), IvParameterSpec(ByteArray(s.size)))
         var enc = cipher.doFinal(s)
         val x = ByteArray(s.size*n)
         for (i in 0..<n) {
-            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(enc, "AES"), IvParameterSpec(ByteArray(s.size)))
+            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(enc, AES), IvParameterSpec(ByteArray(s.size)))
             if (useLongConstants) {
                 cipher.doFinal(c1256, 0, c1256.size, x, i*s.size)
             } else {
                 cipher.doFinal(c1128, 0, c1128.size, x, i*s.size)
             }
-            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(enc, "AES"), IvParameterSpec(ByteArray(s.size)))
+            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(enc, AES), IvParameterSpec(ByteArray(s.size)))
             enc = if (useLongConstants) {
                 cipher.doFinal(c0256)
             } else {
@@ -96,10 +110,10 @@ class Crypto {
     }
 
     fun getECPointFromBigInteger(x : BigInteger, parameters: ECDomainParameters) : ECPoint {
-        return if (x.toByteArray()[0] == ZERO_BYTE) {
-            parameters.curve.decodePoint(byteArrayOf(0x03) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
+        return if (x.toByteArray()[0] == 0.toByte()) {
+            parameters.curve.decodePoint(byteArrayOf(EC_POINT_TAG_SINGLE_COORDINATE) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
         } else {
-            parameters.curve.decodePoint(byteArrayOf(0x03) + x.toByteArray())
+            parameters.curve.decodePoint(byteArrayOf(EC_POINT_TAG_SINGLE_COORDINATE) + x.toByteArray())
         }
     }
 
@@ -115,8 +129,8 @@ class Crypto {
         return ka.calculateAgreement(publicKey)
     }
 
-    fun computeCMAC(m: ByteArray, key: ByteArray, size: Int = 8) : ByteArray {
-        val cMac = CMac(AESEngine(), size*8)
+    fun computeCMAC(m: ByteArray, key: ByteArray, size: Int = MAC_SIZE) : ByteArray {
+        val cMac = CMac(AESEngine(), size*BYTE_TO_BITS)
         cMac.init(KeyParameter(key))
         cMac.update(m, 0, m.size)
         val out = ByteArray(cMac.macSize)
@@ -125,19 +139,14 @@ class Crypto {
     }
 
     fun checkMAC(c: ByteArray, m: ByteArray, key: ByteArray, usePadding: Boolean = true) : Boolean {
-        //val mac = ISO9797Alg3Mac(DESEngine(), m.size*8, ISO7816d4Padding())
-        //mac.init(KeyParameter(key))
-        //mac.update(c, 0, c.size)
-        //val out = ByteArray(m.size)
-        //mac.doFinal(out, 0)
         return m.contentEquals(computeMAC(c, key, m.size, usePadding))
     }
 
-    fun computeMAC(m : ByteArray, key: ByteArray, size: Int = 8, usePadding : Boolean = true) : ByteArray {
+    fun computeMAC(m : ByteArray, key: ByteArray, size: Int = MAC_SIZE, usePadding : Boolean = true) : ByteArray {
         val mac = if (usePadding) {
-            ISO9797Alg3Mac(DESEngine(), size*8, ISO7816d4Padding())
+            ISO9797Alg3Mac(DESEngine(), size*BYTE_TO_BITS, ISO7816d4Padding())
         } else {
-            ISO9797Alg3Mac(DESEngine(), size*8)
+            ISO9797Alg3Mac(DESEngine(), size*BYTE_TO_BITS)
         }
         mac.init(KeyParameter(key))
         mac.update(m, 0, m.size)
@@ -147,16 +156,16 @@ class Crypto {
     }
 
     fun cipher3DES(toEncrypt: ByteArray, key: ByteArray, mode : Int = Cipher.ENCRYPT_MODE, iv : ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)) : ByteArray {
-        val k = SecretKeySpec(key, "DESede")
-        val c = Cipher.getInstance("DESede/CBC/NoPadding")
+        val k = SecretKeySpec(key, DES_EDE)
+        val c = Cipher.getInstance(DES_EDE_CBC_NO_PADDING)
         val i = IvParameterSpec(iv)
         c.init(mode, k, i)
         return c.doFinal(toEncrypt)
     }
 
     fun cipherAES(toEncrypt: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null) : ByteArray {
-        val k = SecretKeySpec(key, "AES")
-        val c = Cipher.getInstance("AES/CBC/NoPadding")
+        val k = SecretKeySpec(key, AES)
+        val c = Cipher.getInstance(AES_CBC_NO_PADDING)
         val i = if (iv == null || iv.isEmpty()) {
             IvParameterSpec(ByteArray(key.size))
         } else {
@@ -167,13 +176,13 @@ class Crypto {
     }
 
     fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray {
-        val key = hash(hashName, seed + byteArrayOf(ZERO_BYTE, ZERO_BYTE, ZERO_BYTE, c))
+        val key = hash(hashName, seed + byteArrayOf(0, 0, 0, c))
         if (is3DES) {
             for (i in key.indices) {
-                if ((key[i] and 0xFE.toByte()).countOneBits() % 2 == 0) {
+                if ((key[i] and KEY_3DES_COUNT_ONES).countOneBits() % 2 == 0) {
                     key[i] = key[i] or 0x1
                 } else {
-                    key[i] = key[i] and 0xFE.toByte()
+                    key[i] = key[i] and KEY_3DES_COUNT_ONES
                 }
             }
         }
@@ -189,17 +198,17 @@ class Crypto {
     fun addPadding(paddingBytes : ByteArray, paddingSize : Int) : ByteArray {
         val pad = paddingSize - paddingBytes.size % paddingSize
         if (pad == paddingSize) {
-            return paddingBytes + byteArrayOf(0x80.toByte(), 0,0,0,0,0,0,0)
+            return paddingBytes + byteArrayOf(PAD_START_BYTE, 0,0,0,0,0,0,0)
         }
-        var padArray = paddingBytes + 0x80.toByte()
+        var padArray = paddingBytes + PAD_START_BYTE
         for (i in 1..<pad) {
-            padArray += 0x00
+            padArray += 0
         }
         return padArray
     }
 
     fun removePadding(paddedBytes : ByteArray) : ByteArray {
-        val last = paddedBytes.lastIndexOf(0x80.toByte())
+        val last = paddedBytes.lastIndexOf(PAD_START_BYTE)
         return if (last == -1) {
             paddedBytes
         } else {

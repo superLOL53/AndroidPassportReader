@@ -1,6 +1,10 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.constants.TlvTags.LENGTH_MULTIPLE_BYTES
+import com.example.emrtdapplication.constants.TlvTags.TAG_MULTIPLE_BYTES
 import kotlin.experimental.and
 import kotlin.experimental.or
 /**
@@ -84,7 +88,7 @@ class TLV {
      */
     private fun decode(ba: ByteArray) {
         val l = if (tag.size < ba.size && ba[tag.size] < 0) {
-            (ba[tag.size] and 0x7F) + 1
+            (ba[tag.size] and LENGTH_MULTIPLE_BYTES) + 1
         } else {
             1
         } + tag.size
@@ -110,26 +114,6 @@ class TLV {
             list = null
         }
     }
-
-    /*fun getTag() : ByteArray {
-        return tag
-    }
-
-    fun getLength() : Int {
-        return length
-    }
-
-    fun getValue() : ByteArray? {
-        return value
-    }
-
-    fun getTLVSequence() : TLVSequence? {
-        return list
-    }
-
-    fun getIsValid(): Boolean {
-        return isValid
-    }*/
 
     fun isConstruct(): Boolean {
         return tag.isEmpty() || (tag[0] and TlvTags.CONSTRUCT_BIT) == TlvTags.CONSTRUCT_BIT
@@ -160,7 +144,7 @@ class TLV {
             return ByteArray(1)
         }
         var tag = byteArrayOf(ba[0])
-        if ((ba[0] and 0x1F).toInt() == 0x1F) {
+        if ((ba[0] and TAG_MULTIPLE_BYTES) == TAG_MULTIPLE_BYTES) {
             var i = 1
             while (ba.size > i && ba[i] < 0) {
                 tag += ba[i]
@@ -189,14 +173,14 @@ class TLV {
             return ba.size
         }
         if (ba[offset] < 0) {
-            val i = ba[offset]+128
+            val i = ba[offset]+BYTE_MODULO
             if (offset+i >= ba.size) {
                 isValid = false
                 return ba.size
             }
             var l = 0
             for (j in 1..i) {
-                l = ba[offset+j].toUByte().toInt() + l*256
+                l = ba[offset+j].toUByte().toInt() + l*UBYTE_MODULO
             }
             return l
         } else {
@@ -212,14 +196,14 @@ class TLV {
         if (!isValid) {
             return ByteArray(1)
         }
-        if (length in 0..127) {
+        if (length in 0..Byte.MAX_VALUE) {
             return byteArrayOf(length.toByte())
         } else {
             var ba = byteArrayOf(Byte.MIN_VALUE)
             var l = length
             var i = 0
             while (l > 0) {
-                l /= 256
+                l /= UBYTE_MODULO
                 i += 1
             }
             ba[0] = ba[0] or i.toByte()

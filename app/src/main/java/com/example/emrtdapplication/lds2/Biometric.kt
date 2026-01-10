@@ -1,5 +1,12 @@
 package com.example.emrtdapplication.lds2
 
+import com.example.emrtdapplication.constants.BiometricConstants.AUTHENTICITY_TOKEN_TAG
+import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_DATA_TAG
+import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_RECORD_SIZE
+import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_TAG
+import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_TAG_1
+import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_TAG_2
+import com.example.emrtdapplication.constants.BiometricConstants.CERTIFICATE_REFERENCE_TAG
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -27,21 +34,21 @@ class Biometric(record: TLV) {
         var biometricData : ByteArray? = null
         var signature : ByteArray? = null
         var certificateReference : ByteArray? = null
-        if (record.tag.size != 2 || record.tag[0] != 0x7F.toByte() ||
-            record.tag[1] != 0x2E.toByte()) {
+        if (record.tag.size != 2 || record.tag[0] != BIOMETRIC_TAG_1 ||
+            record.tag[1] != BIOMETRIC_TAG_2) {
             throw IllegalArgumentException("Illegal tag for Biometric Data Template!")
         }
-        if (record.list == null || record.list!!.tlvSequence.size != 3) {
+        if (record.list == null || record.list!!.tlvSequence.size != BIOMETRIC_RECORD_SIZE) {
             throw IllegalArgumentException("Invalid sequence for Biometric Data Template!")
         }
         for (tlv in record.list!!.tlvSequence) {
-            if (tlv.tag.size != 2 || tlv.tag[0] != 0x5F.toByte()) {
+            if (tlv.tag.size != 2 || tlv.tag[0] != BIOMETRIC_TAG) {
                 throw IllegalArgumentException("Illegal tag for Biometric Data Template!")
             }
             when (tlv.tag[1]) {
-                0x2E.toByte() -> biometricData = tlv.toByteArray()
-                0x37.toByte() -> signature = tlv.value
-                0x38.toByte() -> certificateReference = tlv.value
+                BIOMETRIC_DATA_TAG -> biometricData = tlv.toByteArray()
+                AUTHENTICITY_TOKEN_TAG -> signature = tlv.value
+                CERTIFICATE_REFERENCE_TAG -> certificateReference = tlv.value
             }
         }
         if (biometricData == null) {

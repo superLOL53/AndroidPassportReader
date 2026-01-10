@@ -18,7 +18,6 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
 class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
-    //private var eMRTD = EMRTD()
     private lateinit var nfcAdapter : NfcAdapter
     private var mrz : String? = null
 

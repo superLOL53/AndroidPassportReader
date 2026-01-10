@@ -4,20 +4,22 @@ import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENT
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.EMRTD.mrz
-import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.ReadPassport
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.constants.LDS1ApplicationConstants.APPLICATION_ID
+import com.example.emrtdapplication.constants.LDS1ApplicationConstants.INCREMENT_PROGRESS_BAR
 import com.example.emrtdapplication.constants.SUCCESS
+import java.math.BigInteger
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import kotlin.collections.iterator
 
 class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
-    override val applicationIdentifier: ByteArray = byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x02, 0x47, 0x10, 0x01)
+    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray()
     var bac = BAC(EMRTD.apduControl)
         private set
     var efCOM : EfCom = EfCom(apduControl)
@@ -56,7 +58,7 @@ class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
         private set
     var dg16 : DG16 = DG16(apduControl)
         private set
-    var efMap = mapOf<Byte, ElementaryFileTemplate>(
+    var efMap = mapOf(
         dg1.shortEFIdentifier to dg1,
         dg2.shortEFIdentifier to dg2,
         dg3.shortEFIdentifier to dg3,
@@ -78,14 +80,14 @@ class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
     var certs : Array<X509Certificate>? = null
 
     override fun readFiles(readActivity : ReadPassport) {
-        readActivity.changeProgressBar("Reading EF.COM file...", 3)
+        readActivity.changeProgressBar("Reading EF.COM file...", INCREMENT_PROGRESS_BAR)
         efCOM.read()
         for (ef in efMap) {
-            readActivity.changeProgressBar("Reading DG${ef.key} file...", 3)
+            readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
             ef.value.read()
             ef.value.parse()
         }
-        readActivity.changeProgressBar("Reading EF.SOD file...", 3)
+        readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
         if (efSod.read() == SUCCESS) {
             efSod.parse()
         }
@@ -99,12 +101,12 @@ class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
     }
 
     fun verify(readActivity: ReadPassport) {
-        readActivity.changeProgressBar("Performing Passive Authentication...", 5)
+        readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
         efSod.checkHashes(efMap)
         efSod.passiveAuthentication(certs)
-        readActivity.changeProgressBar("Performing Active Authentication...", 5)
+        readActivity.changeProgressBar("Performing Active Authentication...", INCREMENT_PROGRESS_BAR)
         dg15.activeAuthentication(SecureRandom())
-        readActivity.changeProgressBar("Performing Chip Authentication...", 5)
+        readActivity.changeProgressBar("Performing Chip Authentication...", INCREMENT_PROGRESS_BAR)
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null
             var chipInfo : ChipAuthenticationInfo? = null

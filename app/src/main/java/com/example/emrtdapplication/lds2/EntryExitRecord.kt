@@ -1,5 +1,20 @@
 package com.example.emrtdapplication.lds2
 
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.AUTHENTICITY_TOKEN_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.CERTIFICATE_REFERENCE_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.CONDITIONS_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.DATE_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTION_AUTHORITY_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTION_LOCATION_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTION_RESULT_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTOR_REFERENCE_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.ISSUING_STATE_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.SIGNED_INFO_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.STAY_DURATION_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_MODE_TAG
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_RECORD_SIZE
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_TAG_1
+import com.example.emrtdapplication.constants.EntryExitRecordConstants.VISA_STATUS_TAG
 import com.example.emrtdapplication.utils.TLVSequence
 
 /**
@@ -45,51 +60,49 @@ class EntryExitRecord(val record: TLVSequence) {
         var conditions : String? = null
         var signature : ByteArray? = null
         var certificateReference : ByteArray? = null
-        if (record.tlvSequence.size != 4) {
-            throw IllegalArgumentException("Record sequence must be of size 4!")
+        if (record.tlvSequence.size != TRAVEL_RECORD_SIZE) {
+            throw IllegalArgumentException("Record sequence must be of size $TRAVEL_RECORD_SIZE!")
         }
         for (tlv in record.tlvSequence) {
             if (tlv.tag.size == 1) {
-                if (tlv.tag[0] != 0x73.toByte() || tlv.list == null) {
+                if (tlv.tag[0] != SIGNED_INFO_TAG || tlv.list == null) {
                     throw IllegalArgumentException("Invalid tag for signed info in an Entry/Exit Record!")
                 }
                 for (t in tlv.list!!.tlvSequence) {
-                    if (t.tag.size != 2 || t.tag[0] != 0x5F.toByte() || t.value == null) {
+                    if (t.tag.size != 2 || t.tag[0] != TRAVEL_TAG_1 || t.value == null) {
                         continue
                     }
                     when (t.tag[1]) {
-                        0x44.toByte() -> state2 = t.value.toString()
-                        0x4C.toByte() -> visaStatus = t.value.toString().replace('<', ' ')
-                        0x45.toByte() -> date = t.value.toString()
-                        0x4B.toByte() -> inspectionAuthority = t.value.toString().replace('<', ' ')
-                        0x46.toByte() -> inspectionLocation = t.value.toString().replace('<', ' ')
-                        0x4A.toByte() -> inspectorReference = t.value.toString().replace('<', ' ')
-                        0x4D.toByte() -> inspectionResult = t.value.toString().replace('<', ' ')
-                        0x49.toByte() -> travelMode = when (t.value!![0]) {
+                        ISSUING_STATE_TAG -> state2 = t.value.toString()
+                        VISA_STATUS_TAG -> visaStatus = t.value.toString().replace('<', ' ')
+                        DATE_TAG -> date = t.value.toString()
+                        INSPECTION_AUTHORITY_TAG -> inspectionAuthority = t.value.toString().replace('<', ' ')
+                        INSPECTION_LOCATION_TAG -> inspectionLocation = t.value.toString().replace('<', ' ')
+                        INSPECTOR_REFERENCE_TAG -> inspectorReference = t.value.toString().replace('<', ' ')
+                        INSPECTION_RESULT_TAG -> inspectionResult = t.value.toString().replace('<', ' ')
+                        TRAVEL_MODE_TAG -> travelMode = when (t.value!![0]) {
                                                             'A'.code.toByte() -> "Air"
                                                             'S'.code.toByte() -> "Sea"
                                                             'L'.code.toByte() -> "Land"
                                                             else -> "Unknown"
                                                         }
-                        0x48.toByte() -> stayDuration = if (t.value == null) {
-                                                            null
-                                                        } else {
-                                                            var tmp = 0
-                                                            for (b in tlv.value!!) tmp = tmp*256 + b
-                                                            tmp
-                                                        }
-                        0x4E.toByte() -> conditions = t.value.toString().replace('<', ' ')
+                        STAY_DURATION_TAG -> stayDuration = run {
+                            var tmp = 0
+                            for (b in tlv.value!!) tmp = tmp*256 + b
+                            tmp
+                        }
+                        CONDITIONS_TAG -> conditions = t.value.toString().replace('<', ' ')
                     }
                 }
             } else if (tlv.tag.size == 2) {
-                if (tlv.tag[0] != 0x5F.toByte() || (tlv.tag[1] != 0x44.toByte() &&
-                            tlv.tag[1] != 0x37.toByte() && tlv.tag[1] != 0x38.toByte())) {
+                if (tlv.tag[0] != TRAVEL_TAG_1 || (tlv.tag[1] != ISSUING_STATE_TAG &&
+                            tlv.tag[1] != AUTHENTICITY_TOKEN_TAG && tlv.tag[1] != CERTIFICATE_REFERENCE_TAG)) {
                     throw IllegalArgumentException("Invalid tag in an Entry/Exit Record!")
                 }
                 when (tlv.tag[1]) {
-                    0x44.toByte() -> state1 = tlv.value?.toString()
-                    0x37.toByte() -> signature = tlv.value
-                    0x38.toByte() -> certificateReference = tlv.value
+                    ISSUING_STATE_TAG -> state1 = tlv.value?.toString()
+                    AUTHENTICITY_TOKEN_TAG -> signature = tlv.value
+                    CERTIFICATE_REFERENCE_TAG -> certificateReference = tlv.value
                 }
             }
         }

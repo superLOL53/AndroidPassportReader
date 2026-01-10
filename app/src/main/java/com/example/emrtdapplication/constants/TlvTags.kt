@@ -13,6 +13,16 @@ object TlvTags {
     const val EC_PUBLIC_POINT : Byte = 0x86.toByte()
     const val OID : Byte = 0x06
     const val UNSIGNED_INTEGER : Byte = 0x84.toByte()
+    const val DO01 : Byte = 0x01
+    const val DO08 : Byte = 0x08
+    const val DO09 : Byte = 0x09
     const val DO51 : Byte = 0x51
-    //const val SEQUENCE: Byte = 0x30
+    const val DO85 : Byte = 0x85.toByte()
+    const val DO87 : Byte = 0x87.toByte()
+    const val DO8E : Byte = 0x8E.toByte()
+    const val DO97 : Byte = 0x97.toByte()
+    const val DO97_LE_LENGTH : Byte = 0x01
+    const val DO97_EXTENDED_LE_LENGTH : Byte = 0x02
+    const val TAG_MULTIPLE_BYTES : Byte = 0x1F
+    const val LENGTH_MULTIPLE_BYTES : Byte = 0x7F
 }

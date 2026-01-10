@@ -11,9 +11,9 @@ import com.example.emrtdapplication.lds2.AdditionalBiometrics
 import com.example.emrtdapplication.lds2.TravelRecords
 import com.example.emrtdapplication.lds2.VisaRecords
 import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
+import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.CONNECT_SUCCESS
-import com.example.emrtdapplication.utils.INIT_SUCCESS
 import com.example.emrtdapplication.constants.SUCCESS
 
 /**
@@ -21,11 +21,7 @@ import com.example.emrtdapplication.constants.SUCCESS
  * Visa Records application and Additional Biometrics application) and reads available files.
  *
  */
-//TODO: Write functions to select LDS2 applications (Travel Records, Visa Records and Additional Biometrics)
-//TODO: Make loading screen to indicate reading in progress or finished
-//TODO: Make class for each application? Ask the user which application to read? Or read everything at once?
 object EMRTD {
-    //TODO: Get rid of all warnings, implement PACE, Refactor code, Testing
     var apduControl = APDUControl()
         private set
     var ca = CardAccess(apduControl)

@@ -15,5 +15,6 @@ object SecurityInfoConstants {
     const val CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID = "0.4.0.127.0.7.2.2.1"
     const val TERMINAL_AUTHENTICATION_OID = "0.4.0.127.0.7.2.2.2"
     const val EF_DIR_OID = "2.23.136.1.1.13"
-
+    const val PACE_INFO_TYPE_SIZE = 11
+    const val PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE = 10
 }

@@ -7,6 +7,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_1
+import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_2
+import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_3
 import com.example.emrtdapplication.constants.ManualInputConstants.DATE_LENGTH
 import com.example.emrtdapplication.constants.ManualInputConstants.LOWER_CASE_DIGIT
 import com.example.emrtdapplication.constants.ManualInputConstants.NAME_LENGTH
@@ -34,7 +37,7 @@ class ManualInput : AppCompatActivity() {
     private var passportNr : String? = null
     private var expirationDate : String? = null
     private var birthday : String? = null
-    private var checkDigitSequence = byteArrayOf(7, 3, 1)
+    private var checkDigitSequence = byteArrayOf(CHECK_DIGIT_SEQUENCE_1, CHECK_DIGIT_SEQUENCE_2, CHECK_DIGIT_SEQUENCE_3)
 
 
     @Override
@@ -154,9 +157,9 @@ class ManualInput : AppCompatActivity() {
         return if (ch.isDigit()) {
             ch.digitToInt()
         } else if (ch.isUpperCase()) {
-            ch.code- UPPER_CASE_DIGIT
+            ch.code - UPPER_CASE_DIGIT
         } else if (ch.isLowerCase()){
-            ch.code- LOWER_CASE_DIGIT
+            ch.code - LOWER_CASE_DIGIT
         } else {
             0
         }
