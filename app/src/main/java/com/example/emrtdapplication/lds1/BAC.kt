@@ -1,5 +1,14 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.constants.BACConstants.BAC_PROTOCOL_SUCCESS
+import com.example.emrtdapplication.constants.BACConstants.ENCRYPTION_KEY_VALUE_C
+import com.example.emrtdapplication.constants.BACConstants.ERROR_BAC_PROTOCOL_FAILED
+import com.example.emrtdapplication.constants.BACConstants.ERROR_INVALID_MAC
+import com.example.emrtdapplication.constants.BACConstants.ERROR_INVALID_NONCE
+import com.example.emrtdapplication.constants.BACConstants.ERROR_NONCE_REQUEST_FAILED
+import com.example.emrtdapplication.constants.BACConstants.ERROR_NO_MRZ
+import com.example.emrtdapplication.constants.BACConstants.ERROR_UNINITIALIZED_MRZ_INFORMATION
+import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
@@ -11,19 +20,6 @@ import com.example.emrtdapplication.constants.SUCCESS
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import kotlin.experimental.xor
-
-/**
- * Constants for the class BAC
- */
-const val ENCRYPTION_KEY_VALUE_C : Byte = 1
-const val MAC_COMPUTATION_KEY_VALUE_C : Byte = 2
-const val BAC_PROTOCOL_SUCCESS = 0
-const val ERROR_UNINITIALIZED_MRZ_INFORMATION = -1
-const val ERROR_NONCE_REQUEST_FAILED = -2
-const val ERROR_BAC_PROTOCOL_FAILED = -3
-const val ERROR_INVALID_MAC = -4
-const val ERROR_INVALID_NONCE = -5
-const val ERROR_NO_MRZ = -6
 
 /**
  * Implements the Basic Access Control (BAC) protocol

@@ -1,6 +1,7 @@
 package com.example.emrtdapplication.lds2
 
 import com.example.emrtdapplication.ReadPassport
+import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.BIOMETRIC_FILE_ID
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
@@ -11,7 +12,6 @@ import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
-const val BIOMETRIC_FILE_ID : Byte = 0x02
 class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduControl) {
     override val applicationIdentifier: ByteArray = byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x02, 0x47, 0x20, 0x03)
     private var biometricFiles : Array<Biometric>? = null

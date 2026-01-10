@@ -2,6 +2,10 @@ package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
+import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH
+import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH_3DES_CBC_CBC
+import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH
+import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH_3DES_CBC_CBC
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
@@ -21,21 +25,6 @@ import java.security.PublicKey
 import java.security.SecureRandom
 import java.security.spec.AlgorithmParameterSpec
 import java.security.spec.X509EncodedKeySpec
-
-const val ID_CA = "0.4.0.127.0.7.2.2.3"
-const val ID_CA_DH = "0.4.0.127.0.7.2.2.3.1"
-const val ID_CA_DH_3DES_CBC_CBC = "0.4.0.127.0.7.2.2.3.1.1"
-const val ID_CA_DH_AES_CBC_CMAC_128 = "0.4.0.127.0.7.2.2.3.1.2"
-const val ID_CA_DH_AES_CBC_CMAC_192 = "0.4.0.127.0.7.2.2.3.1.3"
-const val ID_CA_DH_AES_CBC_CMAC_256 = "0.4.0.127.0.7.2.2.3.1.4"
-const val ID_CA_ECDH = "0.4.0.127.0.7.2.2.3.2"
-const val ID_CA_ECDH_3DES_CBC_CBC = "0.4.0.127.0.7.2.2.3.2.1"
-const val ID_CA_ECDH_AES_CBC_CMAC_128 = "0.4.0.127.0.7.2.2.3.2.2"
-const val ID_CA_ECDH_AES_CBC_CMAC_192 = "0.4.0.127.0.7.2.2.3.2.3"
-const val ID_CA_ECDH_AES_CBC_CMAC_256 = "0.4.0.127.0.7.2.2.3.2.4"
-const val ID_PK = "0.4.0.127.0.7.2.2.1"
-const val ID_PK_DH = "0.4.0.127.0.7.2.2.1.1"
-const val ID_PK_ECDH = "0.4.0.127.0.7.2.2.1.2"
 
 /**
  * Implements the chip authentication protocol

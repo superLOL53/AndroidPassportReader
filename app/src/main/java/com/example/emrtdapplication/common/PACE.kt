@@ -9,6 +9,35 @@ import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
+import com.example.emrtdapplication.constants.PACEConstants.INVALID_GENERAL_AUTHENTICATE
+import com.example.emrtdapplication.constants.PACEConstants.INVALID_MSE_COMMAND
+import com.example.emrtdapplication.constants.PACEConstants.INVALID_NONCE
+import com.example.emrtdapplication.constants.PACEConstants.NO_PACE_OID
+import com.example.emrtdapplication.constants.PACEConstants.NO_PASSWORD
+import com.example.emrtdapplication.constants.PACEConstants.POSITIVE_NUMBER
+import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
+import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
+import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
+import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P192R1
+import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P224R1
+import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P256R1
+import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P320R1
+import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P384R1
+import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P512R1
+import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
+import com.example.emrtdapplication.constants.PACEInfoConstants.DH_GM
+import com.example.emrtdapplication.constants.PACEInfoConstants.DH_IM
+import com.example.emrtdapplication.constants.PACEInfoConstants.ECDH_CAM
+import com.example.emrtdapplication.constants.PACEInfoConstants.ECDH_GM
+import com.example.emrtdapplication.constants.PACEInfoConstants.ECDH_IM
+import com.example.emrtdapplication.constants.PACEInfoConstants.MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP
+import com.example.emrtdapplication.constants.PACEInfoConstants.MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP
+import com.example.emrtdapplication.constants.PACEInfoConstants.MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP
+import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P192
+import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P224
+import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P256
+import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P384
+import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P521
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
@@ -26,17 +55,6 @@ import java.math.BigInteger
 import java.security.SecureRandom
 import javax.crypto.Cipher
 
-/**
- * Constants for the PACE class
- */
-//const val PACE_TAG = "PACE"
-//const val PACE_ENABLE_LOGGING = true
-const val NO_PASSWORD = -1
-const val NO_PACE_OID = -2
-const val INVALID_MSE_COMMAND = -3
-const val INVALID_GENERAL_AUTHENTICATE = -4
-const val INVALID_NONCE = -5
-const val POSITIVE_NUMBER = 1
 /**
  * Implements the PACE protocol.
  *

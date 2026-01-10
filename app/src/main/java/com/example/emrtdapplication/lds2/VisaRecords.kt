@@ -4,9 +4,9 @@ import com.example.emrtdapplication.ReadPassport
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_1
+import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_2
 
-const val VISA_RECORD_ID_1 : Byte = 0x01
-const val VISA_RECORD_ID_2 : Byte = 0x03
 //TODO: Implement
 class VisaRecords(apduControl: APDUControl) : LDS2Application(apduControl) {
     override val applicationIdentifier: ByteArray = byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x02, 0x47, 0x20, 0x02)

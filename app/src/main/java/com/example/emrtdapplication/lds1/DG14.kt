@@ -2,14 +2,14 @@ package com.example.emrtdapplication.lds1
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_OID
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_OID
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
-import com.example.emrtdapplication.EF_DIR_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_OID
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.PACE_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_OID
 import com.example.emrtdapplication.common.ActiveAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo

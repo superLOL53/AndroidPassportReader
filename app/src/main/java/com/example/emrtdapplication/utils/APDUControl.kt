@@ -2,32 +2,21 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_ISO_DEP_SUPPORT
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_NFC_TAG
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
+import com.example.emrtdapplication.constants.NfcUse
 import com.example.emrtdapplication.constants.ZERO_BYTE
 import java.io.IOException
 import javax.crypto.Cipher
-
-/**
- * Enum class for NFC types. eMRTD uses ISO DEP as communication protocol. All other are insufficient and not used.
- */
-enum class NfcUse {
-    UNDEFINED,
-    ISO_DEP
-}
-
-/**
- * Constants for the class APDUControl
- */
-const val INIT_SUCCESS = 0
-const val CONNECT_SUCCESS = 1
-const val CLOSE_SUCCESS = 2
-const val ERROR_NO_NFC_TAG = -1
-const val ERROR_NO_ISO_DEP_SUPPORT = -2
-const val ERROR_UNABLE_TO_CONNECT = -3
-const val ERROR_ISO_DEP_NOT_SELECTED = -4
-const val ERROR_UNABLE_TO_CLOSE = -5
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CLOSE
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CONNECT
+import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
 
 /**
  * Class for sending and receiving APDUs from the ePassport

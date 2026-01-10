@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
-import com.example.emrtdapplication.PACE_INFO_TYPE
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -12,6 +10,8 @@ import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE
 import com.example.emrtdapplication.utils.TLV
 
 /**

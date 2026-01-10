@@ -1,12 +1,12 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
-import com.example.emrtdapplication.EF_DIR_TYPE
-import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
-import com.example.emrtdapplication.PACE_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.TERMINAL_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT

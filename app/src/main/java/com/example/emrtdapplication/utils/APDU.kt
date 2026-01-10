@@ -1,17 +1,11 @@
 package com.example.emrtdapplication.utils
 
-/**
- * Constants for the class APDU
- */
-//const val APDU_TAG = "APDU"
-//const val APDU_ENABLE_LOGGING = true
-const val MIN_APDU_LENGTH = 4
-//const val LC_MIN = 1
-const val LC_MAX = 255
-const val LC_EXT_MAX = 65535
-const val LE_MIN = 1
-const val LE_MAX = 256
-const val LE_EXT_MAX = 65536
+import com.example.emrtdapplication.constants.APDUConstants.LC_EXT_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LC_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_EXT_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_MIN
+import com.example.emrtdapplication.constants.APDUConstants.MIN_APDU_LENGTH
 
 /**
  * Class representing an APDU
@@ -131,7 +125,6 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
             }
             apduLength += data.size
         }
-        //log("APDU Length is $apduLength")
         val ba = ByteArray(apduLength)
         var pos = 0
         ba[pos++] = classByte
@@ -139,7 +132,6 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
         ba[pos++] = p1Byte
         ba[pos++] = p2Byte
         if (!useLc && !useLe) {
-            //log("APDU Array: ", ba)
             return ba
         } else if (!useLc) {
             if (useLeExt) {
@@ -170,24 +162,6 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
                 }
             }
         }
-        //log("APDU Array: ", ba)
         return ba
     }
-
-    /*/**
-     * Logs message in the android logcat
-     * @param msg: The message to be printed in the log
-     */
-    private fun log(msg: String) {
-        Logger.log(APDU_TAG, APDU_ENABLE_LOGGING, msg)
-    }
-
-    /**
-     * Logs message in the android logcat
-     * @param msg: The message to be printed in the log
-     * @param b: The byte array to be printed in the log as hexadecimal bytes
-     */
-    private fun log(msg : String, b : ByteArray) {
-        return Logger.log("apdu", true, msg, b)
-    }*/
 }

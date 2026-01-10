@@ -3,21 +3,17 @@ package com.example.emrtdapplication.lds1
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.constants.EFComConstants.LDS_VERSION_LENGTH
+import com.example.emrtdapplication.constants.EFComConstants.LDS_VERSION_TAG
+import com.example.emrtdapplication.constants.EFComConstants.TAG_LIST_TAG
+import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_LENGTH
+import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_TAG
+import com.example.emrtdapplication.constants.EFComConstants.VERSION_TAG
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
-
-/**
- * Constants for EfCom
- */
-const val VERSION_TAG : Byte = 0x5F
-const val LDS_VERSION_TAG : Byte = 0x01
-const val LDS_VERSION_LENGTH = 0x04
-const val UNICODE_VERSION_TAG : Byte = 0x36
-const val UNICODE_VERSION_LENGTH = 0x06
-const val TAG_LIST_TAG : Byte = 0x5C
 
 /**
  * Implements the EF.COM file and inherits from [ElementaryFileTemplate]

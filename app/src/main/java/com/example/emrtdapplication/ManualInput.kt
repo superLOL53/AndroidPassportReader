@@ -7,14 +7,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
-/**
- * Constants for the ManualInput class
- */
-const val UPPER_CASE_DIGIT = 55
-const val LOWER_CASE_DIGIT = 87
-const val NAME_LENGTH = 8
-const val DATE_LENGTH = 6
+import com.example.emrtdapplication.constants.ManualInputConstants.DATE_LENGTH
+import com.example.emrtdapplication.constants.ManualInputConstants.LOWER_CASE_DIGIT
+import com.example.emrtdapplication.constants.ManualInputConstants.NAME_LENGTH
+import com.example.emrtdapplication.constants.ManualInputConstants.UPPER_CASE_DIGIT
 
 
 /** Class for manual input from the user. The manual input consists of:
@@ -158,9 +154,9 @@ class ManualInput : AppCompatActivity() {
         return if (ch.isDigit()) {
             ch.digitToInt()
         } else if (ch.isUpperCase()) {
-            ch.code-UPPER_CASE_DIGIT
+            ch.code- UPPER_CASE_DIGIT
         } else if (ch.isLowerCase()){
-            ch.code-LOWER_CASE_DIGIT
+            ch.code- LOWER_CASE_DIGIT
         } else {
             0
         }

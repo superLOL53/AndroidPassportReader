@@ -4,8 +4,8 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.LE_EXT_MAX
-import com.example.emrtdapplication.utils.LE_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_EXT_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_MAX
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
@@ -13,6 +13,8 @@ import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLVSequence
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.constants.TravelRecordsConstants.CERTIFICATE_RECORDS_ID_1
+import com.example.emrtdapplication.constants.TravelRecordsConstants.CERTIFICATE_RECORDS_ID_2
 
 abstract class LDS2Application(apduControl: APDUControl) : LDSApplication(apduControl) {
     var certificateRecords : Array<CertificateRecord>? = null

@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.lds1
 
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.EMRTD.mrz
 import com.example.emrtdapplication.ElementaryFileTemplate
