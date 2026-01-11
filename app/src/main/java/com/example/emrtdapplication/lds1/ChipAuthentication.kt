@@ -16,7 +16,12 @@ import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.utils.TLV
+import org.bouncycastle.jcajce.provider.asymmetric.dh.BCDHPublicKey
+import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.bouncycastle.jce.interfaces.ECPublicKey
+import org.spongycastle.asn1.x9.DHPublicKey
+import org.spongycastle.crypto.params.DHPublicKeyParameters
+import org.spongycastle.crypto.params.ECPublicKeyParameters
 import java.nio.ByteBuffer
 import java.security.KeyFactory
 import java.security.KeyPair
@@ -36,6 +41,8 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
                          private val random: SecureRandom = SecureRandom(), private val crypto: Crypto = Crypto(),
                          private val chipAuthenticationInfo: ChipAuthenticationInfo?) {
 
+    private var isDH = false
+    private var isEC = false
     /**
      * Authenticate the chip
      */
@@ -43,6 +50,12 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
         return if (chipAuthenticationInfo == null) {
             FAILURE
         } else {
+            apduControl.sendEncryptedAPDU = false
+            if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH)) {
+                isDH = true
+            } else if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH)) {
+                isEC = true
+            }
             if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH_3DES_CBC_CBC) ||
                 chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH_3DES_CBC_CBC)) {
                 authenticate3DES()
@@ -55,7 +68,9 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     private fun authenticate3DES() : Int {
         val keyPair = generateKeyPair()
         if (keyPair == null) return FAILURE
-        val pubData = TLV(0x91.toByte(), keyPair.public.encoded)
+        val publicKeyData = getEncodedPublicKey(keyPair)
+        if (publicKeyData == null) return FAILURE
+        val pubData = TLV(0x91.toByte(), publicKeyData)
         val keyRef = if (publicKeyInfo.keyId == null) {
             null
         } else {
@@ -80,12 +95,10 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     }
 
     private fun authenticateAES() : Int {
-        val keyPair = generateKeyPair()
-        if (keyPair == null) return FAILURE
         val protocol = TLV(0x80.toByte(), chipAuthenticationInfo!!.protocol)
         val ar = protocol.toByteArray()
         var info = apduControl.sendAPDU(APDU(
-            NfcClassByte.COMMAND_CHAINING,
+            NfcClassByte.ZERO,
             NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
             NfcP1Byte.SET_KEY_AGREEMENT_TEMPLATE,
             NfcP2Byte.SET_AUTHENTICATION_TEMPLATE,
@@ -94,15 +107,22 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
         if (!apduControl.checkResponse(info)) {
             return FAILURE
         }
-        val pubData = TLV(0x80.toByte(), keyPair.public.encoded)
-        val tlv = TLV(0x7C, pubData.toByteArray())
-        info = apduControl.sendAPDU(APDU(
+        val keyPair = generateKeyPair()
+        if (keyPair == null) return FAILURE
+        val publicKeyData = getEncodedPublicKey(keyPair)
+        if (publicKeyData == null) return FAILURE
+        val pubData = TLV(0x80.toByte(), publicKeyData)
+        val tlv = TLV(0x7C, pubData.toByteArray()).toByteArray()
+        val test = TLV(tlv)
+        val apdu = APDU(
             NfcClassByte.ZERO,
             NfcInsByte.GENERAL_AUTHENTICATE,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO,
-            tlv.toByteArray()
-        ))
+            tlv
+        )
+        val apduArray = apdu.getByteArray()
+        info = apduControl.sendAPDU(apdu)
         if (!apduControl.checkResponse(info)) {
             return FAILURE
         }
@@ -133,5 +153,21 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
             println(e)
         }
         return null
+    }
+
+    private fun getEncodedPublicKey(keyPair: KeyPair) : ByteArray? {
+        var publicKeyData : ByteArray? = null
+        try {
+            if (isDH) {
+                val publicKey = keyPair.public as BCDHPublicKey
+                publicKeyData = publicKey.y.toByteArray()
+            } else if (isEC) {
+                val publicKey = keyPair.public as BCECPublicKey
+                publicKeyData = publicKey.q.getEncoded(false)
+            }
+        } catch (e : Exception) {
+            println(e)
+        }
+        return publicKeyData
     }
 }

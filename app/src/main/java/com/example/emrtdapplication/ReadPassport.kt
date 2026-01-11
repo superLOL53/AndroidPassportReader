@@ -114,7 +114,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.ldS1Application.readFiles(this)
         changeProgressBar(getString(R.string.reading_cscas), 5)
         readCSCAs()
-        //eMRTD.verifyEMRTD(this)
+        EMRTD.ldS1Application.verify(this)
         changeProgressBar(getString(R.string.passport_verified), 5)
         EMRTD.closeNFC()
     }

@@ -19,7 +19,7 @@ import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
 class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduControl) {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray()
+    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     private var biometricFiles : Array<Biometric>? = null
 
 

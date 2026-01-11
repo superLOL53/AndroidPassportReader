@@ -19,7 +19,7 @@ import java.security.cert.X509Certificate
 import kotlin.collections.iterator
 
 class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray()
+    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var bac = BAC(EMRTD.apduControl)
         private set
     var efCOM : EfCom = EfCom(apduControl)
@@ -102,10 +102,10 @@ class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
 
     fun verify(readActivity: ReadPassport) {
         readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
-        efSod.checkHashes(efMap)
-        efSod.passiveAuthentication(certs)
+        //efSod.checkHashes(efMap)
+        //efSod.passiveAuthentication(certs)
         readActivity.changeProgressBar("Performing Active Authentication...", INCREMENT_PROGRESS_BAR)
-        dg15.activeAuthentication(SecureRandom())
+        //dg15.activeAuthentication(SecureRandom())
         readActivity.changeProgressBar("Performing Chip Authentication...", INCREMENT_PROGRESS_BAR)
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null

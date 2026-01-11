@@ -12,7 +12,7 @@ import com.example.emrtdapplication.constants.TravelRecordsConstants.EXIT_RECORD
 import java.math.BigInteger
 
 class TravelRecords(apduControl: APDUControl) : LDS2Application(apduControl) {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray()
+    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var exitRecords : Array<EntryExitRecord>? = null
         private set
     var entryRecords : Array<EntryExitRecord>? = null

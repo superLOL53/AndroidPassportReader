@@ -10,7 +10,7 @@ import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_I
 import java.math.BigInteger
 
 class VisaRecords(apduControl: APDUControl) : LDS2Application(apduControl) {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray()
+    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var visaRecords : Array<VisaRecord>? = null
         private set
 
