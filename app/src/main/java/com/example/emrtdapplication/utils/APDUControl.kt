@@ -199,6 +199,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      * @param apdu: The APDU to be encrypted and sent to the eMRTD
      * @return The verified and decrypted APDU received from the eMRTD
      */
+    @OptIn(ExperimentalStdlibApi::class)
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         inc()
         val headerSM = headerSM(apdu)
@@ -234,7 +235,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
             finalApdu += 0
         }
         inc()
+        println(finalApdu.toHexString())
         val rApdu = isoDep!!.transceive(finalApdu)
+        println(rApdu.toHexString())
         if (rApdu.size > MIN_APDU_SIZE_FOR_MAC_VERIFICATION) {
             verifyMAC(rApdu)
         }
@@ -248,7 +251,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
      */
     private fun headerSM(apdu: APDU) : ByteArray {
         val header = apdu.getHeader()
-        header[0] = (NfcClassByte.SECURE_MESSAGING or (apdu.getHeader()[0] and SECURE_MESSAGING_MASK))
+        header[0] = (NfcClassByte.SECURE_MESSAGING or apdu.getHeader()[0])
         return header
     }
 
@@ -277,9 +280,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
         var do8785 : ByteArray? = null
         if (apdu.useLc) {
             do8785 = if (apdu.getHeader()[1] % 2 == 0) {
-                byteArrayOf(DO87, DO09, DO01) + encryptedData
+                byteArrayOf(DO87, (encryptedData.size+1).toByte(), DO01) + encryptedData
             } else {
-                byteArrayOf(DO85, DO09, DO01) + encryptedData
+                byteArrayOf(DO85, (encryptedData.size+1).toByte(), DO01) + encryptedData
             }
         }
         return do8785
@@ -342,7 +345,7 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     /**
      * Increments the sequence counter by 1
      */
-    private fun inc() {
+    fun inc() {
         for (i in ssc.indices.reversed()) {
             ssc[i] = (ssc[i] + 1).toByte()
             if (ssc[i] != ZERO_BYTE) {

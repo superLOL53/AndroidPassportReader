@@ -2,6 +2,7 @@ package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
+import com.example.emrtdapplication.constants.APDUConstants
 import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH
 import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH_3DES_CBC_CBC
 import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH
@@ -19,6 +20,7 @@ import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.jcajce.provider.asymmetric.dh.BCDHPublicKey
 import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
 import org.bouncycastle.jce.interfaces.ECPublicKey
+import org.jmrtd.protocol.EACCAProtocol
 import org.spongycastle.asn1.x9.DHPublicKey
 import org.spongycastle.crypto.params.DHPublicKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
@@ -50,7 +52,7 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
         return if (chipAuthenticationInfo == null) {
             FAILURE
         } else {
-            apduControl.sendEncryptedAPDU = false
+            //apduControl.sendEncryptedAPDU = false
             if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH)) {
                 isDH = true
             } else if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH)) {
@@ -107,6 +109,7 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
         if (!apduControl.checkResponse(info)) {
             return FAILURE
         }
+        apduControl.sendEncryptedAPDU = true
         val keyPair = generateKeyPair()
         if (keyPair == null) return FAILURE
         val publicKeyData = getEncodedPublicKey(keyPair)
@@ -115,11 +118,12 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
         val tlv = TLV(0x7C, pubData.toByteArray()).toByteArray()
         val test = TLV(tlv)
         val apdu = APDU(
-            NfcClassByte.ZERO,
+            NfcClassByte.COMMAND_CHAINING,
             NfcInsByte.GENERAL_AUTHENTICATE,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO,
-            tlv
+            tlv,
+            APDUConstants.LE_MAX
         )
         val apduArray = apdu.getByteArray()
         info = apduControl.sendAPDU(apdu)

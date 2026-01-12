@@ -52,6 +52,9 @@ android {
     }
 }
 dependencies {
+    implementation(libs.scuba.sc.android)
+    implementation(libs.scuba.sc.j2se)
+    implementation(libs.scuba.smartcards)
     implementation(libs.jmrtd.jmrtd)
     implementation(libs.core)
     implementation(libs.appcompat)

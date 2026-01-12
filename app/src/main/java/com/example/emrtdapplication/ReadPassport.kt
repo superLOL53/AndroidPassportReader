@@ -3,19 +3,37 @@ package com.example.emrtdapplication
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
+import android.nfc.tech.IsoDep
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH
+import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH
 import com.example.emrtdapplication.constants.SUCCESS
+import net.sf.scuba.smartcards.APDUEvent
+import net.sf.scuba.smartcards.APDUListener
+import net.sf.scuba.smartcards.CardService
+import net.sf.scuba.smartcards.WrappingCardService
 import org.bouncycastle.jce.provider.BouncyCastleProvider
+import org.jmrtd.BACKey
+import org.jmrtd.PassportService
+import org.jmrtd.lds.ChipAuthenticationInfo
+import org.jmrtd.lds.ChipAuthenticationPublicKeyInfo
+import org.jmrtd.lds.LDSFileUtil
+import org.jmrtd.lds.icao.DG14File
+import org.jmrtd.protocol.EACCAProtocol
+import java.math.BigInteger
+import java.security.PublicKey
 import java.security.Security
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
+
 
 class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     private lateinit var nfcAdapter : NfcAdapter
@@ -101,6 +119,34 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      * Reading eMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
      */
     fun readeMRTD(tag: Tag) {
+
+        /*val nfc = IsoDep.get(tag)
+        val service = PassportService(CardService.getInstance(nfc), 1000, 1000, false, true)
+
+
+        service.open()
+
+        service.sendSelectApplet(false)
+        val bacKey = BACKey("U1194584", "000707", "260801")
+
+        service.doBAC(bacKey)
+        val is14 = service.getInputStream(PassportService.EF_DG14)
+        val dg14 = LDSFileUtil.getLDSFile(PassportService.EF_DG14, is14) as DG14File
+        val keyInfo = dg14.securityInfos
+        var chipInfo : ChipAuthenticationInfo? = null
+        var publicKey : ChipAuthenticationPublicKeyInfo? = null
+        for (info in keyInfo) {
+            if (info.objectIdentifier.startsWith(ID_CA_DH) || info.objectIdentifier.startsWith(ID_CA_ECDH)) {
+                chipInfo = info as ChipAuthenticationInfo
+            } else if (info.objectIdentifier.startsWith("0.4.0.127.0.7.2.2.1")) {
+                publicKey = info as ChipAuthenticationPublicKeyInfo
+            }
+        }
+        if (chipInfo == null || publicKey == null) return
+        val apdus = NewAPDUListener()
+        service.addAPDUListener(apdus)
+        val res = service.doEACCA(chipInfo.keyId, chipInfo.objectIdentifier, publicKey.objectIdentifier , publicKey.subjectPublicKey)
+        println(res)*/
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
@@ -152,5 +198,13 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             findViewById<TextView>(R.id.progressBarText).text = text
             findViewById<ProgressBar>(R.id.progressBar).incrementProgressBy(increment)
         }
+    }
+}
+
+class NewAPDUListener : APDUListener {
+    val exchangedAPDUs = ArrayList<APDUEvent?>()
+
+    override fun exchangedAPDU(e: APDUEvent?) {
+        exchangedAPDUs.add(e)
     }
 }

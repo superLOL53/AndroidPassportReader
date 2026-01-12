@@ -18,6 +18,9 @@ mockk = "1.14.3"
 navigationFragment = "2.9.6"
 navigationUiKtx = "2.9.6"
 animatedVectorDrawable = "28.0.0"
+scubaScAndroid = "0.0.26"
+scubaScJ2se = "0.0.21"
+scubaSmartcards = "0.0.20"
 
 [libraries]
 core = { module = "com.madgag.spongycastle:core", version.ref = "core" }
@@ -34,6 +37,9 @@ compose-bom = { group = "androidx.compose", name = "compose-bom", version = "202
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
+scuba-sc-android = { module = "net.sf.scuba:scuba-sc-android", version.ref = "scubaScAndroid" }
+scuba-sc-j2se = { module = "net.sf.scuba:scuba-sc-j2se", version.ref = "scubaScJ2se" }
+scuba-smartcards = { module = "net.sf.scuba:scuba-smartcards", version.ref = "scubaSmartcards" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }

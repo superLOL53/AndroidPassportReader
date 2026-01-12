@@ -17,6 +17,8 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://repo1.maven.org/maven2/org/jmrtd/jmrtd/")
+        maven(url = "https://mvnrepository.com/artifact/net.sf.scuba/scuba-sc-android")
+        maven("https://mvnrepository.com/artifact/net.sf.scuba/scuba-sc-j2se")
     }
 }
 
