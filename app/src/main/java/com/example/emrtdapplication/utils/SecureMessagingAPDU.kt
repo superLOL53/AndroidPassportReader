@@ -5,6 +5,8 @@ import com.example.emrtdapplication.constants.APDUControlConstants.MIN_APDU_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.PADDING_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.SINGLE_KEY_SIZE_3DES
+import com.example.emrtdapplication.constants.CryptoConstants.AES
+import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
 import com.example.emrtdapplication.constants.NfcClassByte
@@ -17,6 +19,8 @@ import com.example.emrtdapplication.constants.TlvTags.DO97
 import com.example.emrtdapplication.constants.TlvTags.DO97_EXTENDED_LE_LENGTH
 import com.example.emrtdapplication.constants.TlvTags.DO97_LE_LENGTH
 import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.or
 
 class SecureMessagingAPDU {
@@ -127,6 +131,7 @@ class SecureMessagingAPDU {
      * @return The byte array containing the formatted encrypted data or null if there is no data
      */
     private fun dataSM(apdu: APDU) : ByteArray? {
+        if (apdu.data.isEmpty()) return null
         val paddedData = addPadding(apdu.data)
         val encryptedData = encrypt(paddedData)
         var do8785 : ByteArray? = null
@@ -166,7 +171,11 @@ class SecureMessagingAPDU {
         //log("M: ", m)
         //log("SSC: ", ssc)
         //log("Incremented SSC: ", ssc)
-        val n = addPadding(sequenceCounter + m)
+        val n = if (isAES) {
+            addPadding(sequenceCounter + m)
+        } else {
+            addPadding(sequenceCounter + m)
+        }
         //log("N: ", n)
         val cc = computeMAC(n)
         //log("CC: ", cc)
@@ -231,7 +240,7 @@ class SecureMessagingAPDU {
      */
     private fun encrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
-            crypto.cipherAES(bytes, encryptionKey)
+            crypto.cipherAES(bytes, encryptionKey, Cipher.ENCRYPT_MODE, computeAESIV())
         } else {
             crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray())
         }
@@ -244,7 +253,7 @@ class SecureMessagingAPDU {
      */
     private fun decrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
-            crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE)
+            crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE, computeAESIV())
         } else {
             crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray(), Cipher.DECRYPT_MODE)
         }
@@ -261,5 +270,20 @@ class SecureMessagingAPDU {
         } else {
             crypto.addPadding(byteArray, PADDING_SIZE)
         }
+    }
+
+    private fun computeAESIV() : ByteArray {
+        val k = SecretKeySpec(encryptionKey, AES)
+        val c = Cipher.getInstance("AES/ECB/NoPadding")
+        c.init(Cipher.ENCRYPT_MODE, k)
+        return c.doFinal(sequenceCounter)
+        //val iv = crypto.cipherAES(sequenceCounter, encryptionKey, Cipher.ENCRYPT_MODE)
+        /*return if (iv.size < 16) {
+            ByteArray(encryptionKey.size-iv.size) + iv
+        } else if (iv.size > 16) {
+            iv.slice(0..<16).toByteArray()
+        } else {
+            iv
+        }*/
     }
 }

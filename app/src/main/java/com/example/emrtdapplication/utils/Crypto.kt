@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.utils
 
-import com.example.emrtdapplication.constants.BACConstants.ENCRYPTION_KEY_VALUE_C
-import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.constants.CryptoConstants.AES
 import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
 import com.example.emrtdapplication.constants.CryptoConstants.BYTE_TO_BITS
@@ -20,7 +18,6 @@ import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
 import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
-import com.example.emrtdapplication.constants.ZERO_BYTE
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHBasicAgreement
 import org.spongycastle.crypto.agreement.ECDHBasicAgreement

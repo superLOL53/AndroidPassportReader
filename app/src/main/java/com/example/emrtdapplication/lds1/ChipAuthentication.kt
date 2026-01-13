@@ -13,7 +13,6 @@ import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.NOT_IMPLEMENTED
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
@@ -24,15 +23,7 @@ import com.example.emrtdapplication.constants.TlvTags.DYNAMIC_AUTHENTICATION_DAT
 import com.example.emrtdapplication.constants.TlvTags.EPHEMERAL_PUBLIC_KEY
 import com.example.emrtdapplication.constants.TlvTags.PRIVATE_KEY_REFERENCE
 import com.example.emrtdapplication.utils.TLV
-import org.bouncycastle.jcajce.provider.asymmetric.dh.BCDHPublicKey
-import org.bouncycastle.jcajce.provider.asymmetric.ec.BCECPublicKey
-import org.bouncycastle.jce.interfaces.ECPublicKey
-import org.bouncycastle.jce.spec.ECPublicKeySpec
-import org.jmrtd.protocol.EACCAProtocol
-import org.spongycastle.asn1.x9.DHPublicKey
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
-import org.spongycastle.crypto.agreement.ECDHBasicAgreement
-import org.spongycastle.crypto.params.DHKeyParameters
 import org.spongycastle.crypto.params.DHParameters
 import org.spongycastle.crypto.params.DHPrivateKeyParameters
 import org.spongycastle.crypto.params.DHPublicKeyParameters
@@ -40,21 +31,12 @@ import org.spongycastle.crypto.params.ECDomainParameters
 import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.util.PublicKeyFactory
-import java.nio.ByteBuffer
-import java.security.KeyFactory
-import java.security.KeyPair
-import java.security.KeyPairGenerator
-import java.security.PublicKey
 import java.security.SecureRandom
-import java.security.spec.AlgorithmParameterSpec
-import java.security.spec.X509EncodedKeySpec
-import javax.crypto.KeyAgreement
 
 /**
  * Implements the chip authentication protocol
  *
  */
-//TODO: Implement
 class ChipAuthentication(private val apduControl: APDUControl, private val chipAuthenticationData : ByteArray?,
                          private val iv : ByteArray, private val publicKeyInfo: ChipAuthenticationPublicKeyInfo,
                          private val random: SecureRandom = SecureRandom(), private val crypto: Crypto = Crypto(),
@@ -110,7 +92,6 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
             if (success != SUCCESS) {
                 FAILURE
             }
-            val ar = agreement!!.toByteArray()
             computeKeys(agreement!!.toByteArray())
             val dg1 = DG1(apduControl)
             dg1.read()
