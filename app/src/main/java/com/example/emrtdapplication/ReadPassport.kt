@@ -151,8 +151,8 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
-        //pace.init(mrz, useCAN, idPaceOid, ca.paceInfos[0].parameterId!!)
-        //pace.paceProtocol()
+        //EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
+        //EMRTD.pace.paceProtocol()
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }

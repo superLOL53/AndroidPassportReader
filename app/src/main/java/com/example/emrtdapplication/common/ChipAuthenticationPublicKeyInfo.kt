@@ -4,6 +4,7 @@ import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
+import java.math.BigInteger
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationPublicKeyInfo:
@@ -22,17 +23,17 @@ import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv) {
     var publicKeyInfo : SubjectPublicKeyInfo
         private set
-    var keyId : Int?
+    var keyId : BigInteger?
         private set
 
     init {
         publicKeyInfo = SubjectPublicKeyInfo.getInstance(requiredData.toByteArray())
         keyId = if (optionalData != null) {
             if (optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
-                optionalData!!.value == null || optionalData!!.value!!.size != 1) {
+                optionalData!!.value == null) {
                 throw IllegalArgumentException()
             } else {
-                optionalData!!.value!![0].toInt()
+                BigInteger(optionalData!!.value!!)
             }
         } else {
             null

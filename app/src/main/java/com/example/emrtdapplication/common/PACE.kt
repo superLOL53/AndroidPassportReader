@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
@@ -322,32 +323,18 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         } else {
             secret
         }
+        encKey = crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], seed)
+        macKey = crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], MAC_COMPUTATION_KEY_VALUE_C)
         when (idPACEOid!![idPACEOid!!.size-1]) {
-            DES_CBC_CBC -> {
-                apduControl.isAES = false
-                encKey = crypto.computeKey("SHA-1", key, seed, true).slice(0..15).toByteArray()
-                encKey = encKey!! + encKey!!.slice(0..7).toByteArray()
-                macKey = crypto.computeKey("SHA-1", key, 2, true).slice(0..15).toByteArray()
-                macKey = macKey!! + macKey!!.slice(0..7).toByteArray()
-            }
-            AES_CBC_CMAC_128 -> {
-                apduControl.isAES = true
-                encKey = crypto.computeKey("SHA-1", key, seed).slice(0..15).toByteArray()
-                macKey = crypto.computeKey("SHA-1", key, 2).slice(0..15).toByteArray()
-
-            }
+            DES_CBC_CBC -> apduControl.isAES = false
+            AES_CBC_CMAC_128 -> apduControl.isAES = true
             AES_CBC_CMAC_192 -> {
                 useLongConstants = true
                 apduControl.isAES = true
-                encKey = crypto.computeKey("SHA-256", key, seed).slice(0..23).toByteArray()
-                macKey = crypto.computeKey("SHA-256", key, 2).slice(0..23).toByteArray()
-
             }
             AES_CBC_CMAC_256 -> {
                 useLongConstants = true
                 apduControl.isAES = true
-                encKey = crypto.computeKey("SHA-256", key, seed)
-                macKey = crypto.computeKey("SHA-256", key, 2)
             }
         }
     }

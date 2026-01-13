@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.BACConstants.ENCRYPTION_KEY_VALUE_C
+import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.constants.CryptoConstants.AES
 import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
 import com.example.emrtdapplication.constants.CryptoConstants.BYTE_TO_BITS
@@ -14,6 +16,10 @@ import com.example.emrtdapplication.constants.CryptoConstants.KEY_3DES_COUNT_ONE
 import com.example.emrtdapplication.constants.CryptoConstants.MAC_SIZE
 import com.example.emrtdapplication.constants.CryptoConstants.MAPPING_CONSTANT
 import com.example.emrtdapplication.constants.CryptoConstants.PAD_START_BYTE
+import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
+import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
+import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
+import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
 import com.example.emrtdapplication.constants.ZERO_BYTE
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHBasicAgreement
@@ -187,6 +193,26 @@ class Crypto {
             }
         }
         return key
+    }
+
+    fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray {
+        return when (cipherId) {
+            DES_CBC_CBC -> {
+                val encKey = computeKey("SHA-1", seed, cValue, true).slice(0..15).toByteArray()
+                encKey + encKey.slice(0..7).toByteArray()
+            }
+            AES_CBC_CMAC_128 -> {
+                computeKey("SHA-1", seed, cValue).slice(0..15).toByteArray()
+
+            }
+            AES_CBC_CMAC_192 -> {
+                computeKey("SHA-256", seed, cValue).slice(0..23).toByteArray()
+            }
+            AES_CBC_CMAC_256 -> {
+                computeKey("SHA-256", seed, cValue)
+            }
+            else -> throw IllegalArgumentException("Illegal cipher algorithm for key computation!")
+        }
     }
 
     fun hash(hashName: String, hashBytes: ByteArray) : ByteArray {

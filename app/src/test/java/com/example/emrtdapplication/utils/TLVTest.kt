@@ -9,30 +9,30 @@ class TLVTest {
     @Test
     fun arrayTest() {
         var test = TLV(byteArrayOf(0x01, 0x01, 0x01))
-        assertEquals(1, test.getLength())
-        assertEquals(true, test.getIsValid())
-        assertArrayEquals(byteArrayOf(0x01), test.getValue())
-        assertArrayEquals(byteArrayOf(0x01), test.getTag())
+        assertEquals(1, test.length)
+        assertEquals(true, test.isValid)
+        assertArrayEquals(byteArrayOf(0x01), test.value)
+        assertArrayEquals(byteArrayOf(0x01), test.tag)
         assertEquals(false, test.isConstruct())
-        assertEquals(null, test.getTLVSequence())
+        assertEquals(null, test.list)
         assertArrayEquals(byteArrayOf(0x01, 0x01, 0x01), test.toByteArray())
 
         test = TLV(byteArrayOf(0x1F, 0x81.toByte(), 0x12, 0x01, 0x01))
-        assertEquals(1, test.getLength())
-        assertEquals(true, test.getIsValid())
-        assertArrayEquals(byteArrayOf(0x01), test.getValue())
-        assertArrayEquals(byteArrayOf(0x1F, 0x81.toByte(), 0x12), test.getTag())
+        assertEquals(1, test.length)
+        assertEquals(true, test.isValid)
+        assertArrayEquals(byteArrayOf(0x01), test.value)
+        assertArrayEquals(byteArrayOf(0x1F, 0x81.toByte(), 0x12), test.tag)
         assertEquals(false, test.isConstruct())
-        assertEquals(null, test.getTLVSequence())
+        assertEquals(null, test.list)
         assertArrayEquals(byteArrayOf(0x1F, 0x81.toByte(), 0x12, 0x01, 0x01), test.toByteArray())
 
         test = TLV(byteArrayOf(0x01, 0x81.toByte(), 0x80.toByte())+ByteArray(128))
-        assertEquals(128, test.getLength())
-        assertEquals(true, test.getIsValid())
-        assertArrayEquals(ByteArray(128), test.getValue())
-        assertArrayEquals(byteArrayOf(0x01), test.getTag())
+        assertEquals(128, test.length)
+        assertEquals(true, test.isValid)
+        assertArrayEquals(ByteArray(128), test.value)
+        assertArrayEquals(byteArrayOf(0x01), test.tag)
         assertEquals(false, test.isConstruct())
-        assertEquals(null, test.getTLVSequence())
+        assertEquals(null, test.list)
         assertArrayEquals(byteArrayOf(0x01, 0x81.toByte(), 0x80.toByte())+ByteArray(128), test.toByteArray())
     }
 
@@ -40,7 +40,7 @@ class TLVTest {
     fun sequenceTest() {
         val test = TLVSequence(byteArrayOf(0x01, 0x01, 0x01, 0x01, 0x01, 0x01))
         assertArrayEquals(byteArrayOf(0x01, 0x01, 0x01, 0x01, 0x01, 0x01), test.toByteArray())
-        assertArrayEquals(byteArrayOf(0x01, 0x01, 0x01), test.getTLVSequence()[0].toByteArray())
-        assertArrayEquals(byteArrayOf(0x01, 0x01, 0x01), test.getTLVSequence()[1].toByteArray())
+        assertArrayEquals(byteArrayOf(0x01, 0x01, 0x01), test.tlvSequence[0].toByteArray())
+        assertArrayEquals(byteArrayOf(0x01, 0x01, 0x01), test.tlvSequence[1].toByteArray())
     }
 }

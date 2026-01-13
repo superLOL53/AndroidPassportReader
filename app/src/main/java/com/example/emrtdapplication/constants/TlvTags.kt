@@ -11,8 +11,10 @@ object TlvTags {
     const val PUBLIC_KEY : Byte = 0x83.toByte()
     const val TERMINAL_AUTHENTICATION_TOKEN : Byte = 0x85.toByte()
     const val EC_PUBLIC_POINT : Byte = 0x86.toByte()
+    const val EPHEMERAL_PUBLIC_KEY : Byte = 0x91.toByte()
     const val OID : Byte = 0x06
     const val UNSIGNED_INTEGER : Byte = 0x84.toByte()
+    const val PRIVATE_KEY_REFERENCE : Byte = 0x84.toByte()
     const val DO01 : Byte = 0x01
     const val DO08 : Byte = 0x08
     const val DO09 : Byte = 0x09

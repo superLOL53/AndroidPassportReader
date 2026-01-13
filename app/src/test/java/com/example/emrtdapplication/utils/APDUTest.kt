@@ -1,5 +1,9 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.APDUConstants.LC_EXT_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LC_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_EXT_MAX
+import com.example.emrtdapplication.constants.APDUConstants.LE_MAX
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 

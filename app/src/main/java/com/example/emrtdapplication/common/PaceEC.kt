@@ -1,14 +1,25 @@
 package com.example.emrtdapplication.common
 
 import android.annotation.SuppressLint
+import com.example.emrtdapplication.utils.Crypto
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.DERSequence
 import org.spongycastle.asn1.x509.Certificate
+import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
+import org.spongycastle.asn1.x9.ECNamedCurveTable
+import org.spongycastle.crypto.agreement.ECDHBasicAgreement
+import org.spongycastle.crypto.params.ECDomainParameters
+import org.spongycastle.crypto.params.ECPrivateKeyParameters
+import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.util.io.pem.PemObject
 import java.io.FileInputStream
+import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
+import javax.crypto.Cipher
+import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * Test class for PACE EC and other stuff. Not relevant for actual implementation
@@ -338,7 +349,7 @@ class PaceEC {
         println("Token: " + token.toHexString())*/
 
         //ECCAM
-        /*val crypto = Crypto()
+        val crypto = Crypto()
         val bp256 = ECNamedCurveTable.getByName("brainpoolp256r1")
         val ss = java.math.BigInteger("658B860BC94DF6F044FCE6D5C82CF8E5", 16).toByteArray()
         val cprk = BigInteger("009E56A6B59C95D06ECE5CD10F983BB2F4F1943528E577F23881D89D8C3BBEE0AA", 16)
@@ -394,16 +405,39 @@ class PaceEC {
 
         val cipher = Cipher.getInstance("AES/CBC/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE, SecretKeySpec(encKey, "AES"), IvParameterSpec(iv))
-        val decrypted = cipher.doFinal(BigInteger("1EEA964DAAE372AC990E3EFDE6333353" +
-                "BFC89A6704D93DA8798CF77F5B7A54BD" +
-                "10CBA372B42BE0B9B5F28AA8DE2F4F92", 16).toByteArray()).slice(0..31).toByteArray()
-        println("Decrypted CA Data: " + decrypted.toHexString())
-        println("CA Public Key: " + publicKeyInfo.publicKeyData.bytes.toHexString())
+        val decrypted = cipher.doFinal(
+            BigInteger(
+                "1EEA964DAAE372AC990E3EFDE6333353" +
+                        "BFC89A6704D93DA8798CF77F5B7A54BD" +
+                        "10CBA372B42BE0B9B5F28AA8DE2F4F92", 16
+            ).toByteArray()).slice(0..31).toByteArray()
+        println("PK MAP.IC: A234236A A9B9621E 8EFB73B5 245C0E09" +
+                "D2576E52 77183C12 08BDD552 80CAE8B3" +
+                "04F36571 3A356E65 A451E165 ECC9AC0A" +
+                "C46E3771 342C8FE5 AEDD0926 85338E23")
+        val hexFormat = HexFormat{
+            upperCase = true
+            bytes {
+                bytesPerGroup = 4
+                groupSeparator = " "
+            }
+        }
         val domainParams = ECDomainParameters(bp256.curve, bp256.g, bp256.n, bp256.h)
+        val pkic = ECPublicKeyParameters(
+            bp256.curve.decodePoint(publicKeyInfo.publicKeyData.bytes),
+            params
+        )
+        println("PK.IC: " + pkic.q.rawXCoord.encoded.toHexString(hexFormat))
+        val caic = ECPrivateKeyParameters(BigInteger(decrypted), params)
+        println("CA.IC: " + caic.d.toByteArray().toHexString(hexFormat))
+
         val ka = ECDHBasicAgreement()
-        ka.init(ECPrivateKeyParameters(BigInteger(decrypted), domainParams))
-        val s = ka.calculateAgreement(ECPublicKeyParameters(bp256.curve.decodePoint(publicKeyInfo.publicKeyData.bytes), domainParams))
-        println(crypto.getECPointFromBigInteger(s, domainParams))*/
+        ka.init(caic)
+        val s = ka.calculateAgreement(pkic)
+        println("KA: " + s.toByteArray().toHexString(hexFormat))
+        val point = crypto.getECPointFromBigInteger(s, params)
+        point.affineXCoord.toBigInteger().toByteArray()
+        println("KA: " + point.affineXCoord.toBigInteger().toByteArray().toHexString(hexFormat))
 
         //Decrypting nonce
         /*val z = byteArrayOf(0x85.toByte(), 0x4D, 0x8D.toByte(), 0xF5.toByte(), 0x82.toByte(), 0x7F, 0xA6.toByte(), 0x85.toByte(), 0x2D, 0x1A, 0x4F, 0xA7.toByte(), 0x01, 0xCD.toByte(), 0xDD.toByte(), 0xCA.toByte())
@@ -424,7 +458,7 @@ class PaceEC {
         //val s = c.doFinal(z)
         //println(s.toHexString())
 
-        val csca = FileInputStream("sampledata/CSCAAUSTRIAcacert005.crt")
+        /*val csca = FileInputStream("sampledata/CSCAAUSTRIAcacert005.crt")
         val certs = csca.readAllBytes()
         val input = ASN1InputStream(certs)
         val seq = DERSequence.getInstance(input.readObject())
@@ -440,7 +474,7 @@ class PaceEC {
         val sign = Signature.getInstance(ml.signatureAlgorithm.algorithm.id)
         sign.initVerify(pubKey)
         sign.update(ml.tbsCertificate.encoded)
-        sign.verify(ml.signature.bytes)
+        sign.verify(ml.signature.bytes)*/
 
         //val cert = CertificateFactory.getInstance("X.509")
         //val ml = cert.generateCertificate(csca)

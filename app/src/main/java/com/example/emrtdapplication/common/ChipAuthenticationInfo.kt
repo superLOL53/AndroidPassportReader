@@ -3,6 +3,7 @@ package com.example.emrtdapplication.common
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
+import java.math.BigInteger
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationInfo:
@@ -29,7 +30,7 @@ import com.example.emrtdapplication.constants.TlvTags
 class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
     var version : Int
         private set
-    var keyId : Int?
+    var keyId : BigInteger?
         private set
 
     init {
@@ -42,10 +43,10 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
         }
         keyId = if (optionalData != null) {
             if (optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
-                optionalData!!.value == null || optionalData!!.value!!.size != 1) {
+                optionalData!!.value == null) {
                 throw IllegalArgumentException()
             } else {
-                optionalData!!.value!![0].toInt()
+                BigInteger(optionalData!!.value!!)
             }
         } else {
             null
