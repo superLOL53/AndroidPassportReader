@@ -18,7 +18,7 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
-class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduControl) {
+class AdditionalBiometrics() : LDS2Application() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     private var biometricFiles : Array<Biometric>? = null
 
@@ -43,14 +43,14 @@ class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduContr
     }
 
     private fun selectFile(fileID : Byte) : Int {
-        val info = apduControl.sendAPDU(
+        val info = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
                 NfcInsByte.SELECT,
                 NfcP1Byte.SELECT_EF,
                 NfcP2Byte.SELECT_FILE, byteArrayOf(BIOMETRIC_FILE_ID, fileID))
         )
-        return if (!apduControl.checkResponse(info)) {
+        return if (!APDUControl.checkResponse(info)) {
             FAILURE
         } else {
             SUCCESS
@@ -58,7 +58,7 @@ class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduContr
     }
 
     private fun readBiometricFile() : Biometric? {
-        var info = apduControl.sendAPDU(
+        var info = APDUControl.sendAPDU(
         APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
@@ -66,7 +66,7 @@ class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduContr
             NfcP2Byte.ZERO, READ_LENGTH
         )
     )
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return null
         }
         val le = if (info[1] < 0) {
@@ -81,20 +81,20 @@ class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduContr
         }
         //Read the whole EF file
         var rawFileContent : ByteArray?
-        if (le >= apduControl.maxResponseLength) {
+        if (le >= APDUControl.maxResponseLength) {
             val tmp = ByteArray(le)
             var p1 : Byte
             var p2 : Byte
             var readBytes : Int
-            for (i in 0..le step apduControl.maxResponseLength) {
+            for (i in 0..le step APDUControl.maxResponseLength) {
                 p1 = (i/UBYTE_MODULO).toByte()
                 p2 = (i % UBYTE_MODULO).toByte()
-                readBytes = if (le - i > apduControl.maxResponseLength) {
-                    apduControl.maxResponseLength
+                readBytes = if (le - i > APDUControl.maxResponseLength) {
+                    APDUControl.maxResponseLength
                 } else {
                     le - i
                 }
-                info = apduControl.sendAPDU(
+                info = APDUControl.sendAPDU(
                     APDU(
                         NfcClassByte.ZERO,
                         NfcInsByte.READ_BINARY,
@@ -102,14 +102,14 @@ class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduContr
                         p2, readBytes
                     )
                 )
-                if (!apduControl.checkResponse(info)) {
+                if (!APDUControl.checkResponse(info)) {
                     return null
                 }
-                apduControl.removeRespondCodes(info).copyInto(tmp, i, 0)
+                APDUControl.removeRespondCodes(info).copyInto(tmp, i, 0)
             }
             rawFileContent = tmp
         } else {
-            info = apduControl.sendAPDU(
+            info = APDUControl.sendAPDU(
                 APDU(
                     NfcClassByte.ZERO,
                     NfcInsByte.READ_BINARY,
@@ -117,10 +117,10 @@ class AdditionalBiometrics(apduControl: APDUControl) : LDS2Application(apduContr
                     NfcP2Byte.ZERO, le
                 )
             )
-            if (!apduControl.checkResponse(info)) {
+            if (!APDUControl.checkResponse(info)) {
                 return null
             }
-            rawFileContent = apduControl.removeRespondCodes(info)
+            rawFileContent = APDUControl.removeRespondCodes(info)
         }
         return try {
             Biometric(TLV(rawFileContent))

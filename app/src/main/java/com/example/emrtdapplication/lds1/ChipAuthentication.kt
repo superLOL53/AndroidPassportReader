@@ -38,7 +38,6 @@ import java.math.BigInteger
  *
  */
 class ChipAuthentication {
-    private val apduControl: APDUControl
     private val publicKeyInfo: ChipAuthenticationPublicKeyInfo
     private val chipAuthenticationData : ByteArray?
     private val chipAuthenticationInfo: ChipAuthenticationInfo?
@@ -50,15 +49,13 @@ class ChipAuthentication {
     private var publicKeyECDH : ECPublicKeyParameters? = null
     private var is3DES = false
 
-    constructor(apduControl: APDUControl, publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationInfo: ChipAuthenticationInfo) {
-        this.apduControl = apduControl
+    constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationInfo: ChipAuthenticationInfo) {
         this.publicKeyInfo = publicKeyInfo
         this.chipAuthenticationInfo = chipAuthenticationInfo
          chipAuthenticationData = null
     }
 
-    constructor(apduControl: APDUControl, publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationData : ByteArray, publicKey : ECPublicKeyParameters) {
-        this.apduControl = apduControl
+    constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationData : ByteArray, publicKey : ECPublicKeyParameters) {
         this.chipAuthenticationData = chipAuthenticationData
         publicKeyECDH = publicKey
         chipAuthenticationInfo = null
@@ -112,7 +109,7 @@ class ChipAuthentication {
                         FAILURE
                     }
                     computeKeys(agreement!!.toByteArray())
-                    val dg1 = DG1(apduControl)
+                    val dg1 = DG1()
                     dg1.read()
                     dg1.parse()
                     SUCCESS
@@ -133,14 +130,14 @@ class ChipAuthentication {
         } else {
             pubData.toByteArray()
         }
-        val info = apduControl.sendAPDU(APDU(
+        val info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
             NfcP1Byte.SET_KEY_AGREEMENT_TEMPLATE,
             NfcP2Byte.SET_KEY_AGREEMENT_TEMPLATE,
             data
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FAILURE
         }
         return SUCCESS
@@ -157,19 +154,19 @@ class ChipAuthentication {
         if (keyId != null) {
             ar = ar + keyId
         }
-        var info = apduControl.sendAPDU(APDU(
+        var info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
             NfcP1Byte.SET_KEY_AGREEMENT_TEMPLATE,
             NfcP2Byte.SET_AUTHENTICATION_TEMPLATE,
             ar
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FAILURE
         }
         val pubData = TLV(CRYPTOGRAPHIC_REFERENCE, publicKeyData)
         val tlv = TLV(DYNAMIC_AUTHENTICATION_DATA, pubData.toByteArray())
-        info = apduControl.sendAPDU(APDU(
+        info = APDUControl.sendAPDU(APDU(
             NfcClassByte.COMMAND_CHAINING,
             NfcInsByte.GENERAL_AUTHENTICATE,
             NfcP1Byte.ZERO,
@@ -177,7 +174,7 @@ class ChipAuthentication {
             tlv.toByteArray(),
             APDUConstants.LE_MAX
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FAILURE
         }
         return SUCCESS
@@ -237,13 +234,13 @@ class ChipAuthentication {
     private fun computeKeys(agreement : ByteArray) {
         if (chipAuthenticationInfo == null) return
         val oid = chipAuthenticationInfo.objectIdentifier
-        apduControl.setEncryptionKeyBAC(Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), ENCRYPTION_KEY_VALUE_C))
-        apduControl.setEncryptionKeyMAC(Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), MAC_COMPUTATION_KEY_VALUE_C))
-        apduControl.isAES = !is3DES
+        APDUControl.setEncryptionKeyBAC(Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), ENCRYPTION_KEY_VALUE_C))
+        APDUControl.setEncryptionKeyMAC(Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), MAC_COMPUTATION_KEY_VALUE_C))
+        APDUControl.isAES = !is3DES
         if (is3DES) {
-            apduControl.setSequenceCounter(ByteArray(8))
+            APDUControl.setSequenceCounter(ByteArray(8))
         } else {
-            apduControl.setSequenceCounter(ByteArray(16))
+            APDUControl.setSequenceCounter(ByteArray(16))
         }
     }
 }

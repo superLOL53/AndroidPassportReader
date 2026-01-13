@@ -9,7 +9,6 @@ import com.example.emrtdapplication.constants.EFComConstants.TAG_LIST_TAG
 import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_LENGTH
 import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_TAG
 import com.example.emrtdapplication.constants.EFComConstants.VERSION_TAG
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.SUCCESS
@@ -18,7 +17,6 @@ import com.example.emrtdapplication.utils.TLV
 /**
  * Implements the EF.COM file and inherits from [ElementaryFileTemplate]
  *
- * @property apduControl Used for sending and receiving APDUs
  * @property ldsVersion
  * @property ldsUpdateLevel
  * @property unicodeMajorVersion
@@ -29,7 +27,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property shortEFIdentifier The short EF identifier of the file
  * @property rawFileContent The contents of the file as a byte array
  */
-class EfCom(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
+class EfCom(): ElementaryFileTemplate() {
     private var ldsVersion = 0
     private var ldsUpdateLevel = 0
     private var unicodeMajorVersion = 0

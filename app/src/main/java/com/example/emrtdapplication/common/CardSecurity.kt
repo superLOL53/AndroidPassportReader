@@ -21,7 +21,6 @@ import org.spongycastle.asn1.cms.SignedData
 /**
  * Implements the EF.CardSecurity file. Required if PACE with CAM, Terminal Authentication or Chip Authentication is supported.
  *
- * @property apduControl Used for sending and receiving APDUs
  * @property csID1 First byte of the file id
  * @property csID2 Second byte of the file id, also the short EF id
  * @property securityInfos Array list of [SecurityInfo] contained in the file
@@ -29,7 +28,7 @@ import org.spongycastle.asn1.cms.SignedData
  */
 
 //TODO: Test implementation, see how the file is actually implemented, signed data vs. security infos
-class CardSecurity(private var apduControl: APDUControl) {
+class CardSecurity() {
     private val csID1: Byte = 0x01
     private val csID2: Byte = 0x1D
     val securityInfos = ArrayList<SecurityInfo>()
@@ -40,21 +39,21 @@ class CardSecurity(private var apduControl: APDUControl) {
      * @return [FILE_UNABLE_TO_SELECT], [SUCCESS]
      */
     fun read() : Int {
-        var info = apduControl.sendAPDU(APDU(
+        var info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(csID1, csID2)))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
-        info = apduControl.sendAPDU(APDU(
+        info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO, 0x00
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
         return parseData(info)

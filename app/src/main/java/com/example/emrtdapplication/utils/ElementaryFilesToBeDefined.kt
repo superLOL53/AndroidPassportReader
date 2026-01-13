@@ -4,7 +4,7 @@ import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
 
-abstract class ElementaryFilesToBeDefined<T>(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
+abstract class ElementaryFilesToBeDefined<T>() : ElementaryFileTemplate() {
     var tlvS : Array<T>? = null
         protected set
 

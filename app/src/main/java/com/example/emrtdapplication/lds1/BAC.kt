@@ -24,11 +24,10 @@ import kotlin.experimental.xor
 /**
  * Implements the Basic Access Control (BAC) protocol
  *
- * @property apduControl Used for sending and receiving APDUs
  * @property random Secure random number generator
  * @property mrzInformation The MRZ of the eMRTD
  */
-class BAC(private var apduControl: APDUControl, private var random: SecureRandom? = SecureRandom()) {
+class BAC(private var random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
 
     /**
@@ -53,7 +52,7 @@ class BAC(private var apduControl: APDUControl, private var random: SecureRandom
         if (mrzInformation == null) {
             return ERROR_UNINITIALIZED_MRZ_INFORMATION
         }
-        var info = apduControl.sendAPDU(
+        var info = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
                 NfcInsByte.REQUEST_RANDOM_NUMBER,
@@ -62,7 +61,7 @@ class BAC(private var apduControl: APDUControl, private var random: SecureRandom
                 0x08
             )
         )
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return ERROR_NONCE_REQUEST_FAILED
         }
         val rndIfd = if (random == null) {
@@ -97,7 +96,7 @@ class BAC(private var apduControl: APDUControl, private var random: SecureRandom
         kMAC += kMAC.slice(0..7).toByteArray()
         val eIfd = Crypto.cipher3DES(s, kEnc)
         val mIfd = Crypto.computeMAC(eIfd, kMAC)
-        info = apduControl.sendAPDU(
+        info = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
                 NfcInsByte.EXTERNAL_AUTHENTICATE,
@@ -107,10 +106,10 @@ class BAC(private var apduControl: APDUControl, private var random: SecureRandom
                 0x28
             )
         )
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return ERROR_BAC_PROTOCOL_FAILED
         }
-        info = apduControl.removeRespondCodes(info)
+        info = APDUControl.removeRespondCodes(info)
         val encData = info.slice(0..31).toByteArray()
         val mIC = info.slice(32..39).toByteArray()
         if (!Crypto.checkMAC(encData, mIC, kMAC)) {
@@ -126,13 +125,13 @@ class BAC(private var apduControl: APDUControl, private var random: SecureRandom
         for (i in 0..15) {
             kSessionSeed[i] = kIC[i] xor kIfd[i]
         }
-        apduControl.setEncryptionKeyBAC(Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray())
-        apduControl.setEncryptionKeyMAC(Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray())
-        apduControl.setSequenceCounter(
+        APDUControl.setEncryptionKeyBAC(Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray())
+        APDUControl.setEncryptionKeyMAC(Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray())
+        APDUControl.setSequenceCounter(
             (rndIC.slice(4..7).toByteArray() + rndIfd.slice(4..7).toByteArray())
         )
-        apduControl.sendEncryptedAPDU = true
-        apduControl.isAES = false
+        APDUControl.sendEncryptedAPDU = true
+        APDUControl.isAES = false
         return BAC_PROTOCOL_SUCCESS
     }
 }

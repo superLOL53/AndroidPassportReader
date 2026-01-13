@@ -6,7 +6,6 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.utils.Person
 import com.example.emrtdapplication.constants.SUCCESS
@@ -17,13 +16,12 @@ import kotlin.experimental.and
 /**
  * Implements the DG16 file and inherits from [ElementaryFileTemplate]
  *
- * @property apduControl Class for communicating with the eMRTD
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG16
  * @property efTag The tag of the DG16 file
  * @property persons A list of [Person] for emergency contacts
  */
-class DG16(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
+class DG16() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x10
     override val efTag: Byte = 0x70

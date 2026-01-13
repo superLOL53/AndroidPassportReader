@@ -5,7 +5,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.biometrics.BiometricInformationGroupTemplate
 import com.example.emrtdapplication.biometrics.BiometricType
 import com.example.emrtdapplication.constants.FAILURE
@@ -16,13 +15,12 @@ import com.example.emrtdapplication.utils.TLV
 /**
  * Implements the DG2 file and inherits from [ElementaryFileTemplate]
  *
- * @property apduControl Class for communicating with the eMRTD
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG2
  * @property efTag The tag of the DG2 file
  *
  */
-class DG2(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
+class DG2() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x02
     override val efTag: Byte = 0x75

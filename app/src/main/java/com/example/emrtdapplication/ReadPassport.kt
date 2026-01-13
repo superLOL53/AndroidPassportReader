@@ -3,33 +3,16 @@ package com.example.emrtdapplication
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.tech.IsoDep
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH
-import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH
 import com.example.emrtdapplication.constants.SUCCESS
-import net.sf.scuba.smartcards.APDUEvent
-import net.sf.scuba.smartcards.APDUListener
-import net.sf.scuba.smartcards.CardService
-import net.sf.scuba.smartcards.WrappingCardService
 import org.bouncycastle.jce.provider.BouncyCastleProvider
-import org.jmrtd.BACKey
-import org.jmrtd.PassportService
-import org.jmrtd.lds.ChipAuthenticationInfo
-import org.jmrtd.lds.ChipAuthenticationPublicKeyInfo
-import org.jmrtd.lds.LDSFileUtil
-import org.jmrtd.lds.icao.DG14File
-import org.jmrtd.protocol.EACCAProtocol
-import java.math.BigInteger
-import java.security.PublicKey
 import java.security.Security
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
@@ -198,13 +181,5 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             findViewById<TextView>(R.id.progressBarText).text = text
             findViewById<ProgressBar>(R.id.progressBar).incrementProgressBy(increment)
         }
-    }
-}
-
-class NewAPDUListener : APDUListener {
-    val exchangedAPDUs = ArrayList<APDUEvent?>()
-
-    override fun exchangedAPDU(e: APDUEvent?) {
-        exchangedAPDUs.add(e)
     }
 }

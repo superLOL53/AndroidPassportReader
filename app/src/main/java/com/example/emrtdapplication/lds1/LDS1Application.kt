@@ -8,56 +8,53 @@ import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.ReadPassport
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.APPLICATION_ID
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.INCREMENT_PROGRESS_BAR
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.utils.Crypto
 import java.math.BigInteger
-import java.security.SecureRandom
 import java.security.cert.X509Certificate
 import kotlin.collections.iterator
 
-class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
+class LDS1Application() : LDSApplication() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
-    var bac = BAC(EMRTD.apduControl)
+    var bac = BAC()
         private set
-    var efCOM : EfCom = EfCom(apduControl)
+    var efCOM : EfCom = EfCom()
         private set
-    var efSod: EfSod = EfSod(apduControl)
+    var efSod: EfSod = EfSod()
         private set
-    var dg1 : DG1 = DG1(apduControl)
+    var dg1 : DG1 = DG1()
         private set
-    var dg2 : DG2 = DG2(apduControl)
+    var dg2 : DG2 = DG2()
         private set
-    var dg3 : DG3 = DG3(apduControl)
+    var dg3 : DG3 = DG3()
         private set
-    var dg4 : DG4 = DG4(apduControl)
+    var dg4 : DG4 = DG4()
         private set
-    var dg5 : DG5 = DG5(apduControl)
+    var dg5 : DG5 = DG5()
         private set
-    var dg6 : DG6 = DG6(apduControl)
+    var dg6 : DG6 = DG6()
         private set
-    var dg7 : DG7 = DG7(apduControl)
+    var dg7 : DG7 = DG7()
         private set
-    var dg8 : DG8 = DG8(apduControl)
+    var dg8 : DG8 = DG8()
         private set
-    var dg9 : DG9 = DG9(apduControl)
+    var dg9 : DG9 = DG9()
         private set
-    var dg10 : DG10 = DG10(apduControl)
+    var dg10 : DG10 = DG10()
         private set
-    var dg11 : DG11 = DG11(apduControl)
+    var dg11 : DG11 = DG11()
         private set
-    var dg12 : DG12 = DG12(apduControl)
+    var dg12 : DG12 = DG12()
         private set
-    var dg13 : DG13 = DG13(apduControl)
+    var dg13 : DG13 = DG13()
         private set
-    var dg14 : DG14 = DG14(apduControl)
+    var dg14 : DG14 = DG14()
         private set
-    var dg15 : DG15 = DG15(apduControl)
+    var dg15 : DG15 = DG15()
         private set
-    var dg16 : DG16 = DG16(apduControl)
+    var dg16 : DG16 = DG16()
         private set
     var efMap = mapOf(
         dg1.shortEFIdentifier to dg1,
@@ -120,9 +117,9 @@ class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
             }
             val auth = if (chipPublicKey != null) {
                 if (chipInfo != null) {
-                        ChipAuthentication(EMRTD.apduControl, chipPublicKey, chipInfo)
+                        ChipAuthentication(chipPublicKey, chipInfo)
                 } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
-                    ChipAuthentication(EMRTD.apduControl, chipPublicKey, EMRTD.pace.chipAuthenticationData!!, EMRTD.pace.chipPublicKey!!)
+                    ChipAuthentication(chipPublicKey, EMRTD.pace.chipAuthenticationData!!, EMRTD.pace.chipPublicKey!!)
                 } else {
                     null
                 }

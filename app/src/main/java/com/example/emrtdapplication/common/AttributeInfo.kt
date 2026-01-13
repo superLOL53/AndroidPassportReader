@@ -33,7 +33,6 @@ const val AI_MIN_LENGTH = 12
 
 /**
  * Implements the EF.ATR/INFO EF. The file is optional if only LDS1 application is present on the ePassport
- * @property apduControl Used for sending and receiving APDUs
  * @property supportFullDFNameSelection Indicates support for full DF name selection
  * @property supportShortEFNameSelection Indicates support for short DF name selection
  * @property supportRecordNumber
@@ -43,7 +42,7 @@ const val AI_MIN_LENGTH = 12
  * @property maxAPDUTransferBytes The maximum bytes that can be sent with a single APDU
  * @property maxAPDUReceiveBytes The maximum bytes that can be received from a single APDU
  */
-class AttributeInfo(private var apduControl: APDUControl) {
+class AttributeInfo() {
     var supportFullDFNameSelection = false
         private set
     var supportShortEFNameSelection = false
@@ -67,24 +66,24 @@ class AttributeInfo(private var apduControl: APDUControl) {
      */
     fun read() : Int {
         reset()
-        var info = apduControl.sendAPDU(APDU(
+        var info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(AI_ID_1, AI_ID_2)))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
-        info = apduControl.sendAPDU(APDU(
+        info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO, 256
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
-        if (parse(apduControl.removeRespondCodes(info)) != FILE_SUCCESSFUL_READ) {
+        if (parse(APDUControl.removeRespondCodes(info)) != FILE_SUCCESSFUL_READ) {
             reset()
             return FILE_UNABLE_TO_READ
         } else {

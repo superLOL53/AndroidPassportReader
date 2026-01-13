@@ -4,7 +4,6 @@ import android.content.Context
 import android.widget.LinearLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
@@ -12,7 +11,6 @@ import com.example.emrtdapplication.utils.TLV
 /**
  * Implements the DG1 file and inherits from [ElementaryFileTemplate]
  *
- * @property apduControl Used for sending and receiving APDUs
  * @property rawFileContent The file content represented as a byte array
  * @property shortEFIdentifier The short EF id
  * @property efTag The tag of the EF
@@ -31,7 +29,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property compositeCheckDigit
  * @property holderName The name of the eMRTD holder
  */
-class DG1(apduControl: APDUControl): ElementaryFileTemplate(apduControl) {
+class DG1(): ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x01
     override val efTag: Byte = 0x61

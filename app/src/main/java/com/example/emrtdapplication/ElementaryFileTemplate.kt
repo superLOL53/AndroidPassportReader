@@ -37,7 +37,7 @@ import java.security.Provider
  * @property isPresent Indicates if the ePassport contains the EF.
  * @property isRead Indicates if the whole EF was read from the ePassport.
  */
-abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
+abstract class ElementaryFileTemplate() {
     protected abstract var rawFileContent: ByteArray?
     abstract val shortEFIdentifier: Byte
     protected open val longEFIdentifier: Byte = LONG_EF_ID
@@ -55,19 +55,19 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
      * - [SUCCESS] if the whole file was successfully read from the ePassport
      */
     fun read() : Int {
-        var info = apduControl.sendAPDU(
+        var info = APDUControl.sendAPDU(
             APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(longEFIdentifier, shortEFIdentifier))
         )
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
         isPresent = true
         //Extract the length of the EF file
-        info = apduControl.sendAPDU(
+        info = APDUControl.sendAPDU(
             APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
@@ -75,7 +75,7 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             NfcP2Byte.ZERO, 6
         )
         )
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
         val le = if (info[1] < 0) {
@@ -91,20 +91,20 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
             2 + info[1]
         }
         //Read the whole EF file
-        if (le >= apduControl.maxResponseLength) {
+        if (le >= APDUControl.maxResponseLength) {
             val tmp = ByteArray(le)
             var p1 : Byte
             var p2 : Byte
             var readBytes : Int
-            for (i in 0..le step apduControl.maxResponseLength) {
+            for (i in 0..le step APDUControl.maxResponseLength) {
                 p1 = (i/UBYTE_MODULO).toByte()
                 p2 = (i % UBYTE_MODULO).toByte()
-                readBytes = if (le - i > apduControl.maxResponseLength) {
-                    apduControl.maxResponseLength
+                readBytes = if (le - i > APDUControl.maxResponseLength) {
+                    APDUControl.maxResponseLength
                 } else {
                     le - i
                 }
-                info = apduControl.sendAPDU(
+                info = APDUControl.sendAPDU(
                     APDU(
                         NfcClassByte.ZERO,
                         NfcInsByte.READ_BINARY,
@@ -112,14 +112,14 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
                         p2, readBytes
                     )
                 )
-                if (!apduControl.checkResponse(info)) {
+                if (!APDUControl.checkResponse(info)) {
                     return FILE_UNABLE_TO_READ
                 }
-                apduControl.removeRespondCodes(info).copyInto(tmp, i, 0)
+                APDUControl.removeRespondCodes(info).copyInto(tmp, i, 0)
             }
             rawFileContent = tmp
         } else {
-            info = apduControl.sendAPDU(
+            info = APDUControl.sendAPDU(
                 APDU(
                     NfcClassByte.ZERO,
                     NfcInsByte.READ_BINARY,
@@ -127,10 +127,10 @@ abstract class ElementaryFileTemplate(protected val apduControl: APDUControl) {
                     NfcP2Byte.ZERO, le
                 )
             )
-            if (!apduControl.checkResponse(info)) {
+            if (!APDUControl.checkResponse(info)) {
                 return FILE_UNABLE_TO_READ
             }
-            rawFileContent = apduControl.removeRespondCodes(info)
+            rawFileContent = APDUControl.removeRespondCodes(info)
         }
         isRead = true
         return SUCCESS

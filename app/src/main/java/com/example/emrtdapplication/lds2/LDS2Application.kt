@@ -1,6 +1,5 @@
 package com.example.emrtdapplication.lds2
 
-import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -16,7 +15,7 @@ import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.TravelRecordsConstants.CERTIFICATE_RECORDS_ID_1
 import com.example.emrtdapplication.constants.TravelRecordsConstants.CERTIFICATE_RECORDS_ID_2
 
-abstract class LDS2Application(apduControl: APDUControl) : LDSApplication(apduControl) {
+abstract class LDS2Application() : LDSApplication() {
     var certificateRecords : Array<CertificateRecord>? = null
         protected set
 
@@ -49,7 +48,7 @@ abstract class LDS2Application(apduControl: APDUControl) : LDSApplication(apduCo
     }
 
     protected fun readNumberOfRecords(tlv: TLV) : Byte {
-        val info = EMRTD.apduControl.sendAPDU(APDU(
+        val info = APDUControl.sendAPDU(APDU(
             NfcClassByte.SECURE_MESSAGING,
             NfcInsByte.FILE_AND_MEMORY_MANAGEMENT,
             NfcP1Byte.EF_ID_IN_DATA_FIELD,
@@ -57,10 +56,10 @@ abstract class LDS2Application(apduControl: APDUControl) : LDSApplication(apduCo
             tlv.toByteArray(),
             LE_MAX
         ))
-        if (!EMRTD.apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return 0
         }
-        val t = TLV(EMRTD.apduControl.removeRespondCodes(info))
+        val t = TLV(APDUControl.removeRespondCodes(info))
         if (t.list == null || t.list!!.tlvSequence.isEmpty() ||
             t.list!!.tlvSequence.size != 1 || t.list!!.tlvSequence[0].value == null ||
             t.list!!.tlvSequence[0].value!!.size != 1) {
@@ -70,17 +69,17 @@ abstract class LDS2Application(apduControl: APDUControl) : LDSApplication(apduCo
     }
 
     protected fun readRecord(recordNumber: Byte) : TLVSequence? {
-        val info = EMRTD.apduControl.sendAPDU(APDU(
+        val info = APDUControl.sendAPDU(APDU(
             NfcClassByte.SECURE_MESSAGING,
             NfcInsByte.READ_RECORD,
             recordNumber,
             NfcP2Byte.READ_SINGLE_RECORD,
             LE_EXT_MAX
         ))
-        return if (!EMRTD.apduControl.checkResponse(info)) {
+        return if (!APDUControl.checkResponse(info)) {
             null
         } else {
-            TLVSequence(EMRTD.apduControl.removeRespondCodes(info))
+            TLVSequence(APDUControl.removeRespondCodes(info))
         }
     }
 

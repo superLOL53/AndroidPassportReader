@@ -28,20 +28,15 @@ import com.example.emrtdapplication.utils.TLV
 /**
  * Implements the EF.DIR file. Required if LDS2 applications are supported
  *
- * @property apduControl Used for sending and receiving APDUs
+ * @property APDUControl Used for sending and receiving APDUs
  * @property hasTravelRecordsApplication Indicates if the eMRTD supports the Travel Records application
  * @property hasVisaRecordsApplication Indicates if the eMRTD supports the Visa Record application
  * @property hasAdditionalBiometricsApplication Indicates if the eMRTD supports the Additional Biometric application
  */
 class Directory() {
-    private var apduControl: APDUControl? = null
     private var hasTravelRecordsApplication = false
     private var hasVisaRecordsApplication = false
     private var hasAdditionalBiometricsApplication = false
-
-    constructor(apduControl: APDUControl) : this() {
-        this.apduControl = apduControl
-    }
 
     constructor(byteArray: ByteArray) : this() {
         parseData(byteArray)
@@ -52,24 +47,24 @@ class Directory() {
      * @return [FILE_UNABLE_TO_SELECT], [FILE_UNABLE_TO_READ] or [SUCCESS]
      */
     fun read() : Int {
-        var info = apduControl!!.sendAPDU(APDU(
+        var info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(DIR_ID_1, DIR_ID_2)))
-        if (!apduControl!!.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
-        info = apduControl!!.sendAPDU(APDU(
+        info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO, 0
         ))
-        if (!apduControl!!.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
-        return parseData(apduControl!!.removeRespondCodes(info))
+        return parseData(APDUControl.removeRespondCodes(info))
     }
 
     /**

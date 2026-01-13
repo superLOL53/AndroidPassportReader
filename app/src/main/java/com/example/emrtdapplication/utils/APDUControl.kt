@@ -20,7 +20,6 @@ import java.io.IOException
 
 /**
  * Class for sending and receiving APDUs from the ePassport
- * @property crypto Class for doing cryptography (e.g, en-/decrypting, padding, MAC computation)
  * @property maxResponseLength The maximum length of the received APDU
  * @property maxCommandLength The maximum length of the sending APDU
  * @property isoDepSupport Indicates the support for ISO DEP of the discovered tag
@@ -33,7 +32,7 @@ import java.io.IOException
  * @property encryptionKeyMAC The key used to generate the MAC of the APDU
  * @property ssc The sequence counter used for the MAC computation
  */
-class APDUControl() {
+object APDUControl {
     var maxResponseLength = 0
     var maxCommandLength = 0
     private var isoDepSupport : Boolean = false

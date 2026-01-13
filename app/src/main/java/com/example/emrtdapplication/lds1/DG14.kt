@@ -16,7 +16,6 @@ import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.common.EFDIRInfo
 import com.example.emrtdapplication.common.PACEDomainParameterInfo
 import com.example.emrtdapplication.common.PACEInfo
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
@@ -26,13 +25,12 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
 /**
  * Implements the DG14 file and inherits from [ElementaryFileTemplate]
  *
- * @property apduControl Class for communicating with the eMRTD
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG14
  * @property efTag The tag of the DG14 file
  * @property securityInfos A list of [SecurityInfo] contained in DG14
  */
-class DG14(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
+class DG14() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0E
     override val efTag: Byte = 0x6E

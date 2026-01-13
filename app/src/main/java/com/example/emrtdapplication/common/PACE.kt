@@ -43,7 +43,6 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.ZERO_BYTE
-import com.example.emrtdapplication.lds1.ChipAuthentication
 import org.spongycastle.asn1.x9.ECNamedCurveTable
 import org.spongycastle.asn1.x9.X9ECParameters
 import org.spongycastle.crypto.agreement.DHStandardGroups
@@ -60,7 +59,6 @@ import javax.crypto.Cipher
 /**
  * Implements the PACE protocol.
  *
- * @property apduControl Used for sending and receiving APDUs
  * @property Crypto Used for Cryptographic operations
  * @property mrzInformation The MRZ information of the eMRTD
  * @property useCAN If the CAN is used for deriving keys
@@ -73,7 +71,7 @@ import javax.crypto.Cipher
  * @property chipPublicKey The public key for the chip authentication protocol. Only used with PACE-CAM.
  */
 //TODO: Documentation
-class PACE(private var apduControl: APDUControl, private val random: SecureRandom? = SecureRandom()) {
+class PACE(private val random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
     private var useCAN = false
     private var useLongConstants = false
@@ -133,13 +131,13 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
         }
         val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
         computeKeys(key, 3)
-        info = apduControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info))
-        if (!apduControl.checkResponse(info)) {
+        info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info))
+        if (!APDUControl.checkResponse(info)) {
             return INVALID_MSE_COMMAND
         }
         info = byteArrayOf(TlvTags.NONCE_QUERY, ZERO_BYTE)
         try {
-            info = apduControl.sendAPDU(
+            info = APDUControl.sendAPDU(
                 APDU(
                     NfcClassByte.COMMAND_CHAINING,
                     NfcInsByte.GENERAL_AUTHENTICATE,
@@ -149,13 +147,13 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
                     256
                 )
             )
-            if (!apduControl.checkResponse(info)) {
+            if (!APDUControl.checkResponse(info)) {
                 return INVALID_GENERAL_AUTHENTICATE
             }
         } catch (_ : Exception) {
             return FAILURE
         }
-        val z = TLV(apduControl.removeRespondCodes(info)).list!!.tlvSequence[0].value
+        val z = TLV(APDUControl.removeRespondCodes(info)).list!!.tlvSequence[0].value
             ?: return INVALID_NONCE
         val s = decryptNonce(z) ?: return INVALID_ARGUMENT
         return when (idPACEOid!![idPACEOid!!.size-2]) {
@@ -327,15 +325,15 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
         encKey = Crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], seed)
         macKey = Crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], MAC_COMPUTATION_KEY_VALUE_C)
         when (idPACEOid!![idPACEOid!!.size-1]) {
-            DES_CBC_CBC -> apduControl.isAES = false
-            AES_CBC_CMAC_128 -> apduControl.isAES = true
+            DES_CBC_CBC -> APDUControl.isAES = false
+            AES_CBC_CMAC_128 -> APDUControl.isAES = true
             AES_CBC_CMAC_192 -> {
                 useLongConstants = true
-                apduControl.isAES = true
+                APDUControl.isAES = true
             }
             AES_CBC_CMAC_256 -> {
                 useLongConstants = true
-                apduControl.isAES = true
+                APDUControl.isAES = true
             }
         }
     }
@@ -372,11 +370,11 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
     private fun checkToken(token: ByteArray, chipToken: ByteArray, isCAM: Boolean = false) : Int {
         var data = TLV(TlvTags.TERMINAL_AUTHENTICATION_TOKEN, computeToken(chipToken))
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        val info = apduControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.GENERAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, data.toByteArray(), 256))
-        if (!apduControl.checkResponse(info)) {
+        val info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.GENERAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, data.toByteArray(), 256))
+        if (!APDUControl.checkResponse(info)) {
             return FAILURE
         }
-        data = TLV(apduControl.removeRespondCodes(info))
+        data = TLV(APDUControl.removeRespondCodes(info))
         val receivedToken = data.list!!.tlvSequence[0].value
         if (isCAM) {
             chipAuthenticationData = data.list?.tlvSequence?.get(1)?.value
@@ -387,9 +385,9 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
             chipAuthenticationData = Crypto.removePadding(chipAuthenticationData!!)
         }
         if (receivedToken.contentEquals(computeToken(token))) {
-            apduControl.sendEncryptedAPDU = true
-            apduControl.setEncryptionKeyBAC(encKey!!)
-            apduControl.setEncryptionKeyMAC(macKey!!)
+            APDUControl.sendEncryptedAPDU = true
+            APDUControl.setEncryptionKeyBAC(encKey!!)
+            APDUControl.setEncryptionKeyMAC(macKey!!)
             return SUCCESS
         } else {
             return FAILURE
@@ -451,7 +449,7 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
     private fun exchangeKeys(publicKey: ECPublicKeyParameters, tag: Byte) : ECPublicKeyParameters {
         var data = TLV(tag, publicKey.q.getEncoded(false))
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        val response = TLV(apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
+        val response = TLV(APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
         return ECPublicKeyParameters(publicKey.parameters.curve.decodePoint(response.list!!.tlvSequence[0].value!!), publicKey.parameters)
     }
 
@@ -467,7 +465,7 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
         }
         var data = TLV(tag, key)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        val response = TLV(apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
+        val response = TLV(APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
         return DHPublicKeyParameters(BigInteger(POSITIVE_NUMBER, response.list!!.tlvSequence[0].value!!), publicKey.parameters)
     }
 
@@ -478,7 +476,7 @@ class PACE(private var apduControl: APDUControl, private val random: SecureRando
     private fun sendNonce(nonce: ByteArray) {
         var data = TLV(TlvTags.MAPPING_DATA, nonce)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        apduControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256))
+        APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256))
     }
 
     /**

@@ -22,27 +22,25 @@ import com.example.emrtdapplication.constants.SUCCESS
  *
  */
 object EMRTD {
-    var apduControl = APDUControl()
+    var ca = CardAccess()
         private set
-    var ca = CardAccess(apduControl)
+    var cs = CardSecurity()
         private set
-    var cs = CardSecurity(apduControl)
+    var ai = AttributeInfo()
         private set
-    var ai = AttributeInfo(apduControl)
-        private set
-    var dir = Directory(apduControl)
+    var dir = Directory()
         private set
     var idPaceOid : ByteArray? = null
-    var pace = PACE(apduControl)
+    var pace = PACE()
         private set
     var mrz : String? = null
-    var ldS1Application = LDS1Application(apduControl)
+    var ldS1Application = LDS1Application()
         private set
-    var travelRecords = TravelRecords(apduControl)
+    var travelRecords = TravelRecords()
         private set
-    var visaRecords = VisaRecords(apduControl)
+    var visaRecords = VisaRecords()
         private set
-    var additionalBiometrics = AdditionalBiometrics(apduControl)
+    var additionalBiometrics = AdditionalBiometrics()
         private set
 
     fun readCommonFiles() {
@@ -50,11 +48,11 @@ object EMRTD {
             return
         }
         if (ai.extendedLengthInfoInFile) {
-            apduControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
-            apduControl.maxCommandLength = ai.maxAPDUTransferBytes - ADDITIONAL_ENCRYPTION_LENGTH
+            APDUControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
+            APDUControl.maxCommandLength = ai.maxAPDUTransferBytes - ADDITIONAL_ENCRYPTION_LENGTH
         } else {
-            apduControl.maxResponseLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
-            apduControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
+            APDUControl.maxResponseLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
+            APDUControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
         }
         dir.read()
         ca.read()
@@ -68,30 +66,29 @@ object EMRTD {
     }
 
     fun connectToNFCTag(tag: Tag) {
-        if (apduControl.init(tag) != INIT_SUCCESS) {
+        if (APDUControl.init(tag) != INIT_SUCCESS) {
             return
         }
-        if (apduControl.connectToNFC() != CONNECT_SUCCESS) {
+        if (APDUControl.connectToNFC() != CONNECT_SUCCESS) {
             return
         }
     }
 
     fun closeNFC() {
-        apduControl.closeNFC()
+        APDUControl.closeNFC()
     }
 
     fun reset() {
-        apduControl = APDUControl()
-        ca = CardAccess(apduControl)
-        cs = CardSecurity(apduControl)
-        ai = AttributeInfo(apduControl)
-        dir = Directory(apduControl)
+        ca = CardAccess()
+        cs = CardSecurity()
+        ai = AttributeInfo()
+        dir = Directory()
         mrz = null
         idPaceOid = null
-        pace = PACE(apduControl)
-        ldS1Application = LDS1Application(apduControl)
-        travelRecords = TravelRecords(apduControl)
-        visaRecords = VisaRecords(apduControl)
-        additionalBiometrics = AdditionalBiometrics(apduControl)
+        pace = PACE()
+        ldS1Application = LDS1Application()
+        travelRecords = TravelRecords()
+        visaRecords = VisaRecords()
+        additionalBiometrics = AdditionalBiometrics()
     }
 }

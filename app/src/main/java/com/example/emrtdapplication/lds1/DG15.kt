@@ -26,13 +26,12 @@ import javax.crypto.Cipher
 /**
  * Implements the DG15 file and inherits from [ElementaryFileTemplate]
  *
- * @property apduControl Class for communicating with the eMRTD
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG15
  * @property efTag The tag of the DG15 file
  * @property isAuthenticated Indicates if the Active Authentication protocol was successful
  */
-class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
+class DG15() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     public override val shortEFIdentifier: Byte = 0x0F
     override val efTag: Byte = 0x6F
@@ -87,11 +86,11 @@ class DG15(apduControl: APDUControl) : ElementaryFileTemplate(apduControl) {
         }
         val nonce = ByteArray(8)
         random.nextBytes(nonce)
-        var response = apduControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.INTERNAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, nonce, 256))
-        if (!apduControl.checkResponse(response)) {
+        var response = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.INTERNAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, nonce, 256))
+        if (!APDUControl.checkResponse(response)) {
             return FAILURE
         }
-        response = apduControl.removeRespondCodes(response)
+        response = APDUControl.removeRespondCodes(response)
         val d = decrypt(response)
         if (d == null) {
             return FAILURE

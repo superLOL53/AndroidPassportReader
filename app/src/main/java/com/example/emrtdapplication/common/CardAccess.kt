@@ -18,14 +18,13 @@ import com.example.emrtdapplication.utils.TLV
  * Implements the EF.CardAccess file. This file is required if PACE is implemented.
  * The file contains ASN1 Sequences of [PACEInfo] and/or [PACEDomainParameterInfo]
  *
- * @property apduControl Used for sending and receiving APDUs
  * @property caID1 First byte of the file id
  * @property caID2 Second byte of the file id, which is also the short EF id
  * @property paceInfos Array list of [PACEInfo] contained in the file
  * @property paceDomainParams Array list of [PACEDomainParameterInfo] contained in the file
  * @throws IllegalArgumentException If the file does not contain [PACEInfo] or [PACEDomainParameterInfo]
  */
-class CardAccess(private var apduControl: APDUControl) {
+class CardAccess() {
     private val caID1: Byte = 0x01
     private val caID2: Byte = 0x1C
     val paceInfos = ArrayList<PACEInfo>()
@@ -36,24 +35,24 @@ class CardAccess(private var apduControl: APDUControl) {
      * @return [FILE_UNABLE_TO_SELECT], [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ]
      */
     fun read() : Int {
-        var info = apduControl.sendAPDU(APDU(
+        var info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
             NfcP1Byte.SELECT_EF,
             NfcP2Byte.SELECT_FILE, byteArrayOf(caID1, caID2)))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
         }
-        info = apduControl.sendAPDU(APDU(
+        info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
             NfcP2Byte.ZERO, 256
         ))
-        if (!apduControl.checkResponse(info)) {
+        if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
-        return parse(apduControl.removeRespondCodes(info))
+        return parse(APDUControl.removeRespondCodes(info))
     }
 
     /**
