@@ -18,7 +18,7 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG7() : ElementaryFilesToBeDefined<DisplayedSignature>() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x07
+    override val shortEFIdentifier: Byte = 0x07
     override val efTag: Byte = 0x67
 
     /**

@@ -23,7 +23,7 @@ import kotlin.experimental.and
  */
 class DG16() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x10
+    override val shortEFIdentifier: Byte = 0x10
     override val efTag: Byte = 0x70
     var persons: Array<Person>? = null
             private set

@@ -33,7 +33,7 @@ import javax.crypto.Cipher
  */
 class DG15() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x0F
+    override val shortEFIdentifier: Byte = 0x0F
     override val efTag: Byte = 0x6F
     private var publicKeyInfo : SubjectPublicKeyInfo? = null
     private val sha1 : Byte = 0xBC.toByte()

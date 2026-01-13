@@ -17,7 +17,7 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG10() : ElementaryFilesToBeDefined<TLV>() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x0A
+    override val shortEFIdentifier: Byte = 0x0A
     override val efTag: Byte = 0x6A
 
     /**

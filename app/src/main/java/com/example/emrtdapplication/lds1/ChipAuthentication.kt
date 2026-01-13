@@ -226,7 +226,7 @@ class ChipAuthentication {
                 publicKeyDH = publicKey as DHPublicKeyParameters
                 keyParamsDH = DHParameters(publicKeyDH!!.parameters.p, publicKeyDH!!.parameters.g, publicKeyDH!!.parameters.q)
             }
-        } catch (e : Exception) {
+        } catch (_ : Exception) {
 
         }
     }

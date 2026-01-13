@@ -17,7 +17,7 @@ import com.example.emrtdapplication.constants.SUCCESS
  */
 class DG13() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x0D
+    override val shortEFIdentifier: Byte = 0x0D
     override val efTag: Byte = 0x6D
 
     /**

@@ -100,10 +100,10 @@ class LDS1Application() : LDSApplication() {
 
     fun verify(readActivity: ReadPassport) {
         readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
-        //efSod.checkHashes(efMap)
-        //efSod.passiveAuthentication(certs)
+        efSod.checkHashes(efMap)
+        efSod.passiveAuthentication(certs)
         readActivity.changeProgressBar("Performing Active Authentication...", INCREMENT_PROGRESS_BAR)
-        //dg15.activeAuthentication(SecureRandom())
+        dg15.activeAuthentication()
         readActivity.changeProgressBar("Performing Chip Authentication...", INCREMENT_PROGRESS_BAR)
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null

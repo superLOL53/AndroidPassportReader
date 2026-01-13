@@ -35,7 +35,7 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG11() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x0B
+    override val shortEFIdentifier: Byte = 0x0B
     override val efTag: Byte = 0x6B
     var fullName : String? = null
         private set

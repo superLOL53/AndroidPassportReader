@@ -23,7 +23,7 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG4() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x04
+    override val shortEFIdentifier: Byte = 0x04
     override val efTag: Byte = 0x76
     var biometricInformation : BiometricInformationGroupTemplate? = null
         private set

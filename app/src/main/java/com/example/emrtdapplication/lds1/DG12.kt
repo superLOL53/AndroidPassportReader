@@ -33,7 +33,7 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG12() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x0C
+    override val shortEFIdentifier: Byte = 0x0C
     override val efTag: Byte = 0x6C
     var issuingAuthority : String? = null
         private set

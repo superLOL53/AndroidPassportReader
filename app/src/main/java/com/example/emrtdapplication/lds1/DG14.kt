@@ -32,7 +32,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
  */
 class DG14() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    public override val shortEFIdentifier: Byte = 0x0E
+    override val shortEFIdentifier: Byte = 0x0E
     override val efTag: Byte = 0x6E
     var securityInfos: Array<SecurityInfo>? = null
         private set
