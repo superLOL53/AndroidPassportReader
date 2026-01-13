@@ -13,6 +13,7 @@ import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.APPLICATION_ID
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.INCREMENT_PROGRESS_BAR
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.utils.Crypto
 import java.math.BigInteger
 import java.security.SecureRandom
 import java.security.cert.X509Certificate
@@ -117,12 +118,18 @@ class LDS1Application(apduControl: APDUControl) : LDSApplication(apduControl) {
                     chipInfo = si as ChipAuthenticationInfo
                 }
             }
-            if (chipPublicKey != null && chipInfo != null) {
-                val auth = ChipAuthentication(
-                    EMRTD.apduControl, null, ByteArray(0),
-                    chipPublicKey, chipAuthenticationInfo = chipInfo)
-                auth.authenticate()
+            val auth = if (chipPublicKey != null) {
+                if (chipInfo != null) {
+                        ChipAuthentication(EMRTD.apduControl, chipPublicKey, chipInfo)
+                } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
+                    ChipAuthentication(EMRTD.apduControl, chipPublicKey, EMRTD.pace.chipAuthenticationData!!, EMRTD.pace.chipPublicKey!!)
+                } else {
+                    null
+                }
+            } else {
+                null
             }
+            auth?.authenticate()
         }
     }
 }

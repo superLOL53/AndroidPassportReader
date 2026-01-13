@@ -25,11 +25,10 @@ import kotlin.experimental.xor
  * Implements the Basic Access Control (BAC) protocol
  *
  * @property apduControl Used for sending and receiving APDUs
- * @property crypto Used for cryptographic operations
  * @property random Secure random number generator
  * @property mrzInformation The MRZ of the eMRTD
  */
-class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Crypto(), private var random: SecureRandom? = SecureRandom()) {
+class BAC(private var apduControl: APDUControl, private var random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
 
     /**
@@ -90,14 +89,14 @@ class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Cry
         for (i in 0..15) {
             s[i+16] = kIfd[i]
         }
-        val hash = crypto.hash("SHA-1", mrzInformation!!.toByteArray())
+        val hash = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
         val kSeed = hash.slice(0..15).toByteArray()
-        var kEnc = crypto.computeKey("SHA-1", kSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray()
+        var kEnc = Crypto.computeKey("SHA-1", kSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray()
         kEnc += kEnc.slice(0..7).toByteArray()
-        var kMAC = crypto.computeKey("SHA-1", kSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray()
+        var kMAC = Crypto.computeKey("SHA-1", kSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray()
         kMAC += kMAC.slice(0..7).toByteArray()
-        val eIfd = crypto.cipher3DES(s, kEnc)
-        val mIfd = crypto.computeMAC(eIfd, kMAC)
+        val eIfd = Crypto.cipher3DES(s, kEnc)
+        val mIfd = Crypto.computeMAC(eIfd, kMAC)
         info = apduControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -114,10 +113,10 @@ class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Cry
         info = apduControl.removeRespondCodes(info)
         val encData = info.slice(0..31).toByteArray()
         val mIC = info.slice(32..39).toByteArray()
-        if (!crypto.checkMAC(encData, mIC, kMAC)) {
+        if (!Crypto.checkMAC(encData, mIC, kMAC)) {
             return ERROR_INVALID_MAC
         }
-        val con = crypto.cipher3DES(encData, kEnc, Cipher.DECRYPT_MODE)
+        val con = Crypto.cipher3DES(encData, kEnc, Cipher.DECRYPT_MODE)
         if (!con.slice(8..15).toByteArray().contentEquals(rndIfd)) {
             return ERROR_INVALID_NONCE
         }
@@ -127,8 +126,8 @@ class BAC(private var apduControl: APDUControl, private var crypto: Crypto = Cry
         for (i in 0..15) {
             kSessionSeed[i] = kIC[i] xor kIfd[i]
         }
-        apduControl.setEncryptionKeyBAC(crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray())
-        apduControl.setEncryptionKeyMAC(crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray())
+        apduControl.setEncryptionKeyBAC(Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray())
+        apduControl.setEncryptionKeyMAC(Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray())
         apduControl.setSequenceCounter(
             (rndIC.slice(4..7).toByteArray() + rndIfd.slice(4..7).toByteArray())
         )

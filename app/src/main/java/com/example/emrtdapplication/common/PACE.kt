@@ -43,6 +43,7 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.ZERO_BYTE
+import com.example.emrtdapplication.lds1.ChipAuthentication
 import org.spongycastle.asn1.x9.ECNamedCurveTable
 import org.spongycastle.asn1.x9.X9ECParameters
 import org.spongycastle.crypto.agreement.DHStandardGroups
@@ -60,7 +61,7 @@ import javax.crypto.Cipher
  * Implements the PACE protocol.
  *
  * @property apduControl Used for sending and receiving APDUs
- * @property crypto Used for cryptographic operations
+ * @property Crypto Used for Cryptographic operations
  * @property mrzInformation The MRZ information of the eMRTD
  * @property useCAN If the CAN is used for deriving keys
  * @property useLongConstants Indicates if integrated mapping uses the long(256 bits) or short(128 bits) c0 and c1 constants
@@ -72,7 +73,7 @@ import javax.crypto.Cipher
  * @property chipPublicKey The public key for the chip authentication protocol. Only used with PACE-CAM.
  */
 //TODO: Documentation
-class PACE(private var apduControl: APDUControl, private val crypto : Crypto = Crypto(), private val random: SecureRandom? = SecureRandom()) {
+class PACE(private var apduControl: APDUControl, private val random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
     private var useCAN = false
     private var useLongConstants = false
@@ -89,7 +90,7 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      * Initializes the PACE protocol with the MRZ information or CAN from the manual input.
      * @param mrz: The MRZ information from the manual input
      * @param can: The CAN from the manual input
-     * @param paceOid: The supported cryptographic PACE protocol
+     * @param paceOid: The supported Cryptographic PACE protocol
      * @return [SUCCESS] or error code indicating a failure
      */
     fun init(mrz :String?, can : Boolean, paceOid : ByteArray?, parameters: Byte): Int {
@@ -130,7 +131,7 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         } else {
             0x01
         }
-        val key = crypto.hash("SHA-1", mrzInformation!!.toByteArray())
+        val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
         computeKeys(key, 3)
         info = apduControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info))
         if (!apduControl.checkResponse(info)) {
@@ -175,15 +176,15 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
     private fun paceECGM(nonce: ByteArray) : Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
-        var keys = crypto.generateECKeyPair(domainParameters)
+        var keys = Crypto.generateECKeyPair(domainParameters)
         var publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.MAPPING_DATA)
-        val sa = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
-        val h = crypto.getECPointFromBigInteger(sa, domainParameters)
-        val g = crypto.genericMappingEC(domainParameters.g, nonce, h)
+        val sa = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        val h = Crypto.getECPointFromBigInteger(sa, domainParameters)
+        val g = Crypto.genericMappingEC(domainParameters.g, nonce, h)
         domainParameters = ECDomainParameters(domainParameters.curve, g, domainParameters.n, domainParameters.h)
-        keys = crypto.generateECKeyPair(domainParameters)
+        keys = Crypto.generateECKeyPair(domainParameters)
         publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        val sharedSecret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
     }
@@ -195,14 +196,14 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      */
     private fun paceDHGM(nonce: ByteArray) : Int {
         var params = getDHParams() ?: return INVALID_ARGUMENT
-        var keys = crypto.generateDHKeyPair(params)
+        var keys = Crypto.generateDHKeyPair(params)
         var publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.MAPPING_DATA)
-        val h = crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
-        val g = crypto.genericMappingDH(params.g, nonce, params.p, h)
+        val h = Crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
+        val g = Crypto.genericMappingDH(params.g, nonce, params.p, h)
         params = DHParameters(params.p, g, params.q)
-        keys = crypto.generateDHKeyPair(params)
+        keys = Crypto.generateDHKeyPair(params)
         publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
+        val sharedSecret = Crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
     }
@@ -222,13 +223,13 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
             random.nextBytes(t)
         }
         sendNonce(t)
-        val r = crypto.integratedMappingPRNG(nonce, t, params.curve.field.characteristic, useLongConstants)
-        val x = crypto.integratedMappingEC(r, params.curve.a.toBigInteger(), params.curve.b.toBigInteger(), params.curve.field.characteristic)
-        val g = crypto.getECPointFromBigInteger(x, domainParams)
+        val r = Crypto.integratedMappingPRNG(nonce, t, params.curve.field.characteristic, useLongConstants)
+        val x = Crypto.integratedMappingEC(r, params.curve.a.toBigInteger(), params.curve.b.toBigInteger(), params.curve.field.characteristic)
+        val g = Crypto.getECPointFromBigInteger(x, domainParams)
         domainParams = ECDomainParameters(params.curve, g, params.n, params.h)
-        val keys = crypto.generateECKeyPair(domainParams)
+        val keys = Crypto.generateECKeyPair(domainParams)
         val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        val sharedSecret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
     }
@@ -247,12 +248,12 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
             random.nextBytes(t)
         }
         sendNonce(t)
-        val r = crypto.integratedMappingPRNG(nonce, t, params.p, useLongConstants)
-        val g = crypto.integratedMappingDH(r, params.p, params.q)
+        val r = Crypto.integratedMappingPRNG(nonce, t, params.p, useLongConstants)
+        val g = Crypto.integratedMappingDH(r, params.p, params.q)
         params = DHParameters(params.p, g, params.q)
-        val keys = crypto.generateDHKeyPair(params)
+        val keys = Crypto.generateDHKeyPair(params)
         val publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
+        val sharedSecret = Crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
     }
@@ -266,15 +267,15 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
     private fun paceECCAM(nonce: ByteArray) : Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
         var domainParams = ECDomainParameters(params.curve, params.g, params.n, params.h)
-        var keys = crypto.generateECKeyPair(domainParams)
+        var keys = Crypto.generateECKeyPair(domainParams)
         chipPublicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.MAPPING_DATA)
-        val sa = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, chipPublicKey!!)
-        val h = crypto.getECPointFromBigInteger(sa, domainParams)
-        val g = crypto.genericMappingEC(domainParams.g, nonce, h)
+        val sa = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, chipPublicKey!!)
+        val h = Crypto.getECPointFromBigInteger(sa, domainParams)
+        val g = Crypto.genericMappingEC(domainParams.g, nonce, h)
         domainParams = ECDomainParameters(params.curve, g, params.n, params.h)
-        keys = crypto.generateECKeyPair(domainParams)
+        keys = Crypto.generateECKeyPair(domainParams)
         val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        val sharedSecret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
         computeKeys(sharedSecret.toByteArray())
         return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey, true)
     }
@@ -323,8 +324,8 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
         } else {
             secret
         }
-        encKey = crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], seed)
-        macKey = crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], MAC_COMPUTATION_KEY_VALUE_C)
+        encKey = Crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], seed)
+        macKey = Crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], MAC_COMPUTATION_KEY_VALUE_C)
         when (idPACEOid!![idPACEOid!!.size-1]) {
             DES_CBC_CBC -> apduControl.isAES = false
             AES_CBC_CMAC_128 -> apduControl.isAES = true
@@ -381,9 +382,9 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
             chipAuthenticationData = data.list?.tlvSequence?.get(1)?.value
             var iv = ByteArray(encKey!!.size)
             iv.fill(-1)
-            iv = crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(encKey!!.size))
-            chipAuthenticationData = crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, iv)
-            chipAuthenticationData = crypto.removePadding(chipAuthenticationData!!)
+            iv = Crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(16))
+            chipAuthenticationData = Crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, iv)
+            chipAuthenticationData = Crypto.removePadding(chipAuthenticationData!!)
         }
         if (receivedToken.contentEquals(computeToken(token))) {
             apduControl.sendEncryptedAPDU = true
@@ -402,9 +403,9 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      */
     private fun computeToken(byteArray: ByteArray) : ByteArray {
         return if (idPACEOid!![idPACEOid!!.size-1] == DES_CBC_CBC) {
-            crypto.computeMAC(byteArray, macKey!!)
+            Crypto.computeMAC(byteArray, macKey!!)
         } else {
-            crypto.computeCMAC(byteArray, macKey!!)
+            Crypto.computeCMAC(byteArray, macKey!!)
         }
     }
 
@@ -487,10 +488,10 @@ class PACE(private var apduControl: APDUControl, private val crypto : Crypto = C
      */
     private fun decryptNonce(nonce: ByteArray) : ByteArray? {
         return when(idPACEOid!![idPACEOid!!.size-1]) {
-            AES_CBC_CMAC_128 -> crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE, ByteArray(16))
-            AES_CBC_CMAC_192 -> crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            AES_CBC_CMAC_256 -> crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            DES_CBC_CBC -> crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            AES_CBC_CMAC_128 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE, ByteArray(16))
+            AES_CBC_CMAC_192 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            AES_CBC_CMAC_256 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            DES_CBC_CBC -> Crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)
             else -> null
         }
     }

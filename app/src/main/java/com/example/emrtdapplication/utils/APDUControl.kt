@@ -2,41 +2,21 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
-import com.example.emrtdapplication.constants.APDUControlConstants.APDU_NO_DATA_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_ISO_DEP_SUPPORT
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_NFC_TAG
-import com.example.emrtdapplication.constants.NfcClassByte
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CLOSE
+import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CONNECT
+import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
+import com.example.emrtdapplication.constants.APDUControlConstants.TIME_OUT
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
 import com.example.emrtdapplication.constants.NfcUse
 import com.example.emrtdapplication.constants.ZERO_BYTE
 import java.io.IOException
-import javax.crypto.Cipher
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CLOSE
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CONNECT
-import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
-import com.example.emrtdapplication.constants.APDUControlConstants.MIN_APDU_SIZE_FOR_MAC_VERIFICATION
-import com.example.emrtdapplication.constants.APDUControlConstants.PADDING_SIZE
-import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
-import com.example.emrtdapplication.constants.APDUControlConstants.SECURE_MESSAGING_MASK
-import com.example.emrtdapplication.constants.APDUControlConstants.SINGLE_KEY_SIZE_3DES
-import com.example.emrtdapplication.constants.APDUControlConstants.TIME_OUT
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
-import com.example.emrtdapplication.constants.TlvTags.DO01
-import com.example.emrtdapplication.constants.TlvTags.DO08
-import com.example.emrtdapplication.constants.TlvTags.DO09
-import com.example.emrtdapplication.constants.TlvTags.DO85
-import com.example.emrtdapplication.constants.TlvTags.DO87
-import com.example.emrtdapplication.constants.TlvTags.DO8E
-import com.example.emrtdapplication.constants.TlvTags.DO97
-import com.example.emrtdapplication.constants.TlvTags.DO97_EXTENDED_LE_LENGTH
-import com.example.emrtdapplication.constants.TlvTags.DO97_LE_LENGTH
-import kotlin.experimental.and
-import kotlin.experimental.or
 
 /**
  * Class for sending and receiving APDUs from the ePassport
@@ -53,7 +33,7 @@ import kotlin.experimental.or
  * @property encryptionKeyMAC The key used to generate the MAC of the APDU
  * @property ssc The sequence counter used for the MAC computation
  */
-class APDUControl(private val crypto: Crypto = Crypto()) {
+class APDUControl() {
     var maxResponseLength = 0
     var maxCommandLength = 0
     private var isoDepSupport : Boolean = false
@@ -212,9 +192,9 @@ class APDUControl(private val crypto: Crypto = Crypto()) {
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         if (isoDep == null) return ByteArray(0)
         inc()
-        val secureAPDU = SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, crypto, apdu)
+        val secureAPDU = SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, apdu)
         val responseAPDU = isoDep!!.transceive(secureAPDU.encryptedAPDUArray)
         inc()
-        return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, crypto, responseAPDU).apduArray
+        return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, responseAPDU).apduArray
     }
 }

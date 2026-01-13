@@ -6,7 +6,7 @@ import com.example.emrtdapplication.constants.APDUControlConstants.PADDING_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.SINGLE_KEY_SIZE_3DES
 import com.example.emrtdapplication.constants.CryptoConstants.AES
-import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
+import com.example.emrtdapplication.constants.CryptoConstants.AES_ECB_NO_PADDING
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
 import com.example.emrtdapplication.constants.NfcClassByte
@@ -19,7 +19,6 @@ import com.example.emrtdapplication.constants.TlvTags.DO97
 import com.example.emrtdapplication.constants.TlvTags.DO97_EXTENDED_LE_LENGTH
 import com.example.emrtdapplication.constants.TlvTags.DO97_LE_LENGTH
 import javax.crypto.Cipher
-import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.or
 
@@ -28,30 +27,27 @@ class SecureMessagingAPDU {
     private val encryptionKey : ByteArray
     private val encryptionKeyMAC: ByteArray
     private val isAES : Boolean
-    private val crypto: Crypto
     val apduArray : ByteArray
     val encryptedAPDUArray : ByteArray
 
     constructor(sequenceCounter : ByteArray, encryptionKey : ByteArray,
                 encryptionKeyMAC: ByteArray, isAES : Boolean,
-                crypto: Crypto, apdu: APDU) {
+                apdu: APDU) {
         this.sequenceCounter = sequenceCounter
         this.encryptionKey = encryptionKey
         this.encryptionKeyMAC = encryptionKeyMAC
         this.isAES = isAES
-        this.crypto = crypto
         apduArray = apdu.getByteArray()
         encryptedAPDUArray = encryptAPDU(apdu)
     }
 
     constructor(sequenceCounter : ByteArray, encryptionKey : ByteArray,
                 encryptionKeyMAC: ByteArray, isAES : Boolean,
-                crypto: Crypto, rApdu: ByteArray) {
+                rApdu: ByteArray) {
         this.sequenceCounter = sequenceCounter
         this.encryptionKey = encryptionKey
         this.encryptionKeyMAC = encryptionKeyMAC
         this.isAES = isAES
-        this.crypto = crypto
         apduArray = extractAPDU(rApdu)
         encryptedAPDUArray = rApdu
     }
@@ -168,19 +164,13 @@ class SecureMessagingAPDU {
      * @return The byte array containing the bytes 0x8E, 0x08 and the computed MAC
      */
     private fun do8E08(m : ByteArray) : ByteArray {
-        //log("M: ", m)
-        //log("SSC: ", ssc)
-        //log("Incremented SSC: ", ssc)
         val n = if (isAES) {
             addPadding(sequenceCounter + m)
         } else {
             addPadding(sequenceCounter + m)
         }
-        //log("N: ", n)
         val cc = computeMAC(n)
-        //log("CC: ", cc)
         val do8e = byteArrayOf(DO8E, DO08) + cc
-        //log("DO8E: ", do8e)
         return do8e
     }
 
@@ -201,7 +191,7 @@ class SecureMessagingAPDU {
             } else {
                 3
             }
-            crypto.removePadding(decrypt(rApdu.slice(l..rApdu.size-APDU_NO_DATA_SIZE).toByteArray())) + rApdu.slice(rApdu.size-RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
+            Crypto.removePadding(decrypt(rApdu.slice(l..rApdu.size-APDU_NO_DATA_SIZE).toByteArray())) + rApdu.slice(rApdu.size-RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
         } else {
             rApdu.slice(rApdu.size-RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
         }
@@ -216,9 +206,9 @@ class SecureMessagingAPDU {
      */
     private fun computeMAC(m : ByteArray) : ByteArray {
         return if (isAES) {
-            crypto.computeCMAC(m, encryptionKeyMAC)
+            Crypto.computeCMAC(m, encryptionKeyMAC)
         } else {
-            crypto.computeMAC(m, encryptionKeyMAC, usePadding = false)
+            Crypto.computeMAC(m, encryptionKeyMAC, usePadding = false)
         }
     }
 
@@ -240,9 +230,9 @@ class SecureMessagingAPDU {
      */
     private fun encrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
-            crypto.cipherAES(bytes, encryptionKey, Cipher.ENCRYPT_MODE, computeAESIV())
+            Crypto.cipherAES(bytes, encryptionKey, Cipher.ENCRYPT_MODE, computeAESIV())
         } else {
-            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray())
+            Crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray())
         }
     }
 
@@ -253,9 +243,9 @@ class SecureMessagingAPDU {
      */
     private fun decrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
-            crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE, computeAESIV())
+            Crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE, computeAESIV())
         } else {
-            crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray(), Cipher.DECRYPT_MODE)
+            Crypto.cipher3DES(bytes, encryptionKey + encryptionKey.slice(0..<SINGLE_KEY_SIZE_3DES).toByteArray(), Cipher.DECRYPT_MODE)
         }
     }
 
@@ -266,24 +256,16 @@ class SecureMessagingAPDU {
      */
     private fun addPadding(byteArray: ByteArray) : ByteArray {
         return if (isAES) {
-            crypto.addPadding(byteArray, encryptionKey.size)
+            Crypto.addPadding(byteArray, encryptionKey.size)
         } else {
-            crypto.addPadding(byteArray, PADDING_SIZE)
+            Crypto.addPadding(byteArray, PADDING_SIZE)
         }
     }
 
     private fun computeAESIV() : ByteArray {
         val k = SecretKeySpec(encryptionKey, AES)
-        val c = Cipher.getInstance("AES/ECB/NoPadding")
+        val c = Cipher.getInstance(AES_ECB_NO_PADDING)
         c.init(Cipher.ENCRYPT_MODE, k)
         return c.doFinal(sequenceCounter)
-        //val iv = crypto.cipherAES(sequenceCounter, encryptionKey, Cipher.ENCRYPT_MODE)
-        /*return if (iv.size < 16) {
-            ByteArray(encryptionKey.size-iv.size) + iv
-        } else if (iv.size > 16) {
-            iv.slice(0..<16).toByteArray()
-        } else {
-            iv
-        }*/
     }
 }

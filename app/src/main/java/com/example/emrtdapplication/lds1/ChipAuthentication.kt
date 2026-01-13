@@ -9,9 +9,6 @@ import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_
 import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_DH_3DES_CBC_CBC
 import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH
 import com.example.emrtdapplication.constants.ChipAuthenticationConstants.ID_CA_ECDH_3DES_CBC_CBC
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
@@ -22,6 +19,9 @@ import com.example.emrtdapplication.constants.TlvTags.CRYPTOGRAPHIC_REFERENCE
 import com.example.emrtdapplication.constants.TlvTags.DYNAMIC_AUTHENTICATION_DATA
 import com.example.emrtdapplication.constants.TlvTags.EPHEMERAL_PUBLIC_KEY
 import com.example.emrtdapplication.constants.TlvTags.PRIVATE_KEY_REFERENCE
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.params.DHParameters
@@ -31,17 +31,17 @@ import org.spongycastle.crypto.params.ECDomainParameters
 import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.util.PublicKeyFactory
-import java.security.SecureRandom
+import java.math.BigInteger
 
 /**
  * Implements the chip authentication protocol
  *
  */
-class ChipAuthentication(private val apduControl: APDUControl, private val chipAuthenticationData : ByteArray?,
-                         private val iv : ByteArray, private val publicKeyInfo: ChipAuthenticationPublicKeyInfo,
-                         private val random: SecureRandom = SecureRandom(), private val crypto: Crypto = Crypto(),
-                         private val chipAuthenticationInfo: ChipAuthenticationInfo?) {
-
+class ChipAuthentication {
+    private val apduControl: APDUControl
+    private val publicKeyInfo: ChipAuthenticationPublicKeyInfo
+    private val chipAuthenticationData : ByteArray?
+    private val chipAuthenticationInfo: ChipAuthenticationInfo?
     private var isDH = false
     private var isEC = false
     private var keyParamsDH : DHParameters? = null
@@ -49,55 +49,76 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     private var publicKeyDH : DHPublicKeyParameters? = null
     private var publicKeyECDH : ECPublicKeyParameters? = null
     private var is3DES = false
+
+    constructor(apduControl: APDUControl, publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationInfo: ChipAuthenticationInfo) {
+        this.apduControl = apduControl
+        this.publicKeyInfo = publicKeyInfo
+        this.chipAuthenticationInfo = chipAuthenticationInfo
+         chipAuthenticationData = null
+    }
+
+    constructor(apduControl: APDUControl, publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationData : ByteArray, publicKey : ECPublicKeyParameters) {
+        this.apduControl = apduControl
+        this.chipAuthenticationData = chipAuthenticationData
+        publicKeyECDH = publicKey
+        chipAuthenticationInfo = null
+        this.publicKeyInfo = publicKeyInfo
+    }
     /**
      * Authenticate the chip
      */
     fun authenticate() : Int {
-        return if (chipAuthenticationInfo == null) {
-            FAILURE
-        } else {
-            if (chipAuthenticationData != null) {
-                authenticatePACECAMMapping()
-            }
-            if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH)) {
-                isDH = true
-            } else if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH)) {
-                isEC = true
-            }
-            is3DES = (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH_3DES_CBC_CBC) ||
-                chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH_3DES_CBC_CBC))
-            setParameters()
-            if (keyParamsDH == null && keyParamsECDH == null) {
-                return FAILURE
-            }
-            val keyPair = generateKeyPair()
-            if (keyPair == null) return FAILURE
-            val publicKeyData = getEncodedPublicKey(keyPair)
-            if (publicKeyData == null) return FAILURE
-            val agreement = if (isDH && publicKeyDH != null) {
-                crypto.calculateDHAgreement(keyPair.private as DHPrivateKeyParameters, publicKeyDH!!)
-            } else if (isEC && publicKeyECDH != null) {
-                crypto.calculateECDHAgreement(keyPair.private as ECPrivateKeyParameters, publicKeyECDH!!)
-            } else {
-                null
-            }
-            if (agreement == null) {
-                FAILURE
-            }
-            val success = if (is3DES) {
-                authenticate3DES(publicKeyData)
-            } else {
-                authenticateAES(publicKeyData)
-            }
-            if (success != SUCCESS) {
-                FAILURE
-            }
-            computeKeys(agreement!!.toByteArray())
-            val dg1 = DG1(apduControl)
-            dg1.read()
-            dg1.parse()
-            SUCCESS
-        }
+        return if (chipAuthenticationData != null && publicKeyECDH != null) {
+                    authenticatePACECAMMapping()
+                } else if(chipAuthenticationInfo != null) {
+                    if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH)) {
+                        isDH = true
+                    } else if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH)) {
+                        isEC = true
+                    }
+                    is3DES =
+                        (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH_3DES_CBC_CBC) ||
+                                chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH_3DES_CBC_CBC))
+                    setParameters()
+                    if (keyParamsDH == null && keyParamsECDH == null) {
+                        return FAILURE
+                    }
+                    val keyPair = generateKeyPair()
+                    if (keyPair == null) return FAILURE
+                    val publicKeyData = getEncodedPublicKey(keyPair)
+                    if (publicKeyData == null) return FAILURE
+                    val agreement = if (isDH && publicKeyDH != null) {
+                        Crypto.calculateDHAgreement(
+                            keyPair.private as DHPrivateKeyParameters,
+                            publicKeyDH!!
+                        )
+                    } else if (isEC && publicKeyECDH != null) {
+                        Crypto.calculateECDHAgreement(
+                            keyPair.private as ECPrivateKeyParameters,
+                            publicKeyECDH!!
+                        )
+                    } else {
+                        null
+                    }
+                    if (agreement == null) {
+                        FAILURE
+                    }
+                    val success = if (is3DES) {
+                        authenticate3DES(publicKeyData)
+                    } else {
+                        authenticateAES(publicKeyData)
+                    }
+                    if (success != SUCCESS) {
+                        FAILURE
+                    }
+                    computeKeys(agreement!!.toByteArray())
+                    val dg1 = DG1(apduControl)
+                    dg1.read()
+                    dg1.parse()
+                    SUCCESS
+                } else {
+                    FAILURE
+                }
     }
 
     private fun authenticate3DES(publicKeyData : ByteArray) : Int {
@@ -163,14 +184,20 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     }
 
     private fun authenticatePACECAMMapping() : Int {
-        TODO()
+        val privateKey = ECPrivateKeyParameters(BigInteger(chipAuthenticationData!!), publicKeyECDH!!.parameters)
+        val agreement = Crypto.calculateECDHAgreement(privateKey, publicKeyECDH!!)
+        return if (agreement.toByteArray().contentEquals(publicKeyInfo.publicKeyInfo.publicKeyData.getEncoded())) {
+            SUCCESS
+        } else {
+            FAILURE
+        }
     }
 
     private fun generateKeyPair() : AsymmetricCipherKeyPair? {
         return if (isDH && keyParamsDH != null) {
-            crypto.generateDHKeyPair(keyParamsDH!!)
+            Crypto.generateDHKeyPair(keyParamsDH!!)
         } else if (isEC && keyParamsECDH != null) {
-            crypto.generateECKeyPair(keyParamsECDH!!)
+            Crypto.generateECKeyPair(keyParamsECDH!!)
         } else {
             null
         }
@@ -210,8 +237,8 @@ class ChipAuthentication(private val apduControl: APDUControl, private val chipA
     private fun computeKeys(agreement : ByteArray) {
         if (chipAuthenticationInfo == null) return
         val oid = chipAuthenticationInfo.objectIdentifier
-        apduControl.setEncryptionKeyBAC(crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), ENCRYPTION_KEY_VALUE_C))
-        apduControl.setEncryptionKeyMAC(crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), MAC_COMPUTATION_KEY_VALUE_C))
+        apduControl.setEncryptionKeyBAC(Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), ENCRYPTION_KEY_VALUE_C))
+        apduControl.setEncryptionKeyMAC(Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), MAC_COMPUTATION_KEY_VALUE_C))
         apduControl.isAES = !is3DES
         if (is3DES) {
             apduControl.setSequenceCounter(ByteArray(8))

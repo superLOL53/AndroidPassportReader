@@ -47,7 +47,7 @@ import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.and
 import kotlin.experimental.or
 
-class Crypto {
+object Crypto {
 
     fun integratedMappingDH(r: BigInteger, p: BigInteger, q: BigInteger) : BigInteger {
         return r.modPow(p.dec().divide(q), p)

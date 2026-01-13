@@ -4,6 +4,7 @@ object CryptoConstants {
     const val PAD_START_BYTE : Byte = 0x80.toByte()
     const val KEY_3DES_COUNT_ONES : Byte = 0xFE.toByte()
     const val AES_CBC_NO_PADDING = "AES/CBC/NoPadding"
+    const val AES_ECB_NO_PADDING = "AES/ECB/NoPadding"
     const val AES = "AES"
     const val DES_EDE = "DESede"
     const val DES_EDE_CBC_NO_PADDING = "DESede/CBC/NoPadding"
