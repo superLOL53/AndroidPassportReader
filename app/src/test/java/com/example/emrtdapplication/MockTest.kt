@@ -41,8 +41,8 @@ class MockTest {
     @Test
     fun tests() {
         val K = "T22000129364081251010318".toByteArray()
-        val seed = Crypto().hash("SHA-1", K)
-        val key = Crypto().computeKey("SHA-1", seed, 3.toByte())
+        val seed = Crypto.hash("SHA-1", K)
+        val key = Crypto.computeKey("SHA-1", seed, 3.toByte())
         println(K.toHexString())
         println(seed.toHexString())
         println(key.toHexString())

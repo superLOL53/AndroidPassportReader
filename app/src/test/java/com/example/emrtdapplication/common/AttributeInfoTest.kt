@@ -27,7 +27,7 @@ class AttributeInfoTest {
             .thenReturn(byteArrayOf(0x90.toByte(), 0x00))
             .thenReturn(byteArrayOf(0x47, 0x03, -1, -1, -1, 0x7F, 0x66, 0x06, 0x02, 0x01, -1, 0x02, 0x01, -1, 0x90.toByte(), 0x00))
 
-        val ai = AttributeInfo(apduControl)
+        val ai = AttributeInfo()
         ai.read()
         assertEquals(true, ai.supportFullDFNameSelection)
         assertEquals(true, ai.supportShortEFNameSelection)

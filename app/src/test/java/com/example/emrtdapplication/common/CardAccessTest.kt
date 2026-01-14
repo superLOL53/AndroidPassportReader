@@ -30,7 +30,7 @@ class CardAccessTest {
         whenever(apduControl.sendAPDU(any()))
             .thenReturn(byteArrayOf(0x90.toByte(), 0x00))
             .thenReturn(BigInteger("31143012060A04007F0007020204020202010202010D9000", 16).toByteArray())
-        val ca = CardAccess(apduControl)
+        val ca = CardAccess()
         ca.read()
         assertEquals(1, ca.paceInfos.size)
         assertEquals(2, ca.paceInfos[0].version)

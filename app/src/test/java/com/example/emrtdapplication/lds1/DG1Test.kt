@@ -33,7 +33,7 @@ class DG1Test {
             .thenReturn(byteArrayOf(0x61, 0x5D, 0x5F, 0x1F, 0x5A) + mrzExample.toByteArray() + byteArrayOf(0x90.toByte(), 0x00)
             )
 
-        val dg1 = DG1(mockAPDUControl)
+        val dg1 = DG1()
         val resRead = dg1.read()
         val resParse = dg1.parse()
 
@@ -73,7 +73,7 @@ class DG1Test {
             .thenReturn(byteArrayOf(0x61, 0x4B, 0x5F, 0x1F, 0x48) + mrzExample.toByteArray() + byteArrayOf(0x90.toByte(), 0x00)
             )
 
-        val dg1 = DG1(mockAPDUControl)
+        val dg1 = DG1()
         val resRead = dg1.read()
         val resParse = dg1.parse()
 

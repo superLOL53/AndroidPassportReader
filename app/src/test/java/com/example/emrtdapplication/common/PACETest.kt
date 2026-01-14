@@ -82,7 +82,7 @@ class PACETest {
             .thenReturn(AsymmetricCipherKeyPair(DHPublicKeyParameters(BigInteger("23FB3749EA030D2A25B278D2A562047ADE3F01B74F17A15402CB7352CA7D2B3EB71C343DB13D1DEBCE9A3666DBCFC920B49174A602CB47965CAA73DC702489A44D41DB914DE9613DC5E98C94160551C0DF86274B9359BC0490D01B03AD54022DCB4F57FAD6322497D7A1E28D46710F461AFE710FBBBC5F8BA166F4311975EC6C", 16), DHStandardGroups.rfc5114_1024_160), DHPrivateKeyParameters(BigInteger("5265030F751F4AD18B08AC565FC7AC952E41618D", 16), DHStandardGroups.rfc5114_1024_160)))
             .thenReturn(AsymmetricCipherKeyPair(DHPublicKeyParameters(BigInteger("00907D89E2D425A178AA81AF4A7774EC8E388C115CAE67031E85EECE520BD911551B9AE4D04369F29A02626C86FBC6747CC7BC352645B6161A2A42D44EDA80A08FA8D61B76D3A154AD8A5A51786B0BC07147057871A922212C5F67F43173172236B7747D1671E6D692A3C7D40A0C3C5CE397545D015C175EB5130551EDBC2EE5D4", 16) , DHParameters(dh.p, g, dh.q)), DHPrivateKeyParameters(BigInteger("0089CCD99B0E8D3B1F11E1296DCA68EC53411CF2CA", 16), DHParameters(dh.p, g, dh.q))))
 
-        val pace = PACE(mockAPDUControl, mockCrypto)
+        val pace = PACE()
         pace.init("T22000129364081251010318", false, byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x01, 0x02), 0x00)
         val result = pace.paceProtocol()
 
@@ -208,7 +208,7 @@ class PACETest {
                     ECDomainParameters(params.curve, g, params.n, params.h)
             )))
 
-        val pace = PACE(mockAPDUControl, mockCrypto)
+        val pace = PACE()
         pace.init("T22000129364081251010318", false, byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x02, 0x02), 0x0D)
         val result = pace.paceProtocol()
 
@@ -312,7 +312,7 @@ class PACETest {
                     params
                 )))
 
-        val pace = PACE(mockAPDUControl, mockCrypto, null)
+        val pace = PACE()
         pace.init("T22000129364081251010318", false, byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x03, 0x02), 0x00)
         val result = pace.paceProtocol()
 
@@ -392,7 +392,7 @@ class PACETest {
                     domainParameters
                 )))
 
-        val pace = PACE(mockAPDUControl, mockCrypto, null)
+        val pace = PACE()
         pace.init("T22000129364081251010318", false, byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x04, 0x02), 0x0D)
         val result = pace.paceProtocol()
 
@@ -499,7 +499,7 @@ class PACETest {
                 )
             )
 
-        val pace = PACE(mockAPDUControl, mockCrypto)
+        val pace = PACE()
         pace.init("C11T002JM496081222310314", false, byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x06, 0x02), 0x0D)
         val result = pace.paceProtocol()
 

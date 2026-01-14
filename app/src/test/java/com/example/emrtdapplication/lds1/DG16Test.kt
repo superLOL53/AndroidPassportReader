@@ -38,7 +38,7 @@ class DG16Test {
             .thenReturn(byteArrayOf(0x90.toByte(), 0x00))
             .thenReturn(dg16Content.slice(0..5).toByteArray() + byteArrayOf(0x90.toByte(), 0x00))
             .thenReturn(dg16Content + byteArrayOf(0x90.toByte(), 0x00))
-        val dg16 = DG16(mockAPDUControl)
+        val dg16 = DG16()
         val resRead = dg16.read()
         val resParse = dg16.parse()
 

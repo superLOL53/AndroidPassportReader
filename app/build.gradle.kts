@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
-val mockitoAgent = configurations.create("mockitoAgent")
 
 android {
     namespace = "com.example.emrtdapplication"
@@ -80,5 +79,7 @@ dependencies {
     debugImplementation(libs.ui.test.manifest)
     testImplementation(kotlin("test"))
     testImplementation(kotlin("reflect"))
+    testCompileOnly(libs.mockito.core)
     testCompileOnly(libs.mockito.inline)
+    androidTestCompileOnly(libs.mockito.android)
 }
