@@ -11,13 +11,9 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.junit.MockitoJUnitRunner
 import java.math.BigInteger
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
-@RunWith(MockitoJUnitRunner::class)
 class BACTest {
 
     private val list = ArrayList<ByteArray>()
@@ -26,17 +22,6 @@ class BACTest {
     private val macKey = slot<ByteArray>()
     private val sequenceCounter = slot<ByteArray>()
 
-    @BeforeTest
-    fun setUp() {
-        //whenever(checkResponse(anyOrNull())).thenCallRealMethod()
-        //whenever(checkResponse(anyOrNull())).thenCallRealMethod()
-        //whenever(removeRespondCodes(any())).thenCallRealMethod()
-        //whenever(setEncryptionKeyBAC(any())).thenCallRealMethod()
-        //whenever(setEncryptionKeyMAC(any())).thenCallRealMethod()
-        //whenever(setSequenceCounter(any())).thenCallRealMethod()
-    }
-
-    @OptIn(ExperimentalStdlibApi::class)
     @Test
     fun bacTest() {
         list.add(BigInteger("4608F919887022129000", 16).toByteArray())

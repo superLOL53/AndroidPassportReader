@@ -20,7 +20,7 @@ class APDUTest {
 
     @Test
     fun expectLengthTest() {
-        var l = intArrayOf(0, 1, LE_MAX-1, LE_MAX, LE_MAX+1, LE_EXT_MAX-1, LE_EXT_MAX, LE_EXT_MAX+1)
+        val l = intArrayOf(0, 1, LE_MAX-1, LE_MAX, LE_MAX+1, LE_EXT_MAX-1, LE_EXT_MAX, LE_EXT_MAX+1)
         var apdu : APDU
         for (i in l.indices) {
             val test = l[i].toByte()
@@ -42,7 +42,7 @@ class APDUTest {
 
     @Test
     fun contentLengthTest() {
-        var l = intArrayOf(0, 1, LC_MAX-1, LC_MAX, LC_MAX+1, LC_EXT_MAX-1, LC_EXT_MAX, LC_EXT_MAX+1)
+        val l = intArrayOf(0, 1, LC_MAX-1, LC_MAX, LC_MAX+1, LC_EXT_MAX-1, LC_EXT_MAX, LC_EXT_MAX+1)
         var apdu : APDU
         for (i in l.indices) {
             val test = l[i].toByte()
@@ -68,8 +68,8 @@ class APDUTest {
 
     @Test
     fun fullAPDUTest() {
-        var lc = intArrayOf(0, 1, LC_MAX-1, LC_MAX, LC_MAX+1, LC_EXT_MAX-1, LC_EXT_MAX, LC_EXT_MAX+1)
-        var le = intArrayOf(0, 1, LE_MAX-1, LE_MAX, LE_MAX+1, LE_EXT_MAX-1, LE_EXT_MAX, LE_EXT_MAX+1)
+        val lc = intArrayOf(0, 1, LC_MAX-1, LC_MAX, LC_MAX+1, LC_EXT_MAX-1, LC_EXT_MAX, LC_EXT_MAX+1)
+        val le = intArrayOf(0, 1, LE_MAX-1, LE_MAX, LE_MAX+1, LE_EXT_MAX-1, LE_EXT_MAX, LE_EXT_MAX+1)
         var apdu : ByteArray
         var actualLc : ByteArray
         var actualLe : ByteArray

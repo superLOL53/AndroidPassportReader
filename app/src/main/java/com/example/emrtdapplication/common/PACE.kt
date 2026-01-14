@@ -388,6 +388,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
             APDUControl.sendEncryptedAPDU = true
             APDUControl.setEncryptionKeyBAC(encKey!!)
             APDUControl.setEncryptionKeyMAC(macKey!!)
+            APDUControl.setSequenceCounter(ByteArray(16))
             return SUCCESS
         } else {
             return FAILURE

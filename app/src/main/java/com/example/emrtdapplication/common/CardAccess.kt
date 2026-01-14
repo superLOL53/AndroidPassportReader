@@ -61,7 +61,7 @@ class CardAccess() {
      * @return [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ]
      * @throws IllegalArgumentException If [b] does not contain [PACEInfo] or [PACEDomainParameterInfo]
      */
-    private fun parse(b : ByteArray) : Int {
+    fun parse(b : ByteArray) : Int {
         val tlv = TLV(b)
         if (tlv.list == null || !tlv.isConstruct()) {
             return FILE_UNABLE_TO_READ

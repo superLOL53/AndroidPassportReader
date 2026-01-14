@@ -3,47 +3,49 @@ package com.example.emrtdapplication.lds1
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.SUCCESS
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.verify
 import org.junit.Assert.assertArrayEquals
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DG1Test {
 
-    private val mockAPDUControl : APDUControl = mock()
+    private var sentAPDUs = mutableListOf<APDU>()
+    private var responseAPDUs = ArrayList<ByteArray>()
 
     @BeforeTest
     fun setUp() {
-        whenever(mockAPDUControl.checkResponse(any())).thenCallRealMethod()
-        whenever(mockAPDUControl.removeRespondCodes(any())).thenCallRealMethod()
+        mockkObject(APDUControl)
+        APDUControl.maxResponseLength = 256
+        APDUControl.maxCommandLength = 256
+        sentAPDUs = mutableListOf()
+        responseAPDUs = ArrayList()
     }
 
     @Test
     fun testTD1Documents() {
         val mrzExample = "I<NLDXI85935F86999999990<<<<<<7208148F1108268NLD<<<<<<<<<<<4VAN<DER<STEEN<<MARIANNE<LOUISE"
-        whenever(mockAPDUControl.sendAPDU(any()))
-            .thenReturn(byteArrayOf(0x90.toByte(), 0x00))
-            .thenReturn(byteArrayOf(0x61, 0x5D, 0x5F, 0x1F, 0x5A, 'I'.code.toByte(), 0x90.toByte(), 0x00))
-            .thenReturn(byteArrayOf(0x61, 0x5D, 0x5F, 0x1F, 0x5A) + mrzExample.toByteArray() + byteArrayOf(0x90.toByte(), 0x00)
-            )
+        responseAPDUs.add(byteArrayOf(0x90.toByte(), 0x00))
+        responseAPDUs.add(byteArrayOf(0x61, 0x5D, 0x5F, 0x1F, 0x5A, 'I'.code.toByte(), 0x90.toByte(), 0x00))
+        responseAPDUs.add(byteArrayOf(0x61, 0x5D, 0x5F, 0x1F, 0x5A) + mrzExample.toByteArray() + byteArrayOf(0x90.toByte(), 0x00))
+        every {
+            APDUControl.sendAPDU(capture(sentAPDUs))
+        } returnsMany responseAPDUs
 
         val dg1 = DG1()
         val resRead = dg1.read()
         val resParse = dg1.parse()
 
-        val apduCapture = argumentCaptor<APDU>()
-        verify(mockAPDUControl, times(3)).sendAPDU(apduCapture.capture())
-        val apdu = apduCapture.allValues
+        verify(exactly = 3) {
+            APDUControl.sendAPDU(any())
+        }
 
-        assertArrayEquals(byteArrayOf(0x00, 0xA4.toByte(), 0x02, 0x0C, 0x02, 0x01, 0x01), apdu[0].getByteArray())
-        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x06), apdu[1].getByteArray())
-        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x5F), apdu[2].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00, 0xA4.toByte(), 0x02, 0x0C, 0x02, 0x01, 0x01), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x06), sentAPDUs[1].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x5F), sentAPDUs[2].getByteArray())
 
         assert("I" == dg1.documentCode)
         assert("NLD" == dg1.issuerCode)
@@ -67,23 +69,24 @@ class DG1Test {
     @Test
     fun testTD2Documents() {
         val mrzExample = "I<ATASMITH<<JOHN<T<<<<<<<<<<<<<<<<<<123456789<HMD7406222M10123130121<<<<<<<<<<<54"
-        whenever(mockAPDUControl.sendAPDU(any()))
-            .thenReturn(byteArrayOf(0x90.toByte(), 0x00))
-            .thenReturn(byteArrayOf(0x61, 0x4B, 0x5F, 0x1F, 0x48, 'I'.code.toByte(), 0x90.toByte(), 0x00))
-            .thenReturn(byteArrayOf(0x61, 0x4B, 0x5F, 0x1F, 0x48) + mrzExample.toByteArray() + byteArrayOf(0x90.toByte(), 0x00)
-            )
+        responseAPDUs.add(byteArrayOf(0x90.toByte(), 0x00))
+        responseAPDUs.add(byteArrayOf(0x61, 0x4B, 0x5F, 0x1F, 0x48, 'I'.code.toByte(), 0x90.toByte(), 0x00))
+        responseAPDUs.add(byteArrayOf(0x61, 0x4B, 0x5F, 0x1F, 0x48) + mrzExample.toByteArray() + byteArrayOf(0x90.toByte(), 0x00))
+        every {
+            APDUControl.sendAPDU(capture(sentAPDUs))
+        } returnsMany responseAPDUs
 
         val dg1 = DG1()
         val resRead = dg1.read()
         val resParse = dg1.parse()
 
-        val apduCapture = argumentCaptor<APDU>()
-        verify(mockAPDUControl, times(3)).sendAPDU(apduCapture.capture())
-        val apdu = apduCapture.allValues
+        verify(exactly = 3) {
+            APDUControl.sendAPDU(any())
+        }
 
-        assertArrayEquals(byteArrayOf(0x00, 0xA4.toByte(), 0x02, 0x0C, 0x02, 0x01, 0x01), apdu[0].getByteArray())
-        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x06), apdu[1].getByteArray())
-        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x4D), apdu[2].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00, 0xA4.toByte(), 0x02, 0x0C, 0x02, 0x01, 0x01), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x06), sentAPDUs[1].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00, 0xB0.toByte(), 0x00, 0x00, 0x4D), sentAPDUs[2].getByteArray())
 
         assert("I" == dg1.documentCode)
         assert("ATA" == dg1.issuerCode)

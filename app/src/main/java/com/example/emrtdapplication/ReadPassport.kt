@@ -38,9 +38,14 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         Security.addProvider(prov)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         val b = Bundle()
-        b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 10000)
+        b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 60000)
         nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
-                NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, b)
+                NfcAdapter.FLAG_READER_NFC_B or
+                NfcAdapter.FLAG_READER_NFC_F or
+                NfcAdapter.FLAG_READER_NFC_V or
+                NfcAdapter.FLAG_READER_NFC_BARCODE or
+                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
+                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, b)
         if (!nfcAdapter.isEnabled) {
             findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
         } else {
@@ -64,12 +69,14 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
         }
         val options = Bundle()
+        options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 60000)
         nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
                 NfcAdapter.FLAG_READER_NFC_B or
                 NfcAdapter.FLAG_READER_NFC_F or
                 NfcAdapter.FLAG_READER_NFC_V or
                 NfcAdapter.FLAG_READER_NFC_BARCODE or
-                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS, options)
+                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
+                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, options)
     }
 
     override fun onPause() {
@@ -101,15 +108,54 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     /**
      * Reading eMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
      */
+    @OptIn(ExperimentalStdlibApi::class)
     fun readeMRTD(tag: Tag) {
-
         /*val nfc = IsoDep.get(tag)
         val service = PassportService(CardService.getInstance(nfc), 1000, 1000, false, true)
 
 
         service.open()
+        var info = service.transmit(CommandAPDU(APDU(
+            NfcClassByte.ZERO,
+            NfcInsByte.SELECT,
+            NfcP1Byte.SELECT_EF,
+            NfcP2Byte.SELECT_FILE, byteArrayOf(0x01, 0x1C)).getByteArray()))
+        info = service.transmit(CommandAPDU(APDU(
+            NfcClassByte.ZERO,
+            NfcInsByte.READ_BINARY,
+            NfcP1Byte.ZERO,
+            NfcP2Byte.ZERO, 256
+        ).getByteArray()))
+        val ca = CardAccess()
+        ca.parse(info.data)
+        val oid = ca.paceInfos[0].objectIdentifier
+        val paramId = BigInteger(ca.paceInfos[0].parameterId!!.toHexString(), 16)
+        val paramsName = when (ca.paceInfos[0].parameterId) {
+            NIST_P192 -> "P-192"
+            NIST_P224 -> "P-224"
+            NIST_P256 -> "P-256"
+            NIST_P384 -> "P-384"
+            NIST_P521 -> "P-521"
+            BRAIN_POOL_P192R1 -> "brainpoolp192r1"
+            BRAIN_POOL_P224R1 -> "brainpoolp224r1"
+            BRAIN_POOL_P256R1 -> "brainpoolp256r1"
+            BRAIN_POOL_P320R1 -> "brainpoolp320r1"
+            BRAIN_POOL_P384R1 -> "brainpoolp384r1"
+            BRAIN_POOL_P512R1 -> "brainpoolp512r1"
+            else -> null
+        }
+        try {
+            val inst = AlgorithmParameters.getInstance("EC")
+            inst.init(ECGenParameterSpec("secp256r1"))
+            val keySpec = PACEKeySpec.createMRZKey(BACKey("U1194584", "000707", "260801"))
+            val params = inst.getParameterSpec(ECParameterSpec::class.java)
+            val res = service.doPACE(keySpec, oid, params, paramId)
+            println()
+        } catch (e : Exception) {
+            println(e)
+        }*/
 
-        service.sendSelectApplet(false)
+        /*service.sendSelectApplet(false)
         val bacKey = BACKey("U1194584", "000707", "260801")
 
         service.doBAC(bacKey)
@@ -130,12 +176,13 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         service.addAPDUListener(apdus)
         val res = service.doEACCA(chipInfo.keyId, chipInfo.objectIdentifier, publicKey.objectIdentifier , publicKey.subjectPublicKey)
         println(res)*/
+
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
-        //EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
-        //EMRTD.pace.paceProtocol()
+        EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
+        EMRTD.pace.paceProtocol()
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }

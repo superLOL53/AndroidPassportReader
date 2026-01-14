@@ -67,9 +67,9 @@ object Crypto {
     }
 
     fun integratedMappingPRNG(s: ByteArray, t: ByteArray, p: BigInteger, useLongConstants: Boolean = false) : BigInteger {
-        val c0128 = BigInteger(C_0_128, 16).toByteArray()
-        val c1128 = BigInteger(C_1_128, 16).toByteArray()
-        val c0256 = BigInteger(C_0_256, 16).toByteArray()
+        val c0128 = BigInteger(C_0_128, 16).toByteArray().slice(1..16).toByteArray()
+        val c1128 = BigInteger(C_1_128, 16).toByteArray().slice(1..16).toByteArray()
+        val c0256 = BigInteger(C_0_256, 16).toByteArray().slice(1..32).toByteArray()
         val c1256 = BigInteger(C_1_256, 16).toByteArray()
         val n = (p.bitLength() + MAPPING_CONSTANT)/(BYTE_TO_BITS*s.size)+1
         val cipher = Cipher.getInstance(AES_CBC_NO_PADDING)
@@ -90,7 +90,11 @@ object Crypto {
                 cipher.doFinal(c0128)
             }
         }
-        return BigInteger(1, x).mod(p)
+        return if (x[0] < 0) {
+            BigInteger(byteArrayOf(0) + x).mod(p)
+        } else {
+            BigInteger(x)
+        }
     }
 
     fun generateECKeyPair(parameters: ECDomainParameters) : AsymmetricCipherKeyPair {
