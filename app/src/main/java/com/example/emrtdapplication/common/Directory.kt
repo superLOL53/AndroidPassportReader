@@ -34,9 +34,12 @@ import com.example.emrtdapplication.utils.TLV
  * @property hasAdditionalBiometricsApplication Indicates if the eMRTD supports the Additional Biometric application
  */
 class Directory() {
-    private var hasTravelRecordsApplication = false
-    private var hasVisaRecordsApplication = false
-    private var hasAdditionalBiometricsApplication = false
+    var hasTravelRecordsApplication = false
+        private set
+    var hasVisaRecordsApplication = false
+        private set
+    var hasAdditionalBiometricsApplication = false
+        private set
 
     constructor(byteArray: ByteArray) : this() {
         parseData(byteArray)

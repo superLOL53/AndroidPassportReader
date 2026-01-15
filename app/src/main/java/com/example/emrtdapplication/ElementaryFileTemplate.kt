@@ -96,6 +96,7 @@ abstract class ElementaryFileTemplate() {
             var p1 : Byte
             var p2 : Byte
             var readBytes : Int
+            //TODO: Implement read for files larger than 32kB
             for (i in 0..le step APDUControl.maxResponseLength) {
                 p1 = (i/UBYTE_MODULO).toByte()
                 p2 = (i % UBYTE_MODULO).toByte()

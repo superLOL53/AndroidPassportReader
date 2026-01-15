@@ -21,6 +21,7 @@ import java.security.cert.X509Certificate
 class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     private lateinit var nfcAdapter : NfcAdapter
     private var mrz : String? = null
+    private var isPACESuccess = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -182,16 +183,39 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
         EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
-        EMRTD.pace.paceProtocol()
+        isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
+        if (isPACESuccess) {
+            EMRTD.cs.read()
+        }
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }
-        EMRTD.ldS1Application.performBACProtocol()
+
+        if (!isPACESuccess && EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
+            return
+        }
         EMRTD.ldS1Application.readFiles(this)
         changeProgressBar(getString(R.string.reading_cscas), 5)
         readCSCAs()
         EMRTD.ldS1Application.verify(this)
         changeProgressBar(getString(R.string.passport_verified), 5)
+        if (isPACESuccess) {
+            if (EMRTD.dir.hasVisaRecordsApplication) {
+                if (EMRTD.visaRecords.selectApplication() == SUCCESS) {
+                    EMRTD.visaRecords.readFiles(this)
+                }
+            }
+            if (EMRTD.dir.hasTravelRecordsApplication) {
+                if (EMRTD.travelRecords.selectApplication() == SUCCESS) {
+                    EMRTD.travelRecords.readFiles(this)
+                }
+            }
+            if (EMRTD.dir.hasAdditionalBiometricsApplication) {
+                if (EMRTD.additionalBiometrics.selectApplication() == SUCCESS) {
+                    EMRTD.additionalBiometrics.readFiles(this)
+                }
+            }
+        }
         EMRTD.closeNFC()
     }
 

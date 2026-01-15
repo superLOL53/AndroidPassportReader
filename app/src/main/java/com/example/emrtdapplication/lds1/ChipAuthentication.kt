@@ -109,9 +109,6 @@ class ChipAuthentication {
                         FAILURE
                     }
                     computeKeys(agreement!!.toByteArray())
-                    val dg1 = DG1()
-                    dg1.read()
-                    dg1.parse()
                     SUCCESS
                 } else {
                     FAILURE

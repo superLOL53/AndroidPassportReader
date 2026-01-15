@@ -11,6 +11,9 @@ import androidx.fragment.app.commit
 import com.example.emrtdapplication.fragments.LDS1Fragment
 import com.google.android.material.navigation.NavigationView
 
+/**
+ * TODO: Write docs
+ */
 class EMRTDView() : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var actionBarDrawerToggle : ActionBarDrawerToggle? = null
     private var drawerLayout : DrawerLayout? = null

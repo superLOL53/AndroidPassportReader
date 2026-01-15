@@ -27,4 +27,5 @@ object TlvTags {
     const val DO97_EXTENDED_LE_LENGTH : Byte = 0x02
     const val TAG_MULTIPLE_BYTES : Byte = 0x1F
     const val LENGTH_MULTIPLE_BYTES : Byte = 0x7F
+    const val CERTIFICATE_BODY : Byte = 0x4E
 }

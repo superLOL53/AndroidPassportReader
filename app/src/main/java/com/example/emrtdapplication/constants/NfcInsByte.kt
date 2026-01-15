@@ -10,4 +10,5 @@ object NfcInsByte {
     const val INTERNAL_AUTHENTICATE : Byte = 0x88.toByte()
     const val FILE_AND_MEMORY_MANAGEMENT : Byte = 0x5E
     const val READ_RECORD : Byte = 0xB2.toByte()
+    const val PERFORM_SECURITY_OPERATION : Byte = 0x2A
 }
