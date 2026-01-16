@@ -15,10 +15,21 @@ import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.TravelRecordsConstants.CERTIFICATE_RECORDS_ID_1
 import com.example.emrtdapplication.constants.TravelRecordsConstants.CERTIFICATE_RECORDS_ID_2
 
+/**
+ * Abstract class for LDS2 applications on the eMRTD
+ *
+ * @property certificateRecords The certificates stored in the LDS2 application
+ */
 abstract class LDS2Application() : LDSApplication() {
     var certificateRecords : Array<CertificateRecord>? = null
         protected set
 
+    /**
+     * Reads a single certificate record from the application
+     *
+     * @param recordNumber The record number of the record to read
+     * @return A [CertificateRecord] or null if the record could not be read or decoded
+     */
     protected fun readCertificateRecord(recordNumber: Byte) : CertificateRecord? {
         val sequence = readRecord(recordNumber)
         return try {
@@ -32,6 +43,9 @@ abstract class LDS2Application() : LDSApplication() {
         }
     }
 
+    /**
+     * Reads certificates stored in the application
+     */
     protected fun readCertificateRecords() {
         val numberOfEntryRecords = readNumberOfRecords(TLV(TlvTags.DO51, byteArrayOf(CERTIFICATE_RECORDS_ID_1, CERTIFICATE_RECORDS_ID_2)))
         if (numberOfEntryRecords == 0.toByte()) {
@@ -47,6 +61,11 @@ abstract class LDS2Application() : LDSApplication() {
         certificateRecords = newCertificateRecords.toTypedArray()
     }
 
+    /**
+     * Reads the number of records available in an EF
+     *
+     * @return The number of records stored in the EF
+     */
     protected fun readNumberOfRecords(tlv: TLV) : Byte {
         val info = APDUControl.sendAPDU(APDU(
             NfcClassByte.SECURE_MESSAGING,
@@ -68,6 +87,12 @@ abstract class LDS2Application() : LDSApplication() {
         return tlv.list!!.tlvSequence[0].value!![0]
     }
 
+    /**
+     * Reads a single record from the application
+     *
+     * @param recordNumber The record number of the record to read
+     * @return The record as a TLV sequence or null if the record could not be read
+     */
     protected fun readRecord(recordNumber: Byte) : TLVSequence? {
         val info = APDUControl.sendAPDU(APDU(
             NfcClassByte.SECURE_MESSAGING,

@@ -47,12 +47,31 @@ import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.and
 import kotlin.experimental.or
 
+/**
+ * Implements several cryptographic operations used throughout the application
+ */
 object Crypto {
 
+    /**
+     * Calculates the mapping value for the PACE protocol with integrated mapping for Diffie-Hellman
+     * @param r The pseudo random generated number
+     * @param p The exponent and modulo for the calculation
+     * @param q The exponent divider for the calculation
+     * @return The calculated mapping value
+     * @return The result of the mapping calculation
+     */
     fun integratedMappingDH(r: BigInteger, p: BigInteger, q: BigInteger) : BigInteger {
         return r.modPow(p.dec().divide(q), p)
     }
 
+    /**
+     * Calculates the mapping value for the PACE protocol with integrated mapping for Elliptic Curves
+     * @param t Pseudo-generated random number
+     * @param a Elliptic curve parameter a
+     * @param b Elliptic curve parameter b
+     * @param p The modulo for the calculation
+     * @return The result of the mapping calculation
+     */
     fun integratedMappingEC(t: BigInteger, a: BigInteger, b: BigInteger, p: BigInteger) : BigInteger {
         val alpha = t.pow(2).negate().mod(p)
         val x2 = b.multiply(a.modInverse(p)).negate().multiply(BigInteger.ONE.add(alpha.add(alpha.pow(2)).modInverse(p))).mod(p)
@@ -66,6 +85,15 @@ object Crypto {
         }
     }
 
+    /**
+     * Pseudo-random number mapping for PACE protocol with integrated mapping
+     * @param s First nonce for mapping
+     * @param t Second nonce for mapping
+     * @param p The modulo for the PRNG
+     * @param useLongConstants Tells if long constants are used. Long constants are used with AES-192
+     * or AES-256
+     * @return The result of the mapping calculation
+     */
     fun integratedMappingPRNG(s: ByteArray, t: ByteArray, p: BigInteger, useLongConstants: Boolean = false) : BigInteger {
         val c0128 = BigInteger(C_0_128, 16).toByteArray().slice(1..16).toByteArray()
         val c1128 = BigInteger(C_1_128, 16).toByteArray().slice(1..16).toByteArray()
@@ -97,25 +125,62 @@ object Crypto {
         }
     }
 
+    /**
+     * Generates an Elliptic Curve key pair with the specified parameters
+     *
+     * @param parameters The domain parameters for the EC key generation
+     * @return The generated EC key pair
+     */
     fun generateECKeyPair(parameters: ECDomainParameters) : AsymmetricCipherKeyPair {
         val generator = ECKeyPairGenerator()
         generator.init(ECKeyGenerationParameters(parameters, SecureRandom()))
         return generator.generateKeyPair()
     }
 
+    /**
+     * Generates a DH key pair with the specified parameters
+     *
+     * @param parameters The domain parameters for the DH key generation
+     * @return The generated DH key pair
+     */
     fun generateDHKeyPair(parameters: DHParameters) : AsymmetricCipherKeyPair {
         val generator = DHKeyPairGenerator()
         generator.init(DHKeyGenerationParameters(SecureRandom(), parameters))
         return generator.generateKeyPair()
     }
+
+    /**
+     * Calculates the generic mapping value for DH
+     *
+     * @param g The value to be mapped
+     * @param s The exponent for the calculation
+     * @param p The modulo for the calculation
+     * @param h The DH group element for the calculation
+     * @return The calculated mapping value
+     */
     fun genericMappingDH(g: BigInteger, s: ByteArray, p: BigInteger, h: BigInteger) : BigInteger {
         return g.modPow(BigInteger(1, s), p).multiply(h).mod(p)
     }
 
+    /**
+     * Calculates the generic mapping value for EC
+     *
+     * @param g The EC point to be mapped
+     * @param s The multiplication value for [g]
+     * @param h The EC point to be added
+     * @return The calculated and mapped EC Point
+     */
     fun genericMappingEC(g: ECPoint, s: ByteArray, h: ECPoint) : ECPoint {
         return g.multiply(BigInteger(1, s)).add(h)
     }
 
+    /**
+     * Converts a BigInteger to an EC point
+     *
+     * @param x The BigInteger to be converted
+     * @param parameters The EC parameters for the conversion
+     * @return The decoded EC point
+     */
     fun getECPointFromBigInteger(x : BigInteger, parameters: ECDomainParameters) : ECPoint {
         return if (x.toByteArray()[0] == 0.toByte()) {
             parameters.curve.decodePoint(byteArrayOf(EC_POINT_TAG_SINGLE_COORDINATE) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
@@ -124,18 +189,40 @@ object Crypto {
         }
     }
 
+    /**
+     * Calculates an EC key agreement
+     *
+     * @param privateKey The private key for the agreement protocol
+     * @param publicKey The public key for the agreement protocol
+     * @return The calculated agreement
+     */
     fun calculateECDHAgreement(privateKey: ECPrivateKeyParameters, publicKey: ECPublicKeyParameters) : BigInteger {
         val ka = ECDHBasicAgreement()
         ka.init(privateKey)
         return ka.calculateAgreement(publicKey)
     }
 
+    /**
+     * Calculates a DH key agreement
+     *
+     * @param privateKey The private key for the agreement protocol
+     * @param publicKey The public key for the agreement protocol
+     * @return The calculated agreement
+     */
     fun calculateDHAgreement(privateKey: DHPrivateKeyParameters, publicKey: DHPublicKeyParameters) : BigInteger {
         val ka = DHBasicAgreement()
         ka.init(privateKey)
         return ka.calculateAgreement(publicKey)
     }
 
+    /**
+     * Computes the CMAC for the given byte array
+     *
+     * @param m The byte array for which the CMAC is calculated
+     * @param key The key for the CMAC calculation
+     * @param size The size of the CMAC
+     * @return The calculated CMAC
+     */
     fun computeCMAC(m: ByteArray, key: ByteArray, size: Int = MAC_SIZE) : ByteArray {
         val cMac = CMac(AESEngine(), size*BYTE_TO_BITS)
         cMac.init(KeyParameter(key))
@@ -145,10 +232,28 @@ object Crypto {
         return out
     }
 
+    /**
+     * Checks the provided MAC against the computed one
+     *
+     * @param c The byte array for which the MAC is calculated and compared
+     * @param m The provided MAC of [c]
+     * @param key The key for the MAC calculation
+     * @param usePadding If padding is used in the MAC calculation
+     * @return True if [m] matches the calculated MAC, otherwise false
+     */
     fun checkMAC(c: ByteArray, m: ByteArray, key: ByteArray, usePadding: Boolean = true) : Boolean {
         return m.contentEquals(computeMAC(c, key, m.size, usePadding))
     }
 
+    /**
+     * Computes the MAC for the given byte array
+     *
+     * @param m The byte array for which the CMAC is calculated
+     * @param key The key for the MAC calculation
+     * @param size The size of the MAC
+     * @param usePadding If padding is used for the MAC calculation
+     * @return The calculated MAC
+     */
     fun computeMAC(m : ByteArray, key: ByteArray, size: Int = MAC_SIZE, usePadding : Boolean = true) : ByteArray {
         val mac = if (usePadding) {
             ISO9797Alg3Mac(DESEngine(), size*BYTE_TO_BITS, ISO7816d4Padding())
@@ -162,15 +267,33 @@ object Crypto {
         return out
     }
 
-    fun cipher3DES(toEncrypt: ByteArray, key: ByteArray, mode : Int = Cipher.ENCRYPT_MODE, iv : ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)) : ByteArray {
+    /**
+     * En-/decrypts the payload using 3DES
+     *
+     * @param data The byte array to en-/decrypt
+     * @param key The key for en-/decryption
+     * @param mode The mode for the cipher. Is either encryption or decryption mode
+     * @param iv The IV used for the cipher
+     * @return The en-/decrypted byte array
+     */
+    fun cipher3DES(data: ByteArray, key: ByteArray, mode : Int = Cipher.ENCRYPT_MODE, iv : ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)) : ByteArray {
         val k = SecretKeySpec(key, DES_EDE)
         val c = Cipher.getInstance(DES_EDE_CBC_NO_PADDING)
         val i = IvParameterSpec(iv)
         c.init(mode, k, i)
-        return c.doFinal(toEncrypt)
+        return c.doFinal(data)
     }
 
-    fun cipherAES(toEncrypt: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null) : ByteArray {
+    /**
+     * En-/decrypts the payload using AES
+     *
+     * @param data The byte array to en-/decrypt
+     * @param key The key for en-/decryption
+     * @param mode The mode for the cipher. Is either encryption or decryption mode
+     * @param iv The IV used for the cipher
+     * @return The en-/decrypted byte array
+     */
+    fun cipherAES(data: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null) : ByteArray {
         val k = SecretKeySpec(key, AES)
         val c = Cipher.getInstance(AES_CBC_NO_PADDING)
         val i = if (iv == null || iv.isEmpty()) {
@@ -179,9 +302,18 @@ object Crypto {
             IvParameterSpec(iv)
         }
         c.init(mode, k, i)
-        return c.doFinal(toEncrypt)
+        return c.doFinal(data)
     }
 
+    /**
+     * Generates a symmetric key for de-/encryption and/or MAC calculation
+     *
+     * @param hashName The name of the hash algorithm for generating the key
+     * @param seed The seed used for input appended by [c] for the hash algorithm
+     * @param c Additional input concatenated to [seed] for the hash algorithm
+     * @param is3DES Indicates if the key generated is a 3DES or AES key
+     * @return The generated symmetric key
+     */
     fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray {
         val key = hash(hashName, seed + byteArrayOf(0, 0, 0, c))
         if (is3DES) {
@@ -196,6 +328,14 @@ object Crypto {
         return key
     }
 
+    /**
+     * Generates an AES or 3DES key.
+     *
+     * @param seed The seed for the key generation
+     * @param cipherId The symmetric protocol id for which a key is generated.
+     * @param cValue Counter value for key generation
+     * @return The generated symmetric key
+     */
     fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray {
         return when (cipherId) {
             DES_CBC_CBC -> {
@@ -216,12 +356,26 @@ object Crypto {
         }
     }
 
+    /**
+     * Hashes the provided byte array with a hash algorithm
+     *
+     * @param hashName The name of the hash algorithm
+     * @param hashBytes The bytes to be hashed
+     * @return The output of the hash algorithm
+     */
     fun hash(hashName: String, hashBytes: ByteArray) : ByteArray {
         val md = MessageDigest.getInstance(hashName)
         md.update(hashBytes)
         return md.digest()
     }
 
+    /**
+     * Adds padding bytes to the provided byte array
+     *
+     * @param paddingBytes The byte array to be padded
+     * @param paddingSize The size of the padding
+     * @return The padded byte array
+     */
     fun addPadding(paddingBytes : ByteArray, paddingSize : Int) : ByteArray {
         val pad = paddingSize - paddingBytes.size % paddingSize
         if (pad == paddingSize) {
@@ -234,6 +388,12 @@ object Crypto {
         return padArray
     }
 
+    /**
+     * Removes padding from a byte array
+     *
+     * @param paddedBytes The byte array from which padding is removed
+     * @return The unpadded byte array
+     */
     fun removePadding(paddedBytes : ByteArray) : ByteArray {
         val last = paddedBytes.lastIndexOf(PAD_START_BYTE)
         return if (last == -1) {

@@ -48,7 +48,7 @@ object APDUControl {
     /**
      * Initialize communication with the eMRTD
      * @param tag: The NFC tag to connect to
-     * @return Initialize success(0), no NFC tag(-1) or no ISO DEP support(-2)
+     * @return [INIT_SUCCESS], [ERROR_NO_NFC_TAG] or [ERROR_NO_ISO_DEP_SUPPORT]
      */
     fun init(tag: Tag?) : Int {
         if (tag == null) {
@@ -119,8 +119,8 @@ object APDUControl {
     }
 
     /**
-     * Connecting to the eMRTD
-     * @return Connect success(1), unable to connect(-3) or iso dep not selected(-4)
+     * Connects to the eMRTD
+     * @return [CONNECT_SUCCESS], [ERROR_UNABLE_TO_CONNECT] or [ERROR_ISO_DEP_NOT_SELECTED]
      */
     fun connectToNFC() : Int{
         try {
@@ -140,7 +140,7 @@ object APDUControl {
 
     /**
      * Closes the NFC Connection from the eMRTD
-     * @return Success (2) or unable to close (-5)
+     * @return [CLOSE_SUCCESS] or [ERROR_UNABLE_TO_CLOSE]
      */
     fun closeNFC() : Int {
         try {
@@ -188,6 +188,12 @@ object APDUControl {
         }
     }
 
+    /**
+     * Sends an encrypted APDU to the eMRTD
+     *
+     * @param apdu The APDU to encrypt and send to the eMRTD
+     * @return The decrypted response APDU
+     */
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         if (isoDep == null) return ByteArray(0)
         inc()

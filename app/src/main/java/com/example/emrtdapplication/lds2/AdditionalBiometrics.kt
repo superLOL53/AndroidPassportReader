@@ -18,16 +18,29 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
+/**
+ * Class representing the Additional Biometrics application
+ *
+ * @property applicationIdentifier The identifier of the application
+ * @property biometricFiles A list containing [Biometric] files read from the eMRTD
+ */
 class AdditionalBiometrics() : LDS2Application() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     private var biometricFiles : Array<Biometric>? = null
 
-
+    /**
+     * Reads files stored in the application
+     *
+     * @param readActivity Activity for updating the read progress
+     */
     override fun readFiles(readActivity: ReadPassport) {
         readCertificateRecords()
         readBiometricFiles()
     }
 
+    /**
+     * Reads the biometric files stored on the application
+     */
     private fun readBiometricFiles() {
         val newBiometricFiles = ArrayList<Biometric>()
         for (i in 1..MAX_BIOMETRIC_FILES) {
@@ -42,6 +55,12 @@ class AdditionalBiometrics() : LDS2Application() {
         biometricFiles = newBiometricFiles.toTypedArray()
     }
 
+    /**
+     * Selects the file to be read from the eMRTD
+     *
+     * @param fileID The identifier of the file to read
+     * @return [SUCCESS] if file was selected, otherwise [FAILURE]
+     */
     private fun selectFile(fileID : Byte) : Int {
         val info = APDUControl.sendAPDU(
             APDU(
@@ -57,6 +76,11 @@ class AdditionalBiometrics() : LDS2Application() {
         }
     }
 
+    /**
+     * Reads a single biometric file from the application
+     *
+     * @return A [Biometric] or null if the file could not be read or decoded
+     */
     private fun readBiometricFile() : Biometric? {
         var info = APDUControl.sendAPDU(
         APDU(

@@ -17,7 +17,6 @@ object TlvTags {
     const val PRIVATE_KEY_REFERENCE : Byte = 0x84.toByte()
     const val DO01 : Byte = 0x01
     const val DO08 : Byte = 0x08
-    const val DO09 : Byte = 0x09
     const val DO51 : Byte = 0x51
     const val DO85 : Byte = 0x85.toByte()
     const val DO87 : Byte = 0x87.toByte()

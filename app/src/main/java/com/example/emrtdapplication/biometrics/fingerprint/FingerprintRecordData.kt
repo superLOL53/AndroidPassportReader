@@ -13,4 +13,5 @@ import java.io.ByteArrayInputStream
  */
 class FingerprintRecordData(biometricData: ByteArray) : BiometricData(BiometricType.FINGERPRINT) {
     val fingerprintData = FingerImageDataBlock(ByteArrayInputStream(biometricData))
+
 }

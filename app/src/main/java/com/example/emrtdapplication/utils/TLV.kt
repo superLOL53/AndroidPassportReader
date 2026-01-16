@@ -8,7 +8,7 @@ import com.example.emrtdapplication.constants.TlvTags.TAG_MULTIPLE_BYTES
 import kotlin.experimental.and
 import kotlin.experimental.or
 /**
- * Class representing a TLV structure
+ * Class representing a Tag-Length-Value (TLV) structure
  * @property tag The tag of the TLV structure
  * @property length The length of the TLV value
  * @property value The byte array containing the value if the TLV structure is not a construct
@@ -115,12 +115,17 @@ class TLV {
         }
     }
 
+    /**
+     * Determines if the TLV contains another TLV or just a value
+     * @return If the TLV structure is a construct
+     */
     fun isConstruct(): Boolean {
         return tag.isEmpty() || (tag[0] and TlvTags.CONSTRUCT_BIT) == TlvTags.CONSTRUCT_BIT
     }
 
     /**
      * Converts the TLV structure into a byte array
+     * @return TLV structure represented as a byte array
      */
     fun toByteArray(): ByteArray {
         val ba = tag+getLengthByteArray()
@@ -191,6 +196,7 @@ class TLV {
     /**
      * Converts the length of the value of the TLV into a
      * byte array containing the length according to TLV rules
+     * @return The length of the TLV structure as byte array
      */
     private fun getLengthByteArray(): ByteArray {
         if (!isValid) {

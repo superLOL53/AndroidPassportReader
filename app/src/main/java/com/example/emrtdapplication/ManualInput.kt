@@ -20,12 +20,8 @@ import com.example.emrtdapplication.constants.ManualInputConstants.UPPER_CASE_DI
  *
  * Passport number, birthday and expiration date
  *
- * OR
- *
- * CAN number
- *
- * One of these is needed to derive keys to establish secure messaging between the reader and the document.
- * Forwards the MRZ information or CAN to the next activity (eMRTD)
+ * This is needed to derive keys to establish secure messaging between the reader and the eMRTD.
+ * Forwards the MRZ information to [ReadPassport]
  *
  * @property passportNr The passport number
  * @property expirationDate The expiration date of the passport

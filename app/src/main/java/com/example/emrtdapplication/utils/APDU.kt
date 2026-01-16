@@ -78,14 +78,16 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * @param p1Byte: The P1 byte of the APDU
      * @param p2Byte: The P2 byte of the APDU
      * @param data: The byte array containing the data
-     * @param le: The expected length of the reply APDU
+     * @param le: The expected length of the response APDU
      */
     constructor(classByte: Byte, insByte: Byte, p1Byte: Byte, p2Byte: Byte, data : ByteArray, le : Int) : this(classByte, insByte, p1Byte, p2Byte, data) {
         calculateLe(le)
     }
 
     /**
+     * Determines the usage of the Le field in the APDU.
      *
+     * @param le The expected length of the response APDU
      */
     private fun calculateLe(le: Int) {
         if (le < LE_MIN || LE_EXT_MAX < le) {

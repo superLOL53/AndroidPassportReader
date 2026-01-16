@@ -17,19 +17,24 @@ import java.security.Security
 import java.security.cert.CertificateFactory
 import java.security.cert.X509Certificate
 
-
+/**
+ * Activity for reading from the eMRTD
+ *
+ * @property nfcAdapter Default local NFC adapter from the android phone
+ * @property mrz Encoded MRZ string from [ManualInput]
+ *
+ */
 class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     private lateinit var nfcAdapter : NfcAdapter
     private var mrz : String? = null
-    private var isPACESuccess = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.read_passport_view)
         if (savedInstanceState != null) {
-            val savedMRZ = savedInstanceState.getString("MRZ")
-            if (savedMRZ != null) {
-                EMRTD.mrz = savedMRZ
+            mrz = savedInstanceState.getString("MRZ")
+            if (mrz != null) {
+                EMRTD.mrz = mrz
             }
         } else {
             EMRTD.mrz = intent.getStringExtra("MRZ")
@@ -107,7 +112,10 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     }
 
     /**
-     * Reading eMRTD Parameters from all available files prior to application selection(EF.DIR, EF.ATR/INFO)
+     * Reading the whole eMRTD
+     *
+     * @param tag The discovered tag from the [nfcAdapter]
+     *
      */
     @OptIn(ExperimentalStdlibApi::class)
     fun readeMRTD(tag: Tag) {
@@ -183,7 +191,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
         EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
-        isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
+        val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
         if (isPACESuccess) {
             EMRTD.cs.read()
         }
@@ -223,6 +231,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      * Read the CSCAs from the issuing country/organization of the eMRTD
      */
     private fun readCSCAs() {
+        //TODO: Implement Master List read/search
         val directory = resources.assets.list("CSCA")
         val tmpCerts = ArrayList<X509Certificate>()
         if (directory != null && EMRTD.ldS1Application.dg1.issuerCode != null) {
@@ -247,6 +256,11 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.ldS1Application.certs = tmpCerts.toTypedArray()
     }
 
+    /**
+     * Changes the title and progress of the progress bar while reading from the eMRTD
+     * @param text The text to be displayed while reading
+     * @param increment Progress amount of the current reading operation
+     */
     fun changeProgressBar(text : String, increment : Int) {
         runOnUiThread {
             findViewById<TextView>(R.id.progressBarText).text = text

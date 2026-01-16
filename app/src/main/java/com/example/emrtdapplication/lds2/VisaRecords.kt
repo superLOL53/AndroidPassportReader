@@ -8,16 +8,31 @@ import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_I
 import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_2
 import java.math.BigInteger
 
+/**
+ * Class representing the Visa Records application
+ *
+ * @property applicationIdentifier The identifier of the application
+ * @property certificateRecords The certificates read from the application
+ * @property visaRecords List of [VisaRecord] read from the application
+ */
 class VisaRecords() : LDS2Application() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var visaRecords : Array<VisaRecord>? = null
         private set
 
+    /**
+     * Reads the files stored in the application
+     *
+     * @param readActivity Activity to update the read progress
+     */
     override fun readFiles(readActivity: ReadPassport) {
         readVisaRecords()
         readCertificateRecords()
     }
 
+    /**
+     * Reads visa records from the application
+     */
     private fun readVisaRecords() {
         val numberOfRecords = readNumberOfRecords(TLV(TlvTags.DO51, byteArrayOf(VISA_RECORD_ID_1, VISA_RECORD_ID_2)))
         if (numberOfRecords == 0.toByte()) {
@@ -33,6 +48,12 @@ class VisaRecords() : LDS2Application() {
         visaRecords = newVisaRecords.toTypedArray()
     }
 
+    /**
+     * Reads a single visa record from the application
+     *
+     * @param recordNumber The record number of the visa record to read
+     * @return A [VisaRecord] or null if the record could not be read or decoded
+     */
     private fun readVisaRecord(recordNumber: Byte) : VisaRecord? {
         val sequence = readRecord(recordNumber)
         return try {

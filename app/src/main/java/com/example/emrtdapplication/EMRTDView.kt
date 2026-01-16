@@ -12,7 +12,11 @@ import com.example.emrtdapplication.fragments.LDS1Fragment
 import com.google.android.material.navigation.NavigationView
 
 /**
- * TODO: Write docs
+ * Activity for navigating and displaying information read from the eMRTD
+ *
+ * @property actionBarDrawerToggle Listener for [drawerLayout]
+ * @property drawerLayout Layout for navigating between different LDS application
+ * @property lds1ViewLayout Layout for displaying LDS1 application content
  */
 class EMRTDView() : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var actionBarDrawerToggle : ActionBarDrawerToggle? = null

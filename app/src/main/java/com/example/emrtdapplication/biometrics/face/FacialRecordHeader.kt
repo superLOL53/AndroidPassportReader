@@ -17,6 +17,7 @@ class FacialRecordHeader(recordHeader: ByteArray) : BiometricHeader(BiometricTyp
     private val versionNumber : String
     private val recordLength : Int
     private val numberOfFaces : Int
+
     init {
         if (recordHeader.size != 14) {
             throw IllegalArgumentException("Facial Record Header must have size 14!")

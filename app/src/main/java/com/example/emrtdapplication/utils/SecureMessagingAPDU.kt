@@ -22,6 +22,16 @@ import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.or
 
+/**
+ * Class for en-/decrypting secure messaging APDUs
+ *
+ * @property sequenceCounter The sequence counter for the APDU en-/decryption
+ * @property encryptionKey The encryption key for the cipher
+ * @property encryptionKeyMAC The key for the MAC calculation
+ * @property isAES Whether or not to use AES cipher
+ * @property apduArray The decrypted APDU as byte array
+ * @property encryptedAPDUArray The encrypted APDU as byte array
+ */
 class SecureMessagingAPDU {
     private val sequenceCounter : ByteArray
     private val encryptionKey : ByteArray
@@ -30,6 +40,14 @@ class SecureMessagingAPDU {
     val apduArray : ByteArray
     val encryptedAPDUArray : ByteArray
 
+    /**
+     * Constructor for creating secure messaging APDUs from normal APDUs
+     * @param sequenceCounter The sequence counter for the encryption and MAC calculation
+     * @param encryptionKey The encryption key for the cipher
+     * @param encryptionKeyMAC The key for the MAC calculation
+     * @param isAES If AES is used as the cipher
+     * @param apdu The APDU to encrypt for secure messaging
+     */
     constructor(sequenceCounter : ByteArray, encryptionKey : ByteArray,
                 encryptionKeyMAC: ByteArray, isAES : Boolean,
                 apdu: APDU) {
@@ -41,6 +59,14 @@ class SecureMessagingAPDU {
         encryptedAPDUArray = encryptAPDU(apdu)
     }
 
+    /**
+     * Constructor for decrypting received APDUs
+     * @param sequenceCounter The sequence counter for decryption and MAC verification
+     * @param encryptionKey The key for decrypting the received APDU
+     * @param encryptionKeyMAC The key for verifying the MAC
+     * @param isAES If AES is used as the cipher
+     * @param rApdu The received APDU to be decrypted
+     */
     constructor(sequenceCounter : ByteArray, encryptionKey : ByteArray,
                 encryptionKeyMAC: ByteArray, isAES : Boolean,
                 rApdu: ByteArray) {
@@ -58,7 +84,6 @@ class SecureMessagingAPDU {
      * @param apdu: The APDU to be encrypted and sent to the eMRTD
      * @return The verified and decrypted APDU received from the eMRTD
      */
-    @OptIn(ExperimentalStdlibApi::class)
     private fun encryptAPDU(apdu: APDU) : ByteArray {
         val headerSM = headerSM(apdu)
         val dataSM = dataSM(apdu)
@@ -92,7 +117,6 @@ class SecureMessagingAPDU {
         if (apdu.useLeExt || apdu.useLcExt) {
             finalApdu += 0
         }
-        println(finalApdu.toHexString())
         return finalApdu
     }
 
@@ -179,9 +203,7 @@ class SecureMessagingAPDU {
      * @param rApdu: The received, encrypted APDU from the eMRTD
      * @return The decrypted APDU without padding
      */
-    @OptIn(ExperimentalStdlibApi::class)
     private fun extractAPDU(rApdu: ByteArray) : ByteArray {
-        println(rApdu.toHexString())
         if (rApdu.size > MIN_APDU_SIZE_FOR_MAC_VERIFICATION) {
             verifyMAC(rApdu)
         }
@@ -224,7 +246,7 @@ class SecureMessagingAPDU {
     }
 
     /**
-     * Encrypt a byte array
+     * Encrypts the incoming byte array
      * @param bytes: The byte array to be encrypted with BAC
      * @return The encrypted byte array
      */
@@ -237,9 +259,9 @@ class SecureMessagingAPDU {
     }
 
     /**
-     * Decrypts the
+     * Decrypts the incoming byte array
      * @param bytes The ByteArray to be decrypted with AES or 3DES
-     * @return The decrypted ByteArray
+     * @return The decrypted byte array
      */
     private fun decrypt(bytes: ByteArray) : ByteArray {
         return if (isAES) {
@@ -262,6 +284,10 @@ class SecureMessagingAPDU {
         }
     }
 
+    /**
+     * Computes the IV parameter for the AES de-/encryption for secure messaging APDUs
+     * @return IV parameter for de-/encrypting the APDUs
+     */
     private fun computeAESIV() : ByteArray {
         val k = SecretKeySpec(encryptionKey, AES)
         val c = Cipher.getInstance(AES_ECB_NO_PADDING)

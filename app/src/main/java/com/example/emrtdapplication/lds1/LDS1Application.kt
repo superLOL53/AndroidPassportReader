@@ -16,6 +16,31 @@ import java.math.BigInteger
 import java.security.cert.X509Certificate
 import kotlin.collections.iterator
 
+/**
+ * Class representing the LDS1 application on the eMRTD
+ *
+ * @property bac Used for performing the BAC protocol
+ * @property efCOM Represents the EF.COM file on the eMRTD
+ * @property efSod Represents the EF.SOD file on the eMRTD
+ * @property dg1 Represents the EF.DG1 file on the eMRTD
+ * @property dg2 Represents the EF.DG2 file on the eMRTD
+ * @property dg3 Represents the EF.DG3 file on the eMRTD
+ * @property dg4 Represents the EF.DG4 file on the eMRTD
+ * @property dg5 Represents the EF.DG5 file on the eMRTD
+ * @property dg6 Represents the EF.DG6 file on the eMRTD
+ * @property dg7 Represents the EF.DG7 file on the eMRTD
+ * @property dg8 Represents the EF.DG8 file on the eMRTD
+ * @property dg9 Represents the EF.DG9 file on the eMRTD
+ * @property dg10 Represents the EF.DG10 file on the eMRTD
+ * @property dg11 Represents the EF.DG11 file on the eMRTD
+ * @property dg12 Represents the EF.DG12 file on the eMRTD
+ * @property dg13 Represents the EF.DG13 file on the eMRTD
+ * @property dg14 Represents the EF.DG14 file on the eMRTD
+ * @property dg15 Represents the EF.DG15 file on the eMRTD
+ * @property dg16 Represents the EF.DG16 file on the eMRTD
+ * @property efMap Maps the file ids for dg files to the files
+ * @property certs Certificates used for passive authentication
+ */
 class LDS1Application() : LDSApplication() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var bac = BAC()
@@ -77,6 +102,11 @@ class LDS1Application() : LDSApplication() {
         private set
     var certs : Array<X509Certificate>? = null
 
+    /**
+     * Read files stored on the application
+     *
+     * @param readActivity Activity for updating the read progress
+     */
     override fun readFiles(readActivity : ReadPassport) {
         readActivity.changeProgressBar("Reading EF.COM file...", INCREMENT_PROGRESS_BAR)
         efCOM.read()
@@ -91,6 +121,11 @@ class LDS1Application() : LDSApplication() {
         }
     }
 
+    /**
+     * Initializes and performs the BAC protocol
+     *
+     * @return [SUCCESS] or [FAILURE] if the protocol failed
+     */
     fun performBACProtocol() : Int {
         if (bac.init(mrz) != SUCCESS) {
             return FAILURE
@@ -98,6 +133,12 @@ class LDS1Application() : LDSApplication() {
         return bac.bacProtocol()
     }
 
+    /**
+     * Verifies the authenticity of the eMRTD by performing passive authentication and
+     * active or chip authentication
+     *
+     * @param readActivity Activity for updating the read progress
+     */
     fun verify(readActivity: ReadPassport) {
         readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
         efSod.checkHashes(efMap)

@@ -26,7 +26,7 @@ import java.security.NoSuchAlgorithmException
 import java.security.Provider
 
 /**
- * Abstract class representing elementary files (EF)
+ * Abstract class representing elementary files (EFs)
  *
  * @property rawFileContent Content of the EF if it is present in the ePassport, otherwise null
  * @property shortEFIdentifier Short EF identifier for the EF
@@ -147,9 +147,13 @@ abstract class ElementaryFileTemplate() {
         if (rawFileContent == null) {
             return null
         }
-        val md = MessageDigest.getInstance(hashName)
-        md.update(rawFileContent!!)
-        return md.digest()
+        try {
+            val md = MessageDigest.getInstance(hashName)
+            md.update(rawFileContent!!)
+            return md.digest()
+        } catch (_ : Exception) {
+            return null
+        }
     }
 
     /**

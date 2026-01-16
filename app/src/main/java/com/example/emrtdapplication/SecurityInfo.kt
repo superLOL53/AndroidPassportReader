@@ -1,13 +1,5 @@
 package com.example.emrtdapplication
 
-import com.example.emrtdapplication.utils.TLV
-import org.spongycastle.asn1.ASN1ObjectIdentifier
-import com.example.emrtdapplication.common.PACEInfo
-import com.example.emrtdapplication.common.ActiveAuthenticationInfo
-import com.example.emrtdapplication.common.ChipAuthenticationInfo
-import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
-import com.example.emrtdapplication.common.PACEDomainParameterInfo
-import com.example.emrtdapplication.common.TerminalAuthenticationInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_OID
@@ -24,6 +16,8 @@ import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.UNKNOWN_TYPE
+import com.example.emrtdapplication.utils.TLV
+import org.spongycastle.asn1.ASN1ObjectIdentifier
 
 /**
  * Class representing the ASN1 Sequence SecurityInfo:
@@ -34,18 +28,13 @@ import com.example.emrtdapplication.constants.SecurityInfoConstants.UNKNOWN_TYPE
  *          optionalData ANY DEFINED BY protocol OPTIONAL
  *      }
  *
- * The following protocols are supported in this project:
+ * The following security infos are supported in this project:
  * - PACEInfo
  * - PACEDomainParameterInfo
  * - ActiveAuthenticationInfo
  * - ChipAuthenticationInfo
  * - ChipAuthenticationPublicKeyInfo
  * - TerminalAuthenticationInfo
- *
- * Subclasses:
- *
- * [PACEInfo], [PACEDomainParameterInfo], [ActiveAuthenticationInfo],
- * [ChipAuthenticationInfo], [ChipAuthenticationPublicKeyInfo], [TerminalAuthenticationInfo]
  *
  * @param tlv The [TLV] Structure representing an ASN1 SecurityInfo Sequence
  * @property objectIdentifier The Object Identifier of the protocol as a [String]
@@ -71,7 +60,12 @@ open class SecurityInfo(tlv: TLV) {
         if (!tlv.isValid || !tlv.isConstruct() || tlv.list == null || tlv.list!!.tlvSequence.size < 2 || 3 < tlv.list!!.tlvSequence.size) {
             throw IllegalArgumentException("Invalid Sequence for type SecurityInfo")
         }
-        objectIdentifier = ASN1ObjectIdentifier.getInstance(tlv.list!!.tlvSequence[0].toByteArray()).id
+        try {
+            objectIdentifier =
+                ASN1ObjectIdentifier.getInstance(tlv.list!!.tlvSequence[0].toByteArray()).id
+        } catch (_ : Exception) {
+            throw IllegalArgumentException("Unable to decode object identifier!")
+        }
         requiredData = tlv.list!!.tlvSequence[1]
         protocol = tlv.list!!.tlvSequence[0].value!!
         if (tlv.list!!.tlvSequence.size == 3) {

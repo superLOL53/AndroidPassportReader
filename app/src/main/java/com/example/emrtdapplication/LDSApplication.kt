@@ -9,9 +9,7 @@ import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
-import com.example.emrtdapplication.constants.SELECT_APPLICATION_SUCCESS
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.constants.UNABLE_TO_SELECT_APPLICATION
 
 /**
  * Represents a LDS application on an eMRTD
