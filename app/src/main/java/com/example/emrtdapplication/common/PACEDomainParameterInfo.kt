@@ -3,10 +3,11 @@ package com.example.emrtdapplication.common
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
-import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.x509.AlgorithmIdentifier
+import java.math.BigInteger
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence PACEDomainParameterInfo:
@@ -26,23 +27,33 @@ import org.spongycastle.asn1.x509.AlgorithmIdentifier
  * @property parameterId The ID of the cryptographic domain parameters
  * @property algorithmIdentifier ASN1 Algorithm Identifier
  */
-class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv) {
-    var parameterId : Int?
-        private set
-    var algorithmIdentifier : AlgorithmIdentifier
-        private set
+class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv, PACE_DOMAIN_PARAMETER_INFO_TYPE) {
+    val parameterId : BigInteger?
+    val algorithmIdentifier : AlgorithmIdentifier
 
     init {
-        algorithmIdentifier = AlgorithmIdentifier.getInstance(ASN1InputStream(requiredData.toByteArray()).readAllBytes())
-        parameterId = if (optionalData == null || optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
-            optionalData!!.value == null || optionalData!!.value!!.size != 1) {
+        try {
+            algorithmIdentifier = AlgorithmIdentifier.getInstance(requiredData.toByteArray())
+        } catch (_ : Exception) {
+            throw IllegalArgumentException("Required data does not contain an AlgorithmIdentifier!")
+        }
+        parameterId = if (optionalData == null || optionalData.tag.size != 1 || optionalData.tag[0] != TlvTags.INTEGER ||
+            optionalData.value == null) {
             null
         } else {
-            optionalData!!.value!![0].toInt()
+            BigInteger(optionalData.value!!)
         }
     }
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        //TODO("Not yet implemented")
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        super.createViews(context, parent)
+        var row = createRow(context, parent)
+        provideTextForRow(row, "Algorithm OID:", algorithmIdentifier.algorithm.id)
+        tableLayout!!.addView(row)
+        if (parameterId != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Parameter ID:", parameterId.toString(16))
+            tableLayout!!.addView(row)
+        }
     }
 }

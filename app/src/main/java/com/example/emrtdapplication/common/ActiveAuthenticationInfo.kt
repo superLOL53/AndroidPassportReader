@@ -26,7 +26,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
  * @property signatureAlgorithm OID representing the signature algorithm
  * @throws IllegalArgumentException If [tlv] does not contain an ActiveAuthenticationInfo sequence
  */
-class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
+class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, ACTIVE_AUTHENTICATION_TYPE) {
     var version : Int
         private set
     var signatureAlgorithm : String
@@ -40,15 +40,23 @@ class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
         } else {
             version = 1
         }
-        if (optionalData == null || !optionalData!!.isValid || optionalData!!.tag.size != 1 ||
-            optionalData!!.tag[0] != TlvTags.OID || optionalData!!.value == null) {
+        if (optionalData == null || !optionalData.isValid || optionalData.tag.size != 1 ||
+            optionalData.tag[0] != TlvTags.OID || optionalData.value == null) {
             throw IllegalArgumentException()
         } else {
-            signatureAlgorithm = ASN1ObjectIdentifier.getInstance(optionalData!!.toByteArray()).id
+            signatureAlgorithm = ASN1ObjectIdentifier.getInstance(optionalData.toByteArray()).id
         }
     }
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        //TODO: Implement
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        super.createViews(context, parent)
+        if (tableLayout != null) {
+            var row = createRow(context, parent)
+            provideTextForRow(row, "Version:", version.toString())
+            tableLayout!!.addView(row)
+            row = createRow(context, parent)
+            provideTextForRow(row, "Signature algorithm OID:", signatureAlgorithm)
+            tableLayout!!.addView(row)
+        }
     }
 }

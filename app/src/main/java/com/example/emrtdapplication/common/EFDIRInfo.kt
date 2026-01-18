@@ -3,6 +3,7 @@ package com.example.emrtdapplication.common
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_TYPE
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -22,10 +23,10 @@ import com.example.emrtdapplication.utils.TLV
  * @param tlv TLV structure containing an instance of a EF.DIR file
  * @property efDir The EF.DIR file
  */
-class EFDIRInfo(tlv: TLV) : SecurityInfo(tlv) {
+class EFDIRInfo(tlv: TLV) : SecurityInfo(tlv, EF_DIR_TYPE) {
     val efDir = Directory(tlv.toByteArray())
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        //TODO("Not yet implemented")
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        efDir.createView(context, parent)
     }
 }

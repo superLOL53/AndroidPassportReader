@@ -3,6 +3,7 @@ package com.example.emrtdapplication.common
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 import java.math.BigInteger
@@ -29,7 +30,7 @@ import java.math.BigInteger
  * @property keyId Id of the public key if multiple public keys for chip authentication are present
  * @throws IllegalArgumentException If [tlv] does not contain a ChipAuthenticationInfo
  */
-class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
+class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_TYPE) {
     var version : Int
         private set
     var keyId : BigInteger?
@@ -44,18 +45,28 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
             version = 1
         }
         keyId = if (optionalData != null) {
-            if (optionalData!!.tag.size != 1 || optionalData!!.tag[0] != TlvTags.INTEGER ||
-                optionalData!!.value == null) {
+            if (optionalData.tag.size != 1 || optionalData.tag[0] != TlvTags.INTEGER ||
+                optionalData.value == null) {
                 throw IllegalArgumentException()
             } else {
-                BigInteger(optionalData!!.value!!)
+                BigInteger(optionalData.value!!)
             }
         } else {
             null
         }
     }
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        //TODO("Not yet implemented")
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        super.createViews(context, parent)
+        if (tableLayout != null) {
+            var row = createRow(context, parent)
+            provideTextForRow(row, "Version:", version.toString())
+            tableLayout!!.addView(row)
+            if (keyId != null) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Key identifier:", keyId!!.toString(16))
+                tableLayout!!.addView(row)
+            }
+        }
     }
 }

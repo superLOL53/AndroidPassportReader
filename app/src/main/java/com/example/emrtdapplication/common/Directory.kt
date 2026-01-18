@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.common
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.DirectoryConstants.ADDITIONAL_BIOMETRICS_APPLICATION_ID
 import com.example.emrtdapplication.constants.DirectoryConstants.AID
 import com.example.emrtdapplication.constants.DirectoryConstants.AID_LENGTH
@@ -117,5 +119,10 @@ class Directory() {
             }
         }
         return SUCCESS
+    }
+
+    fun <T : LinearLayout> createView(context: Context, parent : T) {
+        //var row =
+        //TODO: Implement
     }
 }

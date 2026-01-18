@@ -34,7 +34,7 @@ abstract class LDS2Application() : LDSApplication() {
         val sequence = readRecord(recordNumber)
         return try {
             if (sequence != null) {
-                CertificateRecord(sequence)
+                CertificateRecord(sequence, recordNumber)
             } else {
                 null
             }

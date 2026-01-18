@@ -8,9 +8,7 @@ import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFI
 import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_TAG
 import com.example.emrtdapplication.constants.CertificateRecordConstants.MIN_CERTIFICATE_SERIAL_NUMBER_LENGTH
 import com.example.emrtdapplication.utils.TLVSequence
-import java.io.ByteArrayInputStream
-import java.security.cert.Certificate
-import java.security.cert.CertificateFactory
+import org.spongycastle.asn1.x509.Certificate
 
 /**
  * Represents a single certificate record. The format is as follows:
@@ -20,13 +18,13 @@ import java.security.cert.CertificateFactory
  *          '72'    'Len'   { X.509 Certificate }
  *
  * @param record A TLV sequence containing a certificate record
+ * @property recordNumber The record number of the certificate stored in the application.
  * @property countryCode Two-letter country code
  * @property serialNumber The serial number of the [certificate]
  * @property certificate A X.509 certificate
  * @throws IllegalArgumentException If the certificate could not be decoded or [record] contains an invalid format
  */
-//TODO: Replace Certificate with spongycastle certificate
-class CertificateRecord(record: TLVSequence) {
+class CertificateRecord(record: TLVSequence, val recordNumber: Byte) {
     val countryCode : String
     val serialNumber : ByteArray
     val certificate : Certificate
@@ -53,16 +51,14 @@ class CertificateRecord(record: TLVSequence) {
         var cert : Certificate? = null
         if (record.tlvSequence[1].value != null) {
             try {
-                cert = CertificateFactory.getInstance("X509").generateCertificate(
-                    ByteArrayInputStream(record.tlvSequence[1].value))
+                cert = Certificate.getInstance(record.tlvSequence[1].value)
             } catch (_ : Exception) {
 
             }
         }
         if (cert == null && record.tlvSequence[1].list != null) {
             try {
-                cert = CertificateFactory.getInstance("X509").generateCertificate(
-                    ByteArrayInputStream(record.tlvSequence[1].list!!.toByteArray()))
+                cert = Certificate.getInstance(record.tlvSequence[1].list!!.toByteArray())
             } catch (_ : Exception) {
 
             }
@@ -74,10 +70,6 @@ class CertificateRecord(record: TLVSequence) {
     }
 
     fun createView(context: Context, parent: LinearLayout) {
-        //TODO: Implement
-    }
-
-    fun verify() {
         //TODO: Implement
     }
 }

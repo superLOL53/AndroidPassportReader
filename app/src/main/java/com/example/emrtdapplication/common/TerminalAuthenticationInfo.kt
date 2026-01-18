@@ -3,6 +3,7 @@ package com.example.emrtdapplication.common
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 
@@ -18,22 +19,18 @@ import com.example.emrtdapplication.constants.TlvTags
  * @property version The protocol version. Must be one
  * @throws IllegalArgumentException If [tlv] does not contain an encoded instance of TerminalAuthenticationInfo
  */
-class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
-    var version : Int
-        private set
+class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, TERMINAL_AUTHENTICATION_TYPE) {
 
-    init {
-        version = if (!requiredData.isValid || requiredData.tag.size != 1 ||
-            requiredData.tag[0] != TlvTags.INTEGER || requiredData.value == null ||
-            requiredData.value!!.size != 1 || requiredData.value!![0].toInt() != 1) {
-            throw IllegalArgumentException()
-        } else {
-            1
-        }
+    val version : Int = if (!requiredData.isValid || requiredData.tag.size != 1 ||
+        requiredData.tag[0] != TlvTags.INTEGER || requiredData.value == null ||
+        requiredData.value!!.size != 1 || requiredData.value!![0].toInt() != 1) {
+        throw IllegalArgumentException()
+    } else {
+        1
     }
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        super.createView(context, parent)
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        super.createViews(context, parent)
         if (tableLayout != null) {
             val row = createRow(context, parent)
             provideTextForRow(row, "Version:", version.toString())

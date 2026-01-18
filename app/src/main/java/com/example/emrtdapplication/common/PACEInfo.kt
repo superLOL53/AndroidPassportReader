@@ -6,6 +6,7 @@ import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.INVALID_ARGUMENT
 import com.example.emrtdapplication.constants.PACEInfoConstants.UNDEFINED
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
@@ -45,7 +46,7 @@ import com.example.emrtdapplication.constants.TlvTags
  * @property parameterId The parameter identifier for the asymmetric protocol
  * @throws IllegalArgumentException If [tlv] does not contain an encoded instance of PACEInfo
  */
-class PACEInfo(tlv: TLV): SecurityInfo(tlv) {
+class PACEInfo(tlv: TLV): SecurityInfo(tlv, PACE_INFO_TYPE) {
     var asymmetricProtocol : Byte = UNDEFINED
         private set
     var symmetricProtocol : Byte = UNDEFINED
@@ -66,10 +67,10 @@ class PACEInfo(tlv: TLV): SecurityInfo(tlv) {
             version = 2
         }
         if (optionalData != null) {
-            if (optionalData!!.value == null || optionalData!!.value!!.size != 1) {
+            if (optionalData.value == null || optionalData.value!!.size != 1) {
                 throw IllegalArgumentException("Invalid parameter tag")
             }
-            parameterId = optionalData!!.value!![0]
+            parameterId = optionalData.value!![0]
             if (!(parameterId!! in 0..2 || parameterId!! in 8..18)) {
                 throw IllegalArgumentException("Invalid parameter identifier for PACE")
             }
@@ -78,8 +79,8 @@ class PACEInfo(tlv: TLV): SecurityInfo(tlv) {
         }
     }
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        super.createView(context, parent)
+    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+        super.createViews(context, parent)
         if (tableLayout != null) {
             var row = createRow(context, parent)
             provideTextForRow(row, "Asymmetric protocol:", decodeAsymmetricProtocol())
