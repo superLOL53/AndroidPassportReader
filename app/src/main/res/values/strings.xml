@@ -47,5 +47,9 @@
     <string name="open">Open</string>
     <string name="close">Close</string>
     <string name="lds1">LDS1</string>
+    <string name="entry_records">Entry Records</string>
+    <string name="exit_records">Exit Records</string>
+    <string name="certificates">Certificates</string>
+    <string name="application_is_not_implemented_on_the_emrtd">Application is not implemented on the eMRTD</string>
 
 </resources>

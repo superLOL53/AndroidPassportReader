@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds2
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.EntryExitRecordConstants.AUTHENTICITY_TOKEN_TAG
 import com.example.emrtdapplication.constants.EntryExitRecordConstants.CERTIFICATE_REFERENCE_TAG
 import com.example.emrtdapplication.constants.EntryExitRecordConstants.CONDITIONS_TAG
@@ -139,5 +141,13 @@ class EntryExitRecord(val record: TLVSequence) {
             throw IllegalArgumentException("Unspecified certificate reference in Entry/Exit Record!")
         }
         this.certificateReference = certificateReference[0]
+    }
+
+    fun createView(context: Context, parent: LinearLayout) {
+        //TODO: Implement
+    }
+
+    fun verify() {
+        //TODO: Implement
     }
 }

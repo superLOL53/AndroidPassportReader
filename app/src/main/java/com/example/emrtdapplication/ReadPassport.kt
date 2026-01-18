@@ -12,10 +12,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.utils.MasterList
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
-import java.security.cert.CertificateFactory
-import java.security.cert.X509Certificate
 
 /**
  * Activity for reading from the eMRTD
@@ -186,26 +185,27 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         val res = service.doEACCA(chipInfo.keyId, chipInfo.objectIdentifier, publicKey.objectIdentifier , publicKey.subjectPublicKey)
         println(res)*/
 
+        val isPACESuccess = false
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
-        EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
-        val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
+        //EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
+        /*val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
         if (isPACESuccess) {
             EMRTD.cs.read()
-        }
+        }*/
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }
 
-        if (!isPACESuccess && EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
+        if (/*!isPACESuccess &&*/ EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
             return
         }
         EMRTD.ldS1Application.readFiles(this)
         changeProgressBar(getString(R.string.reading_cscas), 5)
-        readCSCAs()
-        EMRTD.ldS1Application.verify(this)
+        //readCSCAs()
+        //EMRTD.ldS1Application.verify(this)
         changeProgressBar(getString(R.string.passport_verified), 5)
         if (isPACESuccess) {
             if (EMRTD.dir.hasVisaRecordsApplication) {
@@ -231,29 +231,15 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      * Read the CSCAs from the issuing country/organization of the eMRTD
      */
     private fun readCSCAs() {
-        //TODO: Implement Master List read/search
-        val directory = resources.assets.list("CSCA")
-        val tmpCerts = ArrayList<X509Certificate>()
-        if (directory != null && EMRTD.ldS1Application.dg1.issuerCode != null) {
-            var path : Array<String>? = null
-            try {
-                path = resources.assets.list("CSCA/${EMRTD.ldS1Application.dg1.issuerCode}")
-            } catch (_ : Exception) {
-
-            }
-            if (path != null) {
-                val ce = CertificateFactory.getInstance("X509")
-                for (cert in path) {
-                    try {
-                        val c = ce.generateCertificate(assets.open("CSCA/${EMRTD.ldS1Application.dg1.issuerCode}/$cert")) as X509Certificate
-                        tmpCerts.add(c)
-                    } catch (e : Exception) {
-                        println(e)
-                    }
-                }
+        val directory = resources.assets.list("MasterList")
+        if (directory != null) {
+            val filename = directory[0]
+            val readFile = resources.assets.open("MasterList/"+filename)
+            val masterList = MasterList(readFile.readAllBytes())
+            if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
+                EMRTD.ldS1Application.certs = masterList.certificateMap.get(EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)
             }
         }
-        EMRTD.ldS1Application.certs = tmpCerts.toTypedArray()
     }
 
     /**

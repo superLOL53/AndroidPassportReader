@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds2
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_SIZE
 import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_TAG_1
 import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_SERIAL_NUMBER_TAG
@@ -23,6 +25,7 @@ import java.security.cert.CertificateFactory
  * @property certificate A X.509 certificate
  * @throws IllegalArgumentException If the certificate could not be decoded or [record] contains an invalid format
  */
+//TODO: Replace Certificate with spongycastle certificate
 class CertificateRecord(record: TLVSequence) {
     val countryCode : String
     val serialNumber : ByteArray
@@ -68,5 +71,13 @@ class CertificateRecord(record: TLVSequence) {
             throw IllegalArgumentException("Unable to decode certificate!")
         }
         certificate = cert
+    }
+
+    fun createView(context: Context, parent: LinearLayout) {
+        //TODO: Implement
+    }
+
+    fun verify() {
+        //TODO: Implement
     }
 }

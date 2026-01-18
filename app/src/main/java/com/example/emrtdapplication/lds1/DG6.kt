@@ -23,6 +23,7 @@ class DG6() : ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {

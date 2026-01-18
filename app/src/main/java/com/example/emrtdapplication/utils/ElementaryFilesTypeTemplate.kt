@@ -5,7 +5,7 @@ import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
 
 //TODO: Write docs, better way to implement/name
-abstract class ElementaryFilesToBeDefined<T>() : ElementaryFileTemplate() {
+abstract class ElementaryFilesTypeTemplate<T>() : ElementaryFileTemplate() {
     var tlvS : Array<T>? = null
         protected set
 

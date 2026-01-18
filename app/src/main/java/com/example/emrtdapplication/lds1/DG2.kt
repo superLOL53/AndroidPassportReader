@@ -29,6 +29,7 @@ class DG2() : ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
@@ -47,6 +48,7 @@ class DG2() : ElementaryFileTemplate() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */

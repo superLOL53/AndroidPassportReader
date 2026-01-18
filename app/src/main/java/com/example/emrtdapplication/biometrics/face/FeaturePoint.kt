@@ -1,5 +1,9 @@
 package com.example.emrtdapplication.biometrics.face
 
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_SIZE
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_TYPE
+
 /**
  * Class representing a feature point on a facial image according to ISO/IEC 19794-5.
  * @param features Byte array containing a feature point
@@ -9,7 +13,6 @@ package com.example.emrtdapplication.biometrics.face
  * @property verticalPosition Vertical pixel position from the upper left pixel
  * @throws IllegalArgumentException If [features] does not contain an encoded Feature Point
  */
-//TODO: Refine class
 class FeaturePoint(features: ByteArray) {
     val type : Byte
     val point : Byte
@@ -17,12 +20,12 @@ class FeaturePoint(features: ByteArray) {
     val verticalPosition : Int
 
     init {
-        if (features.size != 8 || features[0] != 1.toByte()) {
-            throw IllegalArgumentException("Feature Point must be of size 8!")
+        if (features.size != FEATURE_POINT_SIZE || features[0] != FEATURE_POINT_TYPE) {
+            throw IllegalArgumentException("Feature Point must be of size ${FEATURE_POINT_SIZE}!")
         }
         type = features[0]
         point = features[1]
-        horizontalPosition = features[2]*256 + features[3]
-        verticalPosition = features[4]*256 + features[5]
+        horizontalPosition = features[2]*UBYTE_MODULO + features[3]
+        verticalPosition = features[4]*UBYTE_MODULO + features[5]
     }
 }

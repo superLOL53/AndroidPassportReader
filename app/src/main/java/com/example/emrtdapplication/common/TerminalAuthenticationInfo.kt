@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.common
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
@@ -27,6 +29,15 @@ class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv) {
             throw IllegalArgumentException()
         } else {
             1
+        }
+    }
+
+    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+        super.createView(context, parent)
+        if (tableLayout != null) {
+            val row = createRow(context, parent)
+            provideTextForRow(row, "Version:", version.toString())
+            tableLayout!!.addView(row)
         }
     }
 }

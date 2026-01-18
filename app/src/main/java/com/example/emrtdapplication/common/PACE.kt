@@ -70,7 +70,6 @@ import javax.crypto.Cipher
  * @property chipAuthenticationData The data for the chip authentication protocol. Only used with PACE-CAM.
  * @property chipPublicKey The public key for the chip authentication protocol. Only used with PACE-CAM.
  */
-//TODO: Documentation
 class PACE(private val random: SecureRandom? = SecureRandom()) {
     private var mrzInformation : String? = null
     private var useCAN = false
@@ -86,6 +85,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Initializes the PACE protocol with the MRZ information or CAN from the manual input.
+     *
      * @param mrz: The MRZ information from the manual input
      * @param can: The CAN from the manual input
      * @param paceOid: The supported Cryptographic PACE protocol
@@ -114,6 +114,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Implements the PACE protocol.
+     *
      * @return [SUCCESS] or error code indicating a failure
      */
     fun paceProtocol() : Int {
@@ -168,6 +169,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Implements the PACE EC GM protocol
+     *
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
@@ -189,6 +191,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Implements the PACE DH GM protocol
+     *
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
@@ -208,6 +211,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Implements the PACE EC IM protocol
+     *
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
@@ -220,7 +224,9 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
         } else {
             random.nextBytes(t)
         }
-        sendNonce(t)
+        if (!APDUControl.checkResponse(sendNonce(t))) {
+            return FAILURE
+        }
         val r = Crypto.integratedMappingPRNG(nonce, t, params.curve.field.characteristic, useLongConstants)
         val x = Crypto.integratedMappingEC(r, params.curve.a.toBigInteger(), params.curve.b.toBigInteger(), params.curve.field.characteristic)
         val g = Crypto.getECPointFromBigInteger(x, domainParams)
@@ -234,6 +240,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Implements the PACE DH IM protocol
+     *
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
@@ -245,7 +252,9 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
         } else {
             random.nextBytes(t)
         }
-        sendNonce(t)
+        if (!APDUControl.checkResponse(sendNonce(t))) {
+            return FAILURE
+        }
         val r = Crypto.integratedMappingPRNG(nonce, t, params.p, useLongConstants)
         val g = Crypto.integratedMappingDH(r, params.p, params.q)
         params = DHParameters(params.p, g, params.q)
@@ -259,6 +268,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Implements the PACE EC CAM protocol
+     *
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
@@ -280,6 +290,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Get the DH parameters associated with the [parameters] ID or null
+     *
      * @return [DHParameters] or null
      */
     private fun getDHParams() : DHParameters? {
@@ -292,6 +303,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
     }
     /**
      * Get the EC parameters associated with the [parameters] ID or null
+     *
      * @return [X9ECParameters] or null
      */
     private fun getECParams() : X9ECParameters? {
@@ -313,6 +325,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Compute the keys used for communicating with the eMRTD
+     *
      * @param secret The secret for computing the keys
      * @param seed The seed for computing the keys
      */
@@ -340,6 +353,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Generate and check the tokens for PACE with EC
+     *
      * @param publicKey The public key from the phone
      * @param chipPublicKey The public key from the eMRTD
      * @param isCAM Indicates if PACE with CAM is used
@@ -352,6 +366,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Generate and check the tokens for PACE with DH
+     *
      * @param publicKey The public key from the phone
      * @param chipPublicKey The public key from the eMRTD
      */
@@ -363,6 +378,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Checks the generated and exchanged tokens
+     *
      * @param token The token generated by the phone
      * @param chipToken The token generated by the eMRTD
      * @param isCAM Indicates if PACE with CAM is used
@@ -397,6 +413,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Computes the token for the byte array
+     *
      * @param byteArray The byte array for which the token is computed
      * @return The token as a ByteArray
      */
@@ -410,6 +427,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Generates input data for the token computation
+     *
      * @param publicKey The public key for the token computation
      * @return Input data for the token computation
      */
@@ -429,6 +447,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Generates input data for the token computation
+     *
      * @param publicKey The public key for the token computation
      * @return Input data for the token computation
      */
@@ -444,6 +463,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Exchange EC public keys with the eMRTD
+     *
      * @param publicKey The public key to send to the eMRTD
      * @return The EC public key of the eMRTD
      */
@@ -456,6 +476,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Exchange DH public keys with the eMRTD
+     *
      * @param publicKey The public key to send to the eMRTD
      * @return The DH public key of the eMRTD
      */
@@ -472,16 +493,19 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
 
     /**
      * Sends a nonce to the eMRTD
+     *
      * @param nonce The nonce to send to the eMRTD
+     * @return Response from the eMRTD
      */
-    private fun sendNonce(nonce: ByteArray) {
+    private fun sendNonce(nonce: ByteArray) : ByteArray {
         var data = TLV(TlvTags.MAPPING_DATA, nonce)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256))
+        return APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256))
     }
 
     /**
      * Decrypts a nonce received from the eMRTD
+     *
      * @param nonce The nonce to decrypt
      * @return The decrypted nonce or null
      */

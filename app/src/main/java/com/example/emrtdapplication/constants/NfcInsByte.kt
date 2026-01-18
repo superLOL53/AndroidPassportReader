@@ -11,4 +11,5 @@ object NfcInsByte {
     const val FILE_AND_MEMORY_MANAGEMENT : Byte = 0x5E
     const val READ_RECORD : Byte = 0xB2.toByte()
     const val PERFORM_SECURITY_OPERATION : Byte = 0x2A
+    const val READ_BINARY_LARGE_OFFSET : Byte = 0xB1.toByte()
 }

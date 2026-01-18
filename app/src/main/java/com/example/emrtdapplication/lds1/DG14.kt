@@ -23,7 +23,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
 
 
 /**
- * Implements the DG14 file and inherits from [ElementaryFileTemplate]
+ * Implements the DG14 file
  *
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG14
@@ -39,6 +39,7 @@ class DG14() : ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
@@ -87,6 +88,7 @@ class DG14() : ElementaryFileTemplate() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */

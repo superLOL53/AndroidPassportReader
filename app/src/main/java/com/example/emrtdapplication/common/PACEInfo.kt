@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.common
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.INVALID_ARGUMENT
 import com.example.emrtdapplication.constants.PACEInfoConstants.UNDEFINED
@@ -73,6 +75,46 @@ class PACEInfo(tlv: TLV): SecurityInfo(tlv) {
             }
         } else {
             parameterId = null
+        }
+    }
+
+    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+        super.createView(context, parent)
+        if (tableLayout != null) {
+            var row = createRow(context, parent)
+            provideTextForRow(row, "Asymmetric protocol:", decodeAsymmetricProtocol())
+            tableLayout!!.addView(row)
+            row = createRow(context, parent)
+            provideTextForRow(row, "Symmetric protocol:", decodeSymmetricProtocol())
+            tableLayout!!.addView(row)
+            row = createRow(context, parent)
+            provideTextForRow(row, "Version:", version.toString())
+            tableLayout!!.addView(row)
+            if (parameterId != null) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Parameter ID:", parameterId.toString())
+            }
+        }
+    }
+
+    private fun decodeAsymmetricProtocol() : String {
+        return when(asymmetricProtocol) {
+            1.toByte() -> "PACE-DH-GM"
+            2.toByte() -> "PACE-ECDH-GM"
+            3.toByte() -> "PACE-DH-IM"
+            4.toByte() -> "PACE-ECDH-IM"
+            6.toByte() -> "PACE-ECDH-CAM"
+            else -> "Unknown"
+        }
+    }
+
+    private fun decodeSymmetricProtocol() : String {
+        return when(symmetricProtocol) {
+            1.toByte() -> "3DES-CBC-CBC"
+            2.toByte() -> "AES-CBC-CMAC-128"
+            3.toByte() -> "AES-CBC-CMAC-192"
+            4.toByte() -> "AES-CBC-CMAC-256"
+            else -> "Unknown"
         }
     }
 

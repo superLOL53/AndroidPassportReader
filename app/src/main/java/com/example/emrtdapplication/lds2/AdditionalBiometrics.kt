@@ -26,7 +26,8 @@ import java.math.BigInteger
  */
 class AdditionalBiometrics() : LDS2Application() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
-    private var biometricFiles : Array<Biometric>? = null
+    var biometricFiles : Array<Biometric>? = null
+        private set
 
     /**
      * Reads files stored in the application

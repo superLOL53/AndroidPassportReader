@@ -36,6 +36,16 @@ import java.math.BigInteger
 /**
  * Implements the chip authentication protocol
  *
+ * @property publicKeyInfo Public key info for Chip Authentication protocol
+ * @property chipAuthenticationData Decrypted Chip Authentication Data retrieved during the last step of the PACE protocol
+ * @property chipAuthenticationInfo [ChipAuthenticationInfo] object containing information about the protocol itself
+ * @property isDH If the protocol is a DH key agreement protocol
+ * @property isEC If the protocol is a EC key agreement protocol
+ * @property keyParamsDH DH parameters for the protocol
+ * @property keyParamsECDH EC parameters for the protocol
+ * @property publicKeyDH eMRTD's static public key stored in [DG14]
+ * @property publicKeyECDH eMRTD's static public key stored in [DG14]
+ * @property is3DES If the protocol uses 3DES as the symmetric protocol, otherwise AES is used
  */
 class ChipAuthentication {
     private val publicKeyInfo: ChipAuthenticationPublicKeyInfo
@@ -49,12 +59,25 @@ class ChipAuthentication {
     private var publicKeyECDH : ECPublicKeyParameters? = null
     private var is3DES = false
 
+    /**
+     * Creates a ChipAuthentication object for authenticating the eMRTD's chip
+     *
+     * @param publicKeyInfo The eMRTD's static public key stored in [DG14]
+     * @param chipAuthenticationInfo Information about the protocol stored in [DG14]
+     */
     constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationInfo: ChipAuthenticationInfo) {
         this.publicKeyInfo = publicKeyInfo
         this.chipAuthenticationInfo = chipAuthenticationInfo
          chipAuthenticationData = null
     }
 
+    /**
+     * Creates a ChipAuthentication object for PACE with Chip Authentication Mapping
+     *
+     * @param publicKeyInfo Public key info for the Chip Authentication protocol
+     * @param chipAuthenticationData Decrypted Chip Authentication Data retrieved during the last step in the PACE protocol
+     * @param publicKey eMRTD's public key during the mapping phase of the PACE protocol
+     */
     constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationData : ByteArray, publicKey : ECPublicKeyParameters) {
         this.chipAuthenticationData = chipAuthenticationData
         publicKeyECDH = publicKey
@@ -63,6 +86,8 @@ class ChipAuthentication {
     }
     /**
      * Authenticate the chip
+     *
+     * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
      */
     fun authenticate() : Int {
         return if (chipAuthenticationData != null && publicKeyECDH != null) {
@@ -115,6 +140,12 @@ class ChipAuthentication {
                 }
     }
 
+    /**
+     * Authenticates the eMRTD's chip using 3DES chip authentication protocols
+     *
+     * @param publicKeyData Public key of the reader encoded as byte array
+     * @return [SUCCESS] if APDU exchange was successful, otherwise [FAILURE]
+     */
     private fun authenticate3DES(publicKeyData : ByteArray) : Int {
         val pubData = TLV(EPHEMERAL_PUBLIC_KEY, publicKeyData)
         val keyRef = if (publicKeyInfo.keyId == null) {
@@ -140,6 +171,12 @@ class ChipAuthentication {
         return SUCCESS
     }
 
+    /**
+     * Authenticates the eMRTD's chip using AES chip authentication protocols
+     *
+     * @param publicKeyData Public key of the reader encoded as byte array
+     * @return [SUCCESS] if APDU exchange was successful, otherwise [FAILURE]
+     */
     private fun authenticateAES(publicKeyData: ByteArray) : Int {
         val protocol = TLV(CRYPTOGRAPHIC_REFERENCE, chipAuthenticationInfo!!.protocol)
         val keyId = if (publicKeyInfo.keyId != null) {
@@ -177,6 +214,11 @@ class ChipAuthentication {
         return SUCCESS
     }
 
+    /**
+     * Authenticates the eMRTD's chip using an DH or ECDH key agreement from PACE-CAM
+     *
+     * @return [SUCCESS] or [FAILURE]
+     */
     private fun authenticatePACECAMMapping() : Int {
         val privateKey = ECPrivateKeyParameters(BigInteger(chipAuthenticationData!!), publicKeyECDH!!.parameters)
         val agreement = Crypto.calculateECDHAgreement(privateKey, publicKeyECDH!!)
@@ -187,6 +229,11 @@ class ChipAuthentication {
         }
     }
 
+    /**
+     * Generates key pair for the protocol
+     *
+     * @return Generated key pair
+     */
     private fun generateKeyPair() : AsymmetricCipherKeyPair? {
         return if (isDH && keyParamsDH != null) {
             Crypto.generateDHKeyPair(keyParamsDH!!)
@@ -197,6 +244,12 @@ class ChipAuthentication {
         }
     }
 
+    /**
+     * Encodes a public key as byte array
+     *
+     * @param keyPair Key pair from which the public key is encoded
+     * @return The public key as a byte array
+     */
     private fun getEncodedPublicKey(keyPair: AsymmetricCipherKeyPair) : ByteArray? {
         var publicKeyData : ByteArray? = null
         try {
@@ -213,6 +266,9 @@ class ChipAuthentication {
         return publicKeyData
     }
 
+    /**
+     * Sets the public key and key parameters for the protocol
+     */
     private fun setParameters() {
         try {
             val publicKey = PublicKeyFactory.createKey(publicKeyInfo.publicKeyInfo)
@@ -228,6 +284,11 @@ class ChipAuthentication {
         }
     }
 
+    /**
+     * Computes and sets the symmetric keys for restarting secure messaging
+     *
+     * @param agreement The computed agreement in the key agreement step in the protocol
+     */
     private fun computeKeys(agreement : ByteArray) {
         if (chipAuthenticationInfo == null) return
         val oid = chipAuthenticationInfo.objectIdentifier

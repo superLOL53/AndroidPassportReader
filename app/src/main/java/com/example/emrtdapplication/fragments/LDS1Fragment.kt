@@ -11,6 +11,11 @@ import androidx.fragment.app.Fragment
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 
+/**
+ * Fragment for displaying contents of the LDS1 application
+ *
+ * @property view View for displaying LDS1 application content in the fragment
+ */
 class LDS1Fragment() : Fragment(R.layout.lds1) {
     private var view : ScrollView? = null
 
@@ -24,6 +29,9 @@ class LDS1Fragment() : Fragment(R.layout.lds1) {
         }
     }
 
+    /**
+     * Creates views to display the contents of files in the LDS1 application
+     */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val lds1ViewLayout = view.findViewById<LinearLayout>(R.id.lds1layout)
         this.view = view.findViewById(R.id.lds1scroll)
@@ -191,87 +199,4 @@ class LDS1Fragment() : Fragment(R.layout.lds1) {
             }
         }
     }
-
-    /*fun createViews(view: View) {
-        lds1Binding = DataBindingUtil.setContentView(activity, R.layout.lds1)
-        lds1Binding.dg1 = EMRTD.dg1
-        lds1Binding.dg2 = EMRTD.dg2
-        lds1Binding.dg11 = EMRTD.dg11
-        lds1Binding.dg12 = EMRTD.dg12
-        try {
-            val dg1layout = view.findViewById<LinearLayout>(R.id.dg1layout)
-            lds1ViewLayout = dg1layout.parent as LinearLayout
-        } catch (_: Exception) {
-
-        }
-        for (ef in EMRTD.efMap) {
-            if (!ef.value.isPresent) {
-                try {
-                    when (ef.key) {
-                        0x01.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg1layout))
-                        0x02.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg2layout))
-                        0x03.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg3layout))
-                        0x04.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg4layout))
-                        0x05.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg5layout))
-                        0x06.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg6layout))
-                        0x07.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg7layout))
-                        0x08.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg8layout))
-                        0x09.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg9layout))
-                        0x0A.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg10layout))
-                        0x0B.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg11layout))
-                        0x0C.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg12layout))
-                        0x0D.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg13layout))
-                        0x0E.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg14layout))
-                        0x0F.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg15layout))
-                        0x10.toByte() -> lds1ViewLayout.removeView(view.findViewById<LinearLayout>(R.id.dg16layout))
-                    }
-                } catch (_: Exception) {
-                }
-            } else if (!ef.value.isRead) {
-                val unableReadView = TextView(context)
-                unableReadView.layoutParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                unableReadView.text = getString(R.string.unable_to_read_file_from_passport)
-                when (ef.key) {
-                    0x01.toByte() -> view.findViewById<LinearLayout>(R.id.dg1layout).addView(unableReadView)
-                    0x02.toByte() -> view.findViewById<LinearLayout>(R.id.dg2layout).addView(unableReadView)
-                    0x03.toByte() -> view.findViewById<LinearLayout>(R.id.dg3layout).addView(unableReadView)
-                    0x04.toByte() -> view.findViewById<LinearLayout>(R.id.dg4layout).addView(unableReadView)
-                    0x05.toByte() -> view.findViewById<LinearLayout>(R.id.dg5layout).addView(unableReadView)
-                    0x06.toByte() -> view.findViewById<LinearLayout>(R.id.dg6layout).addView(unableReadView)
-                    0x07.toByte() -> view.findViewById<LinearLayout>(R.id.dg7layout).addView(unableReadView)
-                    0x08.toByte() -> view.findViewById<LinearLayout>(R.id.dg8layout).addView(unableReadView)
-                    0x09.toByte() -> view.findViewById<LinearLayout>(R.id.dg9layout).addView(unableReadView)
-                    0x0A.toByte() -> view.findViewById<LinearLayout>(R.id.dg10layout).addView(unableReadView)
-                    0x0B.toByte() -> view.findViewById<LinearLayout>(R.id.dg11layout).addView(unableReadView)
-                    0x0C.toByte() -> view.findViewById<LinearLayout>(R.id.dg12layout).addView(unableReadView)
-                    0x0D.toByte() -> view.findViewById<LinearLayout>(R.id.dg13layout).addView(unableReadView)
-                    0x0E.toByte() -> view.findViewById<LinearLayout>(R.id.dg14layout).addView(unableReadView)
-                    0x0F.toByte() -> view.findViewById<LinearLayout>(R.id.dg15layout).addView(unableReadView)
-                    0x10.toByte() -> view.findViewById<LinearLayout>(R.id.dg16layout).addView(unableReadView)
-                }
-            } else {
-                when (ef.key) {
-                    0x01.toByte() -> EMRTD.dg1.createViews<LinearLayout>(context, view.findViewById<TableLayout>(R.id.dg1table))
-                    0x02.toByte() -> EMRTD.dg2.createViews(context, view.findViewById(R.id.dg2layout))
-                    0x03.toByte() -> EMRTD.dg3.createViews(context, view.findViewById(R.id.dg3layout))
-                    0x04.toByte() -> EMRTD.dg4.createViews(context, view.findViewById<TableLayout>(R.id.dg4layout))
-                    0x05.toByte() -> EMRTD.dg5.createViews(context, view.findViewById(R.id.dg5layout))
-                    0x06.toByte() -> EMRTD.dg6.createViews(context, view.findViewById<TableLayout>(R.id.dg6layout))
-                    0x07.toByte() -> EMRTD.dg7.createViews(context, view.findViewById<TableLayout>(R.id.dg7layout))
-                    0x08.toByte() -> EMRTD.dg8.createViews(context, view.findViewById<TableLayout>(R.id.dg8layout))
-                    0x09.toByte() -> EMRTD.dg9.createViews(context, view.findViewById<TableLayout>(R.id.dg9layout))
-                    0x0A.toByte() -> EMRTD.dg10.createViews(context, view.findViewById<TableLayout>(R.id.dg10layout))
-                    0x0B.toByte() -> EMRTD.dg11.createViews(context, view.findViewById(R.id.dg11table))
-                    0x0C.toByte() -> EMRTD.dg12.createView(context, view.findViewById(R.id.dg12table))
-                    0x0D.toByte() -> EMRTD.dg13.createViews(context, view.findViewById<TableLayout>(R.id.dg13layout))
-                    0x0E.toByte() -> EMRTD.dg14.createViews(context, view.findViewById<TableLayout>(R.id.dg14layout))
-                    0x0F.toByte() -> EMRTD.dg15.createViews(context, view.findViewById<TableLayout>(R.id.dg15layout))
-                    0x10.toByte() -> EMRTD.dg16.createViews(context, view.findViewById<TableLayout>(R.id.dg16layout))
-                }
-            }
-        }
-    }*/
 }

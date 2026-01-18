@@ -70,6 +70,9 @@ object EMRTD {
             APDUControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
         }
         dir.read()
+        travelRecords.isPresent = dir.hasTravelRecordsApplication
+        visaRecords.isPresent = dir.hasVisaRecordsApplication
+        additionalBiometrics.isPresent = dir.hasAdditionalBiometricsApplication
         ca.read()
         val list = ca.paceInfos
         for (info in list) {

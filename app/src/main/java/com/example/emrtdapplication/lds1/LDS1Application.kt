@@ -12,8 +12,8 @@ import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.APPLICATION_ID
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.INCREMENT_PROGRESS_BAR
 import com.example.emrtdapplication.constants.SUCCESS
+import org.spongycastle.asn1.x509.Certificate
 import java.math.BigInteger
-import java.security.cert.X509Certificate
 import kotlin.collections.iterator
 
 /**
@@ -40,6 +40,8 @@ import kotlin.collections.iterator
  * @property dg16 Represents the EF.DG16 file on the eMRTD
  * @property efMap Maps the file ids for dg files to the files
  * @property certs Certificates used for passive authentication
+ * @property chipAuthenticationResult Result of the chip authentication protocol
+ * @property activeAuthenticationResult Result of the active authentication protocol
  */
 class LDS1Application() : LDSApplication() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
@@ -100,7 +102,11 @@ class LDS1Application() : LDSApplication() {
         dg16.shortEFIdentifier to dg16,
     )
         private set
-    var certs : Array<X509Certificate>? = null
+    var certs : Array<Certificate>? = null
+    var chipAuthenticationResult = FAILURE
+        private set
+    var activeAuthenticationResult = FAILURE
+        private set
 
     /**
      * Read files stored on the application
@@ -144,7 +150,7 @@ class LDS1Application() : LDSApplication() {
         efSod.checkHashes(efMap)
         efSod.passiveAuthentication(certs)
         readActivity.changeProgressBar("Performing Active Authentication...", INCREMENT_PROGRESS_BAR)
-        dg15.activeAuthentication()
+        activeAuthenticationResult = dg15.activeAuthentication()
         readActivity.changeProgressBar("Performing Chip Authentication...", INCREMENT_PROGRESS_BAR)
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null
@@ -158,7 +164,7 @@ class LDS1Application() : LDSApplication() {
             }
             val auth = if (chipPublicKey != null) {
                 if (chipInfo != null) {
-                        ChipAuthentication(chipPublicKey, chipInfo)
+                    ChipAuthentication(chipPublicKey, chipInfo)
                 } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
                     ChipAuthentication(chipPublicKey, EMRTD.pace.chipAuthenticationData!!, EMRTD.pace.chipPublicKey!!)
                 } else {
@@ -167,7 +173,7 @@ class LDS1Application() : LDSApplication() {
             } else {
                 null
             }
-            auth?.authenticate()
+            chipAuthenticationResult = auth?.authenticate() ?: FAILURE
         }
     }
 }

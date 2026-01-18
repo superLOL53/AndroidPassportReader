@@ -8,7 +8,7 @@ import com.example.emrtdapplication.constants.SUCCESS
 
 
 /**
- * Implements the DG13 file and inherits from [ElementaryFileTemplate]
+ * Implements the DG13 file
  *
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG13
@@ -22,6 +22,7 @@ class DG13() : ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
@@ -30,6 +31,7 @@ class DG13() : ElementaryFileTemplate() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */

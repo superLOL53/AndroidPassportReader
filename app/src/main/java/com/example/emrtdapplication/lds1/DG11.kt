@@ -14,21 +14,21 @@ import com.example.emrtdapplication.utils.TLV
 
 
 /**
- * Implements the DG2 file and inherits from [ElementaryFileTemplate]
+ * Implements the DG2 file
  *
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG2
  * @property efTag The tag of the DG2 file
  * @property fullName Full name of document holder in national characters
- * @property personalNumber
- * @property fullDateOfBirth
- * @property placeOfBirth
- * @property permanentAddress
- * @property telephone
- * @property profession
- * @property title
- * @property personalSummary
- * @property custodyInformation
+ * @property personalNumber Personal number of the document holder
+ * @property fullDateOfBirth Date of birth of the document holder
+ * @property placeOfBirth Place of birth of the document holder
+ * @property permanentAddress Address of the document holder
+ * @property telephone Telephone number of the document holder
+ * @property profession Profession of the document holder
+ * @property title Title of the document holder
+ * @property personalSummary Summary of the document holder
+ * @property custodyInformation Custody information of the document holder
  * @property otherTDNumbers Other valid document numbers of other valid travel documents
  * @property image Image of citizenship document
  * @property otherNames Other names of the document holder
@@ -66,6 +66,7 @@ class DG11() : ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
@@ -106,6 +107,7 @@ class DG11() : ElementaryFileTemplate() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */
@@ -175,6 +177,7 @@ class DG11() : ElementaryFileTemplate() {
 
     /**
      * Decodes a TLV structure into names
+     *
      * @param names A TLV structure containing additional names of the document holder
      */
     private fun readNames(names : TLV) {
@@ -193,6 +196,7 @@ class DG11() : ElementaryFileTemplate() {
 
     /**
      * Decodes an image contained in a TLV structure
+     *
      * @param image A TLV structure containing an image
      */
     private fun decodeImage(image : TLV) {
@@ -202,6 +206,7 @@ class DG11() : ElementaryFileTemplate() {
 
     /**
      * Decodes the TLV structure into document numbers
+     *
      * @param numbers A TLV structure containing document numbers of other valid travel documents
      */
     private fun decodeDocumentNumbers(numbers: TLV) {

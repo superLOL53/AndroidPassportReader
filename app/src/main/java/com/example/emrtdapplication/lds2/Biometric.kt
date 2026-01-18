@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds2
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.BiometricConstants.AUTHENTICITY_TOKEN_TAG
 import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_DATA_TAG
 import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_RECORD_SIZE
@@ -63,5 +65,9 @@ class Biometric(record: TLV) {
             throw IllegalArgumentException("Empty or invalid certificate reference!")
         }
         this.certificateReference = certificateReference[0]
+    }
+
+    fun<T : LinearLayout> createView(context: Context, parent: T) {
+        //TODO: Implement
     }
 }

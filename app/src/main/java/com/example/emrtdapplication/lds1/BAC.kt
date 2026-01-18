@@ -32,8 +32,9 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
 
     /**
      * Initializes the BAC protocol with the MRZ information from the manual input
+     *
      * @param newMRZ: The MRZ information used to derive the cryptographic keys for the BAC protocol
-     * @return Success(0) or Error(-6) if newMRZ was empty or null
+     * @return [SUCCESS] or [ERROR_NO_MRZ] if no MRZ is given
      */
     fun init(newMRZ : String?) : Int {
         if (newMRZ.isNullOrEmpty()) {
@@ -46,6 +47,7 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
     /**
      * Implements the BAC protocol, derives the cryptographic keys and stores them in the APDUControl class
      * for further application. The LDS1 application has to be selected before BAC can be run.
+     *
      * @return [BAC_PROTOCOL_SUCCESS] if protocol was successful or a negative error code
      */
     fun bacProtocol() : Int {

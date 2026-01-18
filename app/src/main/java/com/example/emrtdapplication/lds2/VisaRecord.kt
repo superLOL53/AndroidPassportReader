@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds2
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.VisaRecordConstants.ADDITIONAL_BIOMETRICS_REFERENCE_TAG
 import com.example.emrtdapplication.constants.VisaRecordConstants.ADDITIONAL_INFORMATION_TAG
 import com.example.emrtdapplication.constants.VisaRecordConstants.AUTHENTICITY_TOKEN_TAG
@@ -231,5 +233,13 @@ class VisaRecord(val record: TLVSequence) {
             throw IllegalArgumentException("Unspecified or invalid certificate reference in Visa Record!")
         }
         this.certificateReference = certificateReference[0]
+    }
+
+    fun <T : LinearLayout> createView(context: Context, parent: T) {
+        //TODO: Implement
+    }
+
+    fun verify() {
+        //TODO: Implement
     }
 }

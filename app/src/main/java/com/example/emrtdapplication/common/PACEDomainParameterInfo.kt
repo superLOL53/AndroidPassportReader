@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.common
 
+import android.content.Context
+import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
@@ -38,5 +40,9 @@ class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv) {
         } else {
             optionalData!!.value!![0].toInt()
         }
+    }
+
+    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+        //TODO("Not yet implemented")
     }
 }

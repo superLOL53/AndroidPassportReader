@@ -3,6 +3,12 @@ package com.example.emrtdapplication.lds1
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.constants.DG15Constants.PARTIAL_MESSAGE_RECOVERY
+import com.example.emrtdapplication.constants.DG15Constants.SHA_1
+import com.example.emrtdapplication.constants.DG15Constants.SHA_224
+import com.example.emrtdapplication.constants.DG15Constants.SHA_256
+import com.example.emrtdapplication.constants.DG15Constants.SHA_384
+import com.example.emrtdapplication.constants.DG15Constants.SHA_512
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
@@ -29,6 +35,7 @@ import javax.crypto.Cipher
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG15
  * @property efTag The tag of the DG15 file
+ * @property publicKeyInfo The public key used for the Active Authentication protocol as a [SubjectPublicKeyInfo] or null
  * @property isAuthenticated Indicates if the Active Authentication protocol was successful
  */
 class DG15() : ElementaryFileTemplate() {
@@ -36,16 +43,12 @@ class DG15() : ElementaryFileTemplate() {
     override val shortEFIdentifier: Byte = 0x0F
     override val efTag: Byte = 0x6F
     private var publicKeyInfo : SubjectPublicKeyInfo? = null
-    private val sha1 : Byte = 0xBC.toByte()
-    private val sha224 : Byte = 0x38.toByte()
-    private val sha256 : Byte = 0x34.toByte()
-    private val sha384 : Byte = 0x36.toByte()
-    private val sha512 : Byte = 0x35.toByte()
     var isAuthenticated = false
         private set
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
@@ -62,6 +65,7 @@ class DG15() : ElementaryFileTemplate() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */
@@ -69,14 +73,13 @@ class DG15() : ElementaryFileTemplate() {
         if (rawFileContent == null || publicKeyInfo == null) return
         var row = createRow(context, parent)
         provideTextForRow(row, "Algorithm Identifier: ", publicKeyInfo!!.algorithm.algorithm.id)
-        //row = createRow(context, parent)
-        //provideTextForRow(row, "Parameters:", publicKeyInfo!!.algorithm.parameters.toString())
         row = createRow(context, parent)
         provideTextForRow(row, "Public Key:", publicKeyInfo!!.publicKeyData.string)
     }
 
     /**
      * Implements the Active Authentication protocol
+     *
      * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
      */
     fun activeAuthentication(random: SecureRandom = SecureRandom()) : Int {
@@ -97,29 +100,29 @@ class DG15() : ElementaryFileTemplate() {
         } else {
             response = d
         }
-        val hashAlgorithm = if (response[response.size-1] == sha1) {
+        val hashAlgorithm = if (response[response.size-1] == SHA_1) {
             SHA1Digest()
         } else {
             when(response[response.size-2]) {
-                sha256 -> SHA256Digest()
-                sha512 -> SHA512Digest()
-                sha384 -> SHA384Digest()
-                sha224 -> SHA224Digest()
+                SHA_256 -> SHA256Digest()
+                SHA_512 -> SHA512Digest()
+                SHA_384 -> SHA384Digest()
+                SHA_224 -> SHA224Digest()
                 else -> return FAILURE
             }
         }
         hashAlgorithm.digestSize
-        val hash = if (response[response.size-1] == sha1) {
+        val hash = if (response[response.size-1] == SHA_1) {
             response.slice(response.size-hashAlgorithm.digestSize-2..response.size-2).toByteArray()
         } else {
             response.slice(response.size-hashAlgorithm.digestSize-3..response.size-3).toByteArray()
         }
-        val m2 = if (response[response.size-1] == sha1) {
+        val m2 = if (response[response.size-1] == SHA_1) {
             response.slice(1..response.size-hashAlgorithm.digestSize-3).toByteArray()
         } else {
             response.slice(1..response.size-hashAlgorithm.digestSize-4).toByteArray()
         }
-        val m = if (response[0] == 0x6A.toByte()) {
+        val m = if (response[0] == PARTIAL_MESSAGE_RECOVERY) {
             m2 + nonce
         } else {
             m2

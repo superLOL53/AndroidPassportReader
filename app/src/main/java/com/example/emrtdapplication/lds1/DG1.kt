@@ -9,7 +9,7 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
 /**
- * Implements the DG1 file and inherits from [ElementaryFileTemplate]
+ * Implements the DG1 file
  *
  * @property rawFileContent The file content represented as a byte array
  * @property shortEFIdentifier The short EF id
@@ -26,7 +26,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property checkDigitDateOfExpiry The check digit of the expiration date
  * @property nationality The nationality of the eMRTD holder
  * @property optionalData Optional data
- * @property compositeCheckDigit
+ * @property compositeCheckDigit Check digit in the MRZ
  * @property holderName The name of the eMRTD holder
  */
 class DG1(): ElementaryFileTemplate() {
@@ -66,6 +66,7 @@ class DG1(): ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse() : Int {
@@ -94,6 +95,7 @@ class DG1(): ElementaryFileTemplate() {
 
     /**
      * Create the views for the information in the file
+     *
      * @param context The context in which the view is generated
      * @param parent The parent of the to create views
      */
@@ -143,6 +145,7 @@ class DG1(): ElementaryFileTemplate() {
 
     /**
      * Decodes the MRZ for TD1 size eMRTDs
+     *
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
@@ -166,6 +169,7 @@ class DG1(): ElementaryFileTemplate() {
 
     /**
      * Decodes the MRZ for TD2 size eMRTDs
+     *
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
@@ -188,6 +192,7 @@ class DG1(): ElementaryFileTemplate() {
 
     /**
      * Decodes the MRZ for TD3 size eMRTDs
+     *
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */

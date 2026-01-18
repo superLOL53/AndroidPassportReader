@@ -1,5 +1,12 @@
 package com.example.emrtdapplication
 
+import android.content.Context
+import android.view.Gravity
+import android.widget.LinearLayout
+import android.widget.TableLayout
+import android.widget.TableRow
+import android.widget.TextView
+import androidx.core.view.children
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_OID
@@ -55,6 +62,7 @@ open class SecurityInfo(tlv: TLV) {
         private set
     var protocol : ByteArray
         private set
+    protected var tableLayout : TableLayout? = null
 
     init {
         if (!tlv.isValid || !tlv.isConstruct() || tlv.list == null || tlv.list!!.tlvSequence.size < 2 || 3 < tlv.list!!.tlvSequence.size) {
@@ -92,5 +100,57 @@ open class SecurityInfo(tlv: TLV) {
         } else if (objectIdentifier.startsWith(EF_DIR_OID)) {
             type = EF_DIR_TYPE
         }
+    }
+
+    /**
+     * Create views to display contents of the file in the app
+     */
+    open fun <T : LinearLayout> createView(context: Context, parent : T) {
+        tableLayout = TableLayout(context)
+        tableLayout!!.layoutParams = TableLayout.LayoutParams(
+            TableLayout.LayoutParams.MATCH_PARENT,
+            TableLayout.LayoutParams.WRAP_CONTENT
+        )
+        val row = createRow(context, tableLayout!!)
+        provideTextForRow(row, "Protocol OID:", objectIdentifier)
+        tableLayout!!.addView(row)
+        parent.addView(tableLayout)
+    }
+
+    /**
+     * Fill in the text for [row] with [description] and [value]
+     * @param row The row to fill in texts
+     * @param description The meaning of the [value]
+     * @param value The value of the row
+     */
+    protected fun provideTextForRow(row : TableRow, description : String, value : String) {
+        var i = true
+        for (t in row.children) {
+            if (i) {
+                (t as TextView).text = description
+            } else {
+                (t as TextView).text = value
+            }
+            i = !i
+        }
+    }
+
+    /**
+     * Creates a row in a [TableLayout] to display information in the file
+     * @param context The context of the view
+     * @param parent The parent layout of the created row
+     * @return The created row
+     */
+    protected fun createRow(context : Context, parent: LinearLayout) : TableRow {
+        val row = TableRow(context)
+        row.gravity = Gravity.CENTER
+        val description = TextView(context)
+        description.gravity = Gravity.CENTER
+        val value = TextView(context)
+        value.gravity = Gravity.CENTER
+        row.addView(description)
+        row.addView(value)
+        parent.addView(row)
+        return row
     }
 }

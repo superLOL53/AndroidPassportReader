@@ -56,6 +56,7 @@ class DG12() : ElementaryFileTemplate() {
 
     /**
      * Parses the contents of [rawFileContent]
+     *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
@@ -92,6 +93,7 @@ class DG12() : ElementaryFileTemplate() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */
@@ -151,6 +153,7 @@ class DG12() : ElementaryFileTemplate() {
 
     /**
      * Decodes the TLV structure into a string
+     *
      * @param persons A TLV structure containing the name of a person
      * @return A list of names
      */
@@ -170,6 +173,7 @@ class DG12() : ElementaryFileTemplate() {
 
     /**
      * Decodes the image contained in the value of [tlv]
+     *
      * @param tlv A TLV structure containing an image
      * @return Decoded image as a Bitmap or null
      */

@@ -22,6 +22,7 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.FAILURE
 import java.security.MessageDigest
 import com.example.emrtdapplication.lds1.EfSod
+import com.example.emrtdapplication.utils.TLV
 import java.security.NoSuchAlgorithmException
 import java.security.Provider
 
@@ -93,30 +94,24 @@ abstract class ElementaryFileTemplate() {
         //Read the whole EF file
         if (le >= APDUControl.maxResponseLength) {
             val tmp = ByteArray(le)
-            var p1 : Byte
-            var p2 : Byte
-            var readBytes : Int
-            //TODO: Implement read for files larger than 32kB
-            for (i in 0..le step APDUControl.maxResponseLength) {
-                p1 = (i/UBYTE_MODULO).toByte()
-                p2 = (i % UBYTE_MODULO).toByte()
-                readBytes = if (le - i > APDUControl.maxResponseLength) {
-                    APDUControl.maxResponseLength
+            var i = 0
+            while (i < le && i < 32767) {
+                val readBytes = readSmallOffset(i, le)
+                if (readBytes != null) {
+                    readBytes.copyInto(tmp, i, 0)
+                    i += readBytes.size
                 } else {
-                    le - i
-                }
-                info = APDUControl.sendAPDU(
-                    APDU(
-                        NfcClassByte.ZERO,
-                        NfcInsByte.READ_BINARY,
-                        p1,
-                        p2, readBytes
-                    )
-                )
-                if (!APDUControl.checkResponse(info)) {
                     return FILE_UNABLE_TO_READ
                 }
-                APDUControl.removeRespondCodes(info).copyInto(tmp, i, 0)
+            }
+            while (i < le) {
+                val readBytes = readLargeOffset(i, le)
+                if (readBytes != null) {
+                    readBytes.copyInto(tmp, i, 0)
+                    i += readBytes.size
+                } else {
+                    return FILE_UNABLE_TO_READ
+                }
             }
             rawFileContent = tmp
         } else {
@@ -135,6 +130,69 @@ abstract class ElementaryFileTemplate() {
         }
         isRead = true
         return SUCCESS
+    }
+
+    /**
+     * Reads file content up until an offset of 32767 bytes
+     *
+     * @param offset The offset of the EF file to read from
+     * @param fileSize The size of the EF file
+     * @return The file content read from the specified offset or null, if an error occurred
+     */
+    private fun readSmallOffset(offset: Int, fileSize: Int) : ByteArray? {
+        val p1 = (offset / UBYTE_MODULO).toByte()
+        val p2 = (offset % UBYTE_MODULO).toByte()
+        val readBytes = if (offset + APDUControl.maxResponseLength > 32767) {
+            32767 - offset
+        } else if (offset + APDUControl.maxResponseLength > fileSize) {
+            fileSize - offset
+        } else {
+            APDUControl.maxResponseLength
+        }
+        val info = APDUControl.sendAPDU(
+            APDU(
+                NfcClassByte.ZERO,
+                NfcInsByte.READ_BINARY,
+                p1,
+                p2,
+                readBytes
+            )
+        )
+        if (!APDUControl.checkResponse(info)) {
+            return null
+        }
+        return APDUControl.removeRespondCodes(info)
+    }
+
+    /**
+     * Read file content with an offset larger than 32767 bytes
+     *
+     * @param offset The offset from which to read from the EF file
+     * @param fileSize The file size of the EF file
+     * @return The read file content starting from the specified offset or null, if an error occurred
+     */
+    private fun readLargeOffset(offset: Int, fileSize: Int) : ByteArray? {
+        val readBytes = if (offset + APDUControl.maxResponseLength > fileSize) {
+            fileSize - offset
+        } else {
+            APDUControl.maxResponseLength
+        }
+        val data = TLV(0x54, offset.toBigInteger().toByteArray())
+        val info = APDUControl.sendAPDU(
+            APDU(
+                NfcClassByte.ZERO,
+                NfcInsByte.READ_BINARY_LARGE_OFFSET,
+                NfcP1Byte.ZERO,
+                NfcP2Byte.ZERO,
+                data.toByteArray(),
+                readBytes
+            )
+        )
+        if (!APDUControl.checkResponse(info)) {
+            return null
+        }
+        val tlv = TLV(APDUControl.removeRespondCodes(info))
+        return tlv.value
     }
 
     /**

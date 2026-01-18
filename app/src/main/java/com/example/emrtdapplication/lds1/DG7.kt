@@ -4,7 +4,7 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.utils.DisplayedSignature
-import com.example.emrtdapplication.utils.ElementaryFilesToBeDefined
+import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
 
 
@@ -16,13 +16,14 @@ import com.example.emrtdapplication.utils.TLV
  * @property efTag The tag of the DG2 file
  *
  */
-class DG7() : ElementaryFilesToBeDefined<DisplayedSignature>() {
+class DG7() : ElementaryFilesTypeTemplate<DisplayedSignature>() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier: Byte = 0x07
     override val efTag: Byte = 0x67
 
     /**
      * Dynamically create a view for every biometric information in this file.
+     *
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */

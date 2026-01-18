@@ -15,7 +15,7 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 
 /**
- * Implements the EF.COM file and inherits from [ElementaryFileTemplate]
+ * Implements the EF.COM file
  *
  * @property ldsVersion
  * @property ldsUpdateLevel
@@ -39,6 +39,11 @@ class EfCom(): ElementaryFileTemplate() {
     override val shortEFIdentifier: Byte = 0x1E
     override var rawFileContent: ByteArray? = null
 
+    /**
+     * Parses and decodes the file content
+     *
+     * @return [SUCCESS] if the file could be decoded, otherwise an error code
+     */
     override fun parse() : Int {
         if (rawFileContent == null) {
             return SUCCESS
@@ -98,6 +103,13 @@ class EfCom(): ElementaryFileTemplate() {
         // TODO: Implement
     }
 
+    /**
+     * Decodes the encoded version as bytes to an integer
+     *
+     * @param b1 First byte of the encoded version
+     * @param b2 Second byte of the encoded version
+     * @return The decoded version as integer
+     */
     private fun computeVersion(b1: Byte, b2: Byte): Int {
         return (b1-48)*10+(b2-48)
     }
