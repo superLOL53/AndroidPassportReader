@@ -27,6 +27,6 @@ class EFDIRInfo(tlv: TLV) : SecurityInfo(tlv, EF_DIR_TYPE) {
     val efDir = Directory(tlv.toByteArray())
 
     override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        efDir.createView(context, parent)
+        //efDir.createView(context, parent)
     }
 }

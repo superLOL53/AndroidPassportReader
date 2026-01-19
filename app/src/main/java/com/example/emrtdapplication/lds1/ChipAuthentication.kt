@@ -98,8 +98,7 @@ class ChipAuthentication {
                     } else if (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH)) {
                         isEC = true
                     }
-                    is3DES =
-                        (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH_3DES_CBC_CBC) ||
+                    is3DES = (chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_ECDH_3DES_CBC_CBC) ||
                                 chipAuthenticationInfo.objectIdentifier.startsWith(ID_CA_DH_3DES_CBC_CBC))
                     setParameters()
                     if (keyParamsDH == null && keyParamsECDH == null) {

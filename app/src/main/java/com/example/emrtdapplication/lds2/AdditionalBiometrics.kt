@@ -6,7 +6,7 @@ import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.BIOM
 import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.MAX_BIOMETRIC_FILES
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.READ_LENGTH
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
@@ -97,7 +97,7 @@ class AdditionalBiometrics() : LDS2Application() {
         val le = if (info[1] < 0) {
             var l = 0
             for (i in 0..<(info[1]+BYTE_MODULO)) {
-                l = l*UBYTE_MODULO + info[i+2].toUByte().toInt()
+                l = l*U_BYTE_MODULO + info[i+2].toUByte().toInt()
             }
             l += 2 + (info[1] + BYTE_MODULO)
             l
@@ -112,8 +112,8 @@ class AdditionalBiometrics() : LDS2Application() {
             var p2 : Byte
             var readBytes : Int
             for (i in 0..le step APDUControl.maxResponseLength) {
-                p1 = (i/UBYTE_MODULO).toByte()
-                p2 = (i % UBYTE_MODULO).toByte()
+                p1 = (i/U_BYTE_MODULO).toByte()
+                p2 = (i % U_BYTE_MODULO).toByte()
                 readBytes = if (le - i > APDUControl.maxResponseLength) {
                     APDUControl.maxResponseLength
                 } else {

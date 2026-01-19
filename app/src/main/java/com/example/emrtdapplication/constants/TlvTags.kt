@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.constants
 
+//TODO: Order by Byte value and write docs
 object TlvTags {
     const val CONSTRUCT_BIT : Byte = 0x20
     const val INTEGER : Byte = 0x02
@@ -27,4 +28,56 @@ object TlvTags {
     const val TAG_MULTIPLE_BYTES : Byte = 0x1F
     const val LENGTH_MULTIPLE_BYTES : Byte = 0x7F
     const val CERTIFICATE_BODY : Byte = 0x4E
+    const val BIOMETRIC_1 : Byte = 0x7F
+    const val BIOMETRIC_2 : Byte = 0x2E
+    const val BIOMETRIC : Byte = 0x5F
+    const val BIOMETRIC_DATA : Byte = 0x2E
+    const val AUTHENTICITY_TOKEN : Byte = 0x37
+    const val CERTIFICATE_REFERENCE : Byte = 0x38
+    const val CERTIFICATE_RECORD_1 : Byte = 0x5F
+    const val CERTIFICATE_SERIAL_NUMBER : Byte = 0x3A
+    const val CERTIFICATE : Byte = 0x72
+    const val EC_POINT_SINGLE_COORDINATE : Byte = 0x03
+    const val APPLICATION_TEMPLATE: Byte = 0x61
+    const val INTERNATIONAL_AID:Byte = 0x4F
+    const val VERSION : Byte = 0x5F
+    const val LDS_VERSION : Byte = 0x01
+    const val TAG_LIST : Byte = 0x5C
+    const val UNICODE_VERSION : Byte = 0x36
+    const val SIGNED_INFO_TRAVEL_RECORD : Byte = 0x73
+    const val TRAVEL_1 : Byte = 0x5F
+    const val ISSUING_STATE : Byte = 0x44
+    const val VISA_STATUS : Byte = 0x4C
+    const val DATE : Byte = 0x45
+    const val INSPECTION_AUTHORITY : Byte = 0x4B
+    const val INSPECTION_LOCATION : Byte = 0x46
+    const val INSPECTOR_REFERENCE : Byte = 0x4A
+    const val INSPECTION_RESULT : Byte = 0x4D
+    const val TRAVEL_MODE : Byte = 0x49
+    const val STAY_DURATION_TRAVEL_RECORD : Byte = 0x48
+    const val CONDITIONS : Byte = 0x4E
+    const val SIGNED_INFO_VISA_RECORD : Byte = 0x71
+    const val VISA_1 : Byte = 0x5F
+    const val ISSUING_AUTHORITY : Byte = 0x28
+    const val DOCUMENT_TYPE : Byte = 0x43
+    const val ISSUANCE_PLACE : Byte = 0x49
+    const val DOCUMENT_NUMBER : Byte = 0x5A
+    const val HOLDER_NAME : Byte = 0x5B
+    const val VISA_TYPE_A : Byte = 0x71
+    const val VISA_TYPE_B : Byte = 0x72
+    const val NUMBER_OF_ENTRIES : Byte = 0x73
+    const val STAY_DURATION_VISA_RECORD : Byte = 0x74
+    const val PASSPORT_NUMBER : Byte = 0x75
+    const val VISA_TYPE : Byte = 0x76
+    const val TERRITORY_INFORMATION : Byte = 0x77
+    const val ISSUANCE_DATE : Byte = 0x25
+    const val EXPIRATION_DATE : Byte = 0x24
+    const val ADDITIONAL_INFORMATION : Byte = 0x32
+    const val SURNAME : Byte = 0x33
+    const val GIVEN_NAME : Byte = 0x34
+    const val SEX : Byte = 0x35
+    const val BIRTHDATE : Byte = 0x2B
+    const val NATIONALITY : Byte = 0x2C
+    const val MRZ : Byte = 0x1F
+    const val ADDITIONAL_BIOMETRICS_REFERENCE : Byte = 0x40
 }

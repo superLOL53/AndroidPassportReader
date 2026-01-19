@@ -8,7 +8,7 @@ import com.example.emrtdapplication.constants.APDUControlConstants.SINGLE_KEY_SI
 import com.example.emrtdapplication.constants.CryptoConstants.AES
 import com.example.emrtdapplication.constants.CryptoConstants.AES_ECB_NO_PADDING
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.TlvTags.DO01
 import com.example.emrtdapplication.constants.TlvTags.DO08
@@ -138,8 +138,8 @@ class SecureMessagingAPDU {
      * @return The Lc field of the APDU as a byte array
      */
     private fun lcField(length : Int, useExtendedLength : Boolean = false) : ByteArray {
-        return if (length > UBYTE_MODULO || useExtendedLength) {
-            byteArrayOf(0, (length/UBYTE_MODULO).toByte(), (length % UBYTE_MODULO).toByte())
+        return if (length > U_BYTE_MODULO || useExtendedLength) {
+            byteArrayOf(0, (length/U_BYTE_MODULO).toByte(), (length % U_BYTE_MODULO).toByte())
         } else {
             byteArrayOf(length.toByte())
         }
@@ -174,7 +174,7 @@ class SecureMessagingAPDU {
         var do97 : ByteArray? = null
         if (apdu.useLe) {
             do97 = if (apdu.useLeExt) {
-                byteArrayOf(DO97, DO97_EXTENDED_LE_LENGTH, (apdu.le/UBYTE_MODULO).toByte(), (apdu.le%UBYTE_MODULO).toByte())
+                byteArrayOf(DO97, DO97_EXTENDED_LE_LENGTH, (apdu.le/U_BYTE_MODULO).toByte(), (apdu.le%U_BYTE_MODULO).toByte())
             } else {
                 byteArrayOf(DO97, DO97_LE_LENGTH, apdu.le.toByte())
             }

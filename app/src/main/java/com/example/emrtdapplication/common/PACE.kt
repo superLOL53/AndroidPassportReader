@@ -132,7 +132,9 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
         }
         val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
         computeKeys(key, 3)
-        info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info))
+        info = APDUControl.sendAPDU(
+            APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info)
+        )
         if (!APDUControl.checkResponse(info)) {
             return INVALID_MSE_COMMAND
         }

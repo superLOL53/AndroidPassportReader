@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.biometrics.face
 
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_SIZE
 import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_TYPE
 
@@ -25,7 +25,7 @@ class FeaturePoint(features: ByteArray) {
         }
         type = features[0]
         point = features[1]
-        horizontalPosition = features[2]*UBYTE_MODULO + features[3]
-        verticalPosition = features[4]*UBYTE_MODULO + features[5]
+        horizontalPosition = features[2]*U_BYTE_MODULO + features[3]
+        verticalPosition = features[4]*U_BYTE_MODULO + features[5]
     }
 }

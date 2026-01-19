@@ -12,7 +12,7 @@ import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_S
 import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_3
 import com.example.emrtdapplication.constants.ManualInputConstants.DATE_LENGTH
 import com.example.emrtdapplication.constants.ManualInputConstants.LOWER_CASE_DIGIT
-import com.example.emrtdapplication.constants.ManualInputConstants.NAME_LENGTH
+import com.example.emrtdapplication.constants.ManualInputConstants.PASSPORT_NUMBER_LENGTH
 import com.example.emrtdapplication.constants.ManualInputConstants.UPPER_CASE_DIGIT
 
 
@@ -114,13 +114,13 @@ class ManualInput : AppCompatActivity() {
         val sb = StringBuilder()
         val nameCD = if (passportNr == null) {
             ""
-        } else if (passportNr!!.length <= NAME_LENGTH) {
-            while (passportNr!!.length <= NAME_LENGTH) {
+        } else if (passportNr!!.length <= PASSPORT_NUMBER_LENGTH) {
+            while (passportNr!!.length <= PASSPORT_NUMBER_LENGTH) {
                 passportNr = "$passportNr<"
             }
             passportNr!!
         } else {
-            passportNr!!.slice(0..NAME_LENGTH)
+            passportNr!!.slice(0..PASSPORT_NUMBER_LENGTH)
         }
         sb.append(nameCD)
         sb.append(checkDigit(nameCD))

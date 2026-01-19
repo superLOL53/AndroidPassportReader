@@ -1,6 +1,5 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.BiometricConstants.AUTHENTICITY_TOKEN_TAG
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
@@ -13,6 +12,7 @@ import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID
 import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_ECDSA_SHA_512
 import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_RSA_PSS_SHA_256
 import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_RSA_PSS_SHA_512
+import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
 import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_BODY
 import com.example.emrtdapplication.constants.TlvTags.LENGTH_MULTIPLE_BYTES
 import com.example.emrtdapplication.utils.APDU
@@ -68,7 +68,7 @@ class TerminalAuthentication(
 
     private fun doPerformSecurityOperation(certificate: Certificate) : Int {
         val certificateBody = TLV(byteArrayOf(LENGTH_MULTIPLE_BYTES, CERTIFICATE_BODY), certificate.tbsCertificate.encoded)
-        val signature = TLV(byteArrayOf(0x5F, AUTHENTICITY_TOKEN_TAG), certificate.signature.encoded)
+        val signature = TLV(byteArrayOf(0x5F, AUTHENTICITY_TOKEN), certificate.signature.encoded)
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -92,7 +92,7 @@ class TerminalAuthentication(
             APDU(
                 NfcClassByte.ZERO,
                 NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
-                NfcP1Byte.TERMINAL_AUTHENTICATION,
+                NfcP1Byte.SET_DIGITAL_SIGNATURE_TEMPLATE_FOR_VERIFICATION,
                 NfcP2Byte.TERMINAL_AUTHENTICATION,
                 publicKeyReference.toByteArray()
             )

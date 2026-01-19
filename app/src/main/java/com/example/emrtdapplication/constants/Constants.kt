@@ -1,20 +1,47 @@
 package com.example.emrtdapplication.constants
 
-object AttributeInfoConstants {
-
-}
+/**
+ * Constant encoding a zero byte (0x00)
+ */
 const val ZERO_BYTE : Byte = 0x0
 
-//const val ZERO_SHORT : Short = 0
+/**
+ * File was successfully read from the eMRTD
+ */
 const val FILE_SUCCESSFUL_READ = 0
+
+/**
+ * General return value for successful completion
+ */
 const val SUCCESS = 0
+
+/**
+ * General return valcodeue for unsuccessful completion
+ */
 const val FAILURE = -1
+
+/**
+ * File was unable to be selected on the eMRTD
+ */
 const val FILE_UNABLE_TO_SELECT = -1
+
+/**
+ * Unable to read file from the eMRTD
+ */
 const val FILE_UNABLE_TO_READ = -2
+
+/**
+ * Currently not implemented in the app
+ */
 const val NOT_IMPLEMENTED = -3
+
+/**
+ * General error code for an invalid argument
+ */
 const val INVALID_ARGUMENT = -4
 
-const val SELECT_APPLICATION_SUCCESS = 0
-const val UNABLE_TO_SELECT_APPLICATION = -1
-const val ADDITIONAL_ENCRYPTION_LENGTH = 30
+/**
+ * Additional maximum overhead for secure messaging APDUs due to encryption
+ */
+const val ADDITIONAL_ENCRYPTION_LENGTH = 50
 

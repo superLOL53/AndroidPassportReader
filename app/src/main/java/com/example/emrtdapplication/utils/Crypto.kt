@@ -9,7 +9,6 @@ import com.example.emrtdapplication.constants.CryptoConstants.C_1_128
 import com.example.emrtdapplication.constants.CryptoConstants.C_1_256
 import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE
 import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE_CBC_NO_PADDING
-import com.example.emrtdapplication.constants.CryptoConstants.EC_POINT_TAG_SINGLE_COORDINATE
 import com.example.emrtdapplication.constants.CryptoConstants.KEY_3DES_COUNT_ONES
 import com.example.emrtdapplication.constants.CryptoConstants.MAC_SIZE
 import com.example.emrtdapplication.constants.CryptoConstants.MAPPING_CONSTANT
@@ -18,6 +17,7 @@ import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
 import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
+import com.example.emrtdapplication.constants.TlvTags.EC_POINT_SINGLE_COORDINATE
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHBasicAgreement
 import org.spongycastle.crypto.agreement.ECDHBasicAgreement
@@ -183,9 +183,9 @@ object Crypto {
      */
     fun getECPointFromBigInteger(x : BigInteger, parameters: ECDomainParameters) : ECPoint {
         return if (x.toByteArray()[0] == 0.toByte()) {
-            parameters.curve.decodePoint(byteArrayOf(EC_POINT_TAG_SINGLE_COORDINATE) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
+            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
         } else {
-            parameters.curve.decodePoint(byteArrayOf(EC_POINT_TAG_SINGLE_COORDINATE) + x.toByteArray())
+            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + x.toByteArray())
         }
     }
 

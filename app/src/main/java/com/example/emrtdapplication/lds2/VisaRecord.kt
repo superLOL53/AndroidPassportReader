@@ -2,33 +2,33 @@ package com.example.emrtdapplication.lds2
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.constants.VisaRecordConstants.ADDITIONAL_BIOMETRICS_REFERENCE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.ADDITIONAL_INFORMATION_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.AUTHENTICITY_TOKEN_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.BIRTHDATE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.CERTIFICATE_REFERENCE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.DOCUMENT_NUMBER_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.DOCUMENT_TYPE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.EXPIRATION_DATE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.GIVEN_NAME_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.HOLDER_NAME_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.ISSUANCE_DATE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.ISSUANCE_PLACE_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.ISSUING_AUTHORITY_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.MRZ_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.NATIONALITY_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.NUMBER_OF_ENTRIES_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.PASSPORT_NUMBER_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.SEX_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.SIGNED_INFO_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.STAY_DURATION_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.SURNAME_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.TERRITORY_INFORMATION_TAG
+import com.example.emrtdapplication.constants.TlvTags.ADDITIONAL_BIOMETRICS_REFERENCE
+import com.example.emrtdapplication.constants.TlvTags.ADDITIONAL_INFORMATION
+import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
+import com.example.emrtdapplication.constants.TlvTags.BIRTHDATE
+import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_REFERENCE
+import com.example.emrtdapplication.constants.TlvTags.DOCUMENT_NUMBER
+import com.example.emrtdapplication.constants.TlvTags.DOCUMENT_TYPE
+import com.example.emrtdapplication.constants.TlvTags.EXPIRATION_DATE
+import com.example.emrtdapplication.constants.TlvTags.GIVEN_NAME
+import com.example.emrtdapplication.constants.TlvTags.HOLDER_NAME
+import com.example.emrtdapplication.constants.TlvTags.ISSUANCE_DATE
+import com.example.emrtdapplication.constants.TlvTags.ISSUANCE_PLACE
+import com.example.emrtdapplication.constants.TlvTags.ISSUING_AUTHORITY
+import com.example.emrtdapplication.constants.TlvTags.MRZ
+import com.example.emrtdapplication.constants.TlvTags.NATIONALITY
+import com.example.emrtdapplication.constants.TlvTags.NUMBER_OF_ENTRIES
+import com.example.emrtdapplication.constants.TlvTags.PASSPORT_NUMBER
+import com.example.emrtdapplication.constants.TlvTags.SEX
+import com.example.emrtdapplication.constants.TlvTags.SIGNED_INFO_VISA_RECORD
+import com.example.emrtdapplication.constants.TlvTags.STAY_DURATION_VISA_RECORD
+import com.example.emrtdapplication.constants.TlvTags.SURNAME
+import com.example.emrtdapplication.constants.TlvTags.TERRITORY_INFORMATION
+import com.example.emrtdapplication.constants.TlvTags.VISA_1
+import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE
+import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE_A
+import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE_B
 import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_RECORD_SIZE
-import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_TAG_1
-import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_TYPE_A_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_TYPE_B_TAG
-import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_TYPE_TAG
 import com.example.emrtdapplication.utils.TLVSequence
 
 /**
@@ -102,7 +102,7 @@ class VisaRecord(val record: TLVSequence) {
         }
         for (tlv in record.tlvSequence) {
             if (tlv.tag.size == 1) {
-                if (tlv.tag[0] != SIGNED_INFO_TAG) {
+                if (tlv.tag[0] != SIGNED_INFO_VISA_RECORD) {
                     throw IllegalArgumentException("Invalid tag in record sequence!")
                 }
                 if (tlv.list == null || tlv.list!!.tlvSequence.isEmpty()) {
@@ -114,46 +114,46 @@ class VisaRecord(val record: TLVSequence) {
                     }
                     if (t.tag.size == 1) {
                         when (t.tag[0]) {
-                            DOCUMENT_TYPE_TAG -> documentType = t.value.toString()
-                            ISSUANCE_PLACE_TAG -> issuancePlace = t.value.toString()
-                            DOCUMENT_NUMBER_TAG -> documentNumber = t.value.toString()
-                            HOLDER_NAME_TAG -> holderName = t.value.toString()
+                            DOCUMENT_TYPE -> documentType = t.value.toString()
+                            ISSUANCE_PLACE -> issuancePlace = t.value.toString()
+                            DOCUMENT_NUMBER -> documentNumber = t.value.toString()
+                            HOLDER_NAME -> holderName = t.value.toString()
                         }
                     } else if (t.tag.size == 2) {
-                        if (t.tag[0] != VISA_TAG_1) {
+                        if (t.tag[0] != VISA_1) {
                             continue
                         }
                         when (t.tag[1]) {
-                            ISSUING_AUTHORITY_TAG -> state2 = t.value.toString()
-                            VISA_TYPE_A_TAG -> machineReadableVisaTypeA = t.value.toString()
-                            VISA_TYPE_B_TAG -> machineReadableVisaTypeB = t.value.toString()
-                            NUMBER_OF_ENTRIES_TAG -> numberOfEntries = t.value
-                            STAY_DURATION_TAG -> stayDuration = t.value
-                            PASSPORT_NUMBER_TAG -> passportNumber = t.value.toString()
-                            VISA_TYPE_TAG -> visaType = t.value
-                            TERRITORY_INFORMATION_TAG -> territoryInformation = t.value
-                            ISSUANCE_DATE_TAG -> issuanceDate = t.value.toString()
-                            EXPIRATION_DATE_TAG -> expirationDate = t.value.toString()
-                            ADDITIONAL_INFORMATION_TAG -> additionalInformation = t.value.toString()
-                            SURNAME_TAG -> surname = t.value.toString()
-                            GIVEN_NAME_TAG -> givenName = t.value.toString()
-                            SEX_TAG -> sex = t.value.toString()
-                            BIRTHDATE_TAG -> birthDate = t.value.toString()
-                            NATIONALITY_TAG -> nationality = t.value.toString()
-                            MRZ_TAG -> mrz = t.value.toString()
-                            ADDITIONAL_BIOMETRICS_REFERENCE_TAG -> additionalBiometricsReference = t.value
+                            ISSUING_AUTHORITY -> state2 = t.value.toString()
+                            VISA_TYPE_A -> machineReadableVisaTypeA = t.value.toString()
+                            VISA_TYPE_B -> machineReadableVisaTypeB = t.value.toString()
+                            NUMBER_OF_ENTRIES -> numberOfEntries = t.value
+                            STAY_DURATION_VISA_RECORD -> stayDuration = t.value
+                            PASSPORT_NUMBER -> passportNumber = t.value.toString()
+                            VISA_TYPE -> visaType = t.value
+                            TERRITORY_INFORMATION -> territoryInformation = t.value
+                            ISSUANCE_DATE -> issuanceDate = t.value.toString()
+                            EXPIRATION_DATE -> expirationDate = t.value.toString()
+                            ADDITIONAL_INFORMATION -> additionalInformation = t.value.toString()
+                            SURNAME -> surname = t.value.toString()
+                            GIVEN_NAME -> givenName = t.value.toString()
+                            SEX -> sex = t.value.toString()
+                            BIRTHDATE -> birthDate = t.value.toString()
+                            NATIONALITY -> nationality = t.value.toString()
+                            MRZ -> mrz = t.value.toString()
+                            ADDITIONAL_BIOMETRICS_REFERENCE -> additionalBiometricsReference = t.value
                         }
                     }
                 }
             } else if (tlv.tag.size == 2) {
-                if (tlv.tag[0] != VISA_TAG_1 || (tlv.tag[1] != ISSUING_AUTHORITY_TAG &&
-                        tlv.tag[1] != AUTHENTICITY_TOKEN_TAG && tlv.tag[1] != CERTIFICATE_REFERENCE_TAG)) {
+                if (tlv.tag[0] != VISA_1 || (tlv.tag[1] != ISSUING_AUTHORITY &&
+                        tlv.tag[1] != AUTHENTICITY_TOKEN && tlv.tag[1] != CERTIFICATE_REFERENCE)) {
                     throw IllegalArgumentException("Invalid tag in record sequence!")
                 }
                 when (tlv.tag[1]) {
-                    ISSUING_AUTHORITY_TAG -> state1 = tlv.value?.toString()
-                    AUTHENTICITY_TOKEN_TAG -> signature = tlv.value
-                    CERTIFICATE_REFERENCE_TAG -> certificateReference = tlv.value
+                    ISSUING_AUTHORITY -> state1 = tlv.value?.toString()
+                    AUTHENTICITY_TOKEN -> signature = tlv.value
+                    CERTIFICATE_REFERENCE -> certificateReference = tlv.value
                 }
             }
         }

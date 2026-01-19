@@ -4,14 +4,14 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.EFComConstants.LDS_VERSION_LENGTH
-import com.example.emrtdapplication.constants.EFComConstants.LDS_VERSION_TAG
-import com.example.emrtdapplication.constants.EFComConstants.TAG_LIST_TAG
 import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_LENGTH
-import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_TAG
-import com.example.emrtdapplication.constants.EFComConstants.VERSION_TAG
 import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.LDS_VERSION
+import com.example.emrtdapplication.constants.TlvTags.TAG_LIST
+import com.example.emrtdapplication.constants.TlvTags.UNICODE_VERSION
+import com.example.emrtdapplication.constants.TlvTags.VERSION
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -58,19 +58,19 @@ class EfCom(): ElementaryFileTemplate() {
             }
             val value = tag.value
             when (tag.tag[0]) {
-                VERSION_TAG -> {
+                VERSION -> {
                     if (tag.tag.size != 2) {
                         return FILE_UNABLE_TO_READ
                     }
                     when (tag.tag[1]) {
-                        LDS_VERSION_TAG -> {
+                        LDS_VERSION -> {
                             if (tag.length != LDS_VERSION_LENGTH) {
                                 return FILE_UNABLE_TO_READ
                             }
                             ldsVersion = computeVersion(value?.get(0) ?: 0, value?.get(1) ?: 0)
                             ldsUpdateLevel = computeVersion(value?.get(2) ?: 0, value?.get(3) ?: 0)
                         }
-                        UNICODE_VERSION_TAG -> {
+                        UNICODE_VERSION -> {
                             if (tag.length != UNICODE_VERSION_LENGTH) {
                                 return FILE_UNABLE_TO_READ
                             }
@@ -87,7 +87,7 @@ class EfCom(): ElementaryFileTemplate() {
                         else -> FILE_UNABLE_TO_READ
                     }
                 }
-                TAG_LIST_TAG -> tagList = tag.value
+                TAG_LIST -> tagList = tag.value
                 else -> return FILE_UNABLE_TO_READ
             }
         }

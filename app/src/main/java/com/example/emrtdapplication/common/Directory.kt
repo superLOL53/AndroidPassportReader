@@ -1,22 +1,16 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.DirectoryConstants.ADDITIONAL_BIOMETRICS_APPLICATION_ID
 import com.example.emrtdapplication.constants.DirectoryConstants.AID
 import com.example.emrtdapplication.constants.DirectoryConstants.AID_LENGTH
-import com.example.emrtdapplication.constants.DirectoryConstants.APPLICATION_TEMPLATE_TAG
 import com.example.emrtdapplication.constants.DirectoryConstants.DIR_ID_1
 import com.example.emrtdapplication.constants.DirectoryConstants.DIR_ID_2
-import com.example.emrtdapplication.constants.DirectoryConstants.INTERNATIONAL_AID_TAG
 import com.example.emrtdapplication.constants.DirectoryConstants.LDS1_ID_1
 import com.example.emrtdapplication.constants.DirectoryConstants.LDS1_ID_2
 import com.example.emrtdapplication.constants.DirectoryConstants.LDS2_ID
 import com.example.emrtdapplication.constants.DirectoryConstants.TEMPLATE_LENGTH
 import com.example.emrtdapplication.constants.DirectoryConstants.TRAVEL_RECORDS_APPLICATION_ID
 import com.example.emrtdapplication.constants.DirectoryConstants.VISA_RECORDS_APPLICATION_ID
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
@@ -25,6 +19,10 @@ import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.APPLICATION_TEMPLATE
+import com.example.emrtdapplication.constants.TlvTags.INTERNATIONAL_AID
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -96,11 +94,11 @@ class Directory() {
      */
     @OptIn(ExperimentalStdlibApi::class)
     private fun parseTLV(tlv: TLV) : Int {
-        if (!tlv.isValid || tlv.tag.size != 1 || tlv.tag[0] != APPLICATION_TEMPLATE_TAG || tlv.length != TEMPLATE_LENGTH) {
+        if (!tlv.isValid || tlv.tag.size != 1 || tlv.tag[0] != APPLICATION_TEMPLATE || tlv.length != TEMPLATE_LENGTH) {
             return FILE_UNABLE_TO_READ
         }
         val innerTLV = tlv.value?.let { TLV(it) }
-        if (innerTLV == null || !innerTLV.isValid || innerTLV.tag.size != 1 || tlv.tag[0] != INTERNATIONAL_AID_TAG ||
+        if (innerTLV == null || !innerTLV.isValid || innerTLV.tag.size != 1 || tlv.tag[0] != INTERNATIONAL_AID ||
             innerTLV.length != AID_LENGTH || innerTLV.value!!.toHexString().startsWith(AID)) {
             return FILE_UNABLE_TO_READ
         }
@@ -119,10 +117,5 @@ class Directory() {
             }
         }
         return SUCCESS
-    }
-
-    fun <T : LinearLayout> createView(context: Context, parent : T) {
-        //var row =
-        //TODO: Implement
     }
 }

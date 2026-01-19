@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.utils
 
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.TlvTags.LENGTH_MULTIPLE_BYTES
 import com.example.emrtdapplication.constants.TlvTags.TAG_MULTIPLE_BYTES
@@ -185,7 +185,7 @@ class TLV {
             }
             var l = 0
             for (j in 1..i) {
-                l = ba[offset+j].toUByte().toInt() + l*UBYTE_MODULO
+                l = ba[offset+j].toUByte().toInt() + l*U_BYTE_MODULO
             }
             return l
         } else {
@@ -209,7 +209,7 @@ class TLV {
             var l = length
             var i = 0
             while (l > 0) {
-                l /= UBYTE_MODULO
+                l /= U_BYTE_MODULO
                 i += 1
             }
             ba[0] = ba[0] or i.toByte()

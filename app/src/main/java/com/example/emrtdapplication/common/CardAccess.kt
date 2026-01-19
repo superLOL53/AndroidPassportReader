@@ -1,8 +1,5 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
@@ -10,9 +7,13 @@ import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
-import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE_SIZE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
+import org.spongycastle.asn1.ASN1ObjectIdentifier
 
 /**
  * Implements the EF.CardAccess file. This file is required if PACE is implemented.
@@ -67,13 +68,16 @@ class CardAccess() {
             return FILE_UNABLE_TO_READ
         }
         for (sequence in tlv.list!!.tlvSequence) {
-            val si = SecurityInfo(sequence)
-            if (si.type != PACE_INFO_TYPE && si.type != PACE_DOMAIN_PARAMETER_INFO_TYPE) {
-                throw IllegalArgumentException()
-            } else if (si.type == PACE_INFO_TYPE) {
-                paceInfos.add(PACEInfo(sequence))
+            val objectIdentifier = ASN1ObjectIdentifier.getInstance(sequence.list!!.tlvSequence[0].toByteArray()).id
+            if (objectIdentifier.startsWith(PACE_OID)) {
+                objectIdentifier.split(".").size
+                if (objectIdentifier.split(".").size == PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE) {
+                    paceDomainParams.add(PACEDomainParameterInfo(sequence))
+                } else if (objectIdentifier.split(".").size == PACE_INFO_TYPE_SIZE) {
+                    paceInfos.add(PACEInfo(sequence))
+                }
             } else {
-                paceDomainParams.add(PACEDomainParameterInfo((sequence)))
+                throw IllegalArgumentException("Unknown Security Info in EF.CardAccess!")
             }
         }
         return FILE_SUCCESSFUL_READ

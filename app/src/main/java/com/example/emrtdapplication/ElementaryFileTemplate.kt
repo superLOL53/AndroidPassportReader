@@ -2,7 +2,7 @@ package com.example.emrtdapplication
 
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.LONG_EF_ID
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.UBYTE_MODULO
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
@@ -76,7 +76,7 @@ abstract class ElementaryFileTemplate() : CreateView {
             contentStart = 2 + info[1]+BYTE_MODULO
             var l = 0
             for (i in 0..<(info[1]+BYTE_MODULO)) {
-                l = l*UBYTE_MODULO + info[i+2].toUByte().toInt()
+                l = l*U_BYTE_MODULO + info[i+2].toUByte().toInt()
             }
             l += 2 + (info[1] + BYTE_MODULO)
             l
@@ -133,8 +133,8 @@ abstract class ElementaryFileTemplate() : CreateView {
      * @return The file content read from the specified offset or null, if an error occurred
      */
     private fun readSmallOffset(offset: Int, fileSize: Int) : ByteArray? {
-        val p1 = (offset / UBYTE_MODULO).toByte()
-        val p2 = (offset % UBYTE_MODULO).toByte()
+        val p1 = (offset / U_BYTE_MODULO).toByte()
+        val p2 = (offset % U_BYTE_MODULO).toByte()
         val readBytes = if (offset + APDUControl.maxResponseLength > 32767) {
             32767 - offset
         } else if (offset + APDUControl.maxResponseLength > fileSize) {

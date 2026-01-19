@@ -3,10 +3,10 @@ package com.example.emrtdapplication.lds2
 import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_SIZE
-import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_TAG_1
-import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_SERIAL_NUMBER_TAG
-import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_TAG
 import com.example.emrtdapplication.constants.CertificateRecordConstants.MIN_CERTIFICATE_SERIAL_NUMBER_LENGTH
+import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE
+import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_RECORD_1
+import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_SERIAL_NUMBER
 import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.x509.Certificate
 
@@ -31,10 +31,10 @@ class CertificateRecord(record: TLVSequence, val recordNumber: Byte) {
 
     init {
         if (record.tlvSequence.size != CERTIFICATE_RECORD_SIZE) {
-            throw IllegalArgumentException("Certificate record size must be 2!")
+            throw IllegalArgumentException("Certificate record size must be ${CERTIFICATE_RECORD_SIZE}!")
         }
-        if (record.tlvSequence[0].tag.size != 2 || record.tlvSequence[0].tag[0] != CERTIFICATE_RECORD_TAG_1 ||
-            record.tlvSequence[0].tag[1] != CERTIFICATE_SERIAL_NUMBER_TAG) {
+        if (record.tlvSequence[0].tag.size != 2 || record.tlvSequence[0].tag[0] != CERTIFICATE_RECORD_1 ||
+            record.tlvSequence[0].tag[1] != CERTIFICATE_SERIAL_NUMBER) {
             throw IllegalArgumentException("Invalid tag for certificate serial number")
         }
         if (record.tlvSequence[0].value == null) {
@@ -45,7 +45,7 @@ class CertificateRecord(record: TLVSequence, val recordNumber: Byte) {
         }
         countryCode = record.tlvSequence[0].value!!.slice(0..1).toString()
         serialNumber = record.tlvSequence[0].value!!.slice(2..<record.tlvSequence[0].value!!.size).toByteArray()
-        if (record.tlvSequence[1].tag.size != 1 || record.tlvSequence[1].tag[0] != CERTIFICATE_TAG) {
+        if (record.tlvSequence[1].tag.size != 1 || record.tlvSequence[1].tag[0] != CERTIFICATE) {
             throw IllegalArgumentException("Invalid tag for X.509 certificate")
         }
         var cert : Certificate? = null

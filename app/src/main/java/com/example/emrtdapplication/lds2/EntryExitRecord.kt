@@ -2,21 +2,21 @@ package com.example.emrtdapplication.lds2
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.AUTHENTICITY_TOKEN_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.CERTIFICATE_REFERENCE_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.CONDITIONS_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.DATE_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTION_AUTHORITY_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTION_LOCATION_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTION_RESULT_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.INSPECTOR_REFERENCE_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.ISSUING_STATE_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.SIGNED_INFO_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.STAY_DURATION_TAG
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_MODE_TAG
 import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_RECORD_SIZE
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_TAG_1
-import com.example.emrtdapplication.constants.EntryExitRecordConstants.VISA_STATUS_TAG
+import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
+import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_REFERENCE
+import com.example.emrtdapplication.constants.TlvTags.CONDITIONS
+import com.example.emrtdapplication.constants.TlvTags.DATE
+import com.example.emrtdapplication.constants.TlvTags.INSPECTION_AUTHORITY
+import com.example.emrtdapplication.constants.TlvTags.INSPECTION_LOCATION
+import com.example.emrtdapplication.constants.TlvTags.INSPECTION_RESULT
+import com.example.emrtdapplication.constants.TlvTags.INSPECTOR_REFERENCE
+import com.example.emrtdapplication.constants.TlvTags.ISSUING_STATE
+import com.example.emrtdapplication.constants.TlvTags.SIGNED_INFO_TRAVEL_RECORD
+import com.example.emrtdapplication.constants.TlvTags.STAY_DURATION_TRAVEL_RECORD
+import com.example.emrtdapplication.constants.TlvTags.TRAVEL_1
+import com.example.emrtdapplication.constants.TlvTags.TRAVEL_MODE
+import com.example.emrtdapplication.constants.TlvTags.VISA_STATUS
 import com.example.emrtdapplication.utils.TLVSequence
 
 /**
@@ -67,44 +67,44 @@ class EntryExitRecord(val record: TLVSequence) {
         }
         for (tlv in record.tlvSequence) {
             if (tlv.tag.size == 1) {
-                if (tlv.tag[0] != SIGNED_INFO_TAG || tlv.list == null) {
+                if (tlv.tag[0] != SIGNED_INFO_TRAVEL_RECORD || tlv.list == null) {
                     throw IllegalArgumentException("Invalid tag for signed info in an Entry/Exit Record!")
                 }
                 for (t in tlv.list!!.tlvSequence) {
-                    if (t.tag.size != 2 || t.tag[0] != TRAVEL_TAG_1 || t.value == null) {
+                    if (t.tag.size != 2 || t.tag[0] != TRAVEL_1 || t.value == null) {
                         continue
                     }
                     when (t.tag[1]) {
-                        ISSUING_STATE_TAG -> state2 = t.value.toString()
-                        VISA_STATUS_TAG -> visaStatus = t.value.toString().replace('<', ' ')
-                        DATE_TAG -> date = t.value.toString()
-                        INSPECTION_AUTHORITY_TAG -> inspectionAuthority = t.value.toString().replace('<', ' ')
-                        INSPECTION_LOCATION_TAG -> inspectionLocation = t.value.toString().replace('<', ' ')
-                        INSPECTOR_REFERENCE_TAG -> inspectorReference = t.value.toString().replace('<', ' ')
-                        INSPECTION_RESULT_TAG -> inspectionResult = t.value.toString().replace('<', ' ')
-                        TRAVEL_MODE_TAG -> travelMode = when (t.value!![0]) {
+                        ISSUING_STATE -> state2 = t.value.toString()
+                        VISA_STATUS -> visaStatus = t.value.toString().replace('<', ' ')
+                        DATE -> date = t.value.toString()
+                        INSPECTION_AUTHORITY -> inspectionAuthority = t.value.toString().replace('<', ' ')
+                        INSPECTION_LOCATION -> inspectionLocation = t.value.toString().replace('<', ' ')
+                        INSPECTOR_REFERENCE -> inspectorReference = t.value.toString().replace('<', ' ')
+                        INSPECTION_RESULT -> inspectionResult = t.value.toString().replace('<', ' ')
+                        TRAVEL_MODE -> travelMode = when (t.value!![0]) {
                                                             'A'.code.toByte() -> "Air"
                                                             'S'.code.toByte() -> "Sea"
                                                             'L'.code.toByte() -> "Land"
                                                             else -> "Unknown"
                                                         }
-                        STAY_DURATION_TAG -> stayDuration = run {
+                        STAY_DURATION_TRAVEL_RECORD -> stayDuration = run {
                             var tmp = 0
                             for (b in tlv.value!!) tmp = tmp*256 + b
                             tmp
                         }
-                        CONDITIONS_TAG -> conditions = t.value.toString().replace('<', ' ')
+                        CONDITIONS -> conditions = t.value.toString().replace('<', ' ')
                     }
                 }
             } else if (tlv.tag.size == 2) {
-                if (tlv.tag[0] != TRAVEL_TAG_1 || (tlv.tag[1] != ISSUING_STATE_TAG &&
-                            tlv.tag[1] != AUTHENTICITY_TOKEN_TAG && tlv.tag[1] != CERTIFICATE_REFERENCE_TAG)) {
+                if (tlv.tag[0] != TRAVEL_1 || (tlv.tag[1] != ISSUING_STATE &&
+                            tlv.tag[1] != AUTHENTICITY_TOKEN && tlv.tag[1] != CERTIFICATE_REFERENCE)) {
                     throw IllegalArgumentException("Invalid tag in an Entry/Exit Record!")
                 }
                 when (tlv.tag[1]) {
-                    ISSUING_STATE_TAG -> state1 = tlv.value?.toString()
-                    AUTHENTICITY_TOKEN_TAG -> signature = tlv.value
-                    CERTIFICATE_REFERENCE_TAG -> certificateReference = tlv.value
+                    ISSUING_STATE -> state1 = tlv.value?.toString()
+                    AUTHENTICITY_TOKEN -> signature = tlv.value
+                    CERTIFICATE_REFERENCE -> certificateReference = tlv.value
                 }
             }
         }
