@@ -1,8 +1,5 @@
 package com.example.emrtdapplication
 
-import android.content.Context
-import android.widget.LinearLayout
-import android.widget.TableLayout
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.ASN1ObjectIdentifier
 
@@ -31,12 +28,11 @@ import org.spongycastle.asn1.ASN1ObjectIdentifier
  * @property protocol The [objectIdentifier] represented as a [ByteArray]
  * @throws IllegalArgumentException If [tlv] does not contain any of the subclasses of a SecurityInfo
  */
-open class SecurityInfo(tlv: TLV, val type : Int) : CreateView {
+open class SecurityInfo(tlv: TLV, val type : Int) {
     val objectIdentifier : String
     val requiredData : TLV
     val optionalData : TLV?
     val protocol : ByteArray
-    protected var tableLayout : TableLayout? = null
 
     init {
         if (!tlv.isValid || !tlv.isConstruct() || tlv.list == null || tlv.list!!.tlvSequence.size < 2 || 3 < tlv.list!!.tlvSequence.size) {
@@ -58,11 +54,11 @@ open class SecurityInfo(tlv: TLV, val type : Int) : CreateView {
             optionalData = null
         }
     }
-
+/*
     /**
      * Create views to display contents of the file in the app
      */
-    override fun <T : LinearLayout> createViews(context: Context, parent : T) {
+    override fun <T : LinearLayout> createView(context: Context, parent : T) {
         tableLayout = TableLayout(context)
         tableLayout!!.layoutParams = TableLayout.LayoutParams(
             TableLayout.LayoutParams.MATCH_PARENT,
@@ -72,5 +68,5 @@ open class SecurityInfo(tlv: TLV, val type : Int) : CreateView {
         provideTextForRow(row, "Protocol OID:", objectIdentifier)
         tableLayout!!.addView(row)
         parent.addView(tableLayout)
-    }
+    }*/
 }

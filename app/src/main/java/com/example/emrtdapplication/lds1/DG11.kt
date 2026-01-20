@@ -1,12 +1,7 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.view.Gravity
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TableRow
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
@@ -103,76 +98,6 @@ class DG11() : ElementaryFileTemplate() {
             }
         }
         return SUCCESS
-    }
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     *
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        var row : TableRow
-        if (fullName != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Full Name: ", fullName!!)
-        }
-        if (otherNames != null) {
-            for (s in otherNames) {
-                row = createRow(context, parent)
-                provideTextForRow(row, "Other Name: ", s)
-            }
-        }
-        if (personalNumber != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Personal Number: ", personalNumber!!)
-        }
-        if (fullDateOfBirth != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Full date of birth: ", fullDateOfBirth!!)
-        }
-        if (placeOfBirth != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Place of birth: ", placeOfBirth!!)
-        }
-        if (permanentAddress != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Address: ", permanentAddress!!)
-        }
-        if (telephone != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Telephone: ", telephone!!)
-        }
-        if (profession != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Profession: ", profession!!)
-        }
-        if (title != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Title: ", title!!)
-        }
-        if (personalSummary != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Summary: ", personalSummary!!)
-        }
-        if (otherTDNumbers != null) {
-            for (td in otherTDNumbers) {
-                row = createRow(context, parent)
-                provideTextForRow(row, "Other TD number: ", td)
-            }
-        }
-        if (custodyInformation != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Custody information: ", custodyInformation!!)
-        }
-        if (image != null) {
-            val imageView = ImageView(context)
-            imageView.setImageBitmap(image)
-            row = TableRow(context)
-            row.addView(imageView)
-            row.gravity = Gravity.CENTER
-            parent.addView(row)
-        }
     }
 
     /**

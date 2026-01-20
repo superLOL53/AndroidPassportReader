@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.TLV
@@ -47,8 +45,8 @@ class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, ACTIVE_AUTHENTICATI
             signatureAlgorithm = ASN1ObjectIdentifier.getInstance(optionalData.toByteArray()).id
         }
     }
-
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+/*
+    override fun <T : LinearLayout> createView(context: Context, parent: T) {
         super.createViews(context, parent)
         if (tableLayout != null) {
             var row = createRow(context, parent)
@@ -58,5 +56,5 @@ class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, ACTIVE_AUTHENTICATI
             provideTextForRow(row, "Signature algorithm OID:", signatureAlgorithm)
             tableLayout!!.addView(row)
         }
-    }
+    }*/
 }

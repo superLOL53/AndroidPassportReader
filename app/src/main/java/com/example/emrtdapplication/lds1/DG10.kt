@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
 
@@ -18,16 +16,6 @@ class DG10() : ElementaryFilesTypeTemplate<TLV>() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier: Byte = 0x0A
     override val efTag: Byte = 0x6A
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     *
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        //TODO: Implement
-    }
 
     override fun add(tlv: TLV, list: ArrayList<TLV>) {
         list.add(tlv)

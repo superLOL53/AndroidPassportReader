@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
@@ -84,15 +82,5 @@ class DG14() : ElementaryFileTemplate() {
         }
         securityInfos = list.toTypedArray()
         return SUCCESS
-    }
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     *
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        //TODO: Implement
     }
 }

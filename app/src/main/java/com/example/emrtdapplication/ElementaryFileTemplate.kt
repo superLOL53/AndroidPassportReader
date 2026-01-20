@@ -31,8 +31,9 @@ import java.security.Provider
  * @property isPresent Indicates if the ePassport contains the EF.
  * @property isRead Indicates if the whole EF was read from the ePassport.
  */
-abstract class ElementaryFileTemplate() : CreateView {
-    protected abstract var rawFileContent: ByteArray?
+abstract class ElementaryFileTemplate() {
+    abstract var rawFileContent: ByteArray?
+        protected set
     abstract val shortEFIdentifier: Byte
     protected open val longEFIdentifier: Byte = LONG_EF_ID
     protected abstract val efTag: Byte

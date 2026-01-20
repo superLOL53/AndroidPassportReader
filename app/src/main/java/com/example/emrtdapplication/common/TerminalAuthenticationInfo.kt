@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.TLV
@@ -29,12 +27,12 @@ class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, TERMINAL_AUTHENTI
         1
     }
 
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         super.createViews(context, parent)
         if (tableLayout != null) {
             val row = createRow(context, parent)
             provideTextForRow(row, "Version:", version.toString())
             tableLayout!!.addView(row)
         }
-    }
+    }*/
 }

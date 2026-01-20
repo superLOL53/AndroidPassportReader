@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds2
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.CertificateRecordConstants.CERTIFICATE_RECORD_SIZE
 import com.example.emrtdapplication.constants.CertificateRecordConstants.MIN_CERTIFICATE_SERIAL_NUMBER_LENGTH
 import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE
@@ -67,9 +65,5 @@ class CertificateRecord(record: TLVSequence, val recordNumber: Byte) {
             throw IllegalArgumentException("Unable to decode certificate!")
         }
         certificate = cert
-    }
-
-    fun createView(context: Context, parent: LinearLayout) {
-        //TODO: Implement
     }
 }

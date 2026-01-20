@@ -50,5 +50,5 @@ interface CreateView {
     /**
      * Create views to display contents of the file in the app
      */
-    fun <T : LinearLayout> createViews(context: Context, parent: T)
+    fun <T : LinearLayout> createView(context: Context, parent: T)
 }

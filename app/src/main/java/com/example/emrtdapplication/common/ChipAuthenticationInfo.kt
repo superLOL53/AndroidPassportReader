@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.TLV
@@ -56,7 +54,7 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_T
         }
     }
 
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         super.createViews(context, parent)
         if (tableLayout != null) {
             var row = createRow(context, parent)
@@ -68,5 +66,5 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_T
                 tableLayout!!.addView(row)
             }
         }
-    }
+    }*/
 }

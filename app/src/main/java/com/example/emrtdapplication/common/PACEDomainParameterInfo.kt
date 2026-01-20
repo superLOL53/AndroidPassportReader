@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
 import com.example.emrtdapplication.utils.TLV
@@ -45,7 +43,7 @@ class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv, PACE_DOMAIN_PARAMETE
         }
     }
 
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         super.createViews(context, parent)
         var row = createRow(context, parent)
         provideTextForRow(row, "Algorithm OID:", algorithmIdentifier.algorithm.id)
@@ -55,5 +53,5 @@ class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv, PACE_DOMAIN_PARAMETE
             provideTextForRow(row, "Parameter ID:", parameterId.toString(16))
             tableLayout!!.addView(row)
         }
-    }
+    }*/
 }

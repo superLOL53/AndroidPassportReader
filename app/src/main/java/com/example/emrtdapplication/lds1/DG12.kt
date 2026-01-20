@@ -1,13 +1,7 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.view.Gravity
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TableLayout
-import android.widget.TableRow
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NOT_IMPLEMENTED
@@ -89,66 +83,6 @@ class DG12() : ElementaryFileTemplate() {
             }
         }
         return NOT_IMPLEMENTED
-    }
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     *
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        //TODO: Implement
-    }
-
-    fun createView(context: Context, parent : TableLayout) {
-        var row : TableRow
-        if (issuingAuthority != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Issuing Authority: ", issuingAuthority!!)
-        }
-        if (dateOfIssue != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Date of issue: ", dateOfIssue!!)
-        }
-        if (otherPersons != null) {
-            for (p in otherPersons) {
-                row = createRow(context, parent)
-                provideTextForRow(row, "Other Person: ", p)
-            }
-        }
-        if (endorsements != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Endorsement: ", endorsements!!)
-        }
-        if (taxExitRequirements != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Tax/Exit Requirements: ", taxExitRequirements!!)
-        }
-        if (documentPersonalizationTime != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Document personalization time: ", documentPersonalizationTime!!)
-        }
-        if (personalizationSystemSerialNumber != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Personalization device serial number: ", personalizationSystemSerialNumber!!)
-        }
-        if (front != null) {
-            val imageView = ImageView(context)
-            imageView.setImageBitmap(front)
-            row = TableRow(context)
-            row.addView(imageView)
-            row.gravity = Gravity.CENTER
-            parent.addView(row)
-        }
-        if (rear != null) {
-            val imageView = ImageView(context)
-            imageView.setImageBitmap(rear)
-            row = TableRow(context)
-            row.addView(imageView)
-            row.gravity = Gravity.CENTER
-            parent.addView(row)
-        }
     }
 
     /**

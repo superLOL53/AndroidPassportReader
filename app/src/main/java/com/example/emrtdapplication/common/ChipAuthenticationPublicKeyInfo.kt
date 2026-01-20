@@ -1,10 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.view.Gravity
-import android.widget.LinearLayout
-import android.widget.TextView
-import com.example.emrtdapplication.R
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
 import com.example.emrtdapplication.utils.TLV
@@ -50,7 +45,7 @@ class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENT
         }
     }
 
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         super.createViews(context, parent)
         if (tableLayout != null) {
             var row = createRow(context, parent)
@@ -79,5 +74,5 @@ class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENT
         text.isSingleLine = false
         text.text = publicKeyInfo.publicKeyData.toString()
         parent.addView(text)
-    }
+    }*/
 }

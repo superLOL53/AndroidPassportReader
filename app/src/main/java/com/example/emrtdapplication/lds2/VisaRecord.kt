@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds2
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.TlvTags.ADDITIONAL_BIOMETRICS_REFERENCE
 import com.example.emrtdapplication.constants.TlvTags.ADDITIONAL_INFORMATION
 import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
@@ -30,6 +28,10 @@ import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE_A
 import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE_B
 import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_RECORD_SIZE
 import com.example.emrtdapplication.utils.TLVSequence
+import org.spongycastle.asn1.x509.Certificate
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 
 /**
  * Class representing a single Visa Record. The format is as follows:
@@ -46,6 +48,7 @@ import com.example.emrtdapplication.utils.TLVSequence
  * @throws IllegalArgumentException If any of the mandatory fields are missing/invalid or if any tags are invalid
  */
 class VisaRecord(val record: TLVSequence) {
+    val signedInfo : ByteArray
     val state : String
     val documentType : String
     val machineReadableVisaTypeA : String?
@@ -70,8 +73,11 @@ class VisaRecord(val record: TLVSequence) {
     val additionalBiometricsReference : Byte?
     val signature : ByteArray
     val certificateReference : Byte
+    var isVerified = false
+        private set
 
     init {
+        var signedInfo : ByteArray? = null
         var state1 : String? = null
         var state2 : String? = null
         var documentType : String? = null
@@ -105,6 +111,7 @@ class VisaRecord(val record: TLVSequence) {
                 if (tlv.tag[0] != SIGNED_INFO_VISA_RECORD) {
                     throw IllegalArgumentException("Invalid tag in record sequence!")
                 }
+                signedInfo = tlv.toByteArray()
                 if (tlv.list == null || tlv.list!!.tlvSequence.isEmpty()) {
                     throw IllegalArgumentException("Empty visa record!")
                 }
@@ -157,6 +164,10 @@ class VisaRecord(val record: TLVSequence) {
                 }
             }
         }
+        if (signedInfo == null) {
+            throw IllegalArgumentException("No signed information in the record!")
+        }
+        this.signedInfo = signedInfo
         if (state1 == null || !state1.contentEquals(state2)) {
             throw IllegalArgumentException("State entries are not present or mismatch!")
         }
@@ -235,11 +246,16 @@ class VisaRecord(val record: TLVSequence) {
         this.certificateReference = certificateReference[0]
     }
 
-    fun <T : LinearLayout> createView(context: Context, parent: T) {
-        //TODO: Implement
-    }
-
-    fun verify() {
-        //TODO: Implement
+    fun verify(certificate: Certificate) {
+        try {
+            val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
+            val pub = fac!!.generatePublic(spec)
+            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id)
+            sigAlg.initVerify(pub)
+            sigAlg.update(signedInfo)
+            isVerified = sigAlg.verify(signature)
+        } catch (_ : Exception) {
+        }
     }
 }

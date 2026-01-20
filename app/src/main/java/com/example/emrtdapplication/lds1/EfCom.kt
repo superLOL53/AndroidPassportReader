@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.EFComConstants.LDS_VERSION_LENGTH
 import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_LENGTH
@@ -92,15 +90,6 @@ class EfCom(): ElementaryFileTemplate() {
             }
         }
         return FILE_SUCCESSFUL_READ
-    }
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        // TODO: Implement
     }
 
     /**

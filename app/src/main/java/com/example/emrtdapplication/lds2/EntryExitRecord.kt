@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds2
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.EntryExitRecordConstants.TRAVEL_RECORD_SIZE
 import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
 import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_REFERENCE
@@ -18,6 +16,10 @@ import com.example.emrtdapplication.constants.TlvTags.TRAVEL_1
 import com.example.emrtdapplication.constants.TlvTags.TRAVEL_MODE
 import com.example.emrtdapplication.constants.TlvTags.VISA_STATUS
 import com.example.emrtdapplication.utils.TLVSequence
+import org.spongycastle.asn1.x509.Certificate
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 
 /**
  * Class representing a Entry or Exit Record. Both have the same format:
@@ -35,6 +37,7 @@ import com.example.emrtdapplication.utils.TLVSequence
  * @throws IllegalArgumentException If any mandatory field is missing/invalid or if a tag is invalid
  */
 class EntryExitRecord(val record: TLVSequence) {
+    val signedInfo : ByteArray
     val state : String
     val visaStatus : String?
     val date : String
@@ -47,8 +50,11 @@ class EntryExitRecord(val record: TLVSequence) {
     val conditions : String?
     val signature : ByteArray
     val certificateReference : Byte
+    var isVerified = false
+        private set
 
     init {
+        var signedInfo : ByteArray? = null
         var state1 : String? = null
         var state2 : String? = null
         var visaStatus : String? = null
@@ -70,6 +76,7 @@ class EntryExitRecord(val record: TLVSequence) {
                 if (tlv.tag[0] != SIGNED_INFO_TRAVEL_RECORD || tlv.list == null) {
                     throw IllegalArgumentException("Invalid tag for signed info in an Entry/Exit Record!")
                 }
+                signedInfo = tlv.toByteArray()
                 for (t in tlv.list!!.tlvSequence) {
                     if (t.tag.size != 2 || t.tag[0] != TRAVEL_1 || t.value == null) {
                         continue
@@ -108,6 +115,10 @@ class EntryExitRecord(val record: TLVSequence) {
                 }
             }
         }
+        if (signedInfo == null) {
+            throw IllegalArgumentException("No signed information in the record!")
+        }
+        this.signedInfo = signedInfo
         if (state1 == null || !state1.contentEquals(state2)) {
             throw IllegalArgumentException("State entries are not present or mismatch!")
         }
@@ -143,11 +154,16 @@ class EntryExitRecord(val record: TLVSequence) {
         this.certificateReference = certificateReference[0]
     }
 
-    fun createView(context: Context, parent: LinearLayout) {
-        //TODO: Implement
-    }
-
-    fun verify() {
-        //TODO: Implement
+    fun verify(certificate: Certificate) {
+        try {
+            val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
+            val pub = fac!!.generatePublic(spec)
+            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id)
+            sigAlg.initVerify(pub)
+            sigAlg.update(signedInfo)
+            isVerified = sigAlg.verify(signature)
+        } catch (_ : Exception) {
+        }
     }
 }

@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.INVALID_ARGUMENT
 import com.example.emrtdapplication.constants.PACEInfoConstants.UNDEFINED
@@ -79,7 +77,7 @@ class PACEInfo(tlv: TLV): SecurityInfo(tlv, PACE_INFO_TYPE) {
         }
     }
 
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
+    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
         super.createViews(context, parent)
         if (tableLayout != null) {
             var row = createRow(context, parent)
@@ -117,7 +115,7 @@ class PACEInfo(tlv: TLV): SecurityInfo(tlv, PACE_INFO_TYPE) {
             4.toByte() -> "AES-CBC-CMAC-256"
             else -> "Unknown"
         }
-    }
+    }*/
 
     /**
      * Extract and validate the asymmetric and symmetric protocols and their combination

@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
@@ -27,15 +25,5 @@ class DG13() : ElementaryFileTemplate() {
      */
     override fun parse(): Int {
         return SUCCESS
-    }
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     *
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        //TODO: Implement
     }
 }

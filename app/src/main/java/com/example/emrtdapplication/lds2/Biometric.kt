@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds2
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_RECORD_SIZE
 import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
 import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC
@@ -10,6 +8,10 @@ import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC_2
 import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC_DATA
 import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_REFERENCE
 import com.example.emrtdapplication.utils.TLV
+import org.spongycastle.asn1.x509.Certificate
+import java.security.KeyFactory
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 
 /**
  * Class representing a biometric elementary file in the Additional Biometrics application.
@@ -31,6 +33,8 @@ class Biometric(record: TLV) {
     val biometricData : ByteArray
     val signature : ByteArray
     val certificateReference : Byte
+    var isVerified = false
+        private set
 
     init {
         var biometricData : ByteArray? = null
@@ -67,7 +71,16 @@ class Biometric(record: TLV) {
         this.certificateReference = certificateReference[0]
     }
 
-    fun<T : LinearLayout> createView(context: Context, parent: T) {
-        //TODO: Implement
+    fun verify(certificate: Certificate) {
+        try {
+            val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
+            val pub = fac!!.generatePublic(spec)
+            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id)
+            sigAlg.initVerify(pub)
+            sigAlg.update(biometricData)
+            isVerified = sigAlg.verify(signature)
+        } catch (_ : Exception) {
+        }
     }
 }

@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.lds1
 
-import android.content.Context
-import android.widget.LinearLayout
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.DG15Constants.PARTIAL_MESSAGE_RECOVERY
 import com.example.emrtdapplication.constants.DG15Constants.SHA_1
@@ -42,7 +40,8 @@ class DG15() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier: Byte = 0x0F
     override val efTag: Byte = 0x6F
-    private var publicKeyInfo : SubjectPublicKeyInfo? = null
+    var publicKeyInfo : SubjectPublicKeyInfo? = null
+        private set
     var isAuthenticated = false
         private set
 
@@ -61,20 +60,6 @@ class DG15() : ElementaryFileTemplate() {
         } catch (_ : Exception) {
             return FAILURE
         }
-    }
-
-    /**
-     * Dynamically create a view for every biometric information in this file.
-     *
-     * @param context The context in which to create the view
-     * @param parent The parent of the view to create
-     */
-    override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        if (rawFileContent == null || publicKeyInfo == null) return
-        var row = createRow(context, parent)
-        provideTextForRow(row, "Algorithm Identifier: ", publicKeyInfo!!.algorithm.algorithm.id)
-        row = createRow(context, parent)
-        provideTextForRow(row, "Public Key:", publicKeyInfo!!.publicKeyData.string)
     }
 
     /**
