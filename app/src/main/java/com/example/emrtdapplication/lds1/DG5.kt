@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.constants.TlvTags.DG5_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG5_SHORT_EF_ID
 import com.example.emrtdapplication.utils.DisplayedPortrait
 import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
@@ -15,8 +17,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG5() : ElementaryFilesTypeTemplate<DisplayedPortrait>() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x05
-    override val efTag: Byte = 0x65
+    override val shortEFIdentifier = DG5_SHORT_EF_ID
+    override val efTag = DG5_FILE_TAG
 
     override fun add(tlv: TLV, list: ArrayList<DisplayedPortrait>) {
         list.add(DisplayedPortrait(tlv))

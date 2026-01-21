@@ -16,6 +16,8 @@ import com.example.emrtdapplication.common.PACEDomainParameterInfo
 import com.example.emrtdapplication.common.PACEInfo
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG14_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG14_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 
@@ -30,8 +32,8 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
  */
 class DG14() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x0E
-    override val efTag: Byte = 0x6E
+    override val shortEFIdentifier = DG14_SHORT_EF_ID
+    override val efTag = DG14_FILE_TAG
     var securityInfos: Array<SecurityInfo>? = null
         private set
 

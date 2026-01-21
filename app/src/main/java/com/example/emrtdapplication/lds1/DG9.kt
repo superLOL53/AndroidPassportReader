@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.constants.TlvTags.DG9_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG9_SHORT_EF_ID
 import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
 
@@ -15,8 +17,8 @@ import com.example.emrtdapplication.utils.TLV
 class DG9() : ElementaryFilesTypeTemplate<TLV>() {
 
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x09
-    override val efTag: Byte = 0x69
+    override val shortEFIdentifier = DG9_SHORT_EF_ID
+    override val efTag = DG9_FILE_TAG
 
 
     override fun add(tlv: TLV, list: ArrayList<TLV>) {

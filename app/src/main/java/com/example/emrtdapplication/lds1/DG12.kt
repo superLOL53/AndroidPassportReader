@@ -6,6 +6,17 @@ import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NOT_IMPLEMENTED
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG12_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG12_SHORT_EF_ID
+import com.example.emrtdapplication.constants.TlvTags.DOCUMENT_PERSONALIZATION_TIME
+import com.example.emrtdapplication.constants.TlvTags.ENDORSEMENTS
+import com.example.emrtdapplication.constants.TlvTags.FRONT_IMAGE
+import com.example.emrtdapplication.constants.TlvTags.ISSUANCE_DATE_DG12
+import com.example.emrtdapplication.constants.TlvTags.ISSUING_AUTHORITY_DG12
+import com.example.emrtdapplication.constants.TlvTags.PERSONALIZATION_SYSTEM_SERIAL_NUMBER
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TEMPLATE
+import com.example.emrtdapplication.constants.TlvTags.REAR_IMAGE
+import com.example.emrtdapplication.constants.TlvTags.TAX_EXIT_REQUIREMENTS
 import com.example.emrtdapplication.utils.TLV
 
 
@@ -27,8 +38,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG12() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x0C
-    override val efTag: Byte = 0x6C
+    override val shortEFIdentifier = DG12_SHORT_EF_ID
+    override val efTag = DG12_FILE_TAG
     var issuingAuthority : String? = null
         private set
     var dateOfIssue : String? = null
@@ -64,20 +75,20 @@ class DG12() : ElementaryFileTemplate() {
         }
         for (tag in tlv.list!!.tlvSequence) {
             if (tag.tag.size == 1) {
-                if (tag.tag[0] == 0xA0.toByte()) {
+                if (tag.tag[0] == PERSON_TAG_TEMPLATE) {
                     otherPersons(tag)
                 }
             } else if (tag.tag.size == 2) {
                 if (tag.tag[0] == 0x5F.toByte()) {
-                    when (tag.tag[1].toInt()) {
-                        0x19 -> issuingAuthority = tag.value?.decodeToString()
-                        0x26 -> dateOfIssue = tag.value?.decodeToString()
-                        0x1B -> endorsements = tag.value?.decodeToString()
-                        0x1C -> taxExitRequirements = tag.value?.decodeToString()
-                        0x1D -> front = decodeImage(tag)
-                        0x1E -> rear = decodeImage(tag)
-                        0x55 -> documentPersonalizationTime = tag.value?.decodeToString()
-                        0x56 -> personalizationSystemSerialNumber = tag.value?.decodeToString()
+                    when (tag.tag[1]) {
+                        ISSUING_AUTHORITY_DG12 -> issuingAuthority = tag.value?.decodeToString()
+                        ISSUANCE_DATE_DG12 -> dateOfIssue = tag.value?.decodeToString()
+                        ENDORSEMENTS -> endorsements = tag.value?.decodeToString()
+                        TAX_EXIT_REQUIREMENTS -> taxExitRequirements = tag.value?.decodeToString()
+                        FRONT_IMAGE -> front = decodeImage(tag)
+                        REAR_IMAGE -> rear = decodeImage(tag)
+                        DOCUMENT_PERSONALIZATION_TIME -> documentPersonalizationTime = tag.value?.decodeToString()
+                        PERSONALIZATION_SYSTEM_SERIAL_NUMBER -> personalizationSystemSerialNumber = tag.value?.decodeToString()
                     }
                 }
             }

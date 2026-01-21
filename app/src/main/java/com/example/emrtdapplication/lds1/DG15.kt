@@ -15,6 +15,8 @@ import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG15_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG15_SHORT_EF_ID
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import org.spongycastle.crypto.digests.SHA1Digest
 import org.spongycastle.crypto.digests.SHA224Digest
@@ -38,8 +40,8 @@ import javax.crypto.Cipher
  */
 class DG15() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x0F
-    override val efTag: Byte = 0x6F
+    override val shortEFIdentifier = DG15_SHORT_EF_ID
+    override val efTag = DG15_FILE_TAG
     var publicKeyInfo : SubjectPublicKeyInfo? = null
         private set
     var isAuthenticated = false

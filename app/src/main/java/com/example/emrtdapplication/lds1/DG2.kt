@@ -5,6 +5,8 @@ import com.example.emrtdapplication.biometrics.BiometricInformationGroupTemplate
 import com.example.emrtdapplication.biometrics.BiometricType
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG2_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG2_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -17,8 +19,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG2() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x02
-    override val efTag: Byte = 0x75
+    override val shortEFIdentifier: Byte = DG2_SHORT_EF_ID
+    override val efTag: Byte = DG2_FILE_TAG
     var biometricInformation : BiometricInformationGroupTemplate? = null
         private set
 

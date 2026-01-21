@@ -5,6 +5,22 @@ import android.graphics.BitmapFactory
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.BIRTHDATE
+import com.example.emrtdapplication.constants.TlvTags.BIRTH_PLACE
+import com.example.emrtdapplication.constants.TlvTags.CUSTODY_INFORMATION
+import com.example.emrtdapplication.constants.TlvTags.DG11_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG11_SHORT_EF_ID
+import com.example.emrtdapplication.constants.TlvTags.DOCUMENT_NUMBERS
+import com.example.emrtdapplication.constants.TlvTags.FULL_NAME
+import com.example.emrtdapplication.constants.TlvTags.IMAGE
+import com.example.emrtdapplication.constants.TlvTags.MULTIPLE_BYTES_TAG
+import com.example.emrtdapplication.constants.TlvTags.PERMANENT_ADDRESS
+import com.example.emrtdapplication.constants.TlvTags.PERSONAL_NUMBER
+import com.example.emrtdapplication.constants.TlvTags.PERSONAL_SUMMARY
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TEMPLATE
+import com.example.emrtdapplication.constants.TlvTags.PROFESSION
+import com.example.emrtdapplication.constants.TlvTags.TELEPHONE_NUMBER
+import com.example.emrtdapplication.constants.TlvTags.TITLE
 import com.example.emrtdapplication.utils.TLV
 
 
@@ -30,8 +46,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG11() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x0B
-    override val efTag: Byte = 0x6B
+    override val shortEFIdentifier = DG11_SHORT_EF_ID
+    override val efTag = DG11_FILE_TAG
     var fullName : String? = null
         private set
     var personalNumber : String? = null
@@ -75,24 +91,24 @@ class DG11() : ElementaryFileTemplate() {
         }
         for (tag in tlv.list!!.tlvSequence) {
             if (tag.tag.size == 2) {
-                if (tag.tag[0] == 0x5F.toByte()) {
-                    when (tag.tag[1].toInt()) {
-                        0x0E -> fullName = tag.value?.decodeToString()?.replace('<', ' ')
-                        0x10 -> personalNumber = tag.value?.decodeToString()
-                        0x2B -> fullDateOfBirth = tag.value?.decodeToString()
-                        0x11 -> placeOfBirth = tag.value?.decodeToString()?.replace('<', ' ')
-                        0x42 -> permanentAddress = tag.value?.decodeToString()?.replace('<', ' ')
-                        0x12 -> telephone = tag.value?.decodeToString()
-                        0x13 -> profession = tag.value?.decodeToString()
-                        0x14 -> title = tag.value?.decodeToString()
-                        0x15 -> personalSummary = tag.value?.decodeToString()
-                        0x16 -> decodeImage(tag)
-                        0x17 -> decodeDocumentNumbers(tag)
-                        0x18 -> custodyInformation = tag.value?.decodeToString()
+                if (tag.tag[0] == MULTIPLE_BYTES_TAG) {
+                    when (tag.tag[1]) {
+                        FULL_NAME -> fullName = tag.value?.decodeToString()?.replace('<', ' ')
+                        PERSONAL_NUMBER -> personalNumber = tag.value?.decodeToString()
+                        BIRTHDATE -> fullDateOfBirth = tag.value?.decodeToString()
+                        BIRTH_PLACE -> placeOfBirth = tag.value?.decodeToString()?.replace('<', ' ')
+                        PERMANENT_ADDRESS -> permanentAddress = tag.value?.decodeToString()?.replace('<', ' ')
+                        TELEPHONE_NUMBER -> telephone = tag.value?.decodeToString()
+                        PROFESSION -> profession = tag.value?.decodeToString()
+                        TITLE -> title = tag.value?.decodeToString()
+                        PERSONAL_SUMMARY -> personalSummary = tag.value?.decodeToString()
+                        IMAGE -> decodeImage(tag)
+                        DOCUMENT_NUMBERS -> decodeDocumentNumbers(tag)
+                        CUSTODY_INFORMATION -> custodyInformation = tag.value?.decodeToString()
                     }
                 }
             } else if (tag.tag.size ==1) {
-                if (tag.tag[0] == 0xA0.toByte()) {
+                if (tag.tag[0] == PERSON_TAG_TEMPLATE) {
                     readNames(tag)
                 }
             }

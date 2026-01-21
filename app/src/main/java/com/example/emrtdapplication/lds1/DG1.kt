@@ -1,8 +1,15 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.constants.DG1Constants.TD1_SIZE
+import com.example.emrtdapplication.constants.DG1Constants.TD2_SIZE
+import com.example.emrtdapplication.constants.DG1Constants.TD3_SIZE
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG1_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG1_SHORT_EF_ID
+import com.example.emrtdapplication.constants.TlvTags.MRZ
+import com.example.emrtdapplication.constants.TlvTags.MULTIPLE_BYTES_TAG
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -28,8 +35,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG1(): ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x01
-    override val efTag: Byte = 0x61
+    override val shortEFIdentifier = DG1_SHORT_EF_ID
+    override val efTag = DG1_FILE_TAG
     var documentCode : String? = null
         private set
     var issuerCode : String? = null
@@ -71,21 +78,21 @@ class DG1(): ElementaryFileTemplate() {
             return FAILURE
         }
         var tlv = TLV(rawFileContent!!)
-        if (tlv.tag.size != 1 || tlv.tag[0] != 0x61.toByte()) {
+        if (tlv.tag.size != 1 || tlv.tag[0] != DG1_FILE_TAG) {
             return FAILURE
         }
         if (tlv.list == null || tlv.list!!.tlvSequence.size != 1) {
             return FAILURE
         }
         tlv = tlv.list!!.tlvSequence[0]
-        if (tlv.tag.size != 2 || tlv.tag[0] != 0x5F.toByte() || tlv.tag[1] != 0x1F.toByte() || tlv.value == null) {
+        if (tlv.tag.size != 2 || tlv.tag[0] != MULTIPLE_BYTES_TAG || tlv.tag[1] != MRZ || tlv.value == null) {
             return FAILURE
         }
         val mrz = tlv.value!!
         return when(mrz.size) {
-            90 -> decodeTD1MRZ(mrz)
-            72 -> decodeTD2MRZ(mrz)
-            88 -> decodeTD3MRZ(mrz)
+            TD1_SIZE -> decodeTD1MRZ(mrz)
+            TD2_SIZE -> decodeTD2MRZ(mrz)
+            TD3_SIZE -> decodeTD3MRZ(mrz)
             else -> FAILURE
         }
     }

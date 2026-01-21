@@ -3,6 +3,8 @@ package com.example.emrtdapplication.lds1
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG13_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG13_SHORT_EF_ID
 
 
 /**
@@ -15,8 +17,8 @@ import com.example.emrtdapplication.constants.SUCCESS
  */
 class DG13() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x0D
-    override val efTag: Byte = 0x6D
+    override val shortEFIdentifier = DG13_SHORT_EF_ID
+    override val efTag = DG13_FILE_TAG
 
     /**
      * Parses the contents of [rawFileContent]

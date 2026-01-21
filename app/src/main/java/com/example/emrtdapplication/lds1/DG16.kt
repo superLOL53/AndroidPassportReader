@@ -4,6 +4,15 @@ import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.utils.Person
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.DG16_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG16_SHORT_EF_ID
+import com.example.emrtdapplication.constants.TlvTags.MULTIPLE_BYTES_TAG
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_ADDRESS
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_DATE
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_MASK
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_NAME
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TELEPHONE_NUMBER
+import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TEMPLATE
 import com.example.emrtdapplication.utils.TLV
 import kotlin.experimental.and
 
@@ -18,8 +27,8 @@ import kotlin.experimental.and
  */
 class DG16() : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x10
-    override val efTag: Byte = 0x70
+    override val shortEFIdentifier = DG16_SHORT_EF_ID
+    override val efTag = DG16_FILE_TAG
     var persons: Array<Person>? = null
             private set
 
@@ -39,7 +48,7 @@ class DG16() : ElementaryFileTemplate() {
         }
         val list = ArrayList<Person>()
         for (tag in tlv.list!!.tlvSequence) {
-            if (tag.tag.size == 1 && (tag.tag[0] and 0xF0.toByte()) == 0xA0.toByte()) {
+            if (tag.tag.size == 1 && (tag.tag[0] and PERSON_TAG_MASK) == PERSON_TAG_TEMPLATE) {
                 val p = getPerson(tag)
                 if (p != null) {
                     list.add(p)
@@ -65,12 +74,12 @@ class DG16() : ElementaryFileTemplate() {
         var telephone: String? = null
         var address: String? = null
         for (tag in person.list!!.tlvSequence) {
-            if (tag.tag[0] == 0x5F.toByte()) {
-                when (tag.tag[1].toInt()) {
-                    0x50 -> dateRecorded = tag.value?.decodeToString()
-                    0x51 -> name = tag.value?.decodeToString()
-                    0x52 -> telephone = tag.value?.decodeToString()
-                    0x53 -> address = tag.value?.decodeToString()
+            if (tag.tag[0] == MULTIPLE_BYTES_TAG) {
+                when (tag.tag[1]) {
+                    PERSON_TAG_DATE -> dateRecorded = tag.value?.decodeToString()
+                    PERSON_TAG_NAME -> name = tag.value?.decodeToString()
+                    PERSON_TAG_TELEPHONE_NUMBER -> telephone = tag.value?.decodeToString()
+                    PERSON_TAG_ADDRESS -> address = tag.value?.decodeToString()
                 }
             }
         }

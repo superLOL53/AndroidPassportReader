@@ -28,12 +28,12 @@ class TerminalAuthentication(
 
     fun authenticate(certificateChain : Array<Certificate>) : Int {
         for (certificate in certificateChain) {
-            if (doMSESetDST() != SUCCESS ||
+            if (doMSESetDST(certificate) != SUCCESS ||
                 doPerformSecurityOperation(certificate) != SUCCESS) {
                 return FAILURE
             }
         }
-        doMSESetAT()
+        doMSESetAT(certificateChain.last())
         val challenge = getChallenge()
         return if (challenge != null) {
             val signature = signChallenge(challenge)
@@ -47,16 +47,16 @@ class TerminalAuthentication(
         }
     }
 
-    private fun doMSESetDST() : Int {
+    private fun doMSESetDST(certificate: Certificate) : Int {
         //TODO: Find out public key reference
-        val data = ByteArray(0)
+        val data = TLV(0x83.toByte(), certificate.tbsCertificate.encoded)
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
                 NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
                 NfcP1Byte.SET_DIGITAL_SIGNATURE_TEMPLATE_FOR_VERIFICATION,
                 NfcP2Byte.SET_DIGITAL_SIGNATURE_TEMPLATE_FOR_VERIFICATION,
-                data
+                data.toByteArray()
             )
         )
         return if (APDUControl.checkResponse(response)) {
@@ -85,9 +85,9 @@ class TerminalAuthentication(
         }
     }
 
-    private fun doMSESetAT() : Int {
+    private fun doMSESetAT(certificate: Certificate) : Int {
         //TODO: Find out public key reference
-        val publicKeyReference = TLV(0x83.toByte(), byteArrayOf())
+        val publicKeyReference = TLV(0x83.toByte(), certificate.tbsCertificate.encoded)
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,

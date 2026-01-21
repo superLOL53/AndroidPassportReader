@@ -1,6 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.constants.TlvTags.DG7_FILE_TAG
+import com.example.emrtdapplication.constants.TlvTags.DG7_SHORT_EF_ID
 import com.example.emrtdapplication.utils.DisplayedSignature
 import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
@@ -16,8 +18,8 @@ import com.example.emrtdapplication.utils.TLV
  */
 class DG7() : ElementaryFilesTypeTemplate<DisplayedSignature>() {
     override var rawFileContent: ByteArray? = null
-    override val shortEFIdentifier: Byte = 0x07
-    override val efTag: Byte = 0x67
+    override val shortEFIdentifier = DG7_SHORT_EF_ID
+    override val efTag = DG7_FILE_TAG
 
 
     override fun toTypedArray(list: ArrayList<DisplayedSignature>) {
