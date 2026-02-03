@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.NOT_IMPLEMENTED
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG12_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG12_SHORT_EF_ID
@@ -93,7 +92,7 @@ class DG12() : ElementaryFileTemplate() {
                 }
             }
         }
-        return NOT_IMPLEMENTED
+        return SUCCESS
     }
 
     /**

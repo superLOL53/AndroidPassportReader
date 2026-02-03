@@ -31,6 +31,7 @@ import com.example.emrtdapplication.constants.SUCCESS
  * @property travelRecords Information holder for files/protocols in the LDS1 application
  * @property visaRecords Information holder for files/protocols in the LDS1 application
  * @property additionalBiometrics Information holder for files/protocols in the LDS1 application
+ * @property showDetails If details (all information) is displayed
  *
  */
 object EMRTD {
@@ -54,6 +55,7 @@ object EMRTD {
         private set
     var additionalBiometrics = AdditionalBiometrics()
         private set
+    var showDetails = false
 
     /**
      * Reads all common files (EF.CardAccess, EF.DIR and EF.ATR/INFO) from the eMRTD.
@@ -122,5 +124,6 @@ object EMRTD {
         travelRecords = TravelRecords()
         visaRecords = VisaRecords()
         additionalBiometrics = AdditionalBiometrics()
+        APDUControl.reset()
     }
 }

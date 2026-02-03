@@ -23,4 +23,8 @@
     <fragment
         android:id="@+id/biometrics"
         android:label="Additional Biometrics"/>
+
+    <fragment
+        android:id="@+id/settings"
+        android:label="Settings"/>
 </navigation>

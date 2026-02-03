@@ -8,7 +8,7 @@ import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordData
 
-object DG4Display : CreateView {
+object DG4Display : CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.

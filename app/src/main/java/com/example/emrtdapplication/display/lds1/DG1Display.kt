@@ -6,7 +6,7 @@ import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 
-object DG1Display : CreateView {
+object DG1Display : CreateView() {
 
     /**
      * Create the views for the information in the file

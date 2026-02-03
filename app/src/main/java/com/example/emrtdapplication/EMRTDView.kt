@@ -2,6 +2,7 @@ package com.example.emrtdapplication
 
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.activity.addCallback
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -9,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import com.example.emrtdapplication.fragments.AdditionalBiometricsFragment
 import com.example.emrtdapplication.fragments.LDS1Fragment
+import com.example.emrtdapplication.fragments.SettingsFragment
 import com.example.emrtdapplication.fragments.TravelRecordsFragment
 import com.example.emrtdapplication.fragments.VisaRecordFragment
 import com.google.android.material.navigation.NavigationView
@@ -59,6 +61,11 @@ class EMRTDView() : AppCompatActivity(), NavigationView.OnNavigationItemSelected
         findViewById<NavigationView>(R.id.nvView).setNavigationItemSelectedListener(this)
         supportFragmentManager.commit { setReorderingAllowed(true)
                                         replace(R.id.nav_host_fragment, fragment)}
+
+        onBackPressedDispatcher.addCallback(this) {
+            EMRTD.reset()
+            finish()
+        }.isEnabled = true
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -89,6 +96,11 @@ class EMRTDView() : AppCompatActivity(), NavigationView.OnNavigationItemSelected
                 currentFragment = 3
                 fragment = AdditionalBiometricsFragment()
                 supportActionBar?.setTitle(R.string.additional_biometrics)
+            }
+            R.id.nav_settings -> {
+                currentFragment = 4
+                fragment = SettingsFragment()
+                supportActionBar?.setTitle(R.string.settings)
             }
         }
         if (fragment != null) {

@@ -4,7 +4,7 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.CreateView
 
-object DG14Display : CreateView {
+object DG14Display : CreateView() {
     override fun <T : LinearLayout> createView(
         context: Context,
         parent: T

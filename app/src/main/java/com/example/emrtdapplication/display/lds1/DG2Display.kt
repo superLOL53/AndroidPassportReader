@@ -8,7 +8,7 @@ import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.biometrics.face.FacialRecordData
 
-object DG2Display : CreateView {
+object DG2Display : CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
@@ -27,17 +27,24 @@ object DG2Display : CreateView {
                     LinearLayout.LayoutParams.WRAP_CONTENT)
                 view.setImageBitmap(image)
                 parent.addView(view)
-                val facialInfo = biometricData.facialInformation
-                val table = TableLayout(context)
-                parent.addView(table)
-                var row = createRow(context, table)
-                provideTextForRow(row, "Eye color: ", facialInfo.eyeColor)
-                row = createRow(context, table)
-                provideTextForRow(row, "Hair color: ", facialInfo.hairColor)
-                row = createRow(context, table)
-                provideTextForRow(row, "Gender: ", facialInfo.gender)
-                row = createRow(context, table)
-                provideTextForRow(row, "Expression:", facialInfo.expression)
+                if (EMRTD.showDetails) {
+                    val facialInfo = biometricData.facialInformation
+                    val table = TableLayout(context)
+                    table.layoutParams = TableLayout.LayoutParams(
+                        TableLayout.LayoutParams.MATCH_PARENT,
+                        TableLayout.LayoutParams.WRAP_CONTENT
+                    )
+                    table.isStretchAllColumns = true
+                    parent.addView(table)
+                    var row = createRow(context, table)
+                    provideTextForRow(row, "Eye color: ", facialInfo.eyeColor)
+                    row = createRow(context, table)
+                    provideTextForRow(row, "Hair color: ", facialInfo.hairColor)
+                    row = createRow(context, table)
+                    provideTextForRow(row, "Gender: ", facialInfo.gender)
+                    row = createRow(context, table)
+                    provideTextForRow(row, "Expression:", facialInfo.expression)
+                }
             }
         }
     }

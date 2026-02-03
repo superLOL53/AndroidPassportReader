@@ -117,7 +117,7 @@ class DG1(): ElementaryFileTemplate() {
         nationality = mrz.slice(45..47).toByteArray().decodeToString().replace("<", "")
         optionalData = mrz.slice(48..58).toByteArray().decodeToString().replace("<", "")
         compositeCheckDigit = mrz[59].toInt().toChar()
-        holderName = mrz.slice(60..89).toByteArray().decodeToString().replace("<", " ")
+        holderName = mrz.slice(60..89).toByteArray().decodeToString().replace("<", " ").trim()
         return SUCCESS
     }
 
@@ -130,7 +130,7 @@ class DG1(): ElementaryFileTemplate() {
     private fun decodeTD2MRZ(mrz : ByteArray) : Int {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
-        holderName = mrz.slice(5..35).toByteArray().decodeToString().replace("<", " ")
+        holderName = mrz.slice(5..35).toByteArray().decodeToString().replace("<", " ").trim()
         documentNumber = mrz.slice(36..44).toByteArray().decodeToString().replace("<", "")
         checkDigitDocumentNumber = mrz[45].toInt().toChar()
         nationality = mrz.slice(46..48).toByteArray().decodeToString().replace("<", "")
@@ -153,7 +153,7 @@ class DG1(): ElementaryFileTemplate() {
     private fun decodeTD3MRZ(mrz : ByteArray) : Int {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
-        holderName = mrz.slice(5..43).toByteArray().decodeToString().replace("<", " ")
+        holderName = mrz.slice(5..43).toByteArray().decodeToString().replace("<", " ").trim()
         documentNumber = mrz.slice(44..52).toByteArray().decodeToString().replace("<", "")
         checkDigitDocumentNumber = mrz[53].toInt().toChar()
         nationality = mrz.slice(54..56).toByteArray().decodeToString().replace("<", "")

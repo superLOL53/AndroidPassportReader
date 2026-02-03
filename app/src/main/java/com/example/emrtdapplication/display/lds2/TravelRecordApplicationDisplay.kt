@@ -11,7 +11,7 @@ import com.example.emrtdapplication.R
 import com.example.emrtdapplication.display.lds2.records.CertificateRecordDisplay
 import com.example.emrtdapplication.display.lds2.records.EntryExitRecordDisplay
 
-object TravelRecordApplicationDisplay : CreateView {
+object TravelRecordApplicationDisplay : CreateView() {
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.travelRecords.isPresent) {
             createEntryRecordsView(context, parent)

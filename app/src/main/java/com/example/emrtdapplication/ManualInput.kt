@@ -43,6 +43,7 @@ class ManualInput : AppCompatActivity() {
         val passportNumberText = findViewById<EditText>(R.id.passportNr)
         val birthdayText = findViewById<EditText>(R.id.birthday)
         val expirationDateText = findViewById<EditText>(R.id.expirationDate)
+        EMRTD.reset()
         if (savedInstanceState != null) {
             val number = savedInstanceState.getString("passportNumber")
             val expirationDate = savedInstanceState.getString("expirationDate")

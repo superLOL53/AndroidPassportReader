@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="10dp">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -16,20 +17,43 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/dg1layout">
+                android:id="@+id/verification_layout"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/verification_status"/>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:stretchColumns="*"
+                    android:id="@+id/verification_table">
+
+                </TableLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/dg1layout"
+                android:orientation="vertical">
+
+                <TextView
+                    android:text="@string/dg1"
+                    android:gravity="center"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"/>
 
                 <TableLayout
                     android:id="@+id/dg1table"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:visibility="visible">
+                    android:stretchColumns="*">
 
-                    <TableRow
-                        android:gravity="center">
-                        <TextView
-                            android:text="@string/dg1"
-                            android:gravity="center"/>
-                    </TableRow>
                 </TableLayout>
 
             </LinearLayout>
@@ -44,7 +68,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 2"/>
+                    android:text="@string/data_group_2"/>
 
             </LinearLayout>
 
@@ -58,7 +82,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 3"/>
+                    android:text="@string/data_group_3"/>
 
             </LinearLayout>
 
@@ -72,7 +96,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 4"/>
+                    android:text="@string/data_group_4"/>
 
             </LinearLayout>
 
@@ -86,7 +110,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 5"/>
+                    android:text="@string/data_group_5"/>
 
             </LinearLayout>
 
@@ -100,7 +124,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 6"/>
+                    android:text="@string/data_group_6"/>
 
             </LinearLayout>
 
@@ -114,7 +138,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 7"/>
+                    android:text="@string/data_group_7"/>
 
             </LinearLayout>
 
@@ -128,7 +152,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 8"/>
+                    android:text="@string/data_group_8"/>
 
             </LinearLayout>
 
@@ -142,7 +166,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 9"/>
+                    android:text="@string/data_group_9"/>
 
             </LinearLayout>
 
@@ -156,7 +180,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 10"/>
+                    android:text="@string/data_group_10"/>
 
             </LinearLayout>
 
@@ -166,18 +190,17 @@
                 android:id="@+id/dg11layout"
                 android:orientation="vertical">
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/dg11"
+                    android:gravity="center"/>
+
                 <TableLayout
                     android:id="@+id/dg11table"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:visibility="visible">
-
-                <TableRow
-                    android:gravity="center">
-                    <TextView
-                        android:text="@string/dg11"
-                        android:gravity="center"/>
-                </TableRow>
+                    android:stretchColumns="*">
 
                 </TableLayout>
 
@@ -189,18 +212,17 @@
                 android:id="@+id/dg12layout"
                 android:orientation="vertical">
 
+                <TextView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="@string/dg12"
+                    android:gravity="center"/>
+
                 <TableLayout
                     android:id="@+id/dg12table"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
-                    android:visibility="visible">
-
-                    <TableRow
-                        android:gravity="center">
-                        <TextView
-                            android:text="@string/dg12"
-                            android:gravity="center"/>
-                    </TableRow>
+                    android:stretchColumns="*">
                 </TableLayout>
 
             </LinearLayout>
@@ -215,7 +237,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 13"/>
+                    android:text="@string/data_group_13"/>
 
             </LinearLayout>
 
@@ -229,7 +251,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 14"/>
+                    android:text="@string/data_group_14"/>
 
             </LinearLayout>
 
@@ -243,7 +265,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 15"/>
+                    android:text="@string/data_group_15"/>
 
             </LinearLayout>
 
@@ -257,7 +279,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="Data Group 16"/>
+                    android:text="@string/data_group_16"/>
 
             </LinearLayout>
 

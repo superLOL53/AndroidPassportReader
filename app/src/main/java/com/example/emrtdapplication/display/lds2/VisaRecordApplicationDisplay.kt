@@ -11,7 +11,7 @@ import com.example.emrtdapplication.R
 import com.example.emrtdapplication.display.lds2.records.CertificateRecordDisplay
 import com.example.emrtdapplication.display.lds2.records.VisaRecordDisplay
 
-object VisaRecordApplicationDisplay : CreateView {
+object VisaRecordApplicationDisplay : CreateView() {
 
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.visaRecords.isPresent) {

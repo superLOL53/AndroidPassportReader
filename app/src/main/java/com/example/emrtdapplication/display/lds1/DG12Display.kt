@@ -9,7 +9,7 @@ import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 
-object DG12Display : CreateView {
+object DG12Display : CreateView() {
 
     fun createView(context: Context, parent : TableLayout) {
         var row : TableRow

@@ -202,4 +202,18 @@ object APDUControl {
         inc()
         return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, responseAPDU).apduArray
     }
+
+    fun reset() {
+        maxCommandLength = 0
+        maxResponseLength = 0
+        maxTransceiveLength = 0
+        encryptionKey = byteArrayOf(0)
+        encryptionKeyMAC = byteArrayOf(0)
+        ssc = byteArrayOf(0)
+        isAES = false
+        isoDep = null
+        isoDepSupport = false
+        nfcTechUse = NfcUse.UNDEFINED
+        sendEncryptedAPDU = false
+    }
 }

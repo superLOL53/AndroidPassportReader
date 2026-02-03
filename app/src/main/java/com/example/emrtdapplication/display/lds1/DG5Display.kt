@@ -8,7 +8,7 @@ import android.widget.TextView
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 
-object DG5Display : CreateView {
+object DG5Display : CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.

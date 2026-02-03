@@ -8,7 +8,8 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.children
 
-interface CreateView {
+abstract class CreateView {
+    private var alternate = false
 
     /**
      * Fill in the text for [row] with [description] and [value]
@@ -36,11 +37,18 @@ interface CreateView {
      */
     fun createRow(context : Context, parent: LinearLayout) : TableRow {
         val row = TableRow(context)
+        row.layoutParams = TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT)
         row.gravity = Gravity.CENTER
+        if (alternate) {
+            row.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            row.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
         val description = TextView(context)
-        description.gravity = Gravity.CENTER
+        description.gravity = Gravity.START
         val value = TextView(context)
-        value.gravity = Gravity.CENTER
+        value.gravity = Gravity.END
         row.addView(description)
         row.addView(value)
         parent.addView(row)
@@ -50,5 +58,5 @@ interface CreateView {
     /**
      * Create views to display contents of the file in the app
      */
-    fun <T : LinearLayout> createView(context: Context, parent: T)
+    abstract fun <T : LinearLayout> createView(context: Context, parent: T)
 }

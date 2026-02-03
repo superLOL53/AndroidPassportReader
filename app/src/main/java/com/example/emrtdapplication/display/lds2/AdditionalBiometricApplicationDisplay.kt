@@ -10,7 +10,7 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 import com.example.emrtdapplication.display.lds2.records.CertificateRecordDisplay
 
-object AdditionalBiometricApplicationDisplay : CreateView {
+object AdditionalBiometricApplicationDisplay : CreateView() {
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.additionalBiometrics.isPresent) {
             createBiometricsView(context, parent)

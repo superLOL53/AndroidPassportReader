@@ -8,7 +8,7 @@ import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 
-object DG11Display : CreateView {
+object DG11Display : CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.

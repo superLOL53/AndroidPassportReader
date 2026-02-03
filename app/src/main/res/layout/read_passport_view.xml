@@ -9,7 +9,8 @@
         android:layout_height="match_parent"
         android:background="@drawable/overlay"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <TextView
             android:id="@+id/readEMRTD"
