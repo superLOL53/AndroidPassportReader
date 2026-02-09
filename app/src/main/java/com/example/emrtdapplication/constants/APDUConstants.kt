@@ -23,7 +23,7 @@ object APDUConstants {
     /**
      * Minimum value for the Le field to be present in a command APDU
      */
-    const val LE_MIN = 1
+    const val LE_MIN = 0
 
     /**
      * Maximum value for the Le field of a command APDU

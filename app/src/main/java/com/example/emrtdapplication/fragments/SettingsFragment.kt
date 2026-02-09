@@ -3,14 +3,14 @@ package com.example.emrtdapplication.fragments
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.CompoundButton
 import android.widget.ScrollView
 import androidx.fragment.app.Fragment
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-class SettingsFragment : Fragment(R.layout.settings), CompoundButton.OnCheckedChangeListener {
+
+class SettingsFragment : Fragment(R.layout.settings) {
     private var view : ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,10 +31,9 @@ class SettingsFragment : Fragment(R.layout.settings), CompoundButton.OnCheckedCh
         this.view = view.findViewById(R.id.settingsScroll)
         val details = view.findViewById<SwitchMaterial>(R.id.detail_button)
         details.isChecked = EMRTD.showDetails
-        details.setOnCheckedChangeListener(this)
-    }
-
-    override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
-        EMRTD.showDetails = isChecked
+        details.setOnCheckedChangeListener { buttonView, isChecked -> EMRTD.showDetails = isChecked }
+        val showContents = view.findViewById<SwitchMaterial>(R.id.unparsed_button)
+        showContents.isChecked = EMRTD.showUnparsedContent
+        showContents.setOnCheckedChangeListener { buttonView, isChecked ->  EMRTD.showUnparsedContent = isChecked}
     }
 }

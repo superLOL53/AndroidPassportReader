@@ -43,6 +43,7 @@ class DG14() : ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         if (rawFileContent == null) {
             return FAILURE
         }
@@ -83,6 +84,7 @@ class DG14() : ElementaryFileTemplate() {
             }
         }
         securityInfos = list.toTypedArray()
+        isParsed = !securityInfos.isNullOrEmpty()
         return SUCCESS
     }
 }

@@ -30,7 +30,13 @@ abstract class ElementaryFilesTypeTemplate<T>() : ElementaryFileTemplate() {
             }
             toTypedArray(list)
         }
-        return SUCCESS
+        return if (tlvS.isNullOrEmpty()) {
+            isParsed = false
+            FAILURE
+        } else {
+            isParsed = true
+            SUCCESS
+        }
     }
 
     protected abstract fun add(tlv : TLV, list: ArrayList<T>)

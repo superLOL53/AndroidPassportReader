@@ -56,6 +56,7 @@ object EMRTD {
     var additionalBiometrics = AdditionalBiometrics()
         private set
     var showDetails = false
+    var showUnparsedContent = false
 
     /**
      * Reads all common files (EF.CardAccess, EF.DIR and EF.ATR/INFO) from the eMRTD.

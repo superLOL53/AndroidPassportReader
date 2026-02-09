@@ -43,6 +43,7 @@ class EfCom(): ElementaryFileTemplate() {
      * @return [SUCCESS] if the file could be decoded, otherwise an error code
      */
     override fun parse() : Int {
+        isParsed = false
         if (rawFileContent == null) {
             return SUCCESS
         }
@@ -89,6 +90,7 @@ class EfCom(): ElementaryFileTemplate() {
                 else -> return FILE_UNABLE_TO_READ
             }
         }
+        isParsed = true
         return FILE_SUCCESSFUL_READ
     }
 

@@ -1,12 +1,12 @@
 package com.example.emrtdapplication.display.lds1
 
 import android.content.Context
-import android.graphics.text.LineBreaker
-import android.text.TextUtils
+import android.graphics.BitmapFactory
+import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.R
 
 object DG5Display : CreateView() {
 
@@ -18,14 +18,29 @@ object DG5Display : CreateView() {
      */
     @OptIn(ExperimentalStdlibApi::class)
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        if (EMRTD.ldS1Application.dg5.rawFileContent == null) return
-        val view = TextView(context)
-        view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT)
-        view.maxLines = 10
-        view.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
-        view.ellipsize = TextUtils.TruncateAt.END
-        view.text = EMRTD.ldS1Application.dg5.rawFileContent!!.toHexString(HexFormat { upperCase = true; bytes.byteSeparator = " "})
-        parent.addView(view)
+        if (EMRTD.ldS1Application.dg5.tlvS == null) return
+        for (portrait in EMRTD.ldS1Application.dg5.tlvS) {
+            val box = LinearLayout(context)
+            box.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            if (alternate) {
+                box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+            } else {
+                box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+            }
+            alternate = !alternate
+            parent.addView(box)
+            val image = portrait.displayPortrait.imageInputStream.readAllBytes()
+            val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
+            val view = ImageView(context)
+            view.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            view.setImageBitmap(bitmap)
+            box.addView(view)
+        }
     }
 }

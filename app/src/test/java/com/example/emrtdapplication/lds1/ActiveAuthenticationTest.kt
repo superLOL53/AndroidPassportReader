@@ -3,6 +3,7 @@ package com.example.emrtdapplication.lds1
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+
 class ActiveAuthenticationTest {
 
     @BeforeTest
@@ -12,6 +13,5 @@ class ActiveAuthenticationTest {
 
     @Test
     fun testActiveAuthentication() {
-
     }
 }

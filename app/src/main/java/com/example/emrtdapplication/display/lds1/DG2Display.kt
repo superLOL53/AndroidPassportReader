@@ -6,6 +6,7 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.R
 import com.example.emrtdapplication.biometrics.face.FacialRecordData
 
 object DG2Display : CreateView() {
@@ -17,16 +18,35 @@ object DG2Display : CreateView() {
      * @param parent The parent of the view to create
      */
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
+        if (EMRTD.ldS1Application.efSod.isValid && EMRTD.ldS1Application.dg1.matchHash) {
+            parent.setBackgroundColor(context.resources.getColor(R.color.green, null))
+        } else if (EMRTD.ldS1Application.efSod.isValid || EMRTD.ldS1Application.dg1.matchHash) {
+            parent.setBackgroundColor(context.resources.getColor(R.color.yellow, null))
+        } else {
+            parent.setBackgroundColor(context.resources.getColor(R.color.red, null))
+        }
         if (EMRTD.ldS1Application.dg2.biometricInformation != null && EMRTD.ldS1Application.dg2.biometricInformation!!.biometricInformationList != null) {
             for (bios in EMRTD.ldS1Application.dg2.biometricInformation!!.biometricInformationList) {
                 if (bios == null) continue
                 val biometricData = bios.biometricDataBlock.biometricData as FacialRecordData
+                val box = LinearLayout(context)
+                box.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                if (alternate) {
+                    box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+                } else {
+                    box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+                }
+                alternate = !alternate
+                parent.addView(box)
                 val image = biometricData.image
                 val view = ImageView(context)
                 view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT)
                 view.setImageBitmap(image)
-                parent.addView(view)
+                box.addView(view)
                 if (EMRTD.showDetails) {
                     val facialInfo = biometricData.facialInformation
                     val table = TableLayout(context)

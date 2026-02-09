@@ -40,7 +40,11 @@ abstract class ElementaryFileTemplate() {
     protected var contentStart = -1
     var matchHash = false
     var isPresent = false
+        protected set
     var isRead = false
+        protected set
+    var isParsed = false
+        protected set
 
     /**
      * Reads the EF and stores the content in [rawFileContent]

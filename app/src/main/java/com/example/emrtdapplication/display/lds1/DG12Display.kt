@@ -8,6 +8,7 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.R
 
 object DG12Display : CreateView() {
 
@@ -44,20 +45,44 @@ object DG12Display : CreateView() {
             provideTextForRow(row, "Personalization device serial number: ", EMRTD.ldS1Application.dg12.personalizationSystemSerialNumber!!)
         }
         if (EMRTD.ldS1Application.dg12.front != null) {
+            val box = LinearLayout(context)
+            box.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            if (alternate) {
+                box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+            } else {
+                box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+            }
+            alternate = !alternate
+            parent.addView(box)
             val imageView = ImageView(context)
             imageView.setImageBitmap(EMRTD.ldS1Application.dg12.front)
             row = TableRow(context)
             row.addView(imageView)
             row.gravity = Gravity.CENTER
-            parent.addView(row)
+            box.addView(row)
         }
         if (EMRTD.ldS1Application.dg12.rear != null) {
+            val box = LinearLayout(context)
+            box.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            if (alternate) {
+                box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+            } else {
+                box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+            }
+            alternate = !alternate
+            parent.addView(box)
             val imageView = ImageView(context)
             imageView.setImageBitmap(EMRTD.ldS1Application.dg12.rear)
             row = TableRow(context)
             row.addView(imageView)
             row.gravity = Gravity.CENTER
-            parent.addView(row)
+            box.addView(row)
         }
     }
 

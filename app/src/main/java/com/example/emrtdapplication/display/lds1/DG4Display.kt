@@ -6,7 +6,8 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordData
+import com.example.emrtdapplication.R
+import com.example.emrtdapplication.biometrics.iris.IrisRecordData
 
 object DG4Display : CreateView() {
 
@@ -21,16 +22,30 @@ object DG4Display : CreateView() {
             for (bios in EMRTD.ldS1Application.dg4.biometricInformation!!.biometricInformationList) {
                 try {
                     if (bios == null) continue
-                    val biometricData = bios.biometricDataBlock.biometricData as FingerprintRecordData
-                    val image = biometricData.fingerprintData.representationBlocks[0].geImageData()
-                    val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
-                    val view = ImageView(context)
-                    view.layoutParams = LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    view.setImageBitmap(bitmap)
-                    parent.addView(view)
+                    val biometricData = bios.biometricDataBlock.biometricData as IrisRecordData
+                    for (im in biometricData.irisData.representationBlocks) {
+                        val box = LinearLayout(context)
+                        box.layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        if (alternate) {
+                            box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+                        } else {
+                            box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+                        }
+                        alternate = !alternate
+                        parent.addView(box)
+                        val image = im.geImageData()
+                        val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
+                        val view = ImageView(context)
+                        view.layoutParams = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        view.setImageBitmap(bitmap)
+                        box.addView(view)
+                    }
                 } catch (_ : Exception) {
                 }
             }

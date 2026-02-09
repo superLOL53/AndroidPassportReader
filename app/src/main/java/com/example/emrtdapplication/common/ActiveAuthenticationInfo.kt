@@ -45,16 +45,4 @@ class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, ACTIVE_AUTHENTICATI
             signatureAlgorithm = ASN1ObjectIdentifier.getInstance(optionalData.toByteArray()).id
         }
     }
-/*
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        super.createViews(context, parent)
-        if (tableLayout != null) {
-            var row = createRow(context, parent)
-            provideTextForRow(row, "Version:", version.toString())
-            tableLayout!!.addView(row)
-            row = createRow(context, parent)
-            provideTextForRow(row, "Signature algorithm OID:", signatureAlgorithm)
-            tableLayout!!.addView(row)
-        }
-    }*/
 }

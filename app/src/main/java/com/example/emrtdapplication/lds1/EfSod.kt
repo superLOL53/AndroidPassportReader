@@ -19,7 +19,6 @@ import org.spongycastle.asn1.icao.LDSSecurityObject
 import java.io.ByteArrayInputStream
 import java.security.KeyFactory
 import java.security.MessageDigest
-import java.security.Security
 import java.security.Signature
 import java.security.cert.CertificateFactory
 import java.security.spec.X509EncodedKeySpec
@@ -82,6 +81,7 @@ class EfSod(): ElementaryFileTemplate() {
      * @return [SUCCESS] or [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         if (rawFileContent == null) {
             return SUCCESS
         }
@@ -94,6 +94,7 @@ class EfSod(): ElementaryFileTemplate() {
             this.cert = CertificateFactory.getInstance("X.509", "BC").generateCertificate(
                 ByteArrayInputStream(documentSignerCertificate!!.encoded))
             ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).value!!).readAllBytes())
+            isParsed = true
             return SUCCESS
         } catch (_: Exception) {
             return FAILURE
@@ -179,19 +180,17 @@ class EfSod(): ElementaryFileTemplate() {
     private fun validateCSCA(csca: Certificate) : Boolean {
         val time = Date().time
         isCSCAExpired = time < csca.startDate.date.time || csca.endDate.date.time < time
-        val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
-        for (p in Security.getProviders()) {
-            try {
-                val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
-                val pub = fac!!.generatePublic(spec)
-                val sign = Signature.getInstance(csca.signatureAlgorithm.algorithm.id)
-                sign.initVerify(pub)
-                sign.update(csca.tbsCertificate.encoded)
-                isCSCAValid = sign.verify(csca.signature.encoded)
-                return true
-            } catch (e : Exception) {
-                println(e)
-            }
+        try {
+            val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
+            val pub = fac!!.generatePublic(spec)
+            val sign = Signature.getInstance(csca.signatureAlgorithm.algorithm.id, "BC")
+            sign.initVerify(pub)
+            sign.update(csca.tbsCertificate.encoded)
+            isCSCAValid = sign.verify(csca.signature.bytes)
+            return true
+        } catch (e : Exception) {
+            println(e)
         }
         isCSCAValid = false
         return false
@@ -205,22 +204,20 @@ class EfSod(): ElementaryFileTemplate() {
     private fun validateDocumentSignerCertificate(csca : Certificate) : Boolean {
         val time = Date().time
         isDocumentSignerCertificateExpired = time < documentSignerCertificate!!.startDate.date.time || documentSignerCertificate!!.endDate.date.time < time
-        val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
-        for (p in Security.getProviders()) {
-            try {
-                val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
-                val pub = fac!!.generatePublic(spec)
-                val sign = Signature.getInstance(
-                    documentSignerCertificate!!.signatureAlgorithm.algorithm.id,
-                    p.name
-                )
-                sign.initVerify(pub)
-                sign.update(documentSignerCertificate!!.tbsCertificate.encoded)
-                isDocumentSignerCertificateValid = sign.verify(documentSignerCertificate!!.signature.bytes)
-                return isDocumentSignerCertificateValid
-            } catch (e: Exception) {
-                println(e)
-            }
+        try {
+            val spec = X509EncodedKeySpec(csca.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(csca.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
+            val pub = fac!!.generatePublic(spec)
+            val sign = Signature.getInstance(
+                documentSignerCertificate!!.signatureAlgorithm.algorithm.id,
+                "BC"
+            )
+            sign.initVerify(pub)
+            sign.update(documentSignerCertificate!!.tbsCertificate.encoded)
+            isDocumentSignerCertificateValid = sign.verify(documentSignerCertificate!!.signature.bytes)
+            return isDocumentSignerCertificateValid
+        } catch (e: Exception) {
+            println(e)
         }
         isDocumentSignerCertificateValid = false
         return false
@@ -232,19 +229,17 @@ class EfSod(): ElementaryFileTemplate() {
      * @param signerInfo The signed attributes of the [SignedData] [certificate]
      */
     private fun validateSignerInfoSignature(signerInfo: SignerInfo) {
-        for (p in Security.getProviders()) {
-            try {
-                val dsc = X509EncodedKeySpec(documentSignerCertificate!!.subjectPublicKeyInfo.encoded)
-                val fac = KeyFactory.getInstance(documentSignerCertificate!!.subjectPublicKeyInfo.algorithm.algorithm.id, p.name)
-                val pub = fac.generatePublic(dsc)
-                val sign = Signature.getInstance(signerInfo.digestEncryptionAlgorithm.algorithm.id, p.name)
-                sign.initVerify(pub)
-                sign.update(signerInfo.authenticatedAttributes.encoded)
-                isSignerInfoValid = sign.verify(signerInfo.encryptedDigest.octets)
-                return
-            } catch (e: Exception) {
-                println(e)
-            }
+        try {
+            val dsc = X509EncodedKeySpec(documentSignerCertificate!!.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(documentSignerCertificate!!.subjectPublicKeyInfo.algorithm.algorithm.id, "BC")
+            val pub = fac.generatePublic(dsc)
+            val sign = Signature.getInstance(signerInfo.digestEncryptionAlgorithm.algorithm.id, "BC")
+            sign.initVerify(pub)
+            sign.update(signerInfo.authenticatedAttributes.encoded)
+            isSignerInfoValid = sign.verify(signerInfo.encryptedDigest.octets)
+            return
+        } catch (e: Exception) {
+            println(e)
         }
         isSignerInfoValid = false
     }

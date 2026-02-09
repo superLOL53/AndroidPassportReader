@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.R
 
 object DG11Display : CreateView() {
 
@@ -71,12 +72,24 @@ object DG11Display : CreateView() {
             provideTextForRow(row, "Custody information: ", EMRTD.ldS1Application.dg11.custodyInformation!!)
         }
         if (EMRTD.ldS1Application.dg11.image != null) {
+            val box = LinearLayout(context)
+            box.layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+            if (alternate) {
+                box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+            } else {
+                box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+            }
+            alternate = !alternate
+            parent.addView(box)
             val imageView = ImageView(context)
             imageView.setImageBitmap(EMRTD.ldS1Application.dg11.image)
             row = TableRow(context)
             row.addView(imageView)
             row.gravity = Gravity.CENTER
-            parent.addView(row)
+            box.addView(row)
         }
     }
 }

@@ -38,6 +38,7 @@ class DG16() : ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         if (rawFileContent == null) {
             return FAILURE
         }
@@ -56,6 +57,7 @@ class DG16() : ElementaryFileTemplate() {
             }
         }
         persons = list.toTypedArray()
+        isParsed = true
         return SUCCESS
     }
 

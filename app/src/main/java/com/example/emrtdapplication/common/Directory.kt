@@ -24,6 +24,7 @@ import com.example.emrtdapplication.constants.TlvTags.INTERNATIONAL_AID
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
+import java.math.BigInteger
 
 /**
  * Implements the EF.DIR file. Required if LDS2 applications are supported
@@ -78,7 +79,7 @@ class Directory() {
         var tlv: TLV
         var l = 0
         do {
-            tlv = TLV(byteArray.slice(l.. byteArray.size).toByteArray())
+            tlv = TLV(byteArray.slice(l.. byteArray.size-1).toByteArray())
             if (parseTLV(tlv) != SUCCESS) {
                 return FILE_UNABLE_TO_READ
             }
@@ -92,14 +93,15 @@ class Directory() {
      * @param tlv The TLV structure containing the file content
      * @return [FILE_UNABLE_TO_READ] if the content cannot be parsed correctly, otherwise [SUCCESS]
      */
-    @OptIn(ExperimentalStdlibApi::class)
     private fun parseTLV(tlv: TLV) : Int {
-        if (!tlv.isValid || tlv.tag.size != 1 || tlv.tag[0] != APPLICATION_TEMPLATE || tlv.length != TEMPLATE_LENGTH) {
+        if (!tlv.isValid || tlv.tag.size != 1 || tlv.tag[0] != APPLICATION_TEMPLATE || tlv.length != TEMPLATE_LENGTH || tlv.list == null || tlv.list!!.tlvSequence.size != 1) {
             return FILE_UNABLE_TO_READ
         }
-        val innerTLV = tlv.value?.let { TLV(it) }
-        if (innerTLV == null || !innerTLV.isValid || innerTLV.tag.size != 1 || tlv.tag[0] != INTERNATIONAL_AID ||
-            innerTLV.length != AID_LENGTH || innerTLV.value!!.toHexString().startsWith(AID)) {
+        val innerTLV = tlv.list!!.tlvSequence[0]
+        if (!innerTLV.isValid || innerTLV.tag.size != 1 || innerTLV.tag[0] != INTERNATIONAL_AID || innerTLV.length != AID_LENGTH) {
+            return FILE_UNABLE_TO_READ
+        }
+        if (!innerTLV.value!!.slice(0..4).toByteArray().contentEquals(BigInteger(AID, 16).toByteArray().slice(1..5).toByteArray())) {
             return FILE_UNABLE_TO_READ
         }
         when (innerTLV.value?.get(5)) {

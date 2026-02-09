@@ -72,5 +72,12 @@
     <string name="data_group_16">Data Group 16</string>
     <string name="settings">Settings</string>
     <string name="show_details">Show details</string>
+    <string name="dg6_file_content">DG6 File content</string>
+    <string name="dg8_file_content">DG8 File content</string>
+    <string name="dg9_file_content">DG9 File content</string>
+    <string name="dg10_file_content">DG10 File content</string>
+    <string name="dg13_file_content">DG13 File content</string>
+    <string name="show_unparsed_file_s">Show unparsed file(s)</string>
+    <string name="pace_protocol_information">PACE protocol information</string>
 
 </resources>

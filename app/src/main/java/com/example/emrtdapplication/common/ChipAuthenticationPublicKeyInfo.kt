@@ -44,35 +44,4 @@ class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENT
             null
         }
     }
-
-    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        super.createViews(context, parent)
-        if (tableLayout != null) {
-            var row = createRow(context, parent)
-            provideTextForRow(row, "Public key algorithm OID:", publicKeyInfo.algorithm.algorithm.id)
-            tableLayout!!.addView(row)
-            if (keyId != null) {
-                row = createRow(context, parent)
-                provideTextForRow(row, "Key identifier:", keyId!!.toString(16))
-                tableLayout!!.addView(row)
-            }
-        }
-        var text = TextView(context)
-        text.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        text.gravity = Gravity.CENTER
-        text.text = context.getString(R.string.public_key)
-        parent.addView(text)
-        text = TextView(context)
-        text.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-        text.gravity = Gravity.CENTER
-        text.isSingleLine = false
-        text.text = publicKeyInfo.publicKeyData.toString()
-        parent.addView(text)
-    }*/
 }

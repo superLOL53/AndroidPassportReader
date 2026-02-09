@@ -64,6 +64,7 @@ class DG12() : ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         if (rawFileContent == null) {
             return FAILURE
         }
@@ -81,6 +82,7 @@ class DG12() : ElementaryFileTemplate() {
                 if (tag.tag[0] == 0x5F.toByte()) {
                     when (tag.tag[1]) {
                         ISSUING_AUTHORITY_DG12 -> issuingAuthority = tag.value?.decodeToString()
+                        //Date of issuance is represented as hex string?
                         ISSUANCE_DATE_DG12 -> dateOfIssue = tag.value?.decodeToString()
                         ENDORSEMENTS -> endorsements = tag.value?.decodeToString()
                         TAX_EXIT_REQUIREMENTS -> taxExitRequirements = tag.value?.decodeToString()
@@ -92,6 +94,7 @@ class DG12() : ElementaryFileTemplate() {
                 }
             }
         }
+        isParsed = true
         return SUCCESS
     }
 

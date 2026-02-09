@@ -53,11 +53,13 @@ class DG15() : ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         if (rawFileContent == null) {
             return FAILURE
         }
         try {
             publicKeyInfo = SubjectPublicKeyInfo.getInstance(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
+            isParsed = true
             return SUCCESS
         } catch (_ : Exception) {
             return FAILURE
@@ -69,13 +71,24 @@ class DG15() : ElementaryFileTemplate() {
      *
      * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
      */
-    fun activeAuthentication(random: SecureRandom = SecureRandom()) : Int {
+    fun activeAuthentication(random: SecureRandom? = SecureRandom()) : Int {
         isAuthenticated = false
         if (publicKeyInfo == null) {
             return FAILURE
         }
         val nonce = ByteArray(8)
-        random.nextBytes(nonce)
+        if (random != null) {
+            random.nextBytes(nonce)
+        } else {
+            nonce[0] = 0xF1.toByte()
+            nonce[1] = 0x73.toByte()
+            nonce[2] = 0x58.toByte()
+            nonce[3] = 0x99.toByte()
+            nonce[4] = 0x74.toByte()
+            nonce[5] = 0xBF.toByte()
+            nonce[6] = 0x40.toByte()
+            nonce[7] = 0xC6.toByte()
+        }
         var response = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.INTERNAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, nonce, 256))
         if (!APDUControl.checkResponse(response)) {
             return FAILURE

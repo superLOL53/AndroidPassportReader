@@ -42,16 +42,4 @@ class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv, PACE_DOMAIN_PARAMETE
             BigInteger(optionalData.value!!)
         }
     }
-
-    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        super.createViews(context, parent)
-        var row = createRow(context, parent)
-        provideTextForRow(row, "Algorithm OID:", algorithmIdentifier.algorithm.id)
-        tableLayout!!.addView(row)
-        if (parameterId != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Parameter ID:", parameterId.toString(16))
-            tableLayout!!.addView(row)
-        }
-    }*/
 }

@@ -15,9 +15,19 @@ object DG15Display : CreateView() {
      */
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.ldS1Application.dg15.rawFileContent == null || EMRTD.ldS1Application.dg15.publicKeyInfo == null) return
-        var row = createRow(context, parent)
-        provideTextForRow(row, "Algorithm Identifier: ", EMRTD.ldS1Application.dg15.publicKeyInfo!!.algorithm.algorithm.id)
-        row = createRow(context, parent)
-        provideTextForRow(row, "Public Key:", EMRTD.ldS1Application.dg15.publicKeyInfo!!.publicKeyData.string)
+        if (EMRTD.showDetails) {
+            var row = createRow(context, parent)
+            provideTextForRow(
+                row,
+                "Algorithm Identifier: ",
+                EMRTD.ldS1Application.dg15.publicKeyInfo!!.algorithm.algorithm.id
+            )
+            row = createRow(context, parent)
+            provideTextForRow(
+                row,
+                "Public Key:",
+                EMRTD.ldS1Application.dg15.publicKeyInfo!!.publicKeyData.string
+            )
+        }
     }
 }

@@ -63,6 +63,6 @@ class MasterList(masterList: ByteArray) {
 
             }
         }
-        certificateMap = map.mapValuesTo(HashMap<X500Name, Array<Certificate>>(), { it.value.toTypedArray() })
+        certificateMap = map.mapValuesTo(HashMap<X500Name, Array<Certificate>>()) { it.value.toTypedArray() }
     }
 }

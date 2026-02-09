@@ -26,6 +26,7 @@ class DG13() : ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         return SUCCESS
     }
 }

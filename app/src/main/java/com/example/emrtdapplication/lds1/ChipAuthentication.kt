@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.constants.APDUConstants
@@ -133,7 +134,7 @@ class ChipAuthentication {
                         FAILURE
                     }
                     computeKeys(agreement!!.toByteArray())
-                    SUCCESS
+                    verify()
                 } else {
                     FAILURE
                 }
@@ -298,6 +299,29 @@ class ChipAuthentication {
             APDUControl.setSequenceCounter(ByteArray(8))
         } else {
             APDUControl.setSequenceCounter(ByteArray(16))
+        }
+    }
+
+    /**
+     * Verify that the computed keys for chip authentication actually can read from the eMRTD
+     * @return [SUCCESS] or [FAILURE]
+     */
+    private fun verify() : Int {
+        val dg1 = DG1()
+        dg1.read()
+        dg1.parse()
+        if (!dg1.isRead) {
+            return FAILURE
+        }
+        return if (dg1.holderName.contentEquals(EMRTD.ldS1Application.dg1.holderName) &&
+            dg1.documentNumber.contentEquals(EMRTD.ldS1Application.dg1.documentNumber) &&
+            dg1.nationality.contentEquals(EMRTD.ldS1Application.dg1.nationality) &&
+            dg1.sex == EMRTD.ldS1Application.dg1.sex &&
+            dg1.dateOfBirth.contentEquals(EMRTD.ldS1Application.dg1.dateOfBirth) &&
+            dg1.dateOfExpiry.contentEquals(EMRTD.ldS1Application.dg1.dateOfExpiry)) {
+            SUCCESS
+        } else {
+            FAILURE
         }
     }
 }

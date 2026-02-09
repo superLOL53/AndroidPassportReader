@@ -8,8 +8,7 @@
     android:layout_gravity="center_vertical"
     tools:openDrawer="start"
     tools:context=".EMRTDView"
-    style="@style/Theme.EMRTDApplication"
-    android:padding="8dp">
+    style="@style/Theme.EMRTDApplication">
 
    <LinearLayout
        android:layout_width="match_parent"

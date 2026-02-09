@@ -26,13 +26,4 @@ class TerminalAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, TERMINAL_AUTHENTI
     } else {
         1
     }
-
-    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        super.createViews(context, parent)
-        if (tableLayout != null) {
-            val row = createRow(context, parent)
-            provideTextForRow(row, "Version:", version.toString())
-            tableLayout!!.addView(row)
-        }
-    }*/
 }

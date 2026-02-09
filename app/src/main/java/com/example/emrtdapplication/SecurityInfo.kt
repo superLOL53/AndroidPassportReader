@@ -54,19 +54,4 @@ open class SecurityInfo(tlv: TLV, val type : Int) {
             optionalData = null
         }
     }
-/*
-    /**
-     * Create views to display contents of the file in the app
-     */
-    override fun <T : LinearLayout> createView(context: Context, parent : T) {
-        tableLayout = TableLayout(context)
-        tableLayout!!.layoutParams = TableLayout.LayoutParams(
-            TableLayout.LayoutParams.MATCH_PARENT,
-            TableLayout.LayoutParams.WRAP_CONTENT
-        )
-        val row = createRow(context, tableLayout!!)
-        provideTextForRow(row, "Protocol OID:", objectIdentifier)
-        tableLayout!!.addView(row)
-        parent.addView(tableLayout)
-    }*/
 }

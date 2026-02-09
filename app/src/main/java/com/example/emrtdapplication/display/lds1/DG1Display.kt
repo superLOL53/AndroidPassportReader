@@ -28,22 +28,6 @@ object DG1Display : CreateView() {
             row = createRow(context, parent)
             provideTextForRow(row, "Sex:", EMRTD.ldS1Application.dg1.sex.toString())
         }
-        if (EMRTD.ldS1Application.dg1.issuerCode != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Issuer:", EMRTD.ldS1Application.dg1.issuerCode!!)
-        }
-        if (EMRTD.ldS1Application.dg1.documentCode != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Document Code:", EMRTD.ldS1Application.dg1.documentCode!!)
-        }
-        if (EMRTD.ldS1Application.dg1.documentNumber != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Document Number:", EMRTD.ldS1Application.dg1.documentNumber!!)
-        }
-        if (EMRTD.ldS1Application.dg1.optionalDataDocumentNumber != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Optional Data/Document Number:", EMRTD.ldS1Application.dg1.optionalDataDocumentNumber!!)
-        }
         if (EMRTD.ldS1Application.dg1.dateOfExpiry != null) {
             row = createRow(context, parent)
             provideTextForRow(row, "Date of expiry:", EMRTD.ldS1Application.dg1.dateOfExpiry!!)
@@ -52,9 +36,35 @@ object DG1Display : CreateView() {
             row = createRow(context, parent)
             provideTextForRow(row, "Nationality:", EMRTD.ldS1Application.dg1.nationality!!)
         }
-        if (EMRTD.ldS1Application.dg1.optionalData != null) {
-            row = createRow(context, parent)
-            provideTextForRow(row, "Optional Data:", EMRTD.ldS1Application.dg1.optionalData!!)
+        if (EMRTD.showDetails) {
+            if (EMRTD.ldS1Application.dg1.issuerCode != null) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Issuer:", EMRTD.ldS1Application.dg1.issuerCode!!)
+            }
+            if (EMRTD.ldS1Application.dg1.documentCode != null) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Document Code:", EMRTD.ldS1Application.dg1.documentCode!!)
+            }
+            if (EMRTD.ldS1Application.dg1.documentNumber != null) {
+                row = createRow(context, parent)
+                provideTextForRow(
+                    row,
+                    "Document Number:",
+                    EMRTD.ldS1Application.dg1.documentNumber!!
+                )
+            }
+            if (EMRTD.ldS1Application.dg1.optionalDataDocumentNumber != null) {
+                row = createRow(context, parent)
+                provideTextForRow(
+                    row,
+                    "Optional Data/Document Number:",
+                    EMRTD.ldS1Application.dg1.optionalDataDocumentNumber!!
+                )
+            }
+            if (EMRTD.ldS1Application.dg1.optionalData != null) {
+                row = createRow(context, parent)
+                provideTextForRow(row, "Optional Data:", EMRTD.ldS1Application.dg1.optionalData!!)
+            }
         }
     }
 }

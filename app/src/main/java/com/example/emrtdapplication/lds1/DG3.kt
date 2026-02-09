@@ -31,6 +31,7 @@ class DG3() : ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
+        isParsed = false
         if (rawFileContent == null) {
             return FAILURE
         }
@@ -40,14 +41,11 @@ class DG3() : ElementaryFileTemplate() {
             return FAILURE
         }
         tlv = tlv.list!!.tlvSequence[0]
-        biometricInformation = BiometricInformationGroupTemplate(tlv, BiometricType.FINGERPRINT)
-        if (biometricInformation != null && biometricInformation!!.biometricInformationList != null) {
-            for (bit in biometricInformation!!.biometricInformationList!!) {
-                if (bit != null && bit.biometricHeaderTemplate.biometricSubType == null) {
-                    biometricInformation = null
-                    return FAILURE
-                }
-            }
+        try {
+            biometricInformation = BiometricInformationGroupTemplate(tlv, BiometricType.FINGERPRINT)
+            isParsed = biometricInformation != null && !biometricInformation!!.biometricInformationList.isNullOrEmpty()
+        } catch (_ : IllegalArgumentException) {
+            isParsed = false
         }
         return SUCCESS
     }

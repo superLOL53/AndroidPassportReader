@@ -73,9 +73,6 @@ class BiometricHeaderTemplate(biometricHeaderTemplate : TLV) {
 
     private fun setCreator(creator : ByteArray?) {
         if (creator == null) return
-        /*if (creator.size != 2) {
-            throw IllegalArgumentException("Invalid length of the biometric reference creator")
-        }*/
         biometricReferenceDataCreator = 0
         for (b in creator) {
             biometricReferenceDataCreator = biometricReferenceDataCreator!!*256 + b

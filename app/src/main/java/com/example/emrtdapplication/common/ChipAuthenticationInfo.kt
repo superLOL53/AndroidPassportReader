@@ -53,18 +53,4 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_T
             null
         }
     }
-
-    /*override fun <T : LinearLayout> createViews(context: Context, parent: T) {
-        super.createViews(context, parent)
-        if (tableLayout != null) {
-            var row = createRow(context, parent)
-            provideTextForRow(row, "Version:", version.toString())
-            tableLayout!!.addView(row)
-            if (keyId != null) {
-                row = createRow(context, parent)
-                provideTextForRow(row, "Key identifier:", keyId!!.toString(16))
-                tableLayout!!.addView(row)
-            }
-        }
-    }*/
 }

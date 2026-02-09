@@ -16,7 +16,7 @@ const val FILE_SUCCESSFUL_READ = 0
 const val SUCCESS = 0
 
 /**
- * General return valcodeue for unsuccessful completion
+ * General return value for unsuccessful completion
  */
 const val FAILURE = -1
 
@@ -29,11 +29,6 @@ const val FILE_UNABLE_TO_SELECT = -1
  * Unable to read file from the eMRTD
  */
 const val FILE_UNABLE_TO_READ = -2
-
-/**
- * Currently not implemented in the app
- */
-const val NOT_IMPLEMENTED = -3
 
 /**
  * General error code for an invalid argument

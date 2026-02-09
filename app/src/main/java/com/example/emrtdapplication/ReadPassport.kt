@@ -118,78 +118,12 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      */
     @OptIn(ExperimentalStdlibApi::class)
     fun readeMRTD(tag: Tag) {
-        /*val nfc = IsoDep.get(tag)
-        val service = PassportService(CardService.getInstance(nfc), 1000, 1000, false, true)
-
-
-        service.open()
-        var info = service.transmit(CommandAPDU(APDU(
-            NfcClassByte.ZERO,
-            NfcInsByte.SELECT,
-            NfcP1Byte.SELECT_EF,
-            NfcP2Byte.SELECT_FILE, byteArrayOf(0x01, 0x1C)).getByteArray()))
-        info = service.transmit(CommandAPDU(APDU(
-            NfcClassByte.ZERO,
-            NfcInsByte.READ_BINARY,
-            NfcP1Byte.ZERO,
-            NfcP2Byte.ZERO, 256
-        ).getByteArray()))
-        val ca = CardAccess()
-        ca.parse(info.data)
-        val oid = ca.paceInfos[0].objectIdentifier
-        val paramId = BigInteger(ca.paceInfos[0].parameterId!!.toHexString(), 16)
-        val paramsName = when (ca.paceInfos[0].parameterId) {
-            NIST_P192 -> "P-192"
-            NIST_P224 -> "P-224"
-            NIST_P256 -> "P-256"
-            NIST_P384 -> "P-384"
-            NIST_P521 -> "P-521"
-            BRAIN_POOL_P192R1 -> "brainpoolp192r1"
-            BRAIN_POOL_P224R1 -> "brainpoolp224r1"
-            BRAIN_POOL_P256R1 -> "brainpoolp256r1"
-            BRAIN_POOL_P320R1 -> "brainpoolp320r1"
-            BRAIN_POOL_P384R1 -> "brainpoolp384r1"
-            BRAIN_POOL_P512R1 -> "brainpoolp512r1"
-            else -> null
-        }
-        try {
-            val inst = AlgorithmParameters.getInstance("EC")
-            inst.init(ECGenParameterSpec("secp256r1"))
-            val keySpec = PACEKeySpec.createMRZKey(BACKey("U1194584", "000707", "260801"))
-            val params = inst.getParameterSpec(ECParameterSpec::class.java)
-            val res = service.doPACE(keySpec, oid, params, paramId)
-            println()
-        } catch (e : Exception) {
-            println(e)
-        }*/
-
-        /*service.sendSelectApplet(false)
-        val bacKey = BACKey("U1194584", "000707", "260801")
-
-        service.doBAC(bacKey)
-        val is14 = service.getInputStream(PassportService.EF_DG14)
-        val dg14 = LDSFileUtil.getLDSFile(PassportService.EF_DG14, is14) as DG14File
-        val keyInfo = dg14.securityInfos
-        var chipInfo : ChipAuthenticationInfo? = null
-        var publicKey : ChipAuthenticationPublicKeyInfo? = null
-        for (info in keyInfo) {
-            if (info.objectIdentifier.startsWith(ID_CA_DH) || info.objectIdentifier.startsWith(ID_CA_ECDH)) {
-                chipInfo = info as ChipAuthenticationInfo
-            } else if (info.objectIdentifier.startsWith("0.4.0.127.0.7.2.2.1")) {
-                publicKey = info as ChipAuthenticationPublicKeyInfo
-            }
-        }
-        if (chipInfo == null || publicKey == null) return
-        val apdus = NewAPDUListener()
-        service.addAPDUListener(apdus)
-        val res = service.doEACCA(chipInfo.keyId, chipInfo.objectIdentifier, publicKey.objectIdentifier , publicKey.subjectPublicKey)
-        println(res)*/
-
         val isPACESuccess = false
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
+        //Doing PACE results in a TagLostException
         //EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
         /*val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
         if (isPACESuccess) {
@@ -204,8 +138,8 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         }
         EMRTD.ldS1Application.readFiles(this)
         changeProgressBar(getString(R.string.reading_cscas), 5)
-        //readCSCAs()
-        //EMRTD.ldS1Application.verify(this)
+        readCSCAs()
+        EMRTD.ldS1Application.verify(this)
         changeProgressBar(getString(R.string.passport_verified), 5)
         if (isPACESuccess) {
             if (EMRTD.dir.hasVisaRecordsApplication) {
@@ -234,7 +168,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         val directory = resources.assets.list("MasterList")
         if (directory != null) {
             val filename = directory[0]
-            val readFile = resources.assets.open("MasterList/"+filename)
+            val readFile = resources.assets.open("MasterList/$filename")
             val masterList = MasterList(readFile.readAllBytes())
             if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
                 EMRTD.ldS1Application.certs = masterList.certificateMap.get(EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)

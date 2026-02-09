@@ -9,7 +9,17 @@ import android.widget.TextView
 import androidx.core.view.children
 
 abstract class CreateView {
-    private var alternate = false
+    protected var alternate = false
+
+    fun setBackgroundColor(context: Context, parent: LinearLayout, hashMatch : Boolean) {
+        if (EMRTD.ldS1Application.efSod.isValid && hashMatch) {
+            parent.setBackgroundColor(context.resources.getColor(R.color.green, null))
+        } else if (EMRTD.ldS1Application.efSod.isValid || hashMatch) {
+            parent.setBackgroundColor(context.resources.getColor(R.color.yellow, null))
+        } else {
+            parent.setBackgroundColor(context.resources.getColor(R.color.red, null))
+        }
+    }
 
     /**
      * Fill in the text for [row] with [description] and [value]
@@ -47,8 +57,10 @@ abstract class CreateView {
         alternate = !alternate
         val description = TextView(context)
         description.gravity = Gravity.START
+        description.setPadding(10, 0, 0, 0)
         val value = TextView(context)
         value.gravity = Gravity.END
+        value.setPadding(0, 0, 10, 0)
         row.addView(description)
         row.addView(value)
         parent.addView(row)

@@ -74,6 +74,7 @@ class DG1(): ElementaryFileTemplate() {
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
     override fun parse() : Int {
+        isParsed = false
         if (rawFileContent == null) {
             return FAILURE
         }
@@ -89,12 +90,14 @@ class DG1(): ElementaryFileTemplate() {
             return FAILURE
         }
         val mrz = tlv.value!!
-        return when(mrz.size) {
+        val parsed = when(mrz.size) {
             TD1_SIZE -> decodeTD1MRZ(mrz)
             TD2_SIZE -> decodeTD2MRZ(mrz)
             TD3_SIZE -> decodeTD3MRZ(mrz)
             else -> FAILURE
         }
+        isParsed = parsed == SUCCESS
+        return parsed
     }
 
     /**

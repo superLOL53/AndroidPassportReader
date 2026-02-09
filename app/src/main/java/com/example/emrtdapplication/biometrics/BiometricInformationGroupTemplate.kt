@@ -35,8 +35,7 @@ class BiometricInformationGroupTemplate(groupTemplate: TLV, type: BiometricType)
             for (i in 1..<groupTemplate.list!!.tlvSequence.size) {
                 try {
                     info.add(BiometricInformationTemplate(groupTemplate.list!!.tlvSequence[i], type))
-                } catch (e : Exception) {
-                    println(e.message)
+                } catch (_ : IllegalArgumentException) {
                 }
             }
             biometricInformationList = info.toTypedArray()
