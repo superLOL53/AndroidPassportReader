@@ -49,7 +49,7 @@ object TravelRecordApplicationDisplay : CreateView() {
             return
         }
         for (entryRecord in EMRTD.travelRecords.entryRecords) {
-            EntryExitRecordDisplay(entryRecord).createView(context, entryRecordLayout)
+            EntryExitRecordDisplay(entryRecord, true).createView(context, entryRecordLayout)
         }
     }
 
@@ -71,7 +71,7 @@ object TravelRecordApplicationDisplay : CreateView() {
             return
         }
         for (exitRecord in EMRTD.travelRecords.exitRecords) {
-            EntryExitRecordDisplay(exitRecord).createView(context, exitRecordLayout)
+            EntryExitRecordDisplay(exitRecord, false).createView(context, exitRecordLayout)
         }
     }
 

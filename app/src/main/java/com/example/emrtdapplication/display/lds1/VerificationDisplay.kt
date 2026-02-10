@@ -26,7 +26,9 @@ object VerificationDisplay : CreateView() {
         ) {
             "Expired"
         } else if (!EMRTD.ldS1Application.efSod.isValid || !EMRTD.ldS1Application.efSod.isSignerInfoValid || !EMRTD.ldS1Application.efSod.isCSCAValid) {
-            "Failure"
+            "Invalid signature"
+        } else if(!EMRTD.ldS1Application.efSod.doesHashMatch || !EMRTD.ldS1Application.efSod.validContentType) {
+            "Invalid hash/content"
         } else {
             "Verified"
         }

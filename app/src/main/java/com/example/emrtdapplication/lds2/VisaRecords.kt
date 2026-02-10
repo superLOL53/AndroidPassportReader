@@ -58,7 +58,7 @@ class VisaRecords() : LDS2Application() {
         val sequence = readRecord(recordNumber)
         return try {
             if (sequence != null) {
-                VisaRecord(sequence)
+                VisaRecord(sequence, recordNumber)
             } else {
                 null
             }

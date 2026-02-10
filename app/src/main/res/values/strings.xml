@@ -79,5 +79,7 @@
     <string name="dg13_file_content">DG13 File content</string>
     <string name="show_unparsed_file_s">Show unparsed file(s)</string>
     <string name="pace_protocol_information">PACE protocol information</string>
+    <string name="signature">Signature</string>
+    <string name="biometric_content">Biometric Content</string>
 
 </resources>

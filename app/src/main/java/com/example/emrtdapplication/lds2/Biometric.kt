@@ -29,7 +29,7 @@ import java.security.spec.X509EncodedKeySpec
  * @property certificateReference A reference record number for a certificate in the certificate store
  * @throws IllegalArgumentException If any property is missing or invalid or if a tag is invalid
  */
-class Biometric(record: TLV) {
+class Biometric(record: TLV, val fileID : Int) {
     val biometricData : ByteArray
     val signature : ByteArray
     val certificateReference : Byte

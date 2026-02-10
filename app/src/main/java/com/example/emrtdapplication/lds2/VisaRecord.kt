@@ -47,7 +47,7 @@ import java.security.spec.X509EncodedKeySpec
  * @property certificateReference Certificate reference record number in the certificate store
  * @throws IllegalArgumentException If any of the mandatory fields are missing/invalid or if any tags are invalid
  */
-class VisaRecord(val record: TLVSequence) {
+class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
     val signedInfo : ByteArray
     val state : String
     val documentType : String

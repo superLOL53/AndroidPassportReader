@@ -1,10 +1,10 @@
 package com.example.emrtdapplication.display.lds1
 
 import android.content.Context
+import android.graphics.text.LineBreaker
 import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import android.widget.TableLayout
 import android.widget.TextView
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
@@ -54,7 +54,7 @@ object DG14Display : CreateView() {
         provideTextForRow(row, "Symmetric protocol:", decodeSymmetricProtocol(paceInfo.symmetricProtocol))
         if (paceInfo.parameterId != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Domain Parameter ID:", paceInfo.parameterId!!.toInt().toChar().toString())
+            provideTextForRow(row, "Domain Parameter ID:", "${paceInfo.parameterId!!}")
             row = createRow(context, table)
             provideTextForRow(row, "Domain Parameters:", decodeParameters(paceInfo.parameterId!!))
         }
@@ -108,22 +108,24 @@ object DG14Display : CreateView() {
 
     private fun <T : LinearLayout> displayAAType(context: Context, parent: T,activeAuthenticationInfo: ActiveAuthenticationInfo) {
         createHeader(context, parent, "Active Authentication Information")
-        var row = createRow(context, parent)
+        val table = createTable(context, parent)
+        var row = createRow(context, table)
         provideTextForRow(row, "Protocol ID:", activeAuthenticationInfo.objectIdentifier)
-        row = createRow(context, parent)
+        row = createRow(context, table)
         provideTextForRow(row, "Version:", activeAuthenticationInfo.version.toString(10))
-        row = createRow(context, parent)
+        row = createRow(context, table)
         provideTextForRow(row, "Signature Algorithm ID:", activeAuthenticationInfo.signatureAlgorithm)
     }
 
     private fun <T : LinearLayout> displayCAType(context: Context, parent: T, chipAuthenticationInfo: ChipAuthenticationInfo) {
         createHeader(context, parent, "Chip Authentication Information")
-        var row = createRow(context, parent)
+        val table = createTable(context, parent)
+        var row = createRow(context, table)
         provideTextForRow(row, "Protocol ID:", chipAuthenticationInfo.objectIdentifier)
-        row = createRow(context, parent)
+        row = createRow(context, table)
         provideTextForRow(row, "Version:", chipAuthenticationInfo.version.toString(10))
         if (chipAuthenticationInfo.keyId != null) {
-            row = createRow(context, parent)
+            row = createRow(context, table)
             provideTextForRow(row, "Key ID:", chipAuthenticationInfo.keyId!!.toString(10))
         }
     }
@@ -131,70 +133,73 @@ object DG14Display : CreateView() {
     @OptIn(ExperimentalStdlibApi::class)
     private fun <T : LinearLayout> displayCAPKIType(context: Context, parent: T, chipAuthenticationPublicKeyInfo: ChipAuthenticationPublicKeyInfo) {
         createHeader(context, parent, "Chip Authentication Public Key Information")
-        var row = createRow(context, parent)
+        val table = createTable(context, parent)
+        var row = createRow(context, table)
         provideTextForRow(row, "Protocol ID:", chipAuthenticationPublicKeyInfo.objectIdentifier)
-        row = createRow(context, parent)
+        row = createRow(context, table)
         provideTextForRow(row, "Public Key Algorithm ID:", chipAuthenticationPublicKeyInfo.publicKeyInfo.algorithm.algorithm.id)
-        row = createRow(context, parent)
-        provideTextForRow(row, "Public Key:", chipAuthenticationPublicKeyInfo.publicKeyInfo.publicKeyData.bytes.toHexString(HexFormat { upperCase = true;bytes.byteSeparator=" " }))
         if (chipAuthenticationPublicKeyInfo.keyId != null) {
-            row = createRow(context, parent)
+            row = createRow(context, table)
             provideTextForRow(row, "Key ID:", chipAuthenticationPublicKeyInfo.keyId!!.toString())
         }
-    }
-
-    private fun <T : LinearLayout> displayTAType(context: Context, parent: T, terminalAuthenticationInfo: TerminalAuthenticationInfo) {
-        createHeader(context, parent, "Terminal Authentication Information")
-        var row = createRow(context, parent)
-        provideTextForRow(row, "Protocol ID:", terminalAuthenticationInfo.objectIdentifier)
-        row = createRow(context, parent)
-        provideTextForRow(row, "Protocol version:", terminalAuthenticationInfo.version.toString())
-    }
-
-    private fun <T : LinearLayout> displayEDIType(context: Context, parent: T, efDirInfo: EFDIRInfo) {
-        createHeader(context, parent, "EF DIR Information")
-        var row = createRow(context, parent)
-        var status = if (efDirInfo.efDir.hasVisaRecordsApplication) {
-            "Present"
-        } else {
-            "Absent"
-        }
-        provideTextForRow(row, "Visa Records Application:", status)
-        row = createRow(context, parent)
-        status = if (efDirInfo.efDir.hasTravelRecordsApplication) {
-            "Present"
-        } else {
-            "Absent"
-        }
-        provideTextForRow(row, "Travel Records Application:", status)
-        row = createRow(context, parent)
-        status = if (efDirInfo.efDir.hasAdditionalBiometricsApplication) {
-            "Present"
-        } else {
-            "Absent"
-        }
-        provideTextForRow(row, "Additional Biometrics Application:", status)
-    }
-
-    private fun <T : LinearLayout> createTable(context: Context, parent: T) : TableLayout {TableLayout(context)
-        val table = TableLayout(context)
-        table.layoutParams = TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT)
-        table.isStretchAllColumns = true
-        parent.addView(table)
-        return table
-    }
-
-    private fun <T : LinearLayout> createHeader(context: Context, parent: T, headerLine : String) {
-        val text = TextView(context)
+        var text = TextView(context)
         text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         text.gravity = Gravity.CENTER
-        text.text = headerLine
         if (alternate) {
             text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
         } else {
             text.setBackgroundColor(context.resources.getColor(R.color.black, null))
         }
         alternate = !alternate
+        text.text = context.getString(R.string.public_key)
         parent.addView(text)
+        text = TextView(context)
+        text.gravity = Gravity.CENTER
+        text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        text.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
+        text.maxLines = 10
+        if (alternate) {
+            text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            text.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
+        text.text = chipAuthenticationPublicKeyInfo.publicKeyInfo.publicKeyData.bytes.toHexString(HexFormat { upperCase = true;bytes.byteSeparator=" " })
+        parent.addView(text)
+    }
+
+    private fun <T : LinearLayout> displayTAType(context: Context, parent: T, terminalAuthenticationInfo: TerminalAuthenticationInfo) {
+        createHeader(context, parent, "Terminal Authentication Information")
+        val table = createTable(context, parent)
+        var row = createRow(context, table)
+        provideTextForRow(row, "Protocol ID:", terminalAuthenticationInfo.objectIdentifier)
+        row = createRow(context, table)
+        provideTextForRow(row, "Protocol version:", terminalAuthenticationInfo.version.toString())
+    }
+
+    private fun <T : LinearLayout> displayEDIType(context: Context, parent: T, efDirInfo: EFDIRInfo) {
+        createHeader(context, parent, "EF DIR Information")
+        val table = createTable(context, parent)
+        var row = createRow(context, table)
+        var status = if (efDirInfo.efDir.hasVisaRecordsApplication) {
+            "Present"
+        } else {
+            "Absent"
+        }
+        provideTextForRow(row, "Visa Records Application:", status)
+        row = createRow(context, table)
+        status = if (efDirInfo.efDir.hasTravelRecordsApplication) {
+            "Present"
+        } else {
+            "Absent"
+        }
+        provideTextForRow(row, "Travel Records Application:", status)
+        row = createRow(context, table)
+        status = if (efDirInfo.efDir.hasAdditionalBiometricsApplication) {
+            "Present"
+        } else {
+            "Absent"
+        }
+        provideTextForRow(row, "Additional Biometrics Application:", status)
     }
 }

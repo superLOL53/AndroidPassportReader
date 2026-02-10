@@ -48,7 +48,7 @@ class AdditionalBiometrics() : LDS2Application() {
             if (selectFile(i.toByte()) != SUCCESS) {
                 continue
             }
-            val biometricFile = readBiometricFile()
+            val biometricFile = readBiometricFile(i)
             if (biometricFile != null) {
                 newBiometricFiles.add(biometricFile)
             }
@@ -82,7 +82,7 @@ class AdditionalBiometrics() : LDS2Application() {
      *
      * @return A [Biometric] or null if the file could not be read or decoded
      */
-    private fun readBiometricFile() : Biometric? {
+    private fun readBiometricFile(fileID: Int) : Biometric? {
         var info = APDUControl.sendAPDU(
         APDU(
             NfcClassByte.ZERO,
@@ -148,7 +148,7 @@ class AdditionalBiometrics() : LDS2Application() {
             rawFileContent = APDUControl.removeRespondCodes(info)
         }
         return try {
-            Biometric(TLV(rawFileContent))
+            Biometric(TLV(rawFileContent), fileID)
         } catch (_ : IllegalArgumentException) {
             null
         }

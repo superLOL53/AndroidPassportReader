@@ -1,7 +1,9 @@
 package com.example.emrtdapplication
 
 import android.content.Context
+import android.graphics.text.LineBreaker
 import android.view.Gravity
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
@@ -65,6 +67,84 @@ abstract class CreateView {
         row.addView(value)
         parent.addView(row)
         return row
+    }
+
+    protected fun <T : LinearLayout> createTable(context: Context, parent: T) : TableLayout {TableLayout(context)
+        val table = TableLayout(context)
+        table.layoutParams = TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT)
+        table.isStretchAllColumns = true
+        parent.addView(table)
+        return table
+    }
+
+    protected fun <T : LinearLayout> createHeader(context: Context, parent: T, headerLine : String) {
+        val text = TextView(context)
+        text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        text.gravity = Gravity.CENTER
+        text.text = headerLine
+        if (alternate) {
+            text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            text.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
+        parent.addView(text)
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    protected fun <T : LinearLayout> createSignatureView(context: Context, parent: T, signature: ByteArray) {
+        var text = TextView(context)
+        text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        text.gravity = Gravity.CENTER
+        if (alternate) {
+            text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            text.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
+        text.text = context.getString(R.string.signature)
+        parent.addView(text)
+        text = TextView(context)
+        text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        text.gravity = Gravity.CENTER
+        if (alternate) {
+            text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            text.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
+        text.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
+        text.maxLines = 10
+        text.text = signature.toHexString(HexFormat { upperCase = true;bytes.byteSeparator=" " })
+        parent.addView(text)
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    protected fun <T : LinearLayout> createPublicKeyView(context: Context, parent: T, publicKey: ByteArray) {
+        var text = TextView(context)
+        text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        text.gravity = Gravity.CENTER
+        if (alternate) {
+            text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            text.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
+        text.text = context.getString(R.string.public_key)
+        parent.addView(text)
+        text = TextView(context)
+        text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        text.gravity = Gravity.CENTER
+        if (alternate) {
+            text.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+        } else {
+            text.setBackgroundColor(context.resources.getColor(R.color.black, null))
+        }
+        alternate = !alternate
+        text.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
+        text.maxLines = 10
+        text.text = publicKey.toHexString(HexFormat { upperCase = true;bytes.byteSeparator=" " })
+        parent.addView(text)
     }
 
     /**

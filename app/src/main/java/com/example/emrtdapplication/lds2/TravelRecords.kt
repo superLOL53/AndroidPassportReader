@@ -82,7 +82,7 @@ class TravelRecords() : LDS2Application() {
         val sequence = readRecord(recordNumber)
         return try {
             if (sequence != null) {
-                EntryExitRecord(sequence)
+                EntryExitRecord(sequence, recordNumber)
             } else {
                 null
             }
