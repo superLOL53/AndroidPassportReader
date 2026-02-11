@@ -49,7 +49,7 @@ class TerminalAuthentication(
 
     private fun doMSESetDST(certificate: Certificate) : Int {
         //TODO: Find out public key reference
-        val data = TLV(0x83.toByte(), certificate.tbsCertificate.encoded)
+        val data = TLV(0x83.toByte(), certificate.tbsCertificate.serialNumber.encoded)
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,

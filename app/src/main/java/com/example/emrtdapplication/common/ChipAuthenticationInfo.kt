@@ -35,6 +35,10 @@ class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_T
         private set
 
     init {
+        if (protocol.size < 2 || protocol[protocol.size-1] < 1 || 4 < protocol[protocol.size-1] ||
+            protocol[protocol.size-2] < 1 || 2 < protocol[protocol.size-2]) {
+            throw IllegalArgumentException()
+        }
         if (requiredData.tag.size != 1 || requiredData.tag[0] != TlvTags.INTEGER ||
             requiredData.value == null || requiredData.value!!.size != 1 ||
             requiredData.value!![0].toInt() != 1) {

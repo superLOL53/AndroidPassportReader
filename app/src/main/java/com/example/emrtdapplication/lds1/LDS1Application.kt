@@ -6,6 +6,7 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.EMRTD.mrz
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.ReadPassport
+import com.example.emrtdapplication.common.ChipAuthentication
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import com.example.emrtdapplication.constants.FAILURE
@@ -166,7 +167,11 @@ class LDS1Application() : LDSApplication() {
                 if (chipInfo != null) {
                     ChipAuthentication(chipPublicKey, chipInfo)
                 } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
-                    ChipAuthentication(chipPublicKey, EMRTD.pace.chipAuthenticationData!!, EMRTD.pace.chipPublicKey!!)
+                    ChipAuthentication(
+                        chipPublicKey,
+                        EMRTD.pace.chipAuthenticationData!!,
+                        EMRTD.pace.chipPublicKey!!
+                    )
                 } else {
                     null
                 }

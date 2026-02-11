@@ -23,7 +23,7 @@ class ActiveAuthenticationTest {
     }
 
     @Test
-    fun invalidAAInfo() {
+    fun invalidAAInfoProtocol() {
         var aaTLV = TLV(0x20, version.toByteArray() + sigAlg)
         assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
 
@@ -38,11 +38,30 @@ class ActiveAuthenticationTest {
 
         aaTLV = TLV(0x20, byteArrayOf(0x06, 0x06, 0x67, 0x81.toByte(), 0x08, 0x01, 0x01, 0x06) + version.toByteArray() + sigAlg)
         assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
+    }
 
-        aaTLV = TLV(0x20, byteArrayOf(0x06, 0x06, 0x67, 0x81.toByte(), 0x08, 0x01, 0x01, 0x05) + byteArrayOf(0x02, 0x01, 0x00) + sigAlg)
+    @Test
+    fun invalidAAInfoVersion() {
+        var aaTLV = TLV(0x20, protocol + byteArrayOf(0x02, 0x01, 0x00) + sigAlg)
         assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
 
-        aaTLV = TLV(0x20, byteArrayOf(0x06, 0x06, 0x67, 0x81.toByte(), 0x08, 0x01, 0x01, 0x05) + byteArrayOf(0x02, 0x01, 0x02) + sigAlg)
+        aaTLV = TLV(0x20, protocol + byteArrayOf(0x02, 0x01, 0x02) + sigAlg)
         assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
+
+        aaTLV = TLV(0x20, protocol + byteArrayOf(0x01, 0x01, 0x01) + sigAlg)
+        assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
+
+        aaTLV = TLV(0x20, protocol + byteArrayOf(0x03, 0x01, 0x01) + sigAlg)
+        assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
+    }
+
+    @Test
+    fun invalidAAInfoSignatureAlgorithm() {
+        var aaTLV = TLV(0x20, protocol + version.toByteArray() + byteArrayOf(0x05, 0x0A, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x01, 0x01, 0x04, 0x01, 0x03))
+        assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
+
+        aaTLV = TLV(0x20, protocol + version.toByteArray() + byteArrayOf(0x07, 0x0A, 0x04, 0x00, 0x7F, 0x00, 0x07, 0x01, 0x01, 0x04, 0x01, 0x03))
+        assertFailsWith<IllegalArgumentException> { ActiveAuthenticationInfo(aaTLV) }
+
     }
 }
