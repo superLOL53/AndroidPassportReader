@@ -50,9 +50,9 @@ class VisaRecordDisplay(private val visaRecord: VisaRecord) : CreateView() {
             row = createRow(context, table)
             provideTextForRow(row, "Number of Entries:", "${visaRecord.numberOfEntries}")
         }
-        if (visaRecord.stayDuration != null) {
+        if (visaRecord.stayDurationDays != null || visaRecord.stayDurationMonths != null || visaRecord.stayDurationYears != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Stay Duration:", "${visaRecord.stayDuration}")
+            provideTextForRow(row, "Stay Duration:", "${visaRecord.stayDurationYears} Years, ${visaRecord.stayDurationMonths} Months, ${visaRecord.stayDurationDays} Days")
         }
         if (visaRecord.passportNumber != null) {
             row = createRow(context, table)

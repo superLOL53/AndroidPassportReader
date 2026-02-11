@@ -16,11 +16,9 @@ import org.spongycastle.asn1.cms.Attributes
 import org.spongycastle.asn1.cms.SignedData
 import org.spongycastle.asn1.cms.SignerInfo
 import org.spongycastle.asn1.icao.LDSSecurityObject
-import java.io.ByteArrayInputStream
 import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.Signature
-import java.security.cert.CertificateFactory
 import java.security.spec.X509EncodedKeySpec
 import java.util.Date
 
@@ -34,7 +32,6 @@ import java.util.Date
  * @property documentSignerCertificate The Document Signer Certificate contained in the file
  * @property certificate The file content as a certificate
  * @property isValid Indicates if the [documentSignerCertificate] was signed by the CSCA of the same entity
- * @property cert The decoded Document Signer Certificate read from the eMRTD
  * @property isDocumentSignerCertificateValid If the signature of the Document Signer Certificate is valid
  * @property isDocumentSignerCertificateExpired If the Document Signer Certificate is expired by the time of reading
  * @property isCSCAValid If the signature on the CSCA is valid
@@ -52,13 +49,12 @@ class EfSod(): ElementaryFileTemplate() {
     override val shortEFIdentifier: Byte = 0x1D
     var ldsSecurityObject : LDSSecurityObject? = null
         private set
-    private var certificate : SignedData? = null
+    var certificate : SignedData? = null
+        private set
     var documentSignerCertificate : Certificate? = null
         private set
     var isValid = false
         private set
-
-    private var cert : java.security.cert.Certificate? = null
     var isDocumentSignerCertificateValid = false
         private set
     var isDocumentSignerCertificateExpired = true
@@ -74,6 +70,8 @@ class EfSod(): ElementaryFileTemplate() {
     var doesHashMatch = false
         private set
     var validContentType = false
+        private set
+    var usedCSCA : Certificate? = null
         private set
 
     /**
@@ -91,8 +89,6 @@ class EfSod(): ElementaryFileTemplate() {
             certificate = SignedData.getInstance(cert.`object`)
             val content = certificate!!.encapContentInfo.content.toASN1Primitive().encoded
             documentSignerCertificate = Certificate.getInstance(certificate!!.certificates.getObjectAt(0).toASN1Primitive().encoded)
-            this.cert = CertificateFactory.getInstance("X.509", "BC").generateCertificate(
-                ByteArrayInputStream(documentSignerCertificate!!.encoded))
             ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).value!!).readAllBytes())
             isParsed = true
             return SUCCESS
@@ -188,6 +184,7 @@ class EfSod(): ElementaryFileTemplate() {
             sign.initVerify(pub)
             sign.update(csca.tbsCertificate.encoded)
             isCSCAValid = sign.verify(csca.signature.bytes)
+            usedCSCA = csca
             return true
         } catch (e : Exception) {
             println(e)

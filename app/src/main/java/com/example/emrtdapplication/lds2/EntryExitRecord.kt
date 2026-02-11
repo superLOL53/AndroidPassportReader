@@ -82,25 +82,27 @@ class EntryExitRecord(val record: TLVSequence, val recordNumber: Byte) {
                         continue
                     }
                     when (t.tag[1]) {
-                        ISSUING_STATE -> state2 = t.value.toString()
-                        VISA_STATUS -> visaStatus = t.value.toString().replace('<', ' ')
-                        DATE -> date = t.value.toString()
-                        INSPECTION_AUTHORITY -> inspectionAuthority = t.value.toString().replace('<', ' ')
-                        INSPECTION_LOCATION -> inspectionLocation = t.value.toString().replace('<', ' ')
-                        INSPECTOR_REFERENCE -> inspectorReference = t.value.toString().replace('<', ' ')
-                        INSPECTION_RESULT -> inspectionResult = t.value.toString().replace('<', ' ')
+                        ISSUING_STATE -> state2 = t.value!!.decodeToString()
+                        VISA_STATUS -> visaStatus = t.value!!.decodeToString().replace('<', ' ')
+                        DATE -> date = t.value!!.decodeToString()
+                        INSPECTION_AUTHORITY -> inspectionAuthority = t.value!!.decodeToString().replace('<', ' ')
+                        INSPECTION_LOCATION -> inspectionLocation = t.value!!.decodeToString().replace('<', ' ')
+                        INSPECTOR_REFERENCE -> inspectorReference = t.value!!.decodeToString().replace('<', ' ')
+                        INSPECTION_RESULT -> inspectionResult = t.value!!.decodeToString().replace('<', ' ')
                         TRAVEL_MODE -> travelMode = when (t.value!![0]) {
                                                             'A'.code.toByte() -> "Air"
                                                             'S'.code.toByte() -> "Sea"
                                                             'L'.code.toByte() -> "Land"
-                                                            else -> "Unknown"
-                                                        }
+                                                            else -> null
+                        }
                         STAY_DURATION_TRAVEL_RECORD -> stayDuration = run {
                             var tmp = 0
-                            for (b in tlv.value!!) tmp = tmp*256 + b
+                            for (b in t.value!!) {
+                                tmp = tmp*256 + b.toUByte().toInt()
+                            }
                             tmp
                         }
-                        CONDITIONS -> conditions = t.value.toString().replace('<', ' ')
+                        CONDITIONS -> conditions = t.value!!.decodeToString().replace('<', ' ')
                     }
                 }
             } else if (tlv.tag.size == 2) {
@@ -109,7 +111,7 @@ class EntryExitRecord(val record: TLVSequence, val recordNumber: Byte) {
                     throw IllegalArgumentException("Invalid tag in an Entry/Exit Record!")
                 }
                 when (tlv.tag[1]) {
-                    ISSUING_STATE -> state1 = tlv.value?.toString()
+                    ISSUING_STATE -> state1 = tlv.value!!.decodeToString()
                     AUTHENTICITY_TOKEN -> signature = tlv.value
                     CERTIFICATE_REFERENCE -> certificateReference = tlv.value
                 }
@@ -159,7 +161,7 @@ class EntryExitRecord(val record: TLVSequence, val recordNumber: Byte) {
             val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
             val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
             val pub = fac!!.generatePublic(spec)
-            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id)
+            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id, "BC")
             sigAlg.initVerify(pub)
             sigAlg.update(signedInfo)
             isVerified = sigAlg.verify(signature)

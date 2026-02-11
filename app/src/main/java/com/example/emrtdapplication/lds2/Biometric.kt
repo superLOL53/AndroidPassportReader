@@ -52,7 +52,7 @@ class Biometric(record: TLV, val fileID : Int) {
                 throw IllegalArgumentException("Illegal tag for Biometric Data Template!")
             }
             when (tlv.tag[1]) {
-                BIOMETRIC_DATA -> biometricData = tlv.toByteArray()
+                BIOMETRIC_DATA -> biometricData = tlv.value
                 AUTHENTICITY_TOKEN -> signature = tlv.value
                 CERTIFICATE_REFERENCE -> certificateReference = tlv.value
             }
@@ -76,7 +76,7 @@ class Biometric(record: TLV, val fileID : Int) {
             val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
             val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
             val pub = fac!!.generatePublic(spec)
-            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id)
+            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id, "BC")
             sigAlg.initVerify(pub)
             sigAlg.update(biometricData)
             isVerified = sigAlg.verify(signature)

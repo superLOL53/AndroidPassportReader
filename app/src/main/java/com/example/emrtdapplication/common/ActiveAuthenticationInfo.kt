@@ -1,6 +1,7 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
+import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
@@ -31,18 +32,22 @@ class ActiveAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, ACTIVE_AUTHENTICATI
         private set
 
     init {
-        if (type != ACTIVE_AUTHENTICATION_TYPE) throw IllegalArgumentException("Active Authentication Info must have type of Active Authentication Info")
+        if (type != ACTIVE_AUTHENTICATION_TYPE || objectIdentifier != ACTIVE_AUTHENTICATION_OID) throw IllegalArgumentException("Active Authentication Info must have type of Active Authentication Info")
         if (!requiredData.isValid || requiredData.tag.size != 1 || requiredData.tag[0] != TlvTags.INTEGER ||
             requiredData.value == null || requiredData.value!!.size != 1 || requiredData.value!![0].toInt() != 1) {
-            throw IllegalArgumentException()
+            throw IllegalArgumentException("Illegal required data for AA Info!")
         } else {
             version = 1
         }
         if (optionalData == null || !optionalData.isValid || optionalData.tag.size != 1 ||
             optionalData.tag[0] != TlvTags.OID || optionalData.value == null) {
-            throw IllegalArgumentException()
+            throw IllegalArgumentException("Illegal data for AA Info!")
         } else {
-            signatureAlgorithm = ASN1ObjectIdentifier.getInstance(optionalData.toByteArray()).id
+            try {
+                signatureAlgorithm = ASN1ObjectIdentifier.getInstance(optionalData.toByteArray()).id
+            } catch (_ : Exception) {
+                throw IllegalArgumentException("Illegal OID in AA Info!")
+            }
         }
     }
 }

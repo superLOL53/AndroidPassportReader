@@ -54,7 +54,9 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
     val machineReadableVisaTypeA : String?
     val machineReadableVisaTypeB : String?
     val numberOfEntries : Int?
-    val stayDuration : ByteArray?
+    val stayDurationYears : Int?
+    val stayDurationMonths : Int?
+    val stayDurationDays : Int?
     val passportNumber : String?
     val visaType : ByteArray?
     val territoryInformation : ByteArray?
@@ -84,7 +86,9 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
         var machineReadableVisaTypeA : String? = null
         var machineReadableVisaTypeB : String? = null
         var numberOfEntries : ByteArray? = null
-        var stayDuration : ByteArray? = null
+        var stayDurationYears : Int? = null
+        var stayDurationMonths : Int? = null
+        var stayDurationDays : Int? = null
         var passportNumber : String? = null
         var visaType : ByteArray? = null
         var territoryInformation : ByteArray? = null
@@ -121,33 +125,41 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
                     }
                     if (t.tag.size == 1) {
                         when (t.tag[0]) {
-                            DOCUMENT_TYPE -> documentType = t.value.toString()
-                            ISSUANCE_PLACE -> issuancePlace = t.value.toString()
-                            DOCUMENT_NUMBER -> documentNumber = t.value.toString()
-                            HOLDER_NAME -> holderName = t.value.toString()
+                            DOCUMENT_TYPE -> documentType = t.value!!.decodeToString()
+                            ISSUANCE_PLACE -> issuancePlace = t.value!!.decodeToString()
+                            DOCUMENT_NUMBER -> documentNumber = t.value!!.decodeToString()
+                            HOLDER_NAME -> holderName = t.value!!.decodeToString()
                         }
                     } else if (t.tag.size == 2) {
                         if (t.tag[0] != VISA_1) {
                             continue
                         }
                         when (t.tag[1]) {
-                            ISSUING_AUTHORITY -> state2 = t.value.toString()
-                            VISA_TYPE_A -> machineReadableVisaTypeA = t.value.toString()
-                            VISA_TYPE_B -> machineReadableVisaTypeB = t.value.toString()
+                            ISSUING_AUTHORITY -> state2 = t.value!!.decodeToString()
+                            VISA_TYPE_A -> machineReadableVisaTypeA = t.value!!.decodeToString()
+                            VISA_TYPE_B -> machineReadableVisaTypeB = t.value!!.decodeToString()
                             NUMBER_OF_ENTRIES -> numberOfEntries = t.value
-                            STAY_DURATION_VISA_RECORD -> stayDuration = t.value
-                            PASSPORT_NUMBER -> passportNumber = t.value.toString()
+                            STAY_DURATION_VISA_RECORD -> {
+                                if (t.value!!.size == 3) {
+                                    stayDurationDays = t.value!![0].toUByte().toInt()
+                                    stayDurationMonths = t.value!![1].toUByte().toInt()
+                                    stayDurationYears = t.value!![2].toUByte().toInt()
+                                } else {
+                                    throw IllegalArgumentException("Invalid length for duration of stays!")
+                                }
+                            }
+                            PASSPORT_NUMBER -> passportNumber = t.value!!.decodeToString()
                             VISA_TYPE -> visaType = t.value
                             TERRITORY_INFORMATION -> territoryInformation = t.value
-                            ISSUANCE_DATE -> issuanceDate = t.value.toString()
-                            EXPIRATION_DATE -> expirationDate = t.value.toString()
-                            ADDITIONAL_INFORMATION -> additionalInformation = t.value.toString()
-                            SURNAME -> surname = t.value.toString()
-                            GIVEN_NAME -> givenName = t.value.toString()
-                            SEX -> sex = t.value.toString()
-                            BIRTHDATE -> birthDate = t.value.toString()
-                            NATIONALITY -> nationality = t.value.toString()
-                            MRZ -> mrz = t.value.toString()
+                            ISSUANCE_DATE -> issuanceDate = t.value!!.decodeToString()
+                            EXPIRATION_DATE -> expirationDate = t.value!!.decodeToString()
+                            ADDITIONAL_INFORMATION -> additionalInformation = t.value!!.decodeToString()
+                            SURNAME -> surname = t.value!!.decodeToString()
+                            GIVEN_NAME -> givenName = t.value!!.decodeToString()
+                            SEX -> sex = t.value!!.decodeToString()
+                            BIRTHDATE -> birthDate = t.value!!.decodeToString()
+                            NATIONALITY -> nationality = t.value!!.decodeToString()
+                            MRZ -> mrz = t.value!!.decodeToString()
                             ADDITIONAL_BIOMETRICS_REFERENCE -> additionalBiometricsReference = t.value
                         }
                     }
@@ -158,7 +170,7 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
                     throw IllegalArgumentException("Invalid tag in record sequence!")
                 }
                 when (tlv.tag[1]) {
-                    ISSUING_AUTHORITY -> state1 = tlv.value?.toString()
+                    ISSUING_AUTHORITY -> state1 = tlv.value!!.decodeToString()
                     AUTHENTICITY_TOKEN -> signature = tlv.value
                     CERTIFICATE_REFERENCE -> certificateReference = tlv.value
                 }
@@ -183,10 +195,9 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
                                 } else {
                                     numberOfEntries[0].toInt()
                                 }
-        if (stayDuration == null) {
-            throw IllegalArgumentException("Unspecified document type in Visa Record!")
-        }
-        this.stayDuration = stayDuration
+        this.stayDurationYears = stayDurationYears
+        this.stayDurationMonths = stayDurationMonths
+        this.stayDurationDays = stayDurationDays
         this.passportNumber = passportNumber
         this.visaType = visaType
         this.territoryInformation = territoryInformation
@@ -235,7 +246,10 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
             throw IllegalArgumentException("Unspecified MRZ in Visa Record!")
         }
         this.mrz = mrz
-        this.additionalBiometricsReference = additionalBiometricsReference?.get(0)
+        if (additionalBiometricsReference != null && additionalBiometricsReference.size != 2) {
+            throw IllegalArgumentException("Illegal length for the Biometrics EF file reference")
+        }
+        this.additionalBiometricsReference = additionalBiometricsReference?.get(1)
         if (signature == null) {
             throw IllegalArgumentException("Unspecified document type in Visa Record!")
         }
@@ -251,7 +265,7 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
             val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
             val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
             val pub = fac!!.generatePublic(spec)
-            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id)
+            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id, "BC")
             sigAlg.initVerify(pub)
             sigAlg.update(signedInfo)
             isVerified = sigAlg.verify(signature)

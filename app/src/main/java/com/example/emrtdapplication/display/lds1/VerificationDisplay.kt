@@ -4,6 +4,8 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.display.utils.CertificateDisplay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -13,8 +15,22 @@ object VerificationDisplay : CreateView() {
         context: Context,
         parent: T
     ) {
-        val row = createRow(context, parent)
-        provideTextForRow(row, "Authentication Status:", authenticationStatus())
+        var row = createRow(context, parent)
+        provideTextForRow(row, "Passive Authentication Status:", authenticationStatus())
+        row = createRow(context, parent)
+        provideTextForRow(row, "Chip Authentication Status:", chipAuthenticationStatus())
+        if (EMRTD.showDetails) {
+            if (EMRTD.ldS1Application.efSod.usedCSCA != null) {
+                createHeader(context, parent, "Country Signing Certificate Authority")
+                CertificateDisplay(EMRTD.ldS1Application.efSod.usedCSCA!!).createView(context, parent)
+            }
+            if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
+                createHeader(context, parent, "Country Signing Certificate Authority")
+                CertificateDisplay(EMRTD.ldS1Application.efSod.documentSignerCertificate!!).createView(context, parent)
+            }
+            EMRTD.ldS1Application.efSod.certificate
+            EMRTD.ldS1Application.efSod.ldsSecurityObject
+        }
     }
 
     private fun authenticationStatus() : String {
@@ -31,6 +47,14 @@ object VerificationDisplay : CreateView() {
             "Invalid hash/content"
         } else {
             "Verified"
+        }
+    }
+
+    private fun chipAuthenticationStatus() : String {
+        return if (EMRTD.ldS1Application.chipAuthenticationResult == SUCCESS  || EMRTD.ldS1Application.activeAuthenticationResult == SUCCESS) {
+            "Verified"
+        } else {
+            "Failure"
         }
     }
 }
