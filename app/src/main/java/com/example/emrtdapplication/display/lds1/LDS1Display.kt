@@ -13,6 +13,7 @@ class LDS1Display(private val lds1ViewLayout: LinearLayout) : CreateView() {
 
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         VerificationDisplay.createView(context, lds1ViewLayout.findViewById<TableLayout>(R.id.verification_table))
+        VerificationDisplay.setBackgroundColor(context, lds1ViewLayout.findViewById(R.id.verification_layout), EMRTD.ldS1Application.efSod.isValid)
         for (ef in EMRTD.ldS1Application.efMap) {
             if (!ef.value.isPresent || (!EMRTD.showUnparsedContent && !ef.value.isParsed)) {
                 try {

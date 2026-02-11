@@ -25,7 +25,7 @@ object VerificationDisplay : CreateView() {
                 CertificateDisplay(EMRTD.ldS1Application.efSod.usedCSCA!!).createView(context, parent)
             }
             if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
-                createHeader(context, parent, "Country Signing Certificate Authority")
+                createHeader(context, parent, "Document Signer Certificate")
                 CertificateDisplay(EMRTD.ldS1Application.efSod.documentSignerCertificate!!).createView(context, parent)
             }
             EMRTD.ldS1Application.efSod.certificate

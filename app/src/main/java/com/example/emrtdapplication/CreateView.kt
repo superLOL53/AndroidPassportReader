@@ -63,6 +63,8 @@ abstract class CreateView {
         val value = TextView(context)
         value.gravity = Gravity.END
         value.setPadding(0, 0, 10, 0)
+        value.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
+        value.maxLines = 10
         row.addView(description)
         row.addView(value)
         parent.addView(row)

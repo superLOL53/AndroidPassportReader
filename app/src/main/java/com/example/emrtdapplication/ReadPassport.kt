@@ -124,8 +124,8 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
         //Doing PACE results in a TagLostException
-        //EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
-        /*val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
+        /*EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
+        val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
         if (isPACESuccess) {
             EMRTD.cs.read()
         }*/

@@ -207,7 +207,7 @@ class ChipAuthentication {
         val tlv = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, pubData.toByteArray())
         info = APDUControl.sendAPDU(
             APDU(
-                NfcClassByte.COMMAND_CHAINING,
+                NfcClassByte.ZERO,
                 NfcInsByte.GENERAL_AUTHENTICATE,
                 NfcP1Byte.ZERO,
                 NfcP2Byte.ZERO,
