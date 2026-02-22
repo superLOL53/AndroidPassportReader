@@ -118,17 +118,17 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      */
     @OptIn(ExperimentalStdlibApi::class)
     fun readeMRTD(tag: Tag) {
-        val isPACESuccess = false
+        //val isPACESuccess = false
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
         //Doing PACE results in a TagLostException
-        /*EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
+        EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
         val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
         if (isPACESuccess) {
             EMRTD.cs.read()
-        }*/
+        }
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }

@@ -2,6 +2,7 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import android.util.Log
 import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
@@ -72,13 +73,19 @@ object APDUControl {
      * @param apdu: The APDU to be sent to the eMRTD
      * @return The received APDU from the eMRTD
      */
+    @OptIn(ExperimentalStdlibApi::class)
     fun sendAPDU(apdu : APDU) : ByteArray {
-        if (sendEncryptedAPDU) {
-            return sendEncryptedAPDU(apdu)
+        Log.d("APDU", "Sending APDU: " + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
+        upperCase = true}))
+        val apdu = if (sendEncryptedAPDU) {
+            sendEncryptedAPDU(apdu)
         } else {
             sendEncryptedAPDU = false
-            return sendISODEP(apdu)
+            sendISODEP(apdu)
         }
+        Log.d("APDU", "Received APDU: " + apdu.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true}))
+        return apdu
     }
 
     /**
