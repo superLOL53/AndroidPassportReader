@@ -1,6 +1,5 @@
 package com.example.emrtdapplication.common
 
-import android.util.Log
 import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -120,22 +119,22 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      */
     @OptIn(ExperimentalStdlibApi::class)
     fun paceProtocol() : Int {
-        Log.d("PACE", "Starting PACE...")
+        //Log.d("PACE", "Starting PACE...")
         if (idPACEOid == null) {
             return NO_PACE_OID
         }
-        Log.d("PACE", "Using PACE OID: ${
-            idPACEOid!!.toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true})}")
+        //Log.d("PACE", "Using PACE OID: ${
+        //    idPACEOid!!.toHexString(HexFormat { bytes.byteSeparator = " "
+        //    upperCase = true})}")
         var info = byteArrayOf(TlvTags.CRYPTOGRAPHIC_REFERENCE, idPACEOid!!.size.toByte()) + idPACEOid!! + byteArrayOf(
             TlvTags.KEY_REFERENCE, 0x01)
         info += if (mrzInformation == null) {
             return NO_PASSWORD
         } else if (useCAN) {
-            Log.d("PACE", "Using CAN for Key derivation")
+            //Log.d("PACE", "Using CAN for Key derivation")
             0x02
         } else {
-            Log.d("PACE", "Using MRZ for Key derivation")
+            //Log.d("PACE", "Using MRZ for Key derivation")
             0x01
         }
         val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())

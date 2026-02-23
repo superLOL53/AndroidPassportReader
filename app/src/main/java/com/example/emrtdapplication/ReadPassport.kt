@@ -133,7 +133,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             return
         }
 
-        if (/*!isPACESuccess &&*/ EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
+        if (!isPACESuccess && EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
             return
         }
         EMRTD.ldS1Application.readFiles(this)

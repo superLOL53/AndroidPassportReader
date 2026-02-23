@@ -47,7 +47,7 @@ object APDUControlConstants {
     /**
      * NFC response timeout setting
      */
-    const val TIME_OUT = 2000
+    const val TIME_OUT = 50000
 
     /**
      * Byte array size for APDU response codes

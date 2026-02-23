@@ -227,10 +227,10 @@ class ChipAuthentication {
      * @return [SUCCESS] or [FAILURE]
      */
     private fun authenticatePACECAMMapping() : Int {
-        val privateKey =
-            ECPrivateKeyParameters(BigInteger(chipAuthenticationData!!), publicKeyECDH!!.parameters)
-        val agreement = Crypto.calculateECDHAgreement(privateKey, publicKeyECDH!!)
-        return if (agreement.toByteArray().contentEquals(publicKeyInfo.publicKeyInfo.publicKeyData.getEncoded())) {
+        val pub = ECPublicKeyParameters(publicKeyECDH!!.parameters.curve.decodePoint(publicKeyInfo.publicKeyInfo.publicKeyData.bytes), publicKeyECDH!!.parameters)
+        val privateKey = ECPrivateKeyParameters(BigInteger(byteArrayOf(0x00) + chipAuthenticationData!!), pub.parameters)
+        val agreement = Crypto.calculateECDHAgreement(privateKey, pub).toByteArray()
+        return if (agreement.contentEquals(publicKeyECDH!!.q.xCoord.toBigInteger().toByteArray())) {
             SUCCESS
         } else {
             FAILURE
