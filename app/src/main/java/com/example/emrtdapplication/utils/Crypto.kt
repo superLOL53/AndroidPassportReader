@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.utils
 
+import android.util.Log
 import com.example.emrtdapplication.constants.CryptoConstants.AES
 import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
 import com.example.emrtdapplication.constants.CryptoConstants.BYTE_TO_BITS
@@ -40,6 +41,7 @@ import org.spongycastle.crypto.params.KeyParameter
 import org.spongycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.security.NoSuchAlgorithmException
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
@@ -182,7 +184,7 @@ object Crypto {
      * @return The decoded EC point
      */
     fun getECPointFromBigInteger(x : BigInteger, parameters: ECDomainParameters) : ECPoint {
-        return if (x.toByteArray()[0] == 0.toByte()) {
+        return if (x.toByteArray().size*8 != parameters.g.xCoord.bitLength()) {
             parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
         } else {
             parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + x.toByteArray())
@@ -276,12 +278,17 @@ object Crypto {
      * @param iv The IV used for the cipher
      * @return The en-/decrypted byte array
      */
-    fun cipher3DES(data: ByteArray, key: ByteArray, mode : Int = Cipher.ENCRYPT_MODE, iv : ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)) : ByteArray {
-        val k = SecretKeySpec(key, DES_EDE)
-        val c = Cipher.getInstance(DES_EDE_CBC_NO_PADDING)
-        val i = IvParameterSpec(iv)
-        c.init(mode, k, i)
-        return c.doFinal(data)
+    fun cipher3DES(data: ByteArray, key: ByteArray, mode : Int = Cipher.ENCRYPT_MODE, iv : ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)) : ByteArray? {
+        try {
+            val k = SecretKeySpec(key, DES_EDE)
+            val c = Cipher.getInstance(DES_EDE_CBC_NO_PADDING)
+            val i = IvParameterSpec(iv)
+            c.init(mode, k, i)
+            return c.doFinal(data)
+        } catch (e : Exception) {
+            Log.d("Crypto", "Unable to en-/decrypt with 3DES.\n${e.message}")
+        }
+        return null
     }
 
     /**
@@ -291,18 +298,23 @@ object Crypto {
      * @param key The key for en-/decryption
      * @param mode The mode for the cipher. Is either encryption or decryption mode
      * @param iv The IV used for the cipher
-     * @return The en-/decrypted byte array
+     * @return The en-/decrypted byte array or null if [data] could not be en-/decrypted
      */
-    fun cipherAES(data: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null) : ByteArray {
-        val k = SecretKeySpec(key, AES)
-        val c = Cipher.getInstance(AES_CBC_NO_PADDING)
-        val i = if (iv == null || iv.isEmpty()) {
-            IvParameterSpec(ByteArray(key.size))
-        } else {
-            IvParameterSpec(iv)
+    fun cipherAES(data: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null) : ByteArray? {
+        try {
+            val k = SecretKeySpec(key, AES)
+            val c = Cipher.getInstance(AES_CBC_NO_PADDING)
+            val i = if (iv == null || iv.isEmpty()) {
+                IvParameterSpec(ByteArray(key.size))
+            } else {
+                IvParameterSpec(iv)
+            }
+            c.init(mode, k, i)
+            return c.doFinal(data)
+        } catch (e : Exception) {
+            Log.d("Crypto", "Unable to en-/decrypt with AES.\n${e.message}")
         }
-        c.init(mode, k, i)
-        return c.doFinal(data)
+        return null
     }
 
     /**
@@ -312,10 +324,13 @@ object Crypto {
      * @param seed The seed used for input appended by [c] for the hash algorithm
      * @param c Additional input concatenated to [seed] for the hash algorithm
      * @param is3DES Indicates if the key generated is a 3DES or AES key
-     * @return The generated symmetric key
+     * @return The generated symmetric key or null if no key could be generated
      */
-    fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray {
+    fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray? {
         val key = hash(hashName, seed + byteArrayOf(0, 0, 0, c))
+        if (key == null) {
+            return null
+        }
         if (is3DES) {
             for (i in key.indices) {
                 if ((key[i] and KEY_3DES_COUNT_ONES).countOneBits() % 2 == 0) {
@@ -332,22 +347,25 @@ object Crypto {
      * Generates an AES or 3DES key.
      *
      * @param seed The seed for the key generation
-     * @param cipherId The symmetric protocol id for which a key is generated.
+     * @param cipherId The symmetric protocol id for which a key is generated. Must be one of [DES_CBC_CBC], [AES_CBC_CMAC_128], [AES_CBC_CMAC_192], [AES_CBC_CMAC_256]
      * @param cValue Counter value for key generation
      * @return The generated symmetric key
+     * @throws IllegalArgumentException If the cipherId is invalid
      */
-    fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray {
+    fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray? {
         return when (cipherId) {
             DES_CBC_CBC -> {
-                val encKey = computeKey("SHA-1", seed, cValue, true).slice(0..15).toByteArray()
+                val encKey = computeKey("SHA-1", seed, cValue, true)
+                if (encKey == null) return null
+                encKey.slice(0..15).toByteArray()
                 encKey + encKey.slice(0..7).toByteArray()
             }
             AES_CBC_CMAC_128 -> {
-                computeKey("SHA-1", seed, cValue).slice(0..15).toByteArray()
+                computeKey("SHA-1", seed, cValue)?.slice(0..15)?.toByteArray()
 
             }
             AES_CBC_CMAC_192 -> {
-                computeKey("SHA-256", seed, cValue).slice(0..23).toByteArray()
+                computeKey("SHA-256", seed, cValue)?.slice(0..23)?.toByteArray()
             }
             AES_CBC_CMAC_256 -> {
                 computeKey("SHA-256", seed, cValue)
@@ -361,12 +379,17 @@ object Crypto {
      *
      * @param hashName The name of the hash algorithm
      * @param hashBytes The bytes to be hashed
-     * @return The output of the hash algorithm
+     * @return The output of the hash algorithm or null if no hash algorithm with the given name was found
      */
-    fun hash(hashName: String, hashBytes: ByteArray) : ByteArray {
-        val md = MessageDigest.getInstance(hashName)
-        md.update(hashBytes)
-        return md.digest()
+    fun hash(hashName: String, hashBytes: ByteArray) : ByteArray? {
+        try {
+            val md = MessageDigest.getInstance(hashName)
+            md.update(hashBytes)
+            return md.digest()
+        } catch (_ : NoSuchAlgorithmException) {
+            Log.d("Crypto" , "Unable to find hash algorithm $hashName")
+        }
+        return null
     }
 
     /**

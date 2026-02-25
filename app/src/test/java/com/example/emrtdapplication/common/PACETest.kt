@@ -140,14 +140,6 @@ class PACETest {
             Crypto.genericMappingDH(any(), any(), any(), any())
         }
 
-        verify(exactly = 1) {
-            setEncryptionKeyBAC(any())
-        }
-
-        verify(exactly = 1) {
-            setEncryptionKeyMAC(any())
-        }
-
         assertArrayEquals(ByteArray(1) +
                 BigInteger("22C1A40F800A04007F00070202040102830101", 16).toByteArray(),
             sentAPDUs[0].getByteArray())
@@ -208,6 +200,14 @@ class PACETest {
             BigInteger("F518AA8781A8DF278ABA4E7D64B7CB9D49462353", 16).toByteArray(),
             keyParametersDH[1].q.toByteArray())
 
+
+        verify(exactly = 1) {
+            setEncryptionKeyBAC(any())
+        }
+
+        verify(exactly = 1) {
+            setEncryptionKeyMAC(any())
+        }
         assertArrayEquals(
             BigInteger("2F7F46ADCC9E7E521B45D192FAFA9126", 16).toByteArray(),
             encKey.captured)
@@ -297,12 +297,6 @@ class PACETest {
         verify(exactly = 1) {
             Crypto.genericMappingEC(any(), any(), any())
         }
-        verify(exactly = 1) {
-            setEncryptionKeyBAC(any())
-        }
-        verify(exactly = 1) {
-            setEncryptionKeyMAC(any())
-        }
 
         assertArrayEquals(
             byteArrayOf(0x00) +
@@ -336,6 +330,12 @@ class PACETest {
                 "6723A0AF21C89634F65A9AE87A9265E2", 16).toByteArray(),
             keyParametersECDH[1].g.xCoord.toBigInteger().toByteArray())
 
+        verify(exactly = 1) {
+            setEncryptionKeyBAC(any())
+        }
+        verify(exactly = 1) {
+            setEncryptionKeyMAC(any())
+        }
         assertArrayEquals(
             BigInteger("F5F0E35C0D7161EE6724EE513A0D9A7F", 16).
             toByteArray().slice(1..16).toByteArray(),

@@ -45,6 +45,7 @@ import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.ZERO_BYTE
 import org.spongycastle.asn1.x9.ECNamedCurveTable
 import org.spongycastle.asn1.x9.X9ECParameters
+import org.spongycastle.asn1.x9.X9ECPoint
 import org.spongycastle.crypto.agreement.DHStandardGroups
 import org.spongycastle.crypto.params.DHParameters
 import org.spongycastle.crypto.params.DHPrivateKeyParameters
@@ -138,6 +139,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
             0x01
         }
         val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
+        if (key == null) return FAILURE
         computeKeys(key, 3)
         info = APDUControl.sendAPDU(
             APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info)
@@ -339,7 +341,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param seed The seed for computing the keys
      */
     private fun computeKeys(secret: ByteArray, seed : Byte = 1) {
-        val key = if (secret[0] == 0.toByte()) {
+        val key = if (secret.size % 2 != 0) {
             secret.slice(1..<secret.size).toByteArray()
         } else {
             secret
@@ -403,11 +405,13 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
         val receivedToken = data.list!!.tlvSequence[0].value
         if (isCAM) {
             chipAuthenticationData = data.list?.tlvSequence?.get(1)?.value
-            var iv = ByteArray(encKey!!.size)
+            val iv = ByteArray(encKey!!.size)
             iv.fill(-1)
-            iv = Crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(16))
-            chipAuthenticationData = Crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, iv)
-            chipAuthenticationData = Crypto.removePadding(chipAuthenticationData!!)
+            val newIV = Crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(16))
+            if (newIV != null) {
+                chipAuthenticationData = Crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, iv)
+                chipAuthenticationData = Crypto.removePadding(chipAuthenticationData!!)
+            }
         }
         if (receivedToken.contentEquals(computeToken(token))) {
             APDUControl.sendEncryptedAPDU = true
@@ -442,16 +446,9 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      */
     private fun generateTokenData(publicKey: ECPublicKeyParameters) : ByteArray {
         val oid = TLV(TlvTags.OID, idPACEOid!!)
-        var x = publicKey.q.xCoord.toBigInteger().toByteArray()
-        if (x[0] == 0.toByte()) {
-            x = x.slice(1..<x.size).toByteArray()
-        }
-        var y = publicKey.q.yCoord.toBigInteger().toByteArray()
-        if (y[0] == 0.toByte()) {
-            y = y.slice(1..<y.size).toByteArray()
-        }
-        val pub = TLV(TlvTags.EC_PUBLIC_POINT, byteArrayOf(0x04) + x + y)
-        return TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray() + pub.toByteArray()).toByteArray()
+        val pub = X9ECPoint(publicKey.q, false).encoded
+        pub[0] = TlvTags.EC_PUBLIC_POINT
+        return TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray() + pub).toByteArray()
     }
 
     /**
@@ -463,7 +460,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
     private fun generateTokenData(publicKey: DHPublicKeyParameters) : ByteArray {
         val oid = TLV(TlvTags.OID, idPACEOid!!)
         var key = publicKey.y.toByteArray()
-        if (key[0] == 0.toByte()) {
+        if (publicKey.y.signum() == 1 && key[0] == 0.toByte() && key[1] < 0) {
             key = key.slice(1..<key.size).toByteArray()
         }
         val pub = TLV(TlvTags.UNSIGNED_INTEGER, key)

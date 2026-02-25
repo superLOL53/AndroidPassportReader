@@ -137,10 +137,12 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             return
         }
         EMRTD.ldS1Application.readFiles(this)
-        changeProgressBar(getString(R.string.reading_cscas), 5)
-        readCSCAs()
-        EMRTD.ldS1Application.verify(this)
-        changeProgressBar(getString(R.string.passport_verified), 5)
+        if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
+            changeProgressBar(getString(R.string.reading_cscas), 5)
+            readCSCAs()
+            EMRTD.ldS1Application.verify(this)
+            changeProgressBar(getString(R.string.passport_verified), 5)
+        }
         if (isPACESuccess) {
             if (EMRTD.dir.hasVisaRecordsApplication) {
                 if (EMRTD.visaRecords.selectApplication() == SUCCESS) {
@@ -169,9 +171,10 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         if (directory != null) {
             val filename = directory[0]
             val readFile = resources.assets.open("MasterList/$filename")
-            val masterList = MasterList(readFile.readAllBytes())
+            if (EMRTD.ldS1Application.efSod.documentSignerCertificate == null) return
+            val masterList = MasterList(readFile.readAllBytes(), EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)
             if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
-                EMRTD.ldS1Application.certs = masterList.certificateMap.get(EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)
+                EMRTD.ldS1Application.certs = masterList.certificateMap
             }
         }
     }

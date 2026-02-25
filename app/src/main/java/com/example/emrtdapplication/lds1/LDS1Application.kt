@@ -6,6 +6,7 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.EMRTD.mrz
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.ReadPassport
+import com.example.emrtdapplication.common.ActiveAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthentication
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
@@ -13,6 +14,7 @@ import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.APPLICATION_ID
 import com.example.emrtdapplication.constants.LDS1ApplicationConstants.INCREMENT_PROGRESS_BAR
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_TYPE
 import org.spongycastle.asn1.x509.Certificate
 import java.math.BigInteger
 import kotlin.collections.iterator
@@ -150,35 +152,47 @@ class LDS1Application() : LDSApplication() {
         readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
         efSod.checkHashes(efMap)
         efSod.passiveAuthentication(certs)
-        readActivity.changeProgressBar("Performing Active Authentication...", INCREMENT_PROGRESS_BAR)
-        activeAuthenticationResult = dg15.activeAuthentication()
-        readActivity.changeProgressBar("Performing Chip Authentication...", INCREMENT_PROGRESS_BAR)
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
-            var chipPublicKey : ChipAuthenticationPublicKeyInfo? = null
-            var chipInfo : ChipAuthenticationInfo? = null
+            var chipPublicKey: ChipAuthenticationPublicKeyInfo? = null
+            var chipInfo: ChipAuthenticationInfo? = null
+            var activeAuthenticationInfo: ActiveAuthenticationInfo? = null
             for (si in dg14.securityInfos!!) {
                 if (si.type == CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE) {
                     chipPublicKey = si as ChipAuthenticationPublicKeyInfo
                 } else if (si.type == CHIP_AUTHENTICATION_TYPE) {
                     chipInfo = si as ChipAuthenticationInfo
+                } else if (si.type == ACTIVE_AUTHENTICATION_TYPE) {
+                    activeAuthenticationInfo = si as ActiveAuthenticationInfo
                 }
             }
-            val auth = if (chipPublicKey != null) {
-                if (chipInfo != null) {
-                    ChipAuthentication(chipPublicKey, chipInfo)
-                } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
-                    ChipAuthentication(
-                        chipPublicKey,
-                        EMRTD.pace.chipAuthenticationData!!,
-                        EMRTD.pace.chipPublicKey!!
-                    )
+            if (activeAuthenticationInfo != null) {
+                readActivity.changeProgressBar(
+                    "Performing Active Authentication...",
+                    INCREMENT_PROGRESS_BAR
+                )
+                activeAuthenticationResult = dg15.activeAuthentication(activeAuthenticationInfo)
+            } else {
+                readActivity.changeProgressBar(
+                    "Performing Chip Authentication...",
+                    INCREMENT_PROGRESS_BAR
+                )
+                val auth = if (chipPublicKey != null) {
+                    if (chipInfo != null) {
+                        ChipAuthentication(chipPublicKey, chipInfo)
+                    } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
+                        ChipAuthentication(
+                            chipPublicKey,
+                            EMRTD.pace.chipAuthenticationData!!,
+                            EMRTD.pace.chipPublicKey!!
+                        )
+                    } else {
+                        null
+                    }
                 } else {
                     null
                 }
-            } else {
-                null
+                chipAuthenticationResult = auth?.authenticate() ?: FAILURE
             }
-            chipAuthenticationResult = auth?.authenticate() ?: FAILURE
         }
     }
 }

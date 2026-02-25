@@ -91,12 +91,16 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
             s[i+16] = kIfd[i]
         }
         val hash = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
-        val kSeed = hash.slice(0..15).toByteArray()
-        var kEnc = Crypto.computeKey("SHA-1", kSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray()
+        val kSeed = hash?.slice(0..15)?.toByteArray()
+        if (kSeed == null) return ERROR_BAC_PROTOCOL_FAILED
+        var kEnc = Crypto.computeKey("SHA-1", kSeed, ENCRYPTION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
+        if (kEnc == null) return ERROR_BAC_PROTOCOL_FAILED
         kEnc += kEnc.slice(0..7).toByteArray()
-        var kMAC = Crypto.computeKey("SHA-1", kSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray()
+        var kMAC = Crypto.computeKey("SHA-1", kSeed, MAC_COMPUTATION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
+        if (kMAC == null) return ERROR_BAC_PROTOCOL_FAILED
         kMAC += kMAC.slice(0..7).toByteArray()
         val eIfd = Crypto.cipher3DES(s, kEnc)
+        if (eIfd == null) return ERROR_BAC_PROTOCOL_FAILED
         val mIfd = Crypto.computeMAC(eIfd, kMAC)
         info = APDUControl.sendAPDU(
             APDU(
@@ -112,12 +116,16 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
             return ERROR_BAC_PROTOCOL_FAILED
         }
         info = APDUControl.removeRespondCodes(info)
+        if (info.size != 40) {
+            return ERROR_BAC_PROTOCOL_FAILED
+        }
         val encData = info.slice(0..31).toByteArray()
         val mIC = info.slice(32..39).toByteArray()
         if (!Crypto.checkMAC(encData, mIC, kMAC)) {
             return ERROR_INVALID_MAC
         }
         val con = Crypto.cipher3DES(encData, kEnc, Cipher.DECRYPT_MODE)
+        if (con == null) return ERROR_BAC_PROTOCOL_FAILED
         if (!con.slice(8..15).toByteArray().contentEquals(rndIfd)) {
             return ERROR_INVALID_NONCE
         }
@@ -127,8 +135,12 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
         for (i in 0..15) {
             kSessionSeed[i] = kIC[i] xor kIfd[i]
         }
-        APDUControl.setEncryptionKeyBAC(Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true).slice(0..15).toByteArray())
-        APDUControl.setEncryptionKeyMAC(Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true).slice(0..15).toByteArray())
+        val encryptionKeyBAC = Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
+        if (encryptionKeyBAC == null) return ERROR_BAC_PROTOCOL_FAILED
+        APDUControl.setEncryptionKeyBAC(encryptionKeyBAC)
+        val encryptionKeyMAC = Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
+        if (encryptionKeyMAC == null) return ERROR_BAC_PROTOCOL_FAILED
+        APDUControl.setEncryptionKeyMAC(encryptionKeyMAC)
         APDUControl.setSequenceCounter(
             (rndIC.slice(4..7).toByteArray() + rndIfd.slice(4..7).toByteArray())
         )

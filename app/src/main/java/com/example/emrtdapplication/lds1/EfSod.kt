@@ -80,7 +80,7 @@ class EfSod(): ElementaryFileTemplate() {
      */
     override fun parse(): Int {
         isParsed = false
-        if (rawFileContent == null) {
+        if (rawFileContent == null || contentStart >= rawFileContent!!.size) {
             return SUCCESS
         }
         try {
@@ -123,6 +123,13 @@ class EfSod(): ElementaryFileTemplate() {
      */
     @OptIn(ExperimentalStdlibApi::class)
     fun passiveAuthentication(cscas: Array<Certificate>?) : Int {
+        isCSCAValid = false
+        isCSCAExpired = true
+        isValid = false
+        isSignerInfoValid = false
+        isSigningTimeValid = false
+        isDocumentSignerCertificateExpired = true
+        isDocumentSignerCertificateValid = false
         if (cscas == null || cscas.isEmpty() || documentSignerCertificate == null ||
             certificate == null || ldsSecurityObject == null) return FAILURE
         try {

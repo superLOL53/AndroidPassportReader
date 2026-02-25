@@ -33,4 +33,6 @@ object DG15Constants {
      * Byte value indicating partial message recovery in the active authentication protocol
      */
     const val PARTIAL_MESSAGE_RECOVERY : Byte = 0x6A
+
+    const val ECDSA_OID = "0.4.0.127.0.7.1.1.4"
 }

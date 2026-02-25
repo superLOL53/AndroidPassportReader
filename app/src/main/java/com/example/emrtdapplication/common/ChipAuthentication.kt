@@ -309,14 +309,11 @@ class ChipAuthentication {
     private fun computeKeys(agreement : ByteArray) {
         if (chipAuthenticationInfo == null) return
         val oid = chipAuthenticationInfo.objectIdentifier
-        APDUControl.setEncryptionKeyBAC(
-            Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(),
-                BACConstants.ENCRYPTION_KEY_VALUE_C
-            ))
-        APDUControl.setEncryptionKeyMAC(
-            Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(),
-                BACConstants.MAC_COMPUTATION_KEY_VALUE_C
-            ))
+        val encryptionKeyBAC = Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), BACConstants.ENCRYPTION_KEY_VALUE_C)
+        val encryptionKeyMAC = Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), BACConstants.MAC_COMPUTATION_KEY_VALUE_C)
+        if (encryptionKeyBAC == null || encryptionKeyMAC == null) return
+        APDUControl.setEncryptionKeyBAC(encryptionKeyBAC)
+        APDUControl.setEncryptionKeyMAC(encryptionKeyMAC)
         APDUControl.isAES = !is3DES
         if (is3DES) {
             APDUControl.setSequenceCounter(ByteArray(8))

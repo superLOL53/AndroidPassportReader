@@ -154,6 +154,7 @@ class SecureMessagingAPDU {
         if (apdu.data.isEmpty()) return null
         val paddedData = addPadding(apdu.data)
         val encryptedData = encrypt(paddedData)
+        if (encryptedData == null) return null
         var do8785 : ByteArray? = null
         if (apdu.useLc) {
             do8785 = if (apdu.getHeader()[1] % 2 == 0) {
@@ -213,7 +214,12 @@ class SecureMessagingAPDU {
             } else {
                 3
             }
-            Crypto.removePadding(decrypt(rApdu.slice(l..rApdu.size-APDU_NO_DATA_SIZE).toByteArray())) + rApdu.slice(rApdu.size-RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
+            val decrypted = decrypt(rApdu.slice(l..rApdu.size-APDU_NO_DATA_SIZE).toByteArray())
+            if (decrypted == null) {
+                rApdu.slice(rApdu.size - RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
+            } else {
+                Crypto.removePadding(decrypted) + rApdu.slice(rApdu.size - RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
+            }
         } else {
             rApdu.slice(rApdu.size-RESPOND_CODE_SIZE..<rApdu.size).toByteArray()
         }
@@ -250,7 +256,7 @@ class SecureMessagingAPDU {
      * @param bytes: The byte array to be encrypted with BAC
      * @return The encrypted byte array
      */
-    private fun encrypt(bytes: ByteArray) : ByteArray {
+    private fun encrypt(bytes: ByteArray) : ByteArray? {
         return if (isAES) {
             Crypto.cipherAES(bytes, encryptionKey, Cipher.ENCRYPT_MODE, computeAESIV())
         } else {
@@ -263,7 +269,7 @@ class SecureMessagingAPDU {
      * @param bytes The ByteArray to be decrypted with AES or 3DES
      * @return The decrypted byte array
      */
-    private fun decrypt(bytes: ByteArray) : ByteArray {
+    private fun decrypt(bytes: ByteArray) : ByteArray? {
         return if (isAES) {
             Crypto.cipherAES(bytes, encryptionKey, Cipher.DECRYPT_MODE, computeAESIV())
         } else {

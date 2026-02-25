@@ -1,6 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.common.ActiveAuthenticationInfo
+import com.example.emrtdapplication.constants.DG15Constants.ECDSA_OID
 import com.example.emrtdapplication.constants.DG15Constants.PARTIAL_MESSAGE_RECOVERY
 import com.example.emrtdapplication.constants.DG15Constants.SHA_1
 import com.example.emrtdapplication.constants.DG15Constants.SHA_224
@@ -24,7 +26,9 @@ import org.spongycastle.crypto.digests.SHA256Digest
 import org.spongycastle.crypto.digests.SHA384Digest
 import org.spongycastle.crypto.digests.SHA512Digest
 import java.security.KeyFactory
+import java.security.PublicKey
 import java.security.SecureRandom
+import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
@@ -46,6 +50,8 @@ class DG15() : ElementaryFileTemplate() {
         private set
     var isAuthenticated = false
         private set
+    var publicKey : PublicKey? = null
+        private set
 
     /**
      * Parses the contents of [rawFileContent]
@@ -59,6 +65,8 @@ class DG15() : ElementaryFileTemplate() {
         }
         try {
             publicKeyInfo = SubjectPublicKeyInfo.getInstance(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
+            val kf = KeyFactory.getInstance(publicKeyInfo!!.algorithm.algorithm.id, "BC")
+            publicKey = kf.generatePublic(X509EncodedKeySpec(publicKeyInfo!!.encoded))
             isParsed = true
             return SUCCESS
         } catch (_ : Exception) {
@@ -71,7 +79,7 @@ class DG15() : ElementaryFileTemplate() {
      *
      * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
      */
-    fun activeAuthentication(random: SecureRandom? = SecureRandom()) : Int {
+    fun activeAuthentication(info : ActiveAuthenticationInfo, random: SecureRandom? = SecureRandom()) : Int {
         isAuthenticated = false
         if (publicKeyInfo == null) {
             return FAILURE
@@ -94,48 +102,68 @@ class DG15() : ElementaryFileTemplate() {
             return FAILURE
         }
         response = APDUControl.removeRespondCodes(response)
-        val d = decrypt(response)
-        if (d == null) {
-            return FAILURE
-        } else {
-            response = d
-        }
-        val hashAlgorithm = if (response[response.size-1] == SHA_1) {
-            SHA1Digest()
-        } else {
-            when(response[response.size-2]) {
-                SHA_256 -> SHA256Digest()
-                SHA_512 -> SHA512Digest()
-                SHA_384 -> SHA384Digest()
-                SHA_224 -> SHA224Digest()
-                else -> return FAILURE
+        if (info.signatureAlgorithm.startsWith(ECDSA_OID)) {
+            try {
+                val sig = Signature.getInstance(info.signatureAlgorithm, "BC")
+                sig.initVerify(publicKey)
+                sig.update(nonce)
+                isAuthenticated = sig.verify(response)
+                if (isAuthenticated) {
+                    return SUCCESS
+                } else {
+                    isAuthenticated = false
+                    return FAILURE
+                }
+            } catch (_ : Exception) {
+                isAuthenticated = false
+                return FAILURE
             }
-        }
-        hashAlgorithm.digestSize
-        val hash = if (response[response.size-1] == SHA_1) {
-            response.slice(response.size-hashAlgorithm.digestSize-2..response.size-2).toByteArray()
         } else {
-            response.slice(response.size-hashAlgorithm.digestSize-3..response.size-3).toByteArray()
-        }
-        val m2 = if (response[response.size-1] == SHA_1) {
-            response.slice(1..response.size-hashAlgorithm.digestSize-3).toByteArray()
-        } else {
-            response.slice(1..response.size-hashAlgorithm.digestSize-4).toByteArray()
-        }
-        val m = if (response[0] == PARTIAL_MESSAGE_RECOVERY) {
-            m2 + nonce
-        } else {
-            m2
-        }
-        hashAlgorithm.update(m, 0, m.size)
-        val calculatedHash = ByteArray(hashAlgorithm.digestSize)
-        hashAlgorithm.doFinal(calculatedHash, 0)
-        return if (hash.contentEquals(calculatedHash)) {
-            isAuthenticated = true
-            SUCCESS
-        } else {
-            isAuthenticated =false
-            FAILURE
+            val d = decrypt(response)
+            if (d == null) {
+                return FAILURE
+            } else {
+                response = d
+            }
+            val hashAlgorithm = if (response[response.size - 1] == SHA_1) {
+                SHA1Digest()
+            } else {
+                when (response[response.size - 2]) {
+                    SHA_256 -> SHA256Digest()
+                    SHA_512 -> SHA512Digest()
+                    SHA_384 -> SHA384Digest()
+                    SHA_224 -> SHA224Digest()
+                    else -> return FAILURE
+                }
+            }
+            hashAlgorithm.digestSize
+            val hash = if (response[response.size - 1] == SHA_1) {
+                response.slice(response.size - hashAlgorithm.digestSize - 1..response.size - 2)
+                    .toByteArray()
+            } else {
+                response.slice(response.size - hashAlgorithm.digestSize - 2..response.size - 3)
+                    .toByteArray()
+            }
+            val m2 = if (response[response.size - 1] == SHA_1) {
+                response.slice(1..response.size - hashAlgorithm.digestSize - 2).toByteArray()
+            } else {
+                response.slice(1..response.size - hashAlgorithm.digestSize - 3).toByteArray()
+            }
+            val m = if (response[0] == PARTIAL_MESSAGE_RECOVERY) {
+                m2 + nonce
+            } else {
+                m2
+            }
+            hashAlgorithm.update(m, 0, m.size)
+            val calculatedHash = ByteArray(hashAlgorithm.digestSize)
+            hashAlgorithm.doFinal(calculatedHash, 0)
+            return if (hash.contentEquals(calculatedHash)) {
+                isAuthenticated = true
+                SUCCESS
+            } else {
+                isAuthenticated = false
+                FAILURE
+            }
         }
     }
 
@@ -146,10 +174,8 @@ class DG15() : ElementaryFileTemplate() {
      */
     private fun decrypt(byteArray: ByteArray) : ByteArray? {
         try {
-            val c = Cipher.getInstance(publicKeyInfo!!.algorithm.algorithm.id)
-            val kf = KeyFactory.getInstance(publicKeyInfo!!.algorithm.algorithm.id)
-            val key = kf.generatePublic(X509EncodedKeySpec(publicKeyInfo!!.encoded))
-            c.init(Cipher.DECRYPT_MODE, key)
+            val c = Cipher.getInstance("RSA/None/NoPadding")
+            c.init(Cipher.DECRYPT_MODE, publicKey)
             return c.doFinal(byteArray)
         } catch (_ : Exception) {
 

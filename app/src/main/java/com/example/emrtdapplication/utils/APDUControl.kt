@@ -201,11 +201,16 @@ object APDUControl {
      * @param apdu The APDU to encrypt and send to the eMRTD
      * @return The decrypted response APDU
      */
+    @OptIn(ExperimentalStdlibApi::class)
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         if (isoDep == null) return ByteArray(0)
         inc()
         val secureAPDU = SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, apdu)
+        Log.d("APDU", "Sending secured APDU: ${secureAPDU.encryptedAPDUArray.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true})}")
         val responseAPDU = isoDep!!.transceive(secureAPDU.encryptedAPDUArray)
+        Log.d("APDU", "Received secured APDU: ${responseAPDU.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true})}")
         inc()
         return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, responseAPDU).apduArray
     }
