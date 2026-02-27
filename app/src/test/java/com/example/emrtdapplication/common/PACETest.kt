@@ -1,6 +1,8 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.APDUControl.setEncryptionKeyBAC
@@ -11,11 +13,13 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.verify
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Assert.assertArrayEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
 import org.spongycastle.asn1.x9.ECNamedCurveTable
+import org.spongycastle.asn1.x9.X9ECPoint
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHStandardGroups
 import org.spongycastle.crypto.params.DHParameters
@@ -25,6 +29,7 @@ import org.spongycastle.crypto.params.ECDomainParameters
 import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import java.math.BigInteger
+import java.security.Security
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -141,7 +146,7 @@ class PACETest {
         }
 
         assertArrayEquals(ByteArray(1) +
-                BigInteger("22C1A40F800A04007F00070202040102830101", 16).toByteArray(),
+                BigInteger("22C1A412800A04007F00070202040102830101840100", 16).toByteArray(),
             sentAPDUs[0].getByteArray())
         assertArrayEquals(BigInteger("10860000027C0000", 16).toByteArray(),
             sentAPDUs[1].getByteArray())
@@ -300,7 +305,7 @@ class PACETest {
 
         assertArrayEquals(
             byteArrayOf(0x00) +
-                    BigInteger("22C1A40F800A04007F00070202040202830101", 16).toByteArray(),
+                    BigInteger("22C1A412800A04007F0007020204020283010184010D", 16).toByteArray(),
             sentAPDUs[0].getByteArray())
         assertArrayEquals(
             BigInteger("10860000027C0000", 16).toByteArray(),
@@ -452,7 +457,7 @@ class PACETest {
             setSequenceCounter(any())
         }
 
-        assertArrayEquals(byteArrayOf(0x00) + BigInteger("22C1A40F800A04007F00070202040302830101", 16).toByteArray(), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00) + BigInteger("22C1A412800A04007F00070202040302830101840100", 16).toByteArray(), sentAPDUs[0].getByteArray())
         assertArrayEquals(BigInteger("10860000027C0000", 16).toByteArray(), sentAPDUs[1].getByteArray())
         assertArrayEquals(BigInteger("10860000147C128110B3A6DB3C870C3E99245E0D1C06B747DE00", 16).toByteArray(), sentAPDUs[2].getByteArray())
         assertArrayEquals(BigInteger("10860000867C81838381800F0CC62945A8029251FB7EF3C094E12E" +
@@ -557,7 +562,7 @@ class PACETest {
             setSequenceCounter(any())
         }
 
-        assertArrayEquals(byteArrayOf(0x00) + BigInteger("22C1A40F800A04007F00070202040402830101", 16).toByteArray(), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00) + BigInteger("22C1A412800A04007F0007020204040283010184010D", 16).toByteArray(), sentAPDUs[0].getByteArray())
         assertArrayEquals(BigInteger("10860000027C0000", 16).toByteArray(), sentAPDUs[1].getByteArray())
         assertArrayEquals(BigInteger("10860000147C1281105DD4CBFC96F5453B130D890A1CDBAE3200", 16).toByteArray(), sentAPDUs[2].getByteArray())
         assertArrayEquals(BigInteger("10860000457C4383410489CBA23FFE96AA18D824627C3E934E54" +
@@ -677,7 +682,7 @@ class PACETest {
             setSequenceCounter(any())
         }
 
-        assertArrayEquals(byteArrayOf(0x00) + BigInteger("22C1A40F800A04007F00070202040602830101", 16).toByteArray(), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf(0x00) + BigInteger("22C1A412800A04007F0007020204060283010184010D", 16).toByteArray(), sentAPDUs[0].getByteArray())
         assertArrayEquals(BigInteger("10860000027C0000", 16).toByteArray(), sentAPDUs[1].getByteArray())
         assertArrayEquals(BigInteger("10860000457C438141047F1D410ADB7D" +
                 "DB3B84BF1030800981A9105D7457B4A3" +
@@ -709,5 +714,199 @@ class PACETest {
         assertArrayEquals(BigInteger("85DC3FA93D0952BFA82F5FD189EE75BD" +
                 "82F11D1F0B8ED4BF5319AC9B53C426B3", 16).toByteArray().slice(1..32).toByteArray(), pace.chipAuthenticationData)
         assertEquals(SUCCESS, result)
+    }
+
+    @Test
+    @OptIn(ExperimentalStdlibApi::class)
+    fun testBigIntegers() {
+        Security.addProvider(BouncyCastleProvider())
+        val nonce = byteArrayOf(-109, 32, -32, 91, -87, -2, 94, -59, 47, 69, -93, -88, -60, 63, 95, -58)
+        val params = ECNamedCurveTable.getByName("brainpoolp256r1")
+        var domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
+        //val c = EllipticCurve(ECFieldFp(params.curve.field.characteristic), params.curve.a.toBigInteger(), params.curve.b.toBigInteger())
+        //val point = ECPoint(params.g.xCoord.toBigInteger(), params.g.yCoord.toBigInteger())
+        //val spec = ECParameterSpec(c, point, params.n, params.h.toInt())
+        val mappingkeys = AsymmetricCipherKeyPair(
+            ECPublicKeyParameters(
+                params.curve.createPoint(
+                    BigInteger("45645876b0061b22d8833741615eb3501186b558aa21aa5e58b8054c8a783e13", 16),
+                    BigInteger("428d0bb89ae6fd3778550b38b798a4b94dc5878396bc12fea04abc766c818a23", 16)
+                ),
+                domainParameters
+            ),
+            ECPrivateKeyParameters(
+                BigInteger("9970064019066404488942924911341775681978230595610037868731919439656570726073"),
+                domainParameters
+            )
+        )
+        val mappublic = ECPublicKeyParameters(
+            params.curve.createPoint(
+                BigInteger("1017d3ae8f39cf8f8f77c850e30b54729892ba7ae1a5ae76ba15a200218c15bc", 16),
+                BigInteger("76a4f8fc0e2063a5f0c2c2692aa294944dd72703edd2d17741c8cb79596ba717", 16)
+            ),
+            domainParameters
+        )
+        //var h = Crypto.getECPointFromBigInteger(BigInteger("00800c65e003459964b3cacf826ba01a03d228a8095dfdc2de3efcde19c742c9ed", 16), domainParameters)
+
+        val sa = Crypto.calculateECDHAgreement(mappingkeys.private as ECPrivateKeyParameters, mappublic)
+        val h = Crypto.getECPointFromBigInteger(sa, domainParameters)
+        val g = Crypto.genericMappingEC(domainParameters.g, nonce, h)
+        domainParameters = ECDomainParameters(domainParameters.curve, g, domainParameters.n, domainParameters.h)
+        val keys = AsymmetricCipherKeyPair(
+            ECPublicKeyParameters(
+                params.curve.createPoint(
+                    BigInteger("29d84dc7d6001322148d1d633fe3dabe567d7cda61652d7ac2a2b5fe9ac44634", 16),
+                    BigInteger("83fe7890fd80cd39e4850562d96dcc44c0d014cc58c4f2e396f24f194c5379cd", 16)
+                ),
+                domainParameters
+            ),
+            ECPrivateKeyParameters(
+                BigInteger("4924898753890721752129747932260843730496052096643574846423758212848083592021"),
+                domainParameters
+            )
+        )
+        val publicKey = ECPublicKeyParameters(
+            params.curve.createPoint(
+                BigInteger("868400b74abddde1281df1b1d0dd4ae0f97747cf671c083599b2d051f0fe6fa9", 16),
+                BigInteger("5dce18a7b4764a0369ca532a9d93a3afd955c3e55a6ac5e945c865eaccf72874", 16)
+            ),
+            domainParameters
+        )
+        //val pub = ECPublicKeySpec(ECPoint(publicKey.q.xCoord.toBigInteger(), publicKey.q.yCoord.toBigInteger()), spec)
+        //val priv = ECPrivateKeySpec(BigInteger("25265002054187850548232770889216667472137824806778068397813021092250274421503"), spec)
+        //val public = KeyFactory.getInstance("EC").generatePublic(pub)
+        //val private = KeyFactory.getInstance("EC").generatePrivate(priv)
+        //val pub = KeyFactory.getInstance("EC").generatePublic(X509EncodedKeySpec(SubjectPublicKeyInfo.getInstance(publicKey).encoded))
+        //keys = Crypto.generateECKeyPair(domainParameters)
+        //val ka = KeyAgreement.getInstance("ECDH", "BC")
+        //ka.init(private)
+        //ka.doPhase(public, true)
+        //val sec = ka.generateSecret()
+        val secret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey).toByteArray()
+        val key = if (secret[0] == 0.toByte() && secret[1] < 0) {
+            secret.slice(1..<secret.size).toByteArray()
+        } else {
+            secret
+        }
+        val enc = Crypto.computeKey(key, 2, 1)
+        val mac = Crypto.computeKey(key, 2, MAC_COMPUTATION_KEY_VALUE_C)
+        //val oid = TLV(TlvTags.OID, byteArrayOf(4, 0, 127, 0, 7, 2, 2, 4, 2, 2))
+        val pub1 = X9ECPoint(publicKey.q, false).encoded
+        pub1[0] = TlvTags.EC_PUBLIC_POINT
+        //val tok1 = Crypto.computeCMAC(TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray() + pub1).toByteArray(), mac!!)
+        val pub2 = X9ECPoint((keys.public as ECPublicKeyParameters).q, false).encoded
+        pub2[0] = TlvTags.EC_PUBLIC_POINT
+        //val tok2 = Crypto.computeCMAC(TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray() + pub2).toByteArray(), mac)
+
+        println(enc!!.toHexString())
+        println(mac!!.toHexString())
+        //assertArrayEquals(enc, byteArrayOf(-25, -68, -64, 27, -43, 123, 5, -34, -96, 56, 28, -5, 50, 56, 23, -104))
+        //assertArrayEquals(mac, byteArrayOf(102, -4, -84, 2, -47, 84, 74, 10, 32, 83, 3, 86, 30, 25, -121, 69))
+    }
+
+    @Test
+    fun testTrace() {
+
+        responseAPDUs.add(byteArrayOf(0x90.toByte(), 0x00))
+        responseAPDUs.add(byteArrayOf(124, 18, -128, 16, 32, -51, 68, -70, -35, 27, -16, 24, -67, -91, -77, -77, -96, 99, 127, 38, -112, 0))
+        responseAPDUs.add(byteArrayOf(124, 67, -126, 65, 4, 68, 87, -74, 117, -118, -5, -105, 118, -66, 20, -74, 105, 27, 28, 107, 25, -91, -23, -77, -99, 64, 102, 53, 45, -103, -70, -51, 31, 118, -17, 64, 92, 79, -121, 32, -78, 73, -114, -19, 77, -27, 23, -3, -35, -73, -77, -32, -42, -120, 89, -102, -5, -100, -28, -86, -106, 19, -34, 89, 66, -126, -85, -52, -46, -112, 0))
+        responseAPDUs.add(byteArrayOf(124, 67, -124, 65, 4, 39, 88, -21, -126, -112, -90, -122, 62, 121, -75, -17, 26, -63, 59, -127, -93, 85, 16, -20, 121, -127, -11, -89, -74, -27, -46, 105, -12, -119, 103, 73, 111, 38, 2, 83, 101, 32, 75, 37, -108, 63, -60, -128, -73, -111, 104, -30, -41, 113, 27, -39, -17, 109, 69, 124, -30, -85, 13, 39, 111, 103, 55, 116, -32, -112, 0))
+        responseAPDUs.add(byteArrayOf(124, 10, -122, 8, -64, -31, 44, 113, 60, -46, 125, -18, -112, 0))
+        every {
+            APDUControl.sendAPDU(capture(sentAPDUs))
+        } returnsMany responseAPDUs
+
+        every {
+            APDUControl.sendAPDU(capture(sentAPDUs))
+        } returnsMany responseAPDUs
+        every {
+            setEncryptionKeyBAC(capture(encKey))
+        } returns Unit
+        every {
+            setEncryptionKeyMAC(capture(macKey))
+        } returns Unit
+        every {
+            setSequenceCounter(capture(sequenceCounter))
+        } returns Unit
+
+        val params = ECNamedCurveTable.getByName("brainpoolp256r1")
+        val domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
+        //shared secret: 64865951817970981584970805091850750064685959025300757738761760876594492124243
+        val g = params.curve.createPoint(
+            BigInteger("993e871a364b953f775826c18543ca8fe853433d22585086de8835361d14f3c6", 16),
+            BigInteger("8f7bd2cb6c1a1bde96563d7fe30a2f037035009122bf01965c85c66b0caae837", 16)
+        ).normalize()
+        //(993e871a364b953f775826c18543ca8fe853433d22585086de8835361d14f3c6,8f7bd2cb6c1a1bde96563d7fe30a2f037035009122bf01965c85c66b0caae837,1,7d5a0975fc2c3057eef67530417affe7fb8055c126dc5c6ce94a4b44f330b5d9)
+        val newParameters = ECDomainParameters(params.curve, g, params.n, params.h)
+        generatedKeys.add(
+            AsymmetricCipherKeyPair(
+                ECPublicKeyParameters(
+                    params.curve.createPoint(
+                        BigInteger("96654b61a49e6f863853ef9cf4f63a823204def5326344ec6950cf8f1638359b", 16),
+                        BigInteger("785df23c9cda945e6d4fbb66fbcc31099d7a1237a531f849ef5ec4d5194506cc", 16)
+                    ),
+                    domainParameters
+                ),
+                ECPrivateKeyParameters(
+                    BigInteger("38015015218110673124160363937168546017709095001223721232305892219141149195463"),
+                    domainParameters
+                )
+            )
+        )
+        generatedKeys.add(
+            AsymmetricCipherKeyPair(
+                ECPublicKeyParameters(
+                    newParameters.curve.createPoint(
+                        BigInteger("7124bb858f3d1c5d55ee328225dd143c4296240ebe60642dd736107afad57d61", 16),
+                        BigInteger("81d99e0020a231c0192832d4c1ef1725b3caacd08d8b0a4ce621c54c5c078715", 16)
+                    ),
+                    newParameters
+                ),
+                ECPrivateKeyParameters(
+                    BigInteger("47748577442491204775201014938590621824582171129037492131503625161591314064836"),
+                    newParameters
+                )
+            )
+        )
+        every {
+            Crypto.generateECKeyPair(capture(keyParametersECDH))
+        } returnsMany generatedKeys
+
+        val pace = PACE()
+        pace.init("U1194584<000707260801", false, byteArrayOf(0x04, 0x00, 0x7F, 0x00, 0x07, 0x02, 0x02, 0x04, 0x02, 0x02), 0x0D)
+        val res = pace.paceProtocol()
+
+        verify(exactly = 5) {
+            APDUControl.sendAPDU(any())
+        }
+
+        verify(exactly = 2) {
+            Crypto.generateECKeyPair(any())
+        }
+
+        verify(exactly = 1) {
+            setEncryptionKeyBAC(any())
+        }
+        verify(exactly = 1) {
+            setEncryptionKeyMAC(any())
+        }
+        verify(exactly = 1) {
+            setSequenceCounter(any())
+        }
+
+        assertArrayEquals(byteArrayOf(0, 34, -63, -92, 18, -128, 10, 4, 0, 127, 0, 7, 2, 2, 4, 2, 2, -125, 1, 1, -124, 1, 13), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf(16, -122, 0, 0, 2, 124, 0, 0), sentAPDUs[1].getByteArray())
+        assertArrayEquals(byteArrayOf(16, -122, 0, 0, 69, 124, 67, -127, 65, 4, -106, 101, 75, 97, -92, -98, 111, -122, 56, 83, -17, -100, -12, -10, 58, -126, 50, 4, -34, -11, 50, 99, 68, -20, 105, 80, -49, -113, 22, 56, 53, -101, 120, 93, -14, 60, -100, -38, -108, 94, 109, 79, -69, 102, -5, -52, 49, 9, -99, 122, 18, 55, -91, 49, -8, 73, -17, 94, -60, -43, 25, 69, 6, -52, 0), sentAPDUs[2].getByteArray())
+        assertArrayEquals(byteArrayOf(16, -122, 0, 0, 69, 124, 67, -125, 65, 4, 113, 36, -69, -123, -113, 61, 28, 93, 85, -18, 50, -126, 37, -35, 20, 60, 66, -106, 36, 14, -66, 96, 100, 45, -41, 54, 16, 122, -6, -43, 125, 97, -127, -39, -98, 0, 32, -94, 49, -64, 25, 40, 50, -44, -63, -17, 23, 37, -77, -54, -84, -48, -115, -117, 10, 76, -26, 33, -59, 76, 92, 7, -121, 21, 0), sentAPDUs[3].getByteArray())
+        assertArrayEquals(byteArrayOf(0, -122, 0, 0, 12, 124, 10, -123, 8, 55, 124, 88, -123, 62, -101, 118, -100, 0), sentAPDUs[4].getByteArray())
+
+        //assertArrayEquals(BigInteger("8bd2aeb9cb7e57cb2c4b482ffc81b7afb9de27e1e3bd23c23a4453bd9ace3262", 16).toByteArray(), keyParametersECDH[0].g.xCoord.toBigInteger().toByteArray())
+        //assertArrayEquals(g.xCoord.toBigInteger().toByteArray(), keyParametersECDH[1].g.xCoord.toBigInteger().toByteArray())
+// shared secret: [14, -25, -20, -74, 68, 2, 40, 87, 74, -109, 104, -7, -115, -6, 83, 101, -88, 89, 105, -11, 2, -35, 72, -43, 101, 41, -6, 108, 127, 64, -31, -35]
+
+        assertArrayEquals(byteArrayOf(9, 34, 107, -92, -19, -91, 84, -35, 96, -47, 87, -11, -84, -73, -95, 26), encKey.captured)
+        assertArrayEquals(byteArrayOf(20, -88, -124, -33, -25, -125, -51, 97, -19, -69, -91, -43, -115, -92, -128, -9), macKey.captured)
+
+        assertEquals(SUCCESS, res)
     }
 }

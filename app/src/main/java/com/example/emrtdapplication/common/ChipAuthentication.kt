@@ -126,6 +126,10 @@ class ChipAuthentication {
             if (agreement == null) {
                 FAILURE
             }
+            var ba = agreement!!.toByteArray()
+            if (ba[0] == 0.toByte() && ba[1] < 0) {
+                ba = ba.slice(1..<ba.size).toByteArray()
+            }
             val success = if (is3DES) {
                 authenticate3DES(publicKeyData)
             } else {
@@ -134,7 +138,7 @@ class ChipAuthentication {
             if (success != SUCCESS) {
                 FAILURE
             }
-            computeKeys(agreement!!.toByteArray())
+            computeKeys(ba)
             verify()
         } else {
             FAILURE
@@ -306,6 +310,7 @@ class ChipAuthentication {
      *
      * @param agreement The computed agreement in the key agreement step in the protocol
      */
+    @OptIn(ExperimentalStdlibApi::class)
     private fun computeKeys(agreement : ByteArray) {
         if (chipAuthenticationInfo == null) return
         val oid = chipAuthenticationInfo.objectIdentifier

@@ -118,26 +118,20 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      *
      * @return [SUCCESS] or error code indicating a failure
      */
-    @OptIn(ExperimentalStdlibApi::class)
     fun paceProtocol() : Int {
-        //Log.d("PACE", "Starting PACE...")
         if (idPACEOid == null) {
             return NO_PACE_OID
         }
-        //Log.d("PACE", "Using PACE OID: ${
-        //    idPACEOid!!.toHexString(HexFormat { bytes.byteSeparator = " "
-        //    upperCase = true})}")
         var info = byteArrayOf(TlvTags.CRYPTOGRAPHIC_REFERENCE, idPACEOid!!.size.toByte()) + idPACEOid!! + byteArrayOf(
             TlvTags.KEY_REFERENCE, 0x01)
         info += if (mrzInformation == null) {
             return NO_PASSWORD
         } else if (useCAN) {
-            //Log.d("PACE", "Using CAN for Key derivation")
             0x02
         } else {
-            //Log.d("PACE", "Using MRZ for Key derivation")
             0x01
         }
+        info += byteArrayOf(TlvTags.UNSIGNED_INTEGER, 0x1, parameters)
         val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
         if (key == null) return FAILURE
         computeKeys(key, 3)
@@ -341,7 +335,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param seed The seed for computing the keys
      */
     private fun computeKeys(secret: ByteArray, seed : Byte = 1) {
-        val key = if (secret.size % 2 != 0) {
+        val key = if (secret[0] == 0.toByte() && secret[1] < 0) {
             secret.slice(1..<secret.size).toByteArray()
         } else {
             secret
@@ -395,7 +389,8 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param isCAM Indicates if PACE with CAM is used
      */
     private fun checkToken(token: ByteArray, chipToken: ByteArray, isCAM: Boolean = false) : Int {
-        var data = TLV(TlvTags.TERMINAL_AUTHENTICATION_TOKEN, computeToken(chipToken))
+        val token1 = computeToken(chipToken)
+        var data = TLV(TlvTags.TERMINAL_AUTHENTICATION_TOKEN, token1)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
         val info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.GENERAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, data.toByteArray(), 256))
         if (!APDUControl.checkResponse(info)) {
@@ -409,11 +404,12 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
             iv.fill(-1)
             val newIV = Crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(16))
             if (newIV != null) {
-                chipAuthenticationData = Crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, iv)
+                chipAuthenticationData = Crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, newIV)
                 chipAuthenticationData = Crypto.removePadding(chipAuthenticationData!!)
             }
         }
-        if (receivedToken.contentEquals(computeToken(token))) {
+        val token2 = computeToken(token)
+        if (receivedToken.contentEquals(token2)) {
             APDUControl.sendEncryptedAPDU = true
             APDUControl.setEncryptionKeyBAC(encKey!!)
             APDUControl.setEncryptionKeyMAC(macKey!!)
@@ -460,7 +456,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
     private fun generateTokenData(publicKey: DHPublicKeyParameters) : ByteArray {
         val oid = TLV(TlvTags.OID, idPACEOid!!)
         var key = publicKey.y.toByteArray()
-        if (publicKey.y.signum() == 1 && key[0] == 0.toByte() && key[1] < 0) {
+        if (key[0] == 0.toByte() && key[1] < 0) {
             key = key.slice(1..<key.size).toByteArray()
         }
         val pub = TLV(TlvTags.UNSIGNED_INTEGER, key)
@@ -488,7 +484,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      */
     private fun exchangeKeys(publicKey: DHPublicKeyParameters, tag: Byte) : DHPublicKeyParameters {
         var key = publicKey.y.toByteArray()
-        if (key[0] == 0.toByte()) {
+        if (key[0] == 0.toByte() && key[1] < 0) {
             key = key.slice(1..<key.size).toByteArray()
         }
         var data = TLV(tag, key)
@@ -517,7 +513,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      */
     private fun decryptNonce(nonce: ByteArray) : ByteArray? {
         return when(idPACEOid!![idPACEOid!!.size-1]) {
-            AES_CBC_CMAC_128 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE, ByteArray(16))
+            AES_CBC_CMAC_128 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
             AES_CBC_CMAC_192 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
             AES_CBC_CMAC_256 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
             DES_CBC_CBC -> Crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)

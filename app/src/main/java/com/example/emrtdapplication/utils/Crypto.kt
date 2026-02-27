@@ -173,7 +173,7 @@ object Crypto {
      * @return The calculated and mapped EC Point
      */
     fun genericMappingEC(g: ECPoint, s: ByteArray, h: ECPoint) : ECPoint {
-        return g.multiply(BigInteger(1, s)).add(h)
+        return g.multiply(BigInteger(s)).add(h).normalize()
     }
 
     /**
@@ -184,10 +184,11 @@ object Crypto {
      * @return The decoded EC point
      */
     fun getECPointFromBigInteger(x : BigInteger, parameters: ECDomainParameters) : ECPoint {
-        return if (x.toByteArray().size*8 != parameters.g.xCoord.bitLength()) {
-            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + x.toByteArray().slice(1..<x.toByteArray().size).toByteArray())
+        val ba = x.toByteArray()
+        return if (ba[0] == 0.toByte() && ba[1] < 0) {
+            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + ba.slice(1..<x.toByteArray().size).toByteArray())
         } else {
-            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + x.toByteArray())
+            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + ba)
         }
     }
 
@@ -305,7 +306,9 @@ object Crypto {
             val k = SecretKeySpec(key, AES)
             val c = Cipher.getInstance(AES_CBC_NO_PADDING)
             val i = if (iv == null || iv.isEmpty()) {
-                IvParameterSpec(ByteArray(key.size))
+                val ba = ByteArray(key.size)
+                ba.fill(0)
+                IvParameterSpec(ba)
             } else {
                 IvParameterSpec(iv)
             }

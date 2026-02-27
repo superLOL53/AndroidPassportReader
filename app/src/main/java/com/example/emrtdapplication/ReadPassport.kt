@@ -5,6 +5,7 @@ import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
@@ -15,6 +16,22 @@ import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.MasterList
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
+/*
+import android.nfc.tech.IsoDep
+import net.sf.scuba.smartcards.APDUEvent
+import net.sf.scuba.smartcards.CardService
+import org.bouncycastle.jce.ECNamedCurveTable
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec
+import org.bouncycastle.math.ec.ECCurve
+import org.jmrtd.BACKey
+import org.jmrtd.PassportService
+import org.spongycastle.crypto.params.ECDomainParameters
+import java.math.BigInteger
+import java.security.spec.ECFieldFp
+import java.security.spec.ECGenParameterSpec
+import java.security.spec.ECParameterSpec
+import java.security.spec.ECPoint
+import java.security.spec.EllipticCurve*/
 
 /**
  * Activity for reading from the eMRTD
@@ -118,14 +135,29 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      */
     @OptIn(ExperimentalStdlibApi::class)
     fun readeMRTD(tag: Tag) {
-        //val isPACESuccess = false
+        /*val isodep = IsoDep.get(tag)
+        isodep.timeout = 50000
+        val cs = CardService.getInstance(isodep)
+        val apdus = ArrayList<APDUEvent>()
+        val p = PassportService(cs,256,256,false,true)
+        p.addAPDUListener { e -> apdus.add(e)  }
+        p.open()
+        val k = BACKey("U1194584", "000707", "260801")
+        val params = ECNamedCurveTable.getParameterSpec("brainpoolp256r1")
+        val c = EllipticCurve(ECFieldFp(params.curve.field.characteristic), params.curve.a.toBigInteger(), params.curve.b.toBigInteger())
+        val point = ECPoint(params.g.xCoord.toBigInteger(), params.g.yCoord.toBigInteger())
+        val res = p.doPACE(k, "0.4.0.127.0.7.2.2.4.2.2",
+            ECParameterSpec(c, point, params.n, params.h.toInt()),
+            BigInteger("D", 16))*/
+
+
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
-        //Doing PACE results in a TagLostException
         EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
         val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
+        Log.d("PACESuccess", "PACE status: $isPACESuccess")
         if (isPACESuccess) {
             EMRTD.cs.read()
         }
