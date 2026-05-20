@@ -1,24 +1,29 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.utils.MasterList.signedData
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.DERSequence
 import org.spongycastle.asn1.DERTaggedObject
+import org.spongycastle.asn1.DLSet
 import org.spongycastle.asn1.cms.SignedData
-import org.spongycastle.asn1.x500.X500Name
 import org.spongycastle.asn1.x509.Certificate
 
 /**
  * Implements the Master List specified in ICAO Doc 9303-12
  *
- * @param masterList A Master List encoded as byte array
- * @property certificateMap Maps X.500 names to certificates contained in [masterList]
  * @property signedData Decoded Master List represented as a Signed Data object
  */
-class MasterList(masterList: ByteArray, issuerCode : X500Name) {
-    val certificateMap : Array<Certificate>
-    val signedData : SignedData
+object MasterList {
+    var certificateMap : Array<Certificate>? = null
+        private set
+    var signedData : SignedData? = null
+        private set
+    var isDecoded = false
+        private set
+    var isFinished = false
+        private set
 
-    init {
+    fun decodeMasterList(masterList: ByteArray) {
         val map = ArrayList<Certificate>()
         try {
             signedData = SignedData.getInstance(
@@ -31,31 +36,43 @@ class MasterList(masterList: ByteArray, issuerCode : X500Name) {
         } catch (_ : Exception) {
             throw IllegalArgumentException("Byte array does not contain an encoded Master List!")
         }
-        for (certificate in signedData.certificates) {
+        if (signedData == null) {
+            isFinished = true
+            return
+        }
+        for (certificate in signedData!!.certificates) {
             try {
                 val certificateInstance = Certificate.getInstance(certificate.toASN1Primitive().encoded)
-                if (certificateInstance.issuer.equals(issuerCode)) {
-                    map.add(certificateInstance)
-                }
-            } catch (_ : Exception) {
-            }
-        }
-        val contentInfo = TLV(signedData.encapContentInfo.content.toASN1Primitive().encoded)
-        if (contentInfo.value == null) {
-            throw IllegalArgumentException("Signed data does not contain expected content!")
-        }
-        val certificateList = TLVSequence(contentInfo.value!!)
-        if (certificateList.tlvSequence.isEmpty() || certificateList.tlvSequence[0].list == null || certificateList.tlvSequence[0].list!!.tlvSequence.isEmpty()) {
-            throw IllegalArgumentException("Signed Data does not contain any certificates!")
-        }
-        for (certificate in certificateList.tlvSequence[0].list!!.tlvSequence[1].list!!.tlvSequence) {
-            try {
-                val certificateInstance = Certificate.getInstance(certificate.toByteArray())
                 map.add(certificateInstance)
             } catch (_ : Exception) {
-
             }
         }
+        val contentInfo = TLV(signedData!!.encapContentInfo.content.toASN1Primitive().encoded)
+        if (contentInfo.value == null) {
+            isFinished = true
+            throw IllegalArgumentException("Signed data does not contain expected content!")
+        }
+        val list = DERSequence.getInstance(contentInfo.value)
+        val certList = list.getObjectAt(1) as DLSet
+        for (certificate in certList.objects) {
+            map.add(Certificate.getInstance(certificate))
+        }
         certificateMap = map.toTypedArray()
+        isDecoded = true
+        isFinished = true
+    }
+
+    fun getCSCA(certificate: Certificate) : Array<Certificate> {
+        val certs = ArrayList<Certificate>()
+        if (certificateMap != null) {
+            for (c in certificateMap) {
+                if (c.subject.equals(certificate.issuer) && certificate.startDate.date.time >= c.startDate.date.time &&
+                    c.endDate.date.time >= certificate.endDate.date.time &&
+                    c.signatureAlgorithm.algorithm.id == certificate.signatureAlgorithm.algorithm.id) {
+                    certs.add(c)
+                }
+            }
+        }
+        return certs.toTypedArray()
     }
 }

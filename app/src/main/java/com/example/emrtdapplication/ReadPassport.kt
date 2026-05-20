@@ -13,9 +13,9 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.utils.MasterList
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
+
 /*
 import android.nfc.tech.IsoDep
 import net.sf.scuba.smartcards.APDUEvent
@@ -119,7 +119,10 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             findViewById<LinearLayout>(R.id.beforeRead).visibility = View.GONE
             findViewById<LinearLayout>(R.id.Reading).visibility = View.VISIBLE
         }
+        val startTime = System.nanoTime()
         readeMRTD(tag)
+        val endTime = System.nanoTime()
+        Log.d("eMRTDTime", "Execution Time for reading passport: ${endTime - startTime}")
         runOnUiThread {
             val intent = Intent(this, EMRTDView()::class.java)
             startActivity(intent)
@@ -171,7 +174,6 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.ldS1Application.readFiles(this)
         if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
             changeProgressBar(getString(R.string.reading_cscas), 5)
-            readCSCAs()
             EMRTD.ldS1Application.verify(this)
             changeProgressBar(getString(R.string.passport_verified), 5)
         }
@@ -195,7 +197,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         EMRTD.closeNFC()
     }
 
-    /**
+/*    /**
      * Read the CSCAs from the issuing country/organization of the eMRTD
      */
     private fun readCSCAs() {
@@ -210,7 +212,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             }
         }
     }
-
+*/
     /**
      * Changes the title and progress of the progress bar while reading from the eMRTD
      * @param text The text to be displayed while reading

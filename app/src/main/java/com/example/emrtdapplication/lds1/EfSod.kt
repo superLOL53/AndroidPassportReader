@@ -3,9 +3,9 @@ package com.example.emrtdapplication.lds1
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.utils.MasterList
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.ASN1GeneralizedTime
-import org.spongycastle.asn1.x509.Certificate
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1ObjectIdentifier
 import org.spongycastle.asn1.ASN1UTCTime
@@ -16,6 +16,8 @@ import org.spongycastle.asn1.cms.Attributes
 import org.spongycastle.asn1.cms.SignedData
 import org.spongycastle.asn1.cms.SignerInfo
 import org.spongycastle.asn1.icao.LDSSecurityObject
+import org.spongycastle.asn1.x509.Certificate
+import java.lang.Thread.sleep
 import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.Signature
@@ -118,11 +120,9 @@ class EfSod(): ElementaryFileTemplate() {
 
     /**
      * Validates the [documentSignerCertificate] by checking the signature in it with the CSCA
-     * @param cscas The trusted root certificate(s) from the State/organization that issued the eMRTD
      * @return [SUCCESS] or [FAILURE]
      */
-    @OptIn(ExperimentalStdlibApi::class)
-    fun passiveAuthentication(cscas: Array<Certificate>?) : Int {
+    fun passiveAuthentication() : Int {
         isCSCAValid = false
         isCSCAExpired = true
         isValid = false
@@ -130,16 +130,18 @@ class EfSod(): ElementaryFileTemplate() {
         isSigningTimeValid = false
         isDocumentSignerCertificateExpired = true
         isDocumentSignerCertificateValid = false
-        if (cscas == null || cscas.isEmpty() || documentSignerCertificate == null ||
+        if (documentSignerCertificate == null ||
             certificate == null || ldsSecurityObject == null) return FAILURE
         try {
             val signerInfo = SignerInfo.getInstance(certificate!!.signerInfos.getObjectAt(0).toASN1Primitive().encoded)
             validateSignerInfoSignature(signerInfo)
             validateLDSSecurityObject(signerInfo)
         } catch (_ : Exception) {
-
         }
-        val listCSCA = findPossibleCSCA(cscas)
+        while (!MasterList.isFinished) {
+            sleep(500)
+        }
+        val listCSCA = MasterList.getCSCA(documentSignerCertificate!!)
         if (listCSCA.isEmpty()){
             return FAILURE
         } else {
@@ -153,26 +155,6 @@ class EfSod(): ElementaryFileTemplate() {
         isValid = isCSCAValid && isDocumentSignerCertificateValid && isSignerInfoValid &&
                 isSigningTimeValid && !isCSCAExpired && ! isDocumentSignerCertificateExpired && isRead && isPresent
         return SUCCESS
-    }
-
-    /**
-     * Finds possible CSCA for the eMRTD among the CSCA certificates a State/Organization issued over time
-     * @param cscas A list of CSCA a State/Organization issued
-     * @return A list of CSCA where the DSA matches with the [documentSignerCertificate] and
-     * the time period of the [documentSignerCertificate] falls within the time period of the CSCA
-     */
-    private fun findPossibleCSCA(cscas: Array<Certificate>) : ArrayList<Certificate> {
-        val cscaList = ArrayList<Certificate>()
-        for (c in cscas) {
-            if (documentSignerCertificate!!.startDate.date.time < c.startDate.date.time ||
-                c.endDate.date.time < documentSignerCertificate!!.endDate.date.time ||
-                c.signatureAlgorithm.algorithm.id != documentSignerCertificate!!.signatureAlgorithm.algorithm.id) {
-                continue
-            } else {
-                cscaList.add(c)
-            }
-        }
-        return cscaList
     }
 
     /**
@@ -193,8 +175,7 @@ class EfSod(): ElementaryFileTemplate() {
             isCSCAValid = sign.verify(csca.signature.bytes)
             usedCSCA = csca
             return true
-        } catch (e : Exception) {
-            println(e)
+        } catch (_ : Exception) {
         }
         isCSCAValid = false
         return false
@@ -220,8 +201,8 @@ class EfSod(): ElementaryFileTemplate() {
             sign.update(documentSignerCertificate!!.tbsCertificate.encoded)
             isDocumentSignerCertificateValid = sign.verify(documentSignerCertificate!!.signature.bytes)
             return isDocumentSignerCertificateValid
-        } catch (e: Exception) {
-            println(e)
+        } catch (_: Exception) {
+
         }
         isDocumentSignerCertificateValid = false
         return false
@@ -242,8 +223,7 @@ class EfSod(): ElementaryFileTemplate() {
             sign.update(signerInfo.authenticatedAttributes.encoded)
             isSignerInfoValid = sign.verify(signerInfo.encryptedDigest.octets)
             return
-        } catch (e: Exception) {
-            println(e)
+        } catch (_: Exception) {
         }
         isSignerInfoValid = false
     }
