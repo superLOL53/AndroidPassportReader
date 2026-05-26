@@ -2,8 +2,11 @@ package com.example.emrtdapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emrtdapplication.utils.MasterList
+import kotlin.concurrent.thread
 
 /** Starting activity of the app. User decides which type of document the user wants to read.
  * Currently only supports eMRTD documents (e.g. passports)
@@ -13,6 +16,23 @@ class ApplicationEMRTD : AppCompatActivity() {
     @Override
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        thread {
+            if (!MasterList.isDecoded) {
+                val startTime = System.nanoTime()
+                val directory = resources.assets.list("MasterList")
+                if (directory != null) {
+                    val filename = directory[0]
+                    val readFile = resources.assets.open("MasterList/$filename")
+                    try {
+                        MasterList.decodeMasterList(readFile.readAllBytes())
+                    } catch (e: IllegalArgumentException) {
+                        println(e.message)
+                    }
+                }
+                val endTime = System.nanoTime()
+                Log.i("eMRTDTime", "Execution time for reading CSCAs: ${endTime - startTime}")
+            }
+        }
         setContentView(R.layout.entry_view)
         findViewById<Button>(R.id.exit).setOnClickListener{
             this.finishAffinity()

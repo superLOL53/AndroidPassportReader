@@ -13,9 +13,10 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.utils.MasterList
+import com.example.emrtdapplication.utils.APDUControl
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
+
 /*
 import android.nfc.tech.IsoDep
 import net.sf.scuba.smartcards.APDUEvent
@@ -119,7 +120,11 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             findViewById<LinearLayout>(R.id.beforeRead).visibility = View.GONE
             findViewById<LinearLayout>(R.id.Reading).visibility = View.VISIBLE
         }
+        val startTime = System.nanoTime()
         readeMRTD(tag)
+        val endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Execution Time for reading passport: ${endTime - startTime}")
+        Log.i("eMRTDTime", "Number of exchanged APDU pairs: ${APDUControl.exchangedAPDUPairs}")
         runOnUiThread {
             val intent = Intent(this, EMRTDView()::class.java)
             startActivity(intent)
@@ -155,23 +160,26 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
+        var startTime: Long = System.nanoTime()
         EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
         val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
-        Log.d("PACESuccess", "PACE status: $isPACESuccess")
+        var endTime: Long = System.nanoTime()
+        Log.i("PACESuccess", "PACE status: $isPACESuccess")
+        Log.i("eMRTDTime", "Execution time for PACE: ${endTime - startTime}")
         if (isPACESuccess) {
             EMRTD.cs.read()
         }
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }
-
+        startTime = System.nanoTime()
         if (!isPACESuccess && EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
             return
         }
+        endTime = System.nanoTime()
+        Log.i("eMRTDTime", "BAC execution time: ${endTime - startTime}")
         EMRTD.ldS1Application.readFiles(this)
         if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
-            changeProgressBar(getString(R.string.reading_cscas), 5)
-            readCSCAs()
             EMRTD.ldS1Application.verify(this)
             changeProgressBar(getString(R.string.passport_verified), 5)
         }
@@ -193,24 +201,6 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             }
         }
         EMRTD.closeNFC()
-    }
-
-    /**
-     * Read the CSCAs from the issuing country/organization of the eMRTD
-     */
-    private fun readCSCAs() {
-        val directory = resources.assets.list("MasterList")
-        if (directory != null) {
-            val filename = directory[0]
-            val readFile = resources.assets.open("MasterList/$filename")
-            if (EMRTD.ldS1Application.efSod.documentSignerCertificate == null) return
-            val array = readFile.readBytes()
-            val masterList = MasterList(array, EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)
-            readFile.close()
-            if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
-                EMRTD.ldS1Application.certs = masterList.certificateMap
-            }
-        }
     }
 
     /**

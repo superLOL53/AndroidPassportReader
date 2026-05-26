@@ -38,5 +38,5 @@ const val INVALID_ARGUMENT = -4
 /**
  * Additional maximum overhead for secure messaging APDUs due to encryption
  */
-const val ADDITIONAL_ENCRYPTION_LENGTH = 50
+const val ADDITIONAL_ENCRYPTION_LENGTH = 30
 
