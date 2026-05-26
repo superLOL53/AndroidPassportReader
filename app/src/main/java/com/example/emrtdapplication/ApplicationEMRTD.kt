@@ -30,7 +30,7 @@ class ApplicationEMRTD : AppCompatActivity() {
                     }
                 }
                 val endTime = System.nanoTime()
-                Log.d("eMRTDTime", "Execution time for reading CSCAs: ${endTime - startTime}")
+                Log.i("eMRTDTime", "Execution time for reading CSCAs: ${endTime - startTime}")
             }
         }
         setContentView(R.layout.entry_view)

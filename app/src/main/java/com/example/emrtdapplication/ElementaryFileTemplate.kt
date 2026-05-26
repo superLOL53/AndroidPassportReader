@@ -1,10 +1,11 @@
 package com.example.emrtdapplication
 
+import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
+import com.example.emrtdapplication.constants.APDUConstants
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.LONG_EF_ID
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
 import com.example.emrtdapplication.constants.NfcClassByte
@@ -12,10 +13,11 @@ import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.constants.FAILURE
-import java.security.MessageDigest
 import com.example.emrtdapplication.lds1.EfSod
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
+import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.Provider
 
@@ -71,7 +73,7 @@ abstract class ElementaryFileTemplate() {
             NfcClassByte.ZERO,
             NfcInsByte.READ_BINARY,
             NfcP1Byte.ZERO,
-            NfcP2Byte.ZERO, 6
+            NfcP2Byte.ZERO, 0
         )
         )
         if (!APDUControl.checkResponse(info)) {
@@ -90,7 +92,7 @@ abstract class ElementaryFileTemplate() {
             2 + info[1]
         }
         //Read the whole EF file
-        if (le >= APDUControl.maxResponseLength) {
+        if (le >= APDUControl.maxResponseLength - ADDITIONAL_ENCRYPTION_LENGTH) {
             val tmp = ByteArray(le)
             var i = 0
             while (i < le && i < 32767) {
@@ -112,7 +114,7 @@ abstract class ElementaryFileTemplate() {
                 }
             }
             rawFileContent = tmp
-        } else {
+        } else if (le >= APDUConstants.LE_MAX - ADDITIONAL_ENCRYPTION_LENGTH) {
             info = APDUControl.sendAPDU(
                 APDU(
                     NfcClassByte.ZERO,
@@ -124,6 +126,8 @@ abstract class ElementaryFileTemplate() {
             if (!APDUControl.checkResponse(info)) {
                 return FILE_UNABLE_TO_READ
             }
+            rawFileContent = APDUControl.removeRespondCodes(info)
+        } else {
             rawFileContent = APDUControl.removeRespondCodes(info)
         }
         isRead = true

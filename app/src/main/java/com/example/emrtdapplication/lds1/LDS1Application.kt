@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.lds1
 
+import android.util.Log
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.EMRTD.mrz
 import com.example.emrtdapplication.LDSApplication
@@ -114,17 +115,20 @@ class LDS1Application() : LDSApplication() {
      * @param readActivity Activity for updating the read progress
      */
     override fun readFiles(readActivity : ReadPassport) {
-        readActivity.changeProgressBar("Reading EF.COM file...", INCREMENT_PROGRESS_BAR)
+        readActivity.changeProgressBar("Reading files...", INCREMENT_PROGRESS_BAR)
+        val startTime = System.nanoTime()
         efCOM.read()
         for (ef in efMap) {
-            readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
+            //readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
             ef.value.read()
             ef.value.parse()
         }
-        readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
+        //readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
         if (efSod.read() == SUCCESS) {
             efSod.parse()
         }
+        val endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Time for reading LDS1 Files: ${endTime - startTime}")
     }
 
     /**
@@ -146,17 +150,22 @@ class LDS1Application() : LDSApplication() {
      * @param readActivity Activity for updating the read progress
      */
     fun verify(readActivity: ReadPassport) {
+        val startTime = System.nanoTime()
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey: ChipAuthenticationPublicKeyInfo? = null
             var chipInfo: ChipAuthenticationInfo? = null
             var activeAuthenticationInfo: ActiveAuthenticationInfo? = null
             for (si in dg14.securityInfos!!) {
-                if (si.type == CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE) {
-                    chipPublicKey = si as ChipAuthenticationPublicKeyInfo
-                } else if (si.type == CHIP_AUTHENTICATION_TYPE) {
-                    chipInfo = si as ChipAuthenticationInfo
-                } else if (si.type == ACTIVE_AUTHENTICATION_TYPE) {
-                    activeAuthenticationInfo = si as ActiveAuthenticationInfo
+                when (si.type) {
+                    CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> {
+                        chipPublicKey = si as ChipAuthenticationPublicKeyInfo
+                    }
+                    CHIP_AUTHENTICATION_TYPE -> {
+                        chipInfo = si as ChipAuthenticationInfo
+                    }
+                    ACTIVE_AUTHENTICATION_TYPE -> {
+                        activeAuthenticationInfo = si as ActiveAuthenticationInfo
+                    }
                 }
             }
             if (activeAuthenticationInfo != null) {
@@ -191,5 +200,7 @@ class LDS1Application() : LDSApplication() {
         readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
         efSod.checkHashes(efMap)
         efSod.passiveAuthentication()
+        val endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Verification Time: ${endTime - startTime}")
     }
 }

@@ -1,21 +1,34 @@
 package com.example.emrtdapplication
 
 import android.nfc.Tag
+import com.example.emrtdapplication.EMRTD.additionalBiometrics
+import com.example.emrtdapplication.EMRTD.ai
+import com.example.emrtdapplication.EMRTD.ca
+import com.example.emrtdapplication.EMRTD.cs
+import com.example.emrtdapplication.EMRTD.dir
+import com.example.emrtdapplication.EMRTD.idPaceOid
+import com.example.emrtdapplication.EMRTD.ldS1Application
+import com.example.emrtdapplication.EMRTD.mrz
+import com.example.emrtdapplication.EMRTD.pace
+import com.example.emrtdapplication.EMRTD.showDetails
+import com.example.emrtdapplication.EMRTD.travelRecords
+import com.example.emrtdapplication.EMRTD.visaRecords
 import com.example.emrtdapplication.common.AttributeInfo
 import com.example.emrtdapplication.common.CardAccess
 import com.example.emrtdapplication.common.CardSecurity
 import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
+import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
+import com.example.emrtdapplication.constants.APDUControlConstants
+import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
+import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.lds1.LDS1Application
 import com.example.emrtdapplication.lds2.AdditionalBiometrics
 import com.example.emrtdapplication.lds2.TravelRecords
 import com.example.emrtdapplication.lds2.VisaRecords
-import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
-import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
-import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
-import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.constants.SUCCESS
 
 /**
  * Class representing an eMRTD. Holds all information read from an eMRTD
@@ -65,7 +78,7 @@ object EMRTD {
         if (ai.read() != SUCCESS) {
             return
         }
-        if (ai.extendedLengthInfoInFile) {
+        if (APDUControlConstants.USE_EXTENDED_LENGTH_APDUS && ai.extendedLengthInfoInFile) {
             APDUControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
             APDUControl.maxCommandLength = ai.maxAPDUTransferBytes - ADDITIONAL_ENCRYPTION_LENGTH
         } else {
