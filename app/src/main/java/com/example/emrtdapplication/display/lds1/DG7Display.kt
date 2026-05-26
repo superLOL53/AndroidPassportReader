@@ -24,7 +24,7 @@ object DG7Display : CreateView() {
             }
             alternate = !alternate
             parent.addView(box)
-            val image = signature.displaySignature.imageInputStream.readAllBytes()
+            val image = signature.displaySignature.imageInputStream.readBytes()
             val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
             val view = ImageView(context)
             view.layoutParams = LinearLayout.LayoutParams(
@@ -33,6 +33,7 @@ object DG7Display : CreateView() {
             )
             view.setImageBitmap(bitmap)
             box.addView(view)
+            signature.displaySignature.imageInputStream.close()
         }
     }
 }

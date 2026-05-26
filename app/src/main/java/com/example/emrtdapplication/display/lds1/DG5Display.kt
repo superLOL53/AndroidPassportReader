@@ -32,7 +32,7 @@ object DG5Display : CreateView() {
             }
             alternate = !alternate
             parent.addView(box)
-            val image = portrait.displayPortrait.imageInputStream.readAllBytes()
+            val image = portrait.displayPortrait.imageInputStream.readBytes()
             val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
             val view = ImageView(context)
             view.layoutParams = LinearLayout.LayoutParams(
@@ -41,6 +41,7 @@ object DG5Display : CreateView() {
             )
             view.setImageBitmap(bitmap)
             box.addView(view)
+            portrait.displayPortrait.imageInputStream.close()
         }
     }
 }

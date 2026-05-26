@@ -2,9 +2,7 @@ package com.example.emrtdapplication.biometrics
 
 import com.example.emrtdapplication.biometrics.face.FacialRecordData
 import com.example.emrtdapplication.biometrics.face.FacialRecordHeader
-import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordData
 import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordHeader
-import com.example.emrtdapplication.biometrics.iris.IrisRecordData
 import com.example.emrtdapplication.biometrics.iris.IrisRecordHeader
 import com.example.emrtdapplication.utils.TLV
 

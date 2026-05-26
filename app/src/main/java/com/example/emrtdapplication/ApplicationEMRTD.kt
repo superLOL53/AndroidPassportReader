@@ -24,10 +24,11 @@ class ApplicationEMRTD : AppCompatActivity() {
                     val filename = directory[0]
                     val readFile = resources.assets.open("MasterList/$filename")
                     try {
-                        MasterList.decodeMasterList(readFile.readAllBytes())
+                        MasterList.decodeMasterList(readFile.readBytes())
                     } catch (e: IllegalArgumentException) {
-                        println(e.message)
+                        Log.d("Failure", "Message: " + e.message)
                     }
+                    readFile.close()
                 }
                 val endTime = System.nanoTime()
                 Log.i("eMRTDTime", "Execution time for reading CSCAs: ${endTime - startTime}")

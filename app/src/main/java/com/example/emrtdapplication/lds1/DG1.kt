@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.lds1
 
+import android.util.Log
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.DG1Constants.TD1_SIZE
 import com.example.emrtdapplication.constants.DG1Constants.TD2_SIZE
@@ -90,11 +91,16 @@ class DG1(): ElementaryFileTemplate() {
             return FAILURE
         }
         val mrz = tlv.value!!
-        val parsed = when(mrz.size) {
-            TD1_SIZE -> decodeTD1MRZ(mrz)
-            TD2_SIZE -> decodeTD2MRZ(mrz)
-            TD3_SIZE -> decodeTD3MRZ(mrz)
-            else -> FAILURE
+        val parsed = try {
+            when(mrz.size) {
+                TD1_SIZE -> decodeTD1MRZ(mrz)
+                TD2_SIZE -> decodeTD2MRZ(mrz)
+                TD3_SIZE -> decodeTD3MRZ(mrz)
+                else -> FAILURE
+            }
+        } catch (e: Exception) {
+            Log.d("Failure", "Message: " + e.message)
+            return FAILURE
         }
         isParsed = parsed == SUCCESS
         return parsed

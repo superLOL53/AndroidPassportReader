@@ -47,7 +47,7 @@ object DG4Display : CreateView() {
                             }
                             alternate = !alternate
                             parent.addView(box)
-                            val im = image.imageInputStream.readAllBytes()
+                            val im = image.imageInputStream.readBytes()
                             val bitmap = BitmapFactory.decodeByteArray(im, 0, im.size)
                             val view = ImageView(context)
                             view.layoutParams = LinearLayout.LayoutParams(
@@ -56,6 +56,7 @@ object DG4Display : CreateView() {
                             )
                             view.setImageBitmap(bitmap)
                             box.addView(view)
+                            image.imageInputStream.close()
                         }
                     }
                 } catch (_ : Exception) {

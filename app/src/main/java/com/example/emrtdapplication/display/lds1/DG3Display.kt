@@ -7,7 +7,6 @@ import android.widget.LinearLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
-import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordData
 import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordHeader
 
 object DG3Display : CreateView() {
@@ -37,7 +36,7 @@ object DG3Display : CreateView() {
                         }
                         alternate = !alternate
                         parent.addView(box)
-                        val image = im.imageInputStream.readAllBytes()
+                        val image = im.imageInputStream.readBytes()
                         val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
                         val view = ImageView(context)
                         view.layoutParams = LinearLayout.LayoutParams(
@@ -46,6 +45,7 @@ object DG3Display : CreateView() {
                         )
                         view.setImageBitmap(bitmap)
                         box.addView(view)
+                        im.imageInputStream.close()
                     }
                 } catch (_ : Exception) {
                 }

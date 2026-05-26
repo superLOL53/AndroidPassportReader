@@ -1,5 +1,3 @@
 package com.example.emrtdapplication
 
-class MockTest {
-
-}
+class MockTest

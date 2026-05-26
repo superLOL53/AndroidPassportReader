@@ -1,8 +1,7 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
@@ -17,6 +16,8 @@ import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_INFO_TYPE_SIZE
 import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
 import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_OID
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.ASN1ObjectIdentifier
@@ -97,6 +98,7 @@ class CardSecurity() {
                     securityInfos.add(securityInfo)
                 }
             } catch (_ : Exception) {
+                return FAILURE
             }
         }
         return SUCCESS

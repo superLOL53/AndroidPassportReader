@@ -29,7 +29,7 @@ object MasterList {
             signedData = SignedData.getInstance(
                 DERTaggedObject.getInstance(
                     DERSequence.getInstance(
-                        ASN1InputStream(masterList).readAllBytes())
+                        ASN1InputStream(masterList).readBytes())
                         .getObjectAt(1)
                 ).`object`
             )
