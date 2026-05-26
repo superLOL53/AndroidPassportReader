@@ -13,17 +13,17 @@ import com.example.emrtdapplication.biometrics.BiometricType
  * @throws IllegalArgumentException If the size of the [recordHeader] is invalid
  */
 class FacialRecordHeader(recordHeader: ByteArray) : BiometricHeader(BiometricType.FACE) {
-    private val formatIdentifier : String
-    private val versionNumber : String
-    private val recordLength : Int
-    private val numberOfFaces : Int
+    val formatIdentifier : String
+    val versionNumber : String
+    val recordLength : Int
+    val numberOfFaces : Int
 
     init {
         if (recordHeader.size != 14) {
             throw IllegalArgumentException("Facial Record Header must have size 14!")
         }
-        formatIdentifier = recordHeader.slice(0..3).toString()
-        versionNumber = recordHeader.slice(4..7).toString()
+        formatIdentifier = recordHeader.slice(0..3).toByteArray().decodeToString()
+        versionNumber = recordHeader.slice(4..7).toByteArray().decodeToString()
         recordLength = recordHeader[8]*256*256*256 + recordHeader[9]*256*256 + recordHeader[10]*256+recordHeader[11]
         numberOfFaces = recordHeader[12]*256+recordHeader[13]
     }

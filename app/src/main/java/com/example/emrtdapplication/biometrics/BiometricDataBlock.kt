@@ -20,7 +20,7 @@ import com.example.emrtdapplication.utils.TLV
 class BiometricDataBlock(biometricDataBlock : TLV, val type : BiometricType) {
 
     val biometricHeader : BiometricHeader
-    val biometricData : BiometricData
+    val biometricData : BiometricData?
 
     init {
         if (biometricDataBlock.tag.size != 2 || biometricDataBlock.tag[1] != 0x2E.toByte() ||
@@ -41,19 +41,18 @@ class BiometricDataBlock(biometricDataBlock : TLV, val type : BiometricType) {
             }
             BiometricType.IRIS -> {
                 biometricHeader =
-                    IrisRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
-                biometricData = IrisRecordData(
-                    biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size)
-                        .toByteArray()
-                )
+                    IrisRecordHeader(biometricDataBlock.value!!)
+                biometricData = null//IrisRecordData(
+                    //biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size)
+                    //    .toByteArray()
+                //)
             }
             BiometricType.FINGERPRINT -> {
                 biometricHeader =
-                    FingerprintRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
-                biometricData = FingerprintRecordData(
-                    biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size)
-                        .toByteArray()
-                )
+                    FingerprintRecordHeader(biometricDataBlock.value!!)//.slice(0..20).toByteArray())
+                biometricData = null
+                //biometricData = FingerprintRecordData(
+                //    biometricHeader.fingerprintHeader.fingerImageInfos[0].encoded)
             }
         }
     }

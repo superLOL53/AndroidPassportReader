@@ -1,6 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import android.graphics.BitmapFactory
+import com.example.emrtdapplication.biometrics.face.FacialRecordData
+import com.example.emrtdapplication.biometrics.face.FacialRecordHeader
 import com.example.emrtdapplication.utils.APDUControl
 import io.mockk.every
 import io.mockk.mockkObject
@@ -37,7 +39,6 @@ class DG2Test {
         val fiList = ArrayList<FaceInfo>()
         fiList.add(fi)
         val dg2 = DG2File.createISO19794DG2File(fiList)
-        val ownDG2 = DG2()
         val ba = dg2.encoded
 
         responseAPDUs.add(ba.slice(0..5).toByteArray() + byteArrayOf(0x90.toByte(), 0x00))
@@ -48,10 +49,20 @@ class DG2Test {
         APDUControl.maxResponseLength = Integer.MAX_VALUE
         every { APDUControl.sendAPDU(any()) } returnsMany responseAPDUs
         every { BitmapFactory.decodeByteArray(any<ByteArray>(), any<Int>(), any()) } returns null
+
+        val ownDG2 = DG2()
         ownDG2.read()
         ownDG2.parse()
         assertEquals(true, ownDG2.isRead)
         assertEquals(true, ownDG2.isPresent)
         assertEquals(true, ownDG2.isParsed)
+        assertEquals(1, ownDG2.biometricInformation!!.biometricInformationList!!.size)
+
+        val facialHeader = ownDG2.biometricInformation!!.biometricInformationList!![0]!!.biometricDataBlock.biometricHeader as FacialRecordHeader
+        assertEquals("010\u0000", facialHeader.versionNumber)
+
+        val data = ownDG2.biometricInformation!!.biometricInformationList!![0]!!.biometricDataBlock.biometricData as FacialRecordData
+        assertEquals("Unspecified", data.facialInformation.hairColor)
+        assertEquals("Pink", data.facialInformation.eyeColor)
     }
 }

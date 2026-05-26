@@ -204,7 +204,9 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             val filename = directory[0]
             val readFile = resources.assets.open("MasterList/$filename")
             if (EMRTD.ldS1Application.efSod.documentSignerCertificate == null) return
-            val masterList = MasterList(readFile.readAllBytes(), EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)
+            val array = readFile.readBytes()
+            val masterList = MasterList(array, EMRTD.ldS1Application.efSod.documentSignerCertificate!!.issuer)
+            readFile.close()
             if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
                 EMRTD.ldS1Application.certs = masterList.certificateMap
             }

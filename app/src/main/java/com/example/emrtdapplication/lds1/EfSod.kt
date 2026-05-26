@@ -85,11 +85,11 @@ class EfSod(): ElementaryFileTemplate() {
         }
         try {
             val input = ASN1InputStream(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
-            val cert = DERTaggedObject.getInstance(DERSequence.getInstance(input.readAllBytes()).getObjectAt(1))
+            val cert = DERTaggedObject.getInstance(DERSequence.getInstance(input.readObject().encoded).getObjectAt(1))
             certificate = SignedData.getInstance(cert.`object`)
             val content = certificate!!.encapContentInfo.content.toASN1Primitive().encoded
             documentSignerCertificate = Certificate.getInstance(certificate!!.certificates.getObjectAt(0).toASN1Primitive().encoded)
-            ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).value!!).readAllBytes())
+            ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).value!!).readObject().encoded)
             isParsed = true
             return SUCCESS
         } catch (_: Exception) {

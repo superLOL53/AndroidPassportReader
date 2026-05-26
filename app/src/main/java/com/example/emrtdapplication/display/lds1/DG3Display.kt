@@ -8,6 +8,7 @@ import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordData
+import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordHeader
 
 object DG3Display : CreateView() {
 
@@ -22,8 +23,8 @@ object DG3Display : CreateView() {
             for (bios in EMRTD.ldS1Application.dg3.biometricInformation!!.biometricInformationList) {
                 try {
                     if (bios == null) continue
-                    val biometricData = bios.biometricDataBlock.biometricData as FingerprintRecordData
-                    for (im in biometricData.fingerprintData.representationBlocks) {
+                    val biometricData = bios.biometricDataBlock.biometricHeader as FingerprintRecordHeader
+                    for (im in biometricData.fingerprintHeader.fingerImageInfos) {
                         val box = LinearLayout(context)
                         box.layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -36,7 +37,7 @@ object DG3Display : CreateView() {
                         }
                         alternate = !alternate
                         parent.addView(box)
-                        val image = im.geImageData()
+                        val image = im.imageInputStream.readAllBytes()
                         val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
                         val view = ImageView(context)
                         view.layoutParams = LinearLayout.LayoutParams(

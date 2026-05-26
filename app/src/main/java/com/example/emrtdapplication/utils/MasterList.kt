@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.utils
 
+import org.bouncycastle.asn1.DLSequence
+import org.bouncycastle.asn1.DLSet
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.DERSequence
 import org.spongycastle.asn1.DERTaggedObject
@@ -24,7 +26,7 @@ class MasterList(masterList: ByteArray, issuerCode : X500Name) {
             signedData = SignedData.getInstance(
                 DERTaggedObject.getInstance(
                     DERSequence.getInstance(
-                        ASN1InputStream(masterList).readAllBytes())
+                        ASN1InputStream(masterList).readObject().encoded)
                         .getObjectAt(1)
                 ).`object`
             )
@@ -57,5 +59,12 @@ class MasterList(masterList: ByteArray, issuerCode : X500Name) {
             }
         }
         certificateMap = map.toTypedArray()
+        /*val dlSet = DLSequence.getInstance(signedData.encapContentInfo.content)
+        val set = DLSet.getInstance(dlSet.getObjectAt(1))
+        for (certificate in set) {
+            val cert = Certificate.getInstance(certificate)
+            map.add(cert)
+        }
+        certificateMap = map.toTypedArray()*/
     }
 }
