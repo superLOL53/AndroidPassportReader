@@ -75,10 +75,10 @@ object APDUControl {
         this.isoDep = isoDep
         if (nfcTechUse == NfcUse.UNDEFINED) {
             nfcTechUse = NfcUse.ISO_DEP
-            if (APDUControlConstants.USE_EXTENDED_LENGTH_APDUS) {
-                maxTransceiveLength = this.isoDep!!.maxTransceiveLength
+            maxTransceiveLength = if (APDUControlConstants.USE_EXTENDED_LENGTH_APDUS) {
+                this.isoDep!!.maxTransceiveLength
             } else {
-                maxTransceiveLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
+                UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
             }
         }
         this.isoDep!!.timeout = TIME_OUT
@@ -91,7 +91,7 @@ object APDUControl {
      * @param apdu: The APDU to be sent to the eMRTD
      * @return The received APDU from the eMRTD
      */
-    @OptIn(ExperimentalStdlibApi::class)
+    //@OptIn(ExperimentalStdlibApi::class)
     fun sendAPDU(apdu : APDU) : ByteArray {
         exchangedAPDUPairs++
         //Log.d("APDU", "Sending APDU: " + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
@@ -112,7 +112,7 @@ object APDUControl {
      * @param apdu The APDU to send
      * @return The received byte array from the ePassport
      */
-    @OptIn(ExperimentalStdlibApi::class)
+    //@OptIn(ExperimentalStdlibApi::class)
     private fun sendISODEP(apdu: APDU) : ByteArray {
         return if (isoDep != null) {
             isoDep!!.transceive(apdu.getByteArray())
@@ -186,7 +186,7 @@ object APDUControl {
 
     /**
      * Checks if the ePassport responded with OK status codes
-     * @param bytes The byte array for checking the respond codes
+     * @param bytes The byte array for checking the response codes
      * @return True if the ePassport responded with an OK status code, otherwise false
      */
     fun checkResponse(bytes: ByteArray): Boolean {
@@ -195,7 +195,7 @@ object APDUControl {
 
     /**
      * Removes the 2 byte respond codes from the byte array
-     * @param bytes The byte array from which the respond codes are removed
+     * @param bytes The byte array from which the response codes are removed
      * @return The byte array without respond codes
      */
     fun removeRespondCodes(bytes: ByteArray): ByteArray {
@@ -220,7 +220,7 @@ object APDUControl {
      * @param apdu The APDU to encrypt and send to the eMRTD
      * @return The decrypted response APDU
      */
-    @OptIn(ExperimentalStdlibApi::class)
+    //@OptIn(ExperimentalStdlibApi::class)
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         if (isoDep == null) return ByteArray(0)
         inc()
@@ -246,5 +246,6 @@ object APDUControl {
         isoDepSupport = false
         nfcTechUse = NfcUse.UNDEFINED
         sendEncryptedAPDU = false
+        exchangedAPDUPairs = 0
     }
 }

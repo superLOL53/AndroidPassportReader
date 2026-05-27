@@ -1,44 +1,44 @@
 [versions]
-agp = "8.13.2"
+agp = "9.2.1"
 core = "1.58.0.0"
-jmrtd = "0.8.3"
+jmrtd = "0.8.6"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-appcompat = "1.7.0"
-material = "1.12.0"
-kotlin = "2.1.0"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.10.1"
-composeBom = "2024.04.01"
-mockitoAndroid = "5.21.0"
-mockitoCore = "5.18.0"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+#appcompat = "1.7.0"
+material = "1.14.0"
+kotlin = "2.3.21"
+#lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.13.0"
+#composeBom = "2024.04.01"
+mockitoAndroid = "5.23.0"
+mockitoCore = "5.23.0"
 mockitoInline = "5.2.0"
-mockitoKotlin = "4.1.0"
-mockk = "1.14.3"
-navigationFragment = "2.9.6"
-navigationUiKtx = "2.9.6"
-animatedVectorDrawable = "28.0.0"
+#mockitoKotlin = "4.1.0"
+mockk = "1.14.9"
+navigationFragment = "2.9.8"
+navigationUiKtx = "2.9.8"
+#animatedVectorDrawable = "28.0.0"
 scubaScAndroid = "0.0.26"
 scubaScJ2se = "0.0.21"
 scubaSmartcards = "0.0.20"
 
 [libraries]
 core = { module = "com.madgag.spongycastle:core", version.ref = "core" }
-jmrtd = { module = "org.jmrtd:jmrtd" }
+#jmrtd = { module = "org.jmrtd:jmrtd" }
 jmrtd-jmrtd = { module = "org.jmrtd:jmrtd", version.ref = "jmrtd" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version = "1.7.1" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.1" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.10.0" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.06.01" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2026.05.01" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
-mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "5.4.0" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version = "6.3.0" }
 scuba-sc-android = { module = "net.sf.scuba:scuba-sc-android", version.ref = "scubaScAndroid" }
 scuba-sc-j2se = { module = "net.sf.scuba:scuba-sc-j2se", version.ref = "scubaScJ2se" }
 scuba-smartcards = { module = "net.sf.scuba:scuba-smartcards", version.ref = "scubaSmartcards" }
@@ -52,7 +52,7 @@ material3 = { group = "androidx.compose.material3", name = "material3" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
 navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
-animated-vector-drawable = { group = "com.android.support", name = "animated-vector-drawable", version.ref = "animatedVectorDrawable" }
+#animated-vector-drawable = { group = "com.android.support", name = "animated-vector-drawable", version.ref = "animatedVectorDrawable" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

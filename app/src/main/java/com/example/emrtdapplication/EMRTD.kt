@@ -1,6 +1,7 @@
 package com.example.emrtdapplication
 
 import android.nfc.Tag
+import android.util.Log
 import com.example.emrtdapplication.EMRTD.additionalBiometrics
 import com.example.emrtdapplication.EMRTD.ai
 import com.example.emrtdapplication.EMRTD.ca
@@ -75,9 +76,12 @@ object EMRTD {
      * Reads all common files (EF.CardAccess, EF.DIR and EF.ATR/INFO) from the eMRTD.
      */
     fun readCommonFiles() {
+        var startTime = System.nanoTime()
         if (ai.read() != SUCCESS) {
             return
         }
+        var endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Time for reading EF.ATR/INFO: ${endTime - startTime}")
         if (APDUControlConstants.USE_EXTENDED_LENGTH_APDUS && ai.extendedLengthInfoInFile) {
             APDUControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
             APDUControl.maxCommandLength = ai.maxAPDUTransferBytes - ADDITIONAL_ENCRYPTION_LENGTH
@@ -85,11 +89,17 @@ object EMRTD {
             APDUControl.maxResponseLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
             APDUControl.maxCommandLength = UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
         }
+        startTime = System.nanoTime()
         dir.read()
+        endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Time for reading EF.DIR: ${endTime - startTime}")
         travelRecords.isPresent = dir.hasTravelRecordsApplication
         visaRecords.isPresent = dir.hasVisaRecordsApplication
         additionalBiometrics.isPresent = dir.hasAdditionalBiometricsApplication
+        startTime = System.nanoTime()
         ca.read()
+        endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Time for reading EF.CA: ${endTime - startTime}")
         val list = ca.paceInfos
         for (info in list) {
             if (info.parameterId != null) {

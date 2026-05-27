@@ -44,7 +44,7 @@ import java.math.BigInteger
  * @property chipAuthenticationResult Result of the chip authentication protocol
  * @property activeAuthenticationResult Result of the active authentication protocol
  */
-class LDS1Application() : LDSApplication() {
+class LDS1Application : LDSApplication() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var bac = BAC()
         private set
@@ -103,7 +103,6 @@ class LDS1Application() : LDSApplication() {
         dg16.shortEFIdentifier to dg16,
     )
         private set
-    //var certs : Array<Certificate>? = null
     var chipAuthenticationResult = FAILURE
         private set
     var activeAuthenticationResult = FAILURE
@@ -116,19 +115,25 @@ class LDS1Application() : LDSApplication() {
      */
     override fun readFiles(readActivity : ReadPassport) {
         readActivity.changeProgressBar("Reading files...", INCREMENT_PROGRESS_BAR)
-        val startTime = System.nanoTime()
+        var startTime = System.nanoTime()
         efCOM.read()
+        var endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Time for reading EF.COM File: ${endTime - startTime}")
         for (ef in efMap) {
-            //readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
+            readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
+            startTime = System.nanoTime()
             ef.value.read()
             ef.value.parse()
+            endTime = System.nanoTime()
+            Log.i("eMRTDTime", "Time for reading DG${ef.key} File: ${endTime - startTime}")
         }
-        //readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
+        readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
+        startTime = System.nanoTime()
         if (efSod.read() == SUCCESS) {
             efSod.parse()
         }
-        val endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Time for reading LDS1 Files: ${endTime - startTime}")
+        endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Time for reading EF.SOD File: ${endTime - startTime}")
     }
 
     /**
@@ -150,7 +155,7 @@ class LDS1Application() : LDSApplication() {
      * @param readActivity Activity for updating the read progress
      */
     fun verify(readActivity: ReadPassport) {
-        val startTime = System.nanoTime()
+        var startTime = System.nanoTime()
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey: ChipAuthenticationPublicKeyInfo? = null
             var chipInfo: ChipAuthenticationInfo? = null
@@ -197,10 +202,13 @@ class LDS1Application() : LDSApplication() {
                 chipAuthenticationResult = auth?.authenticate() ?: FAILURE
             }
         }
+        var endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Active Verification Time: ${endTime - startTime}")
         readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
+        startTime = System.nanoTime()
         efSod.checkHashes(efMap)
         efSod.passiveAuthentication()
-        val endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Verification Time: ${endTime - startTime}")
+        endTime = System.nanoTime()
+        Log.i("eMRTDTime", "Passive Verification Time: ${endTime - startTime}")
     }
 }

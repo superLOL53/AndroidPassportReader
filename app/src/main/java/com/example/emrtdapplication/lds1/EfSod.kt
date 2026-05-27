@@ -43,7 +43,7 @@ import java.util.Date
  * @property doesHashMatch If the signed hash matches the hash of the [ldsSecurityObject]
  * @property validContentType If the content of the [ldsSecurityObject] is actually an LDS Security Object
  */
-class EfSod(): ElementaryFileTemplate() {
+class EfSod: ElementaryFileTemplate() {
 
     override val efTag: Byte = 77
     override var rawFileContent: ByteArray? = null

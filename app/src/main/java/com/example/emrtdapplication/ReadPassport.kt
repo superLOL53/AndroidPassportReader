@@ -138,7 +138,6 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      * @param tag The discovered tag from the [nfcAdapter]
      *
      */
-    @OptIn(ExperimentalStdlibApi::class)
     fun readeMRTD(tag: Tag) {
         /*val isodep = IsoDep.get(tag)
         isodep.timeout = 50000
@@ -167,7 +166,10 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         Log.i("PACESuccess", "PACE status: $isPACESuccess")
         Log.i("eMRTDTime", "Execution time for PACE: ${endTime - startTime}")
         if (isPACESuccess) {
+            startTime = System.nanoTime()
             EMRTD.cs.read()
+            endTime = System.nanoTime()
+            Log.i("eMRTDTime", "Time for reading EF.CS: ${endTime - startTime}")
         }
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
