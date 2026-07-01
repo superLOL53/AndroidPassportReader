@@ -81,5 +81,8 @@
     <string name="pace_protocol_information">PACE protocol information</string>
     <string name="signature">Signature</string>
     <string name="biometric_content">Biometric Content</string>
+    <string name="lost_comm">Lost communication with the passport.\nTry again?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>

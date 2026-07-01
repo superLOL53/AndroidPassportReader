@@ -20,7 +20,6 @@ import com.example.emrtdapplication.common.CardSecurity
 import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
 import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
-import com.example.emrtdapplication.constants.APDUControlConstants
 import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
 import com.example.emrtdapplication.constants.FAILURE
@@ -82,7 +81,7 @@ object EMRTD {
         }
         var endTime = System.nanoTime()
         Log.i("eMRTDTime", "Time for reading EF.ATR/INFO: ${endTime - startTime}")
-        if (APDUControlConstants.USE_EXTENDED_LENGTH_APDUS && ai.extendedLengthInfoInFile) {
+        if (ai.extendedLengthInfoInFile) {
             APDUControl.maxResponseLength = ai.maxAPDUReceiveBytes - ADDITIONAL_ENCRYPTION_LENGTH
             APDUControl.maxCommandLength = ai.maxAPDUTransferBytes - ADDITIONAL_ENCRYPTION_LENGTH
         } else {

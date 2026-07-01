@@ -15,6 +15,7 @@ import io.mockk.slot
 import io.mockk.verify
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.junit.Assert.assertArrayEquals
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
@@ -30,7 +31,6 @@ import org.spongycastle.crypto.params.ECPrivateKeyParameters
 import org.spongycastle.crypto.params.ECPublicKeyParameters
 import java.math.BigInteger
 import java.security.Security
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
 @RunWith(MockitoJUnitRunner::class)
@@ -45,7 +45,7 @@ class PACETest {
     private var macKey = slot<ByteArray>()
     private var sequenceCounter = slot<ByteArray>()
 
-    @BeforeTest
+    @Before
     fun setUp() {
         mockkObject(APDUControl)
         mockkObject(Crypto)
@@ -808,10 +808,10 @@ class PACETest {
     fun testTrace() {
 
         responseAPDUs.add(byteArrayOf(0x90.toByte(), 0x00))
-        responseAPDUs.add(byteArrayOf(124, 18, -128, 16, 32, -51, 68, -70, -35, 27, -16, 24, -67, -91, -77, -77, -96, 99, 127, 38, -112, 0))
-        responseAPDUs.add(byteArrayOf(124, 67, -126, 65, 4, 68, 87, -74, 117, -118, -5, -105, 118, -66, 20, -74, 105, 27, 28, 107, 25, -91, -23, -77, -99, 64, 102, 53, 45, -103, -70, -51, 31, 118, -17, 64, 92, 79, -121, 32, -78, 73, -114, -19, 77, -27, 23, -3, -35, -73, -77, -32, -42, -120, 89, -102, -5, -100, -28, -86, -106, 19, -34, 89, 66, -126, -85, -52, -46, -112, 0))
-        responseAPDUs.add(byteArrayOf(124, 67, -124, 65, 4, 39, 88, -21, -126, -112, -90, -122, 62, 121, -75, -17, 26, -63, 59, -127, -93, 85, 16, -20, 121, -127, -11, -89, -74, -27, -46, 105, -12, -119, 103, 73, 111, 38, 2, 83, 101, 32, 75, 37, -108, 63, -60, -128, -73, -111, 104, -30, -41, 113, 27, -39, -17, 109, 69, 124, -30, -85, 13, 39, 111, 103, 55, 116, -32, -112, 0))
-        responseAPDUs.add(byteArrayOf(124, 10, -122, 8, -64, -31, 44, 113, 60, -46, 125, -18, -112, 0))
+        responseAPDUs.add(byteArrayOf(124, 18, -128, 16, -97, -88, -70, -88, 77, -47, -17, -27, 14, 85, -9, -113, 44, 53, 4, -70, -112, 0))
+        responseAPDUs.add(byteArrayOf(124, 67, -126, 65, 4, 65, 0, 45, -3, -78, 101, -105, -17, -49, -71, 124, 58, -96, 12, -63, 39, -90, 91, -55, -77, 29, 72, 61, -27, -68, 89, -87, 99, 49, -45, -121, -37, 19, -92, -73, 107, 122, 119, -22, 66, 101, 121, -17, 104, 2, 70, 127, -54, 49, -31, 105, 107, -62, 42, 28, 4, 80, -128, -70, 33, 63, -46, 30, -71, -112, 0))
+        responseAPDUs.add(byteArrayOf(124, 67, -124, 65, 4, 9, -121, 17, 103, -32, 109, -108, -95, -128, 60, -21, -52, -17, 70, 59, 122, -94, 12, -32, 71, 45, 113, -7, 58, -120, -23, -7, 12, -9, -63, 60, -82, -99, -10, 1, -50, -128, -10, -79, -53, -17, 55, -53, 43, 70, -128, 81, -60, -69, 87, 21, -108, -122, 11, -48, -30, 31, 119, -79, 16, -70, 5, -21, 4, -112, 0 ))
+        responseAPDUs.add(byteArrayOf(124, 10, -122, 8, -108, 118, -32, 127, 50, -81, 40, 126, -112, 0 ))
         every {
             APDUControl.sendAPDU(capture(sentAPDUs))
         } returnsMany responseAPDUs
@@ -833,8 +833,8 @@ class PACETest {
         val domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
         //shared secret: 64865951817970981584970805091850750064685959025300757738761760876594492124243
         val g = params.curve.createPoint(
-            BigInteger("993e871a364b953f775826c18543ca8fe853433d22585086de8835361d14f3c6", 16),
-            BigInteger("8f7bd2cb6c1a1bde96563d7fe30a2f037035009122bf01965c85c66b0caae837", 16)
+            BigInteger("63243729749562333355292243550312970334778175571054726587095381623627144114786"),
+            BigInteger("38218615093753523893122277964030810387585405539772602581557831887485717997975")
         ).normalize()
         //(993e871a364b953f775826c18543ca8fe853433d22585086de8835361d14f3c6,8f7bd2cb6c1a1bde96563d7fe30a2f037035009122bf01965c85c66b0caae837,1,7d5a0975fc2c3057eef67530417affe7fb8055c126dc5c6ce94a4b44f330b5d9)
         val newParameters = ECDomainParameters(params.curve, g, params.n, params.h)
@@ -842,13 +842,13 @@ class PACETest {
             AsymmetricCipherKeyPair(
                 ECPublicKeyParameters(
                     params.curve.createPoint(
-                        BigInteger("96654b61a49e6f863853ef9cf4f63a823204def5326344ec6950cf8f1638359b", 16),
-                        BigInteger("785df23c9cda945e6d4fbb66fbcc31099d7a1237a531f849ef5ec4d5194506cc", 16)
+                        BigInteger("44d27855f1d077639eb609f01f03a1a2c14d37d91f6751fd07f2f8292595a753", 16),
+                        BigInteger("56eb0805de8cb3ca3e5afc41e1a6e4dccd2e04ed0c5aa6693d46a5beaa5101b5", 16)
                     ),
                     domainParameters
                 ),
                 ECPrivateKeyParameters(
-                    BigInteger("38015015218110673124160363937168546017709095001223721232305892219141149195463"),
+                    BigInteger("59087035115509684328083537428604850410847351834061890864847142286172290511923"),
                     domainParameters
                 )
             )
@@ -857,13 +857,13 @@ class PACETest {
             AsymmetricCipherKeyPair(
                 ECPublicKeyParameters(
                     newParameters.curve.createPoint(
-                        BigInteger("7124bb858f3d1c5d55ee328225dd143c4296240ebe60642dd736107afad57d61", 16),
-                        BigInteger("81d99e0020a231c0192832d4c1ef1725b3caacd08d8b0a4ce621c54c5c078715", 16)
+                        BigInteger("3012e19ae0041dbc37324ec14674662c856cddcc21cb6bb2d1b77cd2008ce4f3", 16),
+                        BigInteger("734188881852d47994344938bf5e1ce9ddba0cbbbf5fc4b808d6053f019f9513", 16)
                     ),
                     newParameters
                 ),
                 ECPrivateKeyParameters(
-                    BigInteger("47748577442491204775201014938590621824582171129037492131503625161591314064836"),
+                    BigInteger("24786162131171479143127008657951457428572704997208549039471567706349934908145"),
                     newParameters
                 )
             )
@@ -894,18 +894,18 @@ class PACETest {
             setSequenceCounter(any())
         }
 
-        assertArrayEquals(byteArrayOf(0, 34, -63, -92, 18, -128, 10, 4, 0, 127, 0, 7, 2, 2, 4, 2, 2, -125, 1, 1, -124, 1, 13), sentAPDUs[0].getByteArray())
+        assertArrayEquals(byteArrayOf( 0, 34, -63, -92, 18, -128, 10, 4, 0, 127, 0, 7, 2, 2, 4, 2, 2, -125, 1, 1, -124, 1, 13 ), sentAPDUs[0].getByteArray())
         assertArrayEquals(byteArrayOf(16, -122, 0, 0, 2, 124, 0, 0), sentAPDUs[1].getByteArray())
-        assertArrayEquals(byteArrayOf(16, -122, 0, 0, 69, 124, 67, -127, 65, 4, -106, 101, 75, 97, -92, -98, 111, -122, 56, 83, -17, -100, -12, -10, 58, -126, 50, 4, -34, -11, 50, 99, 68, -20, 105, 80, -49, -113, 22, 56, 53, -101, 120, 93, -14, 60, -100, -38, -108, 94, 109, 79, -69, 102, -5, -52, 49, 9, -99, 122, 18, 55, -91, 49, -8, 73, -17, 94, -60, -43, 25, 69, 6, -52, 0), sentAPDUs[2].getByteArray())
-        assertArrayEquals(byteArrayOf(16, -122, 0, 0, 69, 124, 67, -125, 65, 4, 113, 36, -69, -123, -113, 61, 28, 93, 85, -18, 50, -126, 37, -35, 20, 60, 66, -106, 36, 14, -66, 96, 100, 45, -41, 54, 16, 122, -6, -43, 125, 97, -127, -39, -98, 0, 32, -94, 49, -64, 25, 40, 50, -44, -63, -17, 23, 37, -77, -54, -84, -48, -115, -117, 10, 76, -26, 33, -59, 76, 92, 7, -121, 21, 0), sentAPDUs[3].getByteArray())
-        assertArrayEquals(byteArrayOf(0, -122, 0, 0, 12, 124, 10, -123, 8, 55, 124, 88, -123, 62, -101, 118, -100, 0), sentAPDUs[4].getByteArray())
+        assertArrayEquals(byteArrayOf( 16, -122, 0, 0, 69, 124, 67, -127, 65, 4, 68, -46, 120, 85, -15, -48, 119, 99, -98, -74, 9, -16, 31, 3, -95, -94, -63, 77, 55, -39, 31, 103, 81, -3, 7, -14, -8, 41, 37, -107, -89, 83, 86, -21, 8, 5, -34, -116, -77, -54, 62, 90, -4, 65, -31, -90, -28, -36, -51, 46, 4, -19, 12, 90, -90, 105, 61, 70, -91, -66, -86, 81, 1, -75, 0 ), sentAPDUs[2].getByteArray())
+        assertArrayEquals(byteArrayOf( 16, -122, 0, 0, 69, 124, 67, -125, 65, 4, 48, 18, -31, -102, -32, 4, 29, -68, 55, 50, 78, -63, 70, 116, 102, 44, -123, 108, -35, -52, 33, -53, 107, -78, -47, -73, 124, -46, 0, -116, -28, -13, 115, 65, -120, -120, 24, 82, -44, 121, -108, 52, 73, 56, -65, 94, 28, -23, -35, -70, 12, -69, -65, 95, -60, -72, 8, -42, 5, 63, 1, -97, -107, 19, 0 ), sentAPDUs[3].getByteArray())
+        assertArrayEquals(byteArrayOf( 0, -122, 0, 0, 12, 124, 10, -123, 8, -25, -65, 20, -50, -34, -45, 5, 71, 0 ), sentAPDUs[4].getByteArray())
 
         //assertArrayEquals(BigInteger("8bd2aeb9cb7e57cb2c4b482ffc81b7afb9de27e1e3bd23c23a4453bd9ace3262", 16).toByteArray(), keyParametersECDH[0].g.xCoord.toBigInteger().toByteArray())
         //assertArrayEquals(g.xCoord.toBigInteger().toByteArray(), keyParametersECDH[1].g.xCoord.toBigInteger().toByteArray())
 // shared secret: [14, -25, -20, -74, 68, 2, 40, 87, 74, -109, 104, -7, -115, -6, 83, 101, -88, 89, 105, -11, 2, -35, 72, -43, 101, 41, -6, 108, 127, 64, -31, -35]
 
-        assertArrayEquals(byteArrayOf(9, 34, 107, -92, -19, -91, 84, -35, 96, -47, 87, -11, -84, -73, -95, 26), encKey.captured)
-        assertArrayEquals(byteArrayOf(20, -88, -124, -33, -25, -125, -51, 97, -19, -69, -91, -43, -115, -92, -128, -9), macKey.captured)
+        assertArrayEquals(byteArrayOf(30, 9, 94, 6, -7, 115, 51, 32, 73, 26, -109, 33, -55, -119, -110, -82), encKey.captured)
+        assertArrayEquals(byteArrayOf(98, 76, -31, -111, 59, 31, 82, -124, 98, -44, -26, 109, 19, -47, -114, -68), macKey.captured)
 
         assertEquals(SUCCESS, res)
     }

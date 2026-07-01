@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.constants.CertificationRevocationStatus
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.display.utils.CertificateDisplay
 import java.time.LocalDate
@@ -19,6 +20,8 @@ object VerificationDisplay : CreateView() {
         provideTextForRow(row, "Passive Authentication Status:", authenticationStatus())
         row = createRow(context, parent)
         provideTextForRow(row, "Chip Authentication Status:", chipAuthenticationStatus())
+        row = createRow(context, parent)
+        provideTextForRow(row, "CRL Status:", crlStatus())
         if (EMRTD.showDetails) {
             if (EMRTD.ldS1Application.efSod.usedCSCA != null) {
                 createHeader(context, parent, "Country Signing Certificate Authority")
@@ -55,6 +58,14 @@ object VerificationDisplay : CreateView() {
             "Verified"
         } else {
             "Failure"
+        }
+    }
+
+    private fun crlStatus() : String {
+        return when (EMRTD.ldS1Application.efSod.certificationRevocationStatus) {
+            CertificationRevocationStatus.UNDETERMINED -> "UNDETERMINED"
+            CertificationRevocationStatus.REVOKED -> "REVOKED"
+            CertificationRevocationStatus.UNREVOKED -> "UNREVOKED"
         }
     }
 }

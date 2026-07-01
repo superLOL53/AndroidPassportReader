@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:id="@+id/readView"
+    android:gravity="center">
 
     <LinearLayout
         android:id="@+id/beforeRead"
@@ -105,4 +107,55 @@
             android:scrollbarSize="8dp" />
 
     </LinearLayout>
+
+    <LinearLayout android:id="@+id/overlayLostComm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:gravity="center"
+        android:background="@drawable/emrtd_view_shape"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/lostCommText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="@string/lost_comm"
+            android:textColor="@color/black"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/lostCommNo"
+                style="@style/CustomButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_weight="1"
+                android:text="@string/no"
+                android:textColor="#ffffff" />
+
+            <Button
+                android:id="@+id/lostCommYes"
+                style="@style/CustomButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:layout_weight="1"
+                android:text="@string/yes"
+                android:textColor="#ffffff" />
+        </LinearLayout>
+    </LinearLayout>
+
 </RelativeLayout>

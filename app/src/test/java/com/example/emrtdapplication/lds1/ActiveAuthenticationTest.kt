@@ -1,12 +1,12 @@
 package com.example.emrtdapplication.lds1
 
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.Before
+import org.junit.Test
 
 
 class ActiveAuthenticationTest {
 
-    @BeforeTest
+    @Before
     fun setUp() {
 
     }

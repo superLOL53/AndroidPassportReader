@@ -3,6 +3,7 @@ package com.example.emrtdapplication
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
+import android.nfc.TagLostException
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -10,29 +11,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.utils.APDUControl
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
-
-/*
-import android.nfc.tech.IsoDep
-import net.sf.scuba.smartcards.APDUEvent
-import net.sf.scuba.smartcards.CardService
-import org.bouncycastle.jce.ECNamedCurveTable
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec
-import org.bouncycastle.math.ec.ECCurve
-import org.jmrtd.BACKey
-import org.jmrtd.PassportService
-import org.spongycastle.crypto.params.ECDomainParameters
-import java.math.BigInteger
-import java.security.spec.ECFieldFp
-import java.security.spec.ECGenParameterSpec
-import java.security.spec.ECParameterSpec
-import java.security.spec.ECPoint
-import java.security.spec.EllipticCurve*/
 
 /**
  * Activity for reading from the eMRTD
@@ -69,27 +53,41 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
                 NfcAdapter.FLAG_READER_NFC_BARCODE or
                 NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
                 NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, b)
+        val overlay = findViewById<LinearLayout>(R.id.overlayNFCEnable)
+        val readView = findViewById<RelativeLayout>(R.id.readView)
         if (!nfcAdapter.isEnabled) {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
+            overlay.visibility = View.VISIBLE
+            val cancel = findViewById<Button>(R.id.nfcCancel)
+            cancel.setOnClickListener {
+                readView.removeView(overlay)
+            }
+            findViewById<Button>(R.id.enableNFC).setOnClickListener {
+                startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+                readView.removeView(overlay)
+            }
         } else {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+            readView.removeView(overlay)
         }
-        val cancel = findViewById<Button>(R.id.nfcCancel)
-        cancel.setOnClickListener {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+        findViewById<Button>(R.id.lostCommYes).setOnClickListener {
+            val intent = Intent(this, ReadPassport()::class.java)
+            startActivity(intent)
+            finish()
         }
-        findViewById<Button>(R.id.enableNFC).setOnClickListener {
-            startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+        findViewById<Button>(R.id.lostCommNo).setOnClickListener {
+            val intent = Intent(this, ApplicationEMRTD()::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent)
         }
     }
 
     override fun onResume() {
         super.onResume()
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        if (!nfcAdapter.isEnabled) {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.VISIBLE
-        } else {
-            findViewById<LinearLayout>(R.id.overlayNFCEnable).visibility = View.GONE
+        val overlay = findViewById<LinearLayout>(R.id.overlayNFCEnable)
+        if (!nfcAdapter.isEnabled && overlay != null) {
+            overlay.visibility = View.VISIBLE
+        } else if(overlay != null) {
+            findViewById<LinearLayout>(R.id.readView).removeView(overlay)
         }
         val options = Bundle()
         options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 60000)
@@ -113,22 +111,25 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     }
 
     override fun onTagDiscovered(tag: Tag?) {
-        if (tag == null) {
-            return
-        }
-        runOnUiThread {
-            findViewById<LinearLayout>(R.id.beforeRead).visibility = View.GONE
-            findViewById<LinearLayout>(R.id.Reading).visibility = View.VISIBLE
-        }
-        val startTime = System.nanoTime()
-        readeMRTD(tag)
-        val endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Execution Time for reading passport: ${endTime - startTime}")
-        Log.i("eMRTDTime", "Number of exchanged APDU pairs: ${APDUControl.exchangedAPDUPairs}")
-        runOnUiThread {
-            val intent = Intent(this, EMRTDView()::class.java)
-            startActivity(intent)
-            finish()
+        try {
+            if (tag == null) {
+                return
+            }
+            runOnUiThread {
+                findViewById<LinearLayout>(R.id.beforeRead).visibility = View.GONE
+                findViewById<LinearLayout>(R.id.Reading).visibility = View.VISIBLE
+            }
+            readeMRTD(tag)
+            runOnUiThread {
+                val intent = Intent(this, EMRTDView()::class.java)
+                startActivity(intent)
+                finish()
+            }
+        } catch (_ : TagLostException) {
+            nfcAdapter.disableReaderMode(this)
+            runOnUiThread {
+                findViewById<LinearLayout>(R.id.overlayLostComm).visibility = View.VISIBLE
+            }
         }
     }
 
@@ -143,43 +144,39 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         isodep.timeout = 50000
         val cs = CardService.getInstance(isodep)
         val apdus = ArrayList<APDUEvent>()
-        val p = PassportService(cs,256,256,false,true)
+        val p = PassportService(cs, 256, 256, false, true)
         p.addAPDUListener { e -> apdus.add(e)  }
         p.open()
         val k = BACKey("U1194584", "000707", "260801")
         val params = ECNamedCurveTable.getParameterSpec("brainpoolp256r1")
-        val c = EllipticCurve(ECFieldFp(params.curve.field.characteristic), params.curve.a.toBigInteger(), params.curve.b.toBigInteger())
+        val c = EllipticCurve(
+            ECFieldFp(params.curve.field.characteristic),
+            params.curve.a.toBigInteger(),
+            params.curve.b.toBigInteger()
+        )
         val point = ECPoint(params.g.xCoord.toBigInteger(), params.g.yCoord.toBigInteger())
         val res = p.doPACE(k, "0.4.0.127.0.7.2.2.4.2.2",
             ECParameterSpec(c, point, params.n, params.h.toInt()),
-            BigInteger("D", 16))*/
+            BigInteger("D", 16)
+        )*/
 
 
         EMRTD.connectToNFCTag(tag)
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
-        var startTime: Long = System.nanoTime()
         EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
         val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
-        var endTime: Long = System.nanoTime()
         Log.i("PACESuccess", "PACE status: $isPACESuccess")
-        Log.i("eMRTDTime", "Execution time for PACE: ${endTime - startTime}")
         if (isPACESuccess) {
-            startTime = System.nanoTime()
             EMRTD.cs.read()
-            endTime = System.nanoTime()
-            Log.i("eMRTDTime", "Time for reading EF.CS: ${endTime - startTime}")
         }
         if (EMRTD.ldS1Application.selectApplication() != SUCCESS) {
             return
         }
-        startTime = System.nanoTime()
         if (!isPACESuccess && EMRTD.ldS1Application.performBACProtocol() != SUCCESS) {
             return
         }
-        endTime = System.nanoTime()
-        Log.i("eMRTDTime", "BAC execution time: ${endTime - startTime}")
         EMRTD.ldS1Application.readFiles(this)
         if (EMRTD.ldS1Application.efSod.documentSignerCertificate != null) {
             EMRTD.ldS1Application.verify(this)

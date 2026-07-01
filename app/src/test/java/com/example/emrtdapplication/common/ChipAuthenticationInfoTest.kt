@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.utils.TLV
+import org.junit.Test
 import java.math.BigInteger
-import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

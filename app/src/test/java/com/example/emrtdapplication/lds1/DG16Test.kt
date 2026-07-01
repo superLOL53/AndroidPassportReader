@@ -1,14 +1,14 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.constants.SUCCESS
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.Assert.assertArrayEquals
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.Before
+import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
@@ -23,7 +23,7 @@ class DG16Test {
             byteArrayOf(0x5F, 0x52, 0x0B) + "14155551212".toByteArray() + byteArrayOf(0x5F, 0x53, 0x23) +
             "49 REDWOOD LN<OCEAN BREEZE<CA<94000".toByteArray()
 
-    @BeforeTest
+    @Before
     fun setUp() {
         mockkObject(APDUControl)
         APDUControl.maxResponseLength = 256

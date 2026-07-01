@@ -7,16 +7,16 @@ import org.jmrtd.cbeff.StandardBiometricHeader
 import org.jmrtd.lds.icao.DG3File
 import org.jmrtd.lds.iso19794.FingerImageInfo
 import org.jmrtd.lds.iso19794.FingerInfo
+import org.junit.Before
+import org.junit.Test
 import java.io.ByteArrayInputStream
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DG3Test {
 
     val responseAPDUs = ArrayList<ByteArray>()
 
-    @BeforeTest
+    @Before
     fun setUp() {
         responseAPDUs.clear()
         responseAPDUs.add(byteArrayOf(0x90.toByte(), 0x00))

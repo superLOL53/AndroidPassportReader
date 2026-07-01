@@ -2,7 +2,7 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.constants.SecurityInfoConstants
 import com.example.emrtdapplication.utils.TLV
-import kotlin.test.Test
+import org.junit.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

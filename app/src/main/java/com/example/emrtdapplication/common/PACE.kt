@@ -1,9 +1,6 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.INVALID_ARGUMENT
 import com.example.emrtdapplication.constants.NfcClassByte
@@ -40,9 +37,12 @@ import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P256
 import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P384
 import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P521
 import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.ZERO_BYTE
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.utils.Crypto
+import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x9.ECNamedCurveTable
 import org.spongycastle.asn1.x9.X9ECParameters
 import org.spongycastle.asn1.x9.X9ECPoint
@@ -60,7 +60,6 @@ import javax.crypto.Cipher
 /**
  * Implements the PACE protocol.
  *
- * @property Crypto Used for Cryptographic operations
  * @property mrzInformation The MRZ information of the eMRTD
  * @property useCAN If the CAN is used for deriving keys
  * @property useLongConstants Indicates if integrated mapping uses the long(256 bits) or short(128 bits) c0 and c1 constants
@@ -132,8 +131,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
             0x01
         }
         info += byteArrayOf(TlvTags.UNSIGNED_INTEGER, 0x1, parameters)
-        val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
-        if (key == null) return FAILURE
+        val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray()) ?: return FAILURE
         computeKeys(key, 3)
         info = APDUControl.sendAPDU(
             APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info)
@@ -168,7 +166,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
             ECDH_GM -> paceECGM(s)
             ECDH_IM -> paceECIM(s)
             ECDH_CAM -> paceECCAM(s)
-            else -> return INVALID_ARGUMENT
+            else -> INVALID_ARGUMENT
         }
     }
 
@@ -300,9 +298,9 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      */
     private fun getDHParams() : DHParameters? {
         return when (parameters) {
-            MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_1024_160
-            MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_2048_224
-            MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP -> return DHStandardGroups.rfc5114_2048_256
+            MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP -> DHStandardGroups.rfc5114_1024_160
+            MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP -> DHStandardGroups.rfc5114_2048_224
+            MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP -> DHStandardGroups.rfc5114_2048_256
             else -> null
         }
     }

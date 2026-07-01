@@ -8,16 +8,16 @@ import org.jmrtd.lds.icao.DG4File
 import org.jmrtd.lds.iso19794.IrisBiometricSubtypeInfo
 import org.jmrtd.lds.iso19794.IrisImageInfo
 import org.jmrtd.lds.iso19794.IrisInfo
+import org.junit.Before
+import org.junit.Test
 import java.io.ByteArrayInputStream
-import kotlin.test.BeforeTest
-import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class DG4Test {
 
     val responseAPDUs = ArrayList<ByteArray>()
 
-    @BeforeTest
+    @Before
     fun setUp() {
         responseAPDUs.clear()
         responseAPDUs.add(byteArrayOf(0x90.toByte(), 0x00))

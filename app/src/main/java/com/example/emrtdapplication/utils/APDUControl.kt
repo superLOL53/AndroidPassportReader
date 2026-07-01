@@ -2,6 +2,7 @@ package com.example.emrtdapplication.utils
 
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
+import android.util.Log
 import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.constants.APDUControlConstants
 import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
@@ -94,16 +95,16 @@ object APDUControl {
     //@OptIn(ExperimentalStdlibApi::class)
     fun sendAPDU(apdu : APDU) : ByteArray {
         exchangedAPDUPairs++
-        //Log.d("APDU", "Sending APDU: " + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
-        //    upperCase = true}))
+        Log.d("APDU", "Sending APDU: " + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true}))
         val apdu = if (sendEncryptedAPDU) {
             sendEncryptedAPDU(apdu)
         } else {
             sendEncryptedAPDU = false
             sendISODEP(apdu)
         }
-        //Log.d("APDU", "Received APDU: " + apdu.toHexString(HexFormat { bytes.byteSeparator = " "
-        //    upperCase = true}))
+        Log.d("APDU", "Received APDU: " + apdu.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true}))
         return apdu
     }
 
@@ -225,11 +226,11 @@ object APDUControl {
         if (isoDep == null) return ByteArray(0)
         inc()
         val secureAPDU = SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, apdu)
-        //Log.d("APDU", "Sending secured APDU: ${secureAPDU.encryptedAPDUArray.toHexString(HexFormat { bytes.byteSeparator = " "
-        //    upperCase = true})}")
+        Log.d("APDU", "Sending secured APDU: ${secureAPDU.encryptedAPDUArray.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true})}")
         val responseAPDU = isoDep!!.transceive(secureAPDU.encryptedAPDUArray)
-        //Log.d("APDU", "Received secured APDU: ${responseAPDU.toHexString(HexFormat { bytes.byteSeparator = " "
-        //    upperCase = true})}")
+        Log.d("APDU", "Received secured APDU: ${responseAPDU.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true})}")
         inc()
         return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, responseAPDU).apduArray
     }

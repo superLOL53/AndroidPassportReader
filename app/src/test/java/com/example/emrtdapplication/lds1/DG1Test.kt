@@ -1,14 +1,14 @@
 package com.example.emrtdapplication.lds1
 
+import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.constants.SUCCESS
 import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.verify
 import org.junit.Assert.assertArrayEquals
-import kotlin.test.BeforeTest
-import kotlin.test.Test
+import org.junit.Before
+import org.junit.Test
 import kotlin.test.assertEquals
 
 class DG1Test {
@@ -16,7 +16,7 @@ class DG1Test {
     private var sentAPDUs = mutableListOf<APDU>()
     private var responseAPDUs = ArrayList<ByteArray>()
 
-    @BeforeTest
+    @Before
     fun setUp() {
         mockkObject(APDUControl)
         APDUControl.maxResponseLength = 256

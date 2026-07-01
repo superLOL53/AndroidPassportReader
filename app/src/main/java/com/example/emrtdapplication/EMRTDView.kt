@@ -114,7 +114,7 @@ class EMRTDView() : AppCompatActivity(), NavigationView.OnNavigationItemSelected
         return if (actionBarDrawerToggle != null && actionBarDrawerToggle!!.onOptionsItemSelected(item)) {
             true
         } else {
-            return super.onOptionsItemSelected(item)
+            super.onOptionsItemSelected(item)
         }
     }
 }

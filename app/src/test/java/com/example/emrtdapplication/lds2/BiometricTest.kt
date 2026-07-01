@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.lds2
 
 import com.example.emrtdapplication.utils.TLV
+import org.junit.Test
 import java.security.SecureRandom
-import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

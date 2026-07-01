@@ -9,14 +9,15 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.children
+import com.example.emrtdapplication.constants.CertificationRevocationStatus
 
 abstract class CreateView {
     protected var alternate = false
 
     fun setBackgroundColor(context: Context, parent: LinearLayout, hashMatch : Boolean) {
-        if (EMRTD.ldS1Application.efSod.isValid && hashMatch) {
+        if (EMRTD.ldS1Application.efSod.isValid && hashMatch && EMRTD.ldS1Application.efSod.certificationRevocationStatus == CertificationRevocationStatus.UNREVOKED) {
             parent.setBackgroundColor(context.resources.getColor(R.color.green, null))
-        } else if (EMRTD.ldS1Application.efSod.isValid || hashMatch) {
+        } else if (EMRTD.ldS1Application.efSod.isValid && hashMatch) {
             parent.setBackgroundColor(context.resources.getColor(R.color.yellow, null))
         } else {
             parent.setBackgroundColor(context.resources.getColor(R.color.red, null))

@@ -19,6 +19,7 @@ import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
 import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
 import com.example.emrtdapplication.constants.TlvTags.EC_POINT_SINGLE_COORDINATE
+import org.spongycastle.asn1.x509.Certificate
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
 import org.spongycastle.crypto.agreement.DHBasicAgreement
 import org.spongycastle.crypto.agreement.ECDHBasicAgreement
@@ -40,9 +41,13 @@ import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.params.KeyParameter
 import org.spongycastle.math.ec.ECPoint
 import java.math.BigInteger
+import java.security.KeyFactory
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
+import java.security.PublicKey
 import java.security.SecureRandom
+import java.security.Signature
+import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
@@ -426,6 +431,73 @@ object Crypto {
             paddedBytes
         } else {
             paddedBytes.slice(0..<last).toByteArray()
+        }
+    }
+
+    /**
+     * Generates a public key from the given certificate
+     *
+     * @param certificate The certificate from which to create the public key
+     * @return The generated public key from the certificate or null if a public key could not be generated
+     */
+    fun generatePublicKey(certificate: Certificate) : PublicKey? {
+        try {
+            val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
+            val fac = KeyFactory.getInstance(
+                certificate.subjectPublicKeyInfo.algorithm.algorithm.id,
+                "BC"
+            )
+            return fac!!.generatePublic(spec)
+        } catch (_ : Exception) {
+            return null
+        }
+    }
+
+    /**
+     * Verifies the signed certificate with the signer certificate
+     *
+     * @param signedCertificate The certificate which was signed by the [signerCertificate]
+     * @param signerCertificate The certificate which signed the [signedCertificate]
+     * @return True if the [signedCertificate] was signed by the [signerCertificate] otherwise false
+     */
+    fun verifyCertificate(signedCertificate: Certificate, signerCertificate: Certificate) : Boolean {
+        try {
+            val pub = generatePublicKey(signerCertificate)
+            return if (pub != null) {
+                verifySignature(
+                    signedCertificate.signatureAlgorithm.algorithm.id,
+                    pub,
+                    signedCertificate.tbsCertificate.encoded,
+                    signedCertificate.signature.bytes
+                )
+            } else {
+                false
+            }
+        } catch (_ : Exception) {
+            return false
+        }
+    }
+
+    /**
+     * Verifies the signature of the [signedData]
+     *
+     * @param signatureOID The OID of the signature algorithm used
+     * @param publicKey The public key to verify the signature
+     * @param signedData A byte array containing the signed bytes
+     * @param signature The signature of the [signedData]
+     * @return True if the signature is valid otherwise false
+     */
+    fun verifySignature(signatureOID: String, publicKey: PublicKey, signedData: ByteArray, signature: ByteArray) : Boolean {
+        try {
+            val sign = Signature.getInstance(
+                signatureOID,
+                "BC"
+            )
+            sign.initVerify(publicKey)
+            sign.update(signedData)
+            return sign.verify(signature)
+        } catch (_ : Exception) {
+            return false
         }
     }
 }
