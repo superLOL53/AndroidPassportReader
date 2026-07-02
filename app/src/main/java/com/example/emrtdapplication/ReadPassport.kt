@@ -140,12 +140,12 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      *
      */
     fun readeMRTD(tag: Tag) {
-        /*val isodep = IsoDep.get(tag)
+        /*val isoDep = IsoDep.get(tag)
         isodep.timeout = 50000
-        val cs = CardService.getInstance(isodep)
-        val apdus = ArrayList<APDUEvent>()
+        val cs = CardService.getInstance(isoDep)
+        val APDUs = ArrayList<APDUEvent>()
         val p = PassportService(cs, 256, 256, false, true)
-        p.addAPDUListener { e -> apdus.add(e)  }
+        p.addAPDUListener { e -> APDUs.add(e)  }
         p.open()
         val k = BACKey("U1194584", "000707", "260801")
         val params = ECNamedCurveTable.getParameterSpec("brainpoolp256r1")

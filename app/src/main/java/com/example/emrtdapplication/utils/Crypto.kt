@@ -409,7 +409,7 @@ object Crypto {
             return paddingBytes + byteArrayOf(PAD_START_BYTE, 0,0,0,0,0,0,0)
         }
         var padArray = paddingBytes + PAD_START_BYTE
-        while (pad > 0) {
+        while (pad > 1) {
             padArray += 0
             pad--
         }

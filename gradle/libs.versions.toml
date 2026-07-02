@@ -25,7 +25,7 @@ scubaSmartcards = "0.0.20"
 
 [libraries]
 core = { module = "com.madgag.spongycastle:core", version.ref = "core" }
-jmrtd = { module = "org.jmrtd:jmrtd" }
+#jmrtd = { module = "org.jmrtd:jmrtd" }
 jmrtd-jmrtd = { module = "org.jmrtd:jmrtd", version.ref = "jmrtd" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }

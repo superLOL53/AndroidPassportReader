@@ -115,25 +115,16 @@ class LDS1Application : LDSApplication() {
      */
     override fun readFiles(readActivity : ReadPassport) {
         readActivity.changeProgressBar("Reading files...", INCREMENT_PROGRESS_BAR)
-        var startTime = System.nanoTime()
         efCOM.read()
-        var endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Time for reading EF.COM File: ${endTime - startTime}")
         for (ef in efMap) {
             readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
-            startTime = System.nanoTime()
             ef.value.read()
             ef.value.parse()
-            endTime = System.nanoTime()
-            Log.i("eMRTDTime", "Time for reading DG${ef.key} File: ${endTime - startTime}")
         }
         readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
-        startTime = System.nanoTime()
         if (efSod.read() == SUCCESS) {
             efSod.parse()
         }
-        endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Time for reading EF.SOD File: ${endTime - startTime}")
     }
 
     /**

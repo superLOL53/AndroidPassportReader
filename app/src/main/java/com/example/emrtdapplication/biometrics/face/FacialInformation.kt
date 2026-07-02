@@ -84,7 +84,7 @@ class FacialInformation(facialInformation: ByteArray) {
 
     private fun setExpression(highByte: Byte, lowByte: Byte) : String {
         if (highByte == 0.toByte()) {
-            when (lowByte) {
+            return when (lowByte) {
                 0.toByte() -> "Unspecified"
                 1.toByte() -> "Neutral"
                 2.toByte() -> "Smile (closed mouth)"
@@ -100,6 +100,5 @@ class FacialInformation(facialInformation: ByteArray) {
         } else {
             return "Vendor specific"
         }
-        return "Unspecified"
     }
 }
