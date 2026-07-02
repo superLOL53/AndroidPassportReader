@@ -29,7 +29,6 @@ import java.math.BigInteger
 /**
  * Implements the EF.DIR file. Required if LDS2 applications are supported
  *
- * @property APDUControl Used for sending and receiving APDUs
  * @property hasTravelRecordsApplication Indicates if the eMRTD supports the Travel Records application
  * @property hasVisaRecordsApplication Indicates if the eMRTD supports the Visa Record application
  * @property hasAdditionalBiometricsApplication Indicates if the eMRTD supports the Additional Biometric application
@@ -79,7 +78,7 @@ class Directory() {
         var tlv: TLV
         var l = 0
         do {
-            tlv = TLV(byteArray.slice(l.. byteArray.size-1).toByteArray())
+            tlv = TLV(byteArray.slice(l..<byteArray.size).toByteArray())
             if (parseTLV(tlv) != SUCCESS) {
                 return FILE_UNABLE_TO_READ
             }

@@ -40,17 +40,12 @@ class BiometricDataBlock(biometricDataBlock : TLV, val type : BiometricType) {
             BiometricType.IRIS -> {
                 biometricHeader =
                     IrisRecordHeader(biometricDataBlock.value!!)
-                biometricData = null//IrisRecordData(
-                    //biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size)
-                    //    .toByteArray()
-                //)
+                biometricData = null
             }
             BiometricType.FINGERPRINT -> {
                 biometricHeader =
-                    FingerprintRecordHeader(biometricDataBlock.value!!)//.slice(0..20).toByteArray())
+                    FingerprintRecordHeader(biometricDataBlock.value!!)
                 biometricData = null
-                //biometricData = FingerprintRecordData(
-                //    biometricHeader.fingerprintHeader.fingerImageInfos[0].encoded)
             }
         }
     }

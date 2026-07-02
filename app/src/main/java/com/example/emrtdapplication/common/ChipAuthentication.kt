@@ -33,11 +33,11 @@ import java.math.BigInteger
  * @property chipAuthenticationData Decrypted Chip Authentication Data retrieved during the last step of the PACE protocol
  * @property chipAuthenticationInfo [ChipAuthenticationInfo] object containing information about the protocol itself
  * @property isDH If the protocol is a DH key agreement protocol
- * @property isEC If the protocol is a EC key agreement protocol
+ * @property isEC If the protocol is an EC key agreement protocol
  * @property keyParamsDH DH parameters for the protocol
  * @property keyParamsECDH EC parameters for the protocol
- * @property publicKeyDH eMRTD's static public key stored in [com.example.emrtdapplication.lds1.DG14]
- * @property publicKeyECDH eMRTD's static public key stored in [com.example.emrtdapplication.lds1.DG14]
+ * @property publicKeyDH eMRTDs static public key stored in [com.example.emrtdapplication.lds1.DG14]
+ * @property publicKeyECDH eMRTDs static public key stored in [com.example.emrtdapplication.lds1.DG14]
  * @property is3DES If the protocol uses 3DES as the symmetric protocol, otherwise AES is used
  */
 class ChipAuthentication {
@@ -53,9 +53,9 @@ class ChipAuthentication {
     private var is3DES = false
 
     /**
-     * Creates a ChipAuthentication object for authenticating the eMRTD's chip
+     * Creates a ChipAuthentication object for authenticating the eMRTDs chip
      *
-     * @param publicKeyInfo The eMRTD's static public key stored in [com.example.emrtdapplication.lds1.DG14]
+     * @param publicKeyInfo The eMRTDs static public key stored in [com.example.emrtdapplication.lds1.DG14]
      * @param chipAuthenticationInfo Information about the protocol stored in [com.example.emrtdapplication.lds1.DG14]
      */
     constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationInfo: ChipAuthenticationInfo) {
@@ -69,7 +69,7 @@ class ChipAuthentication {
      *
      * @param publicKeyInfo Public key info for the Chip Authentication protocol
      * @param chipAuthenticationData Decrypted Chip Authentication Data retrieved during the last step in the PACE protocol
-     * @param publicKey eMRTD's public key during the mapping phase of the PACE protocol
+     * @param publicKey eMRTDs public key during the mapping phase of the PACE protocol
      */
     constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationData : ByteArray, publicKey : ECPublicKeyParameters) {
         this.chipAuthenticationData = chipAuthenticationData
@@ -106,10 +106,8 @@ class ChipAuthentication {
             if (keyParamsDH == null && keyParamsECDH == null) {
                 return FAILURE
             }
-            val keyPair = generateKeyPair()
-            if (keyPair == null) return FAILURE
-            val publicKeyData = getEncodedPublicKey(keyPair)
-            if (publicKeyData == null) return FAILURE
+            val keyPair = generateKeyPair() ?: return FAILURE
+            val publicKeyData = getEncodedPublicKey(keyPair) ?: return FAILURE
             val agreement = if (isDH && publicKeyDH != null) {
                 Crypto.calculateDHAgreement(
                     keyPair.private as DHPrivateKeyParameters,
@@ -146,7 +144,7 @@ class ChipAuthentication {
     }
 
     /**
-     * Authenticates the eMRTD's chip using 3DES chip authentication protocols
+     * Authenticates the eMRTDs chip using 3DES chip authentication protocols
      *
      * @param publicKeyData Public key of the reader encoded as byte array
      * @return [SUCCESS] if APDU exchange was successful, otherwise [FAILURE]
@@ -179,7 +177,7 @@ class ChipAuthentication {
     }
 
     /**
-     * Authenticates the eMRTD's chip using AES chip authentication protocols
+     * Authenticates the eMRTDs chip using AES chip authentication protocols
      *
      * @param publicKeyData Public key of the reader encoded as byte array
      * @return [SUCCESS] if APDU exchange was successful, otherwise [FAILURE]
@@ -193,7 +191,7 @@ class ChipAuthentication {
                     }
         var ar = protocol.toByteArray()
         if (keyId != null) {
-            ar = ar + keyId
+            ar += keyId
         }
         var info = APDUControl.sendAPDU(
             APDU(
@@ -226,7 +224,7 @@ class ChipAuthentication {
     }
 
     /**
-     * Authenticates the eMRTD's chip using an DH or ECDH key agreement from PACE-CAM
+     * Authenticates the eMRTDs chip using an DH or ECDH key agreement from PACE-CAM
      *
      * @return [SUCCESS] or [FAILURE]
      */

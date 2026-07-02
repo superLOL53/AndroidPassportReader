@@ -44,7 +44,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property image Image of citizenship document
  * @property otherNames Other names of the document holder
  */
-class DG11() : ElementaryFileTemplate() {
+class DG11 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG11_SHORT_EF_ID
     override val efTag = DG11_FILE_TAG

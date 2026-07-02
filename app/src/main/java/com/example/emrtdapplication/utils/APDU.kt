@@ -15,7 +15,7 @@ import com.example.emrtdapplication.constants.APDUConstants.MIN_APDU_LENGTH
  * @property insByte The INS byte of the APDU
  * @property p1Byte The P1 byte of the APDU
  * @property p2Byte The P2 byte of the APDU
- * @property data The data to be send with the APDU.
+ * @property data The data to be sent with the APDU.
  * @property lc The length of the data of the APDU
  * @property useLc Indicates if the Lc field and in extent the [data] is sent with the APDU
  * @property useLcExt Indicates if the APDU uses the extended length for the [lc]
@@ -90,7 +90,7 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * @param le The expected length of the response APDU
      */
     private fun calculateLe(le: Int) {
-        if (le < LE_MIN || LE_EXT_MAX < le) {
+        if (le !in LE_MIN..LE_EXT_MAX) {
             return
         }
         useLe = true

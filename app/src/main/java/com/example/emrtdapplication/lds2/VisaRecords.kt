@@ -1,11 +1,11 @@
 package com.example.emrtdapplication.lds2
 
 import com.example.emrtdapplication.ReadPassport
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.VisaRecordsConstants.APPLICATION_ID
 import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_1
 import com.example.emrtdapplication.constants.VisaRecordsConstants.VISA_RECORD_ID_2
+import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
 /**
@@ -15,7 +15,7 @@ import java.math.BigInteger
  * @property certificateRecords The certificates read from the application
  * @property visaRecords List of [VisaRecord] read from the application
  */
-class VisaRecords() : LDS2Application() {
+class VisaRecords : LDS2Application() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var visaRecords : Array<VisaRecord>? = null
         private set

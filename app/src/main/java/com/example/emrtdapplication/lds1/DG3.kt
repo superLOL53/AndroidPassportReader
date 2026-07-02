@@ -18,7 +18,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property biometricInformation The decoded biometric information contained in the DG3 file or null if
  * it could not be decoded
  */
-class DG3() : ElementaryFileTemplate() {
+class DG3 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG3_SHORT_EF_ID
     override val efTag = DG3_FILE_TAG

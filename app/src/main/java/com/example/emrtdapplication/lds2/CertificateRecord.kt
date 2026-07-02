@@ -19,7 +19,7 @@ import org.spongycastle.asn1.x509.Certificate
  * @property recordNumber The record number of the certificate stored in the application.
  * @property countryCode Two-letter country code
  * @property serialNumber The serial number of the [certificate]
- * @property certificate A X.509 certificate
+ * @property certificate An X.509 certificate
  * @throws IllegalArgumentException If the certificate could not be decoded or [record] contains an invalid format
  */
 class CertificateRecord(record: TLVSequence, val recordNumber: Byte) {

@@ -34,7 +34,7 @@ object TravelRecordApplicationDisplay : CreateView() {
     /**
      * Creates views for every Entry Record read from the application
      *
-     * @param view The parent for which views for a Entry Record are generated
+     * @param view The parent for which views for an Entry Record are generated
      */
     private fun createEntryRecordsView(context : Context, view: View) {
         val entryRecordLayout = view.findViewById<LinearLayout>(R.id.entry_records)
@@ -56,7 +56,7 @@ object TravelRecordApplicationDisplay : CreateView() {
     /**
      * Creates views for every Exit Record read from the application
      *
-     * @param view The parent for which views for a Exit Record are generated
+     * @param view The parent for which views for an Exit Record are generated
      */
     private fun createExitRecordsView(context: Context, view: View) {
         val exitRecordLayout = view.findViewById<LinearLayout>(R.id.exit_records)

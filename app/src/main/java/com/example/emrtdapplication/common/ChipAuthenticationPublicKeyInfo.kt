@@ -2,8 +2,8 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import java.math.BigInteger
 
@@ -18,7 +18,7 @@ import java.math.BigInteger
  *
  * @param tlv TLV structure containing an encoded instance of ChipAuthenticationPublicKeyInfo
  * @property publicKeyInfo The public key encoded as [SubjectPublicKeyInfo]
- * @property keyId Id of the public key if multiple public keys are present
+ * @property keyId ID of the public key if multiple public keys are present
  * @throws IllegalArgumentException If [tlv] does not contain an instance of ChipAuthenticationPublicKeyInfo
  */
 class ChipAuthenticationPublicKeyInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE) {

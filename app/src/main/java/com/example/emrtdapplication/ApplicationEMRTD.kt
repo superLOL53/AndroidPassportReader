@@ -18,7 +18,6 @@ class ApplicationEMRTD : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         thread {
             if (!MasterList.isDecoded) {
-                val startTime = System.nanoTime()
                 val directory = resources.assets.list("MasterList")
                 if (directory != null) {
                     val filename = directory[0]
@@ -30,8 +29,6 @@ class ApplicationEMRTD : AppCompatActivity() {
                     }
                     readFile.close()
                 }
-                val endTime = System.nanoTime()
-                Log.i("eMRTDTime", "Execution time for reading CSCAs: ${endTime - startTime}")
             }
         }
         setContentView(R.layout.entry_view)

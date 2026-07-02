@@ -20,7 +20,7 @@ object CryptoConstants {
     const val PAD_START_BYTE : Byte = 0x80.toByte()
 
     /**
-     * Mask for counting 1 bits in a DES key
+     * Mask for counting 1-bits in a DES key
      */
     const val KEY_3DES_COUNT_ONES : Byte = 0xFE.toByte()
 

@@ -335,10 +335,7 @@ object Crypto {
      * @return The generated symmetric key or null if no key could be generated
      */
     fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray? {
-        val key = hash(hashName, seed + byteArrayOf(0, 0, 0, c))
-        if (key == null) {
-            return null
-        }
+        val key = hash(hashName, seed + byteArrayOf(0, 0, 0, c)) ?: return null
         if (is3DES) {
             for (i in key.indices) {
                 if ((key[i] and KEY_3DES_COUNT_ONES).countOneBits() % 2 == 0) {
@@ -363,8 +360,7 @@ object Crypto {
     fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray? {
         return when (cipherId) {
             DES_CBC_CBC -> {
-                val encKey = computeKey("SHA-1", seed, cValue, true)
-                if (encKey == null) return null
+                val encKey = computeKey("SHA-1", seed, cValue, true) ?: return null
                 encKey.slice(0..15).toByteArray()
                 encKey + encKey.slice(0..7).toByteArray()
             }
@@ -408,13 +404,14 @@ object Crypto {
      * @return The padded byte array
      */
     fun addPadding(paddingBytes : ByteArray, paddingSize : Int) : ByteArray {
-        val pad = paddingSize - paddingBytes.size % paddingSize
+        var pad = paddingSize - paddingBytes.size % paddingSize
         if (pad == paddingSize) {
             return paddingBytes + byteArrayOf(PAD_START_BYTE, 0,0,0,0,0,0,0)
         }
         var padArray = paddingBytes + PAD_START_BYTE
-        for (i in 1..<pad) {
+        while (pad > 0) {
             padArray += 0
+            pad--
         }
         return padArray
     }

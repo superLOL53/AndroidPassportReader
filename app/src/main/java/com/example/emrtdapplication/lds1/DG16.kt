@@ -2,7 +2,6 @@ package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.utils.Person
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG16_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG16_SHORT_EF_ID
@@ -13,6 +12,7 @@ import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_MASK
 import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_NAME
 import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TELEPHONE_NUMBER
 import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TEMPLATE
+import com.example.emrtdapplication.utils.Person
 import com.example.emrtdapplication.utils.TLV
 import kotlin.experimental.and
 
@@ -25,7 +25,7 @@ import kotlin.experimental.and
  * @property efTag The tag of the DG16 file
  * @property persons A list of [Person] for emergency contacts
  */
-class DG16() : ElementaryFileTemplate() {
+class DG16 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG16_SHORT_EF_ID
     override val efTag = DG16_FILE_TAG

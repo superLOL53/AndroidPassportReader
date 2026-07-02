@@ -84,5 +84,8 @@
     <string name="lost_comm">Lost communication with the passport.\nTry again?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="public_key_information">Public Key Information</string>
+    <string name="algorithm_identifier">Algorithm identifier:</string>
+    <string name="public_key_column">Public Key:</string>
 
 </resources>

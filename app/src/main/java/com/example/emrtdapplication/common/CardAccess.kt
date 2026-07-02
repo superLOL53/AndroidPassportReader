@@ -25,7 +25,7 @@ import org.spongycastle.asn1.ASN1ObjectIdentifier
  * @property paceDomainParams Array list of [PACEDomainParameterInfo] contained in the file
  * @throws IllegalArgumentException If the file does not contain [PACEInfo] or [PACEDomainParameterInfo]
  */
-class CardAccess() {
+class CardAccess {
     private val caID1: Byte = 0x01
     private val caID2: Byte = 0x1C
     val paceInfos = ArrayList<PACEInfo>()

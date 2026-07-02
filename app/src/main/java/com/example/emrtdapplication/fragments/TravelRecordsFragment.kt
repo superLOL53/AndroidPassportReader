@@ -14,7 +14,7 @@ import com.example.emrtdapplication.display.lds2.TravelRecordApplicationDisplay
  *
  * @property view View for displaying Travel Record application content in the fragment
  */
-class TravelRecordsFragment() : Fragment(R.layout.travel_records) {
+class TravelRecordsFragment : Fragment(R.layout.travel_records) {
     private var view : ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

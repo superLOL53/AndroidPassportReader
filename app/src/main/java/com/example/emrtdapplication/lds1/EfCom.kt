@@ -25,7 +25,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property shortEFIdentifier The short EF identifier of the file
  * @property rawFileContent The contents of the file as a byte array
  */
-class EfCom(): ElementaryFileTemplate() {
+class EfCom: ElementaryFileTemplate() {
     private var ldsVersion = 0
     private var ldsUpdateLevel = 0
     private var unicodeMajorVersion = 0

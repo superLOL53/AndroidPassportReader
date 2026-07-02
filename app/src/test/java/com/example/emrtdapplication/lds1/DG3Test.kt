@@ -42,11 +42,11 @@ class DG3Test {
         APDUControl.maxResponseLength = Integer.MAX_VALUE
         every { APDUControl.sendAPDU(any()) } returnsMany responseAPDUs
 
-        val owndg3 = DG3()
-        owndg3.read()
-        owndg3.parse()
-        assertEquals(true, owndg3.isPresent)
-        assertEquals(true, owndg3.isRead)
-        assertEquals(true, owndg3.isParsed)
+        val ownDG3 = DG3()
+        ownDG3.read()
+        ownDG3.parse()
+        assertEquals(true, ownDG3.isPresent)
+        assertEquals(true, ownDG3.isRead)
+        assertEquals(true, ownDG3.isParsed)
     }
 }

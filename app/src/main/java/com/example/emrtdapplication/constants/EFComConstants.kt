@@ -1,7 +1,7 @@
 package com.example.emrtdapplication.constants
 
 /**
- * Constants for EfCom
+ * Constants for EF.COM
  */
 object EFComConstants {
     /**
@@ -10,7 +10,7 @@ object EFComConstants {
     const val LDS_VERSION_LENGTH = 0x04
 
     /**
-     * Byte length for value in a TLV holding unicode version information
+     * Byte length for value in a TLV holding Unicode version information
      */
     const val UNICODE_VERSION_LENGTH = 0x06
 

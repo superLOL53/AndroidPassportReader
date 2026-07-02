@@ -21,7 +21,7 @@ import com.google.android.material.navigation.NavigationView
  * @property actionBarDrawerToggle Listener for [drawerLayout]
  * @property drawerLayout Layout for navigating between different LDS application
  */
-class EMRTDView() : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var actionBarDrawerToggle : ActionBarDrawerToggle? = null
     private var drawerLayout : DrawerLayout? = null
     private var currentFragment : Int = 0

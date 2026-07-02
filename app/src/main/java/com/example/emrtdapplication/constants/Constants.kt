@@ -40,4 +40,12 @@ const val INVALID_ARGUMENT = -4
  */
 const val ADDITIONAL_ENCRYPTION_LENGTH = 30
 
+/**
+ * The OID for the CRL Distribution Points
+ */
 const val CRL_DISTRIBUTION_POINT_OID = "2.5.29.31"
+
+/**
+ * The OID for the Authority Key Identifier
+ */
+const val AUTHORITY_KEY_IDENTIFIER_OID = "2.5.29.35"

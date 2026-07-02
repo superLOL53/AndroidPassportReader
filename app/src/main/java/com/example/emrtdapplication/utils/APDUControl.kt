@@ -3,8 +3,6 @@ package com.example.emrtdapplication.utils
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.util.Log
-import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
-import com.example.emrtdapplication.constants.APDUControlConstants
 import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
@@ -76,11 +74,7 @@ object APDUControl {
         this.isoDep = isoDep
         if (nfcTechUse == NfcUse.UNDEFINED) {
             nfcTechUse = NfcUse.ISO_DEP
-            maxTransceiveLength = if (APDUControlConstants.USE_EXTENDED_LENGTH_APDUS) {
-                this.isoDep!!.maxTransceiveLength
-            } else {
-                UByte.MAX_VALUE.toInt() - ADDITIONAL_ENCRYPTION_LENGTH
-            }
+            maxTransceiveLength = this.isoDep!!.maxTransceiveLength
         }
         this.isoDep!!.timeout = TIME_OUT
         return INIT_SUCCESS

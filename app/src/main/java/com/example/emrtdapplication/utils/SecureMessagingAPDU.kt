@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.utils
 
+import android.annotation.SuppressLint
 import com.example.emrtdapplication.constants.APDUControlConstants.APDU_NO_DATA_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.MIN_APDU_SIZE_FOR_MAC_VERIFICATION
 import com.example.emrtdapplication.constants.APDUControlConstants.PADDING_SIZE
@@ -28,7 +29,7 @@ import kotlin.experimental.or
  * @property sequenceCounter The sequence counter for the APDU en-/decryption
  * @property encryptionKey The encryption key for the cipher
  * @property encryptionKeyMAC The key for the MAC calculation
- * @property isAES Whether or not to use AES cipher
+ * @property isAES Whether to use AES cipher
  * @property apduArray The decrypted APDU as byte array
  * @property encryptedAPDUArray The encrypted APDU as byte array
  */
@@ -122,7 +123,7 @@ class SecureMessagingAPDU {
 
     /**
      * Constructs the header for secure messaging
-     * @param apdu: The apdu for which the header is formatted
+     * @param apdu: The APDU for which the header is formatted
      * @return The header for secure messaging without padding
      */
     private fun headerSM(apdu: APDU) : ByteArray {
@@ -147,14 +148,13 @@ class SecureMessagingAPDU {
 
     /**
      * Builds the formatted encrypted data for the BAC encrypted APDU
-     * @param apdu: The apdu for which the data is encrypted
+     * @param apdu: The APDU for which the data is encrypted
      * @return The byte array containing the formatted encrypted data or null if there is no data
      */
     private fun dataSM(apdu: APDU) : ByteArray? {
         if (apdu.data.isEmpty()) return null
         val paddedData = addPadding(apdu.data)
-        val encryptedData = encrypt(paddedData)
-        if (encryptedData == null) return null
+        val encryptedData = encrypt(paddedData) ?: return null
         var do8785 : ByteArray? = null
         if (apdu.useLc) {
             do8785 = if (apdu.getHeader()[1] % 2 == 0) {
@@ -294,6 +294,7 @@ class SecureMessagingAPDU {
      * Computes the IV parameter for the AES de-/encryption for secure messaging APDUs
      * @return IV parameter for de-/encrypting the APDUs
      */
+    @SuppressLint("GetInstance")
     private fun computeAESIV() : ByteArray {
         val k = SecretKeySpec(encryptionKey, AES)
         val c = Cipher.getInstance(AES_ECB_NO_PADDING)

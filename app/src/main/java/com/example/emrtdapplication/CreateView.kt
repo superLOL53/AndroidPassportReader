@@ -14,6 +14,9 @@ import com.example.emrtdapplication.constants.CertificationRevocationStatus
 abstract class CreateView {
     protected var alternate = false
 
+    /**
+     * Sets the background color for the [parent] depending on the validity of the read eMRTD
+     */
     fun setBackgroundColor(context: Context, parent: LinearLayout, hashMatch : Boolean) {
         if (EMRTD.ldS1Application.efSod.isValid && hashMatch && EMRTD.ldS1Application.efSod.certificationRevocationStatus == CertificationRevocationStatus.UNREVOKED) {
             parent.setBackgroundColor(context.resources.getColor(R.color.green, null))
@@ -94,7 +97,6 @@ abstract class CreateView {
         parent.addView(text)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     protected fun <T : LinearLayout> createSignatureView(context: Context, parent: T, signature: ByteArray) {
         var text = TextView(context)
         text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -122,7 +124,6 @@ abstract class CreateView {
         parent.addView(text)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     protected fun <T : LinearLayout> createPublicKeyView(context: Context, parent: T, publicKey: ByteArray) {
         var text = TextView(context)
         text.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)

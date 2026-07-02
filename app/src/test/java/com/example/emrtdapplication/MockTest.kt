@@ -24,8 +24,8 @@ class MockTest {
     fun test() {
         val seq = DLSequence.getInstance(test)
         for (i in 0..<seq.size()) {
-            val dpseq = seq.getObjectAt(i) as DLSequence
-            val dp = DistributionPoint.getInstance(dpseq)
+            val dpSeq = seq.getObjectAt(i) as DLSequence
+            val dp = DistributionPoint.getInstance(dpSeq)
             dp.distributionPoint
         }
     }

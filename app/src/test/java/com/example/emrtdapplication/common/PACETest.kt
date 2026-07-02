@@ -726,7 +726,7 @@ class PACETest {
         //val c = EllipticCurve(ECFieldFp(params.curve.field.characteristic), params.curve.a.toBigInteger(), params.curve.b.toBigInteger())
         //val point = ECPoint(params.g.xCoord.toBigInteger(), params.g.yCoord.toBigInteger())
         //val spec = ECParameterSpec(c, point, params.n, params.h.toInt())
-        val mappingkeys = AsymmetricCipherKeyPair(
+        val mappingKeys = AsymmetricCipherKeyPair(
             ECPublicKeyParameters(
                 params.curve.createPoint(
                     BigInteger("45645876b0061b22d8833741615eb3501186b558aa21aa5e58b8054c8a783e13", 16),
@@ -739,7 +739,7 @@ class PACETest {
                 domainParameters
             )
         )
-        val mappublic = ECPublicKeyParameters(
+        val mapPublic = ECPublicKeyParameters(
             params.curve.createPoint(
                 BigInteger("1017d3ae8f39cf8f8f77c850e30b54729892ba7ae1a5ae76ba15a200218c15bc", 16),
                 BigInteger("76a4f8fc0e2063a5f0c2c2692aa294944dd72703edd2d17741c8cb79596ba717", 16)
@@ -748,7 +748,7 @@ class PACETest {
         )
         //var h = Crypto.getECPointFromBigInteger(BigInteger("00800c65e003459964b3cacf826ba01a03d228a8095dfdc2de3efcde19c742c9ed", 16), domainParameters)
 
-        val sa = Crypto.calculateECDHAgreement(mappingkeys.private as ECPrivateKeyParameters, mappublic)
+        val sa = Crypto.calculateECDHAgreement(mappingKeys.private as ECPrivateKeyParameters, mapPublic)
         val h = Crypto.getECPointFromBigInteger(sa, domainParameters)
         val g = Crypto.genericMappingEC(domainParameters.g, nonce, h)
         domainParameters = ECDomainParameters(domainParameters.curve, g, domainParameters.n, domainParameters.h)
@@ -773,9 +773,9 @@ class PACETest {
             domainParameters
         )
         //val pub = ECPublicKeySpec(ECPoint(publicKey.q.xCoord.toBigInteger(), publicKey.q.yCoord.toBigInteger()), spec)
-        //val priv = ECPrivateKeySpec(BigInteger("25265002054187850548232770889216667472137824806778068397813021092250274421503"), spec)
+        //val privateSpec = ECPrivateKeySpec(BigInteger("25265002054187850548232770889216667472137824806778068397813021092250274421503"), spec)
         //val public = KeyFactory.getInstance("EC").generatePublic(pub)
-        //val private = KeyFactory.getInstance("EC").generatePrivate(priv)
+        //val private = KeyFactory.getInstance("EC").generatePrivate(privateSpec)
         //val pub = KeyFactory.getInstance("EC").generatePublic(X509EncodedKeySpec(SubjectPublicKeyInfo.getInstance(publicKey).encoded))
         //keys = Crypto.generateECKeyPair(domainParameters)
         //val ka = KeyAgreement.getInstance("ECDH", "BC")

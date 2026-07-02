@@ -73,9 +73,4 @@ object APDUControlConstants {
      * Response APDU data offset counting from the end
      */
     const val APDU_NO_DATA_SIZE = 17
-
-    /**
-     * Whether or not to use extended length APDUs
-     */
-    const val USE_EXTENDED_LENGTH_APDUS = true
 }

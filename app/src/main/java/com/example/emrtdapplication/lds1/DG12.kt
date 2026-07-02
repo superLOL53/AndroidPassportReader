@@ -35,7 +35,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property documentPersonalizationTime Date and time of personalization
  * @property personalizationSystemSerialNumber The serial number of the personalization system
  */
-class DG12() : ElementaryFileTemplate() {
+class DG12 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG12_SHORT_EF_ID
     override val efTag = DG12_FILE_TAG

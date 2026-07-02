@@ -36,9 +36,9 @@ class DG4Test {
         val i = IrisInfo(header,0,0,0,0,0,
             0,0,0,0,0,0,0,
             0,byteArrayOf(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16),list)
-        val ilist = ArrayList<IrisInfo>()
-        ilist.add(i)
-        val dg4 = DG4File.createISO19794DG4File(ilist)
+        val irisList = ArrayList<IrisInfo>()
+        irisList.add(i)
+        val dg4 = DG4File.createISO19794DG4File(irisList)
         val ba = dg4.encoded
         responseAPDUs.add(ba.slice(0..5).toByteArray() + byteArrayOf(0x90.toByte(), 0x00))
         responseAPDUs.add(ba + byteArrayOf(0x90.toByte(), 0x00))

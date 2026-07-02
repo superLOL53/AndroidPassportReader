@@ -34,7 +34,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property compositeCheckDigit Check digit in the MRZ
  * @property holderName The name of the eMRTD holder
  */
-class DG1(): ElementaryFileTemplate() {
+class DG1: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG1_SHORT_EF_ID
     override val efTag = DG1_FILE_TAG
@@ -91,7 +91,7 @@ class DG1(): ElementaryFileTemplate() {
             return FAILURE
         }
         val mrz = tlv.value!!
-        val parsed = try {
+        try {
             when(mrz.size) {
                 TD1_SIZE -> decodeTD1MRZ(mrz)
                 TD2_SIZE -> decodeTD2MRZ(mrz)
@@ -102,8 +102,8 @@ class DG1(): ElementaryFileTemplate() {
             Log.d("Failure", "Message: " + e.message)
             return FAILURE
         }
-        isParsed = parsed == SUCCESS
-        return parsed
+        isParsed = true
+        return SUCCESS
     }
 
     /**
@@ -112,7 +112,7 @@ class DG1(): ElementaryFileTemplate() {
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
-    private fun decodeTD1MRZ(mrz : ByteArray) : Int {
+    private fun decodeTD1MRZ(mrz : ByteArray) {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
         documentNumber = mrz.slice(5..13).toByteArray().decodeToString().replace("<", "")
@@ -127,7 +127,6 @@ class DG1(): ElementaryFileTemplate() {
         optionalData = mrz.slice(48..58).toByteArray().decodeToString().replace("<", "")
         compositeCheckDigit = mrz[59].toInt().toChar()
         holderName = mrz.slice(60..89).toByteArray().decodeToString().replace("<", " ").trim()
-        return SUCCESS
     }
 
     /**
@@ -136,7 +135,7 @@ class DG1(): ElementaryFileTemplate() {
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
-    private fun decodeTD2MRZ(mrz : ByteArray) : Int {
+    private fun decodeTD2MRZ(mrz : ByteArray) {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
         holderName = mrz.slice(5..35).toByteArray().decodeToString().replace("<", " ").trim()
@@ -150,7 +149,6 @@ class DG1(): ElementaryFileTemplate() {
         checkDigitDateOfExpiry = mrz[63].toInt().toChar()
         optionalData = mrz.slice(64..70).toByteArray().decodeToString().replace("<", "")
         compositeCheckDigit = mrz[71].toInt().toChar()
-        return SUCCESS
     }
 
     /**
@@ -159,7 +157,7 @@ class DG1(): ElementaryFileTemplate() {
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
-    private fun decodeTD3MRZ(mrz : ByteArray) : Int {
+    private fun decodeTD3MRZ(mrz : ByteArray) {
         documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
         issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
         holderName = mrz.slice(5..43).toByteArray().decodeToString().replace("<", " ").trim()
@@ -174,6 +172,5 @@ class DG1(): ElementaryFileTemplate() {
         optionalData = mrz.slice(72..85).toByteArray().decodeToString().replace("<", "")
         checkDigit = mrz[86].toInt().toChar()
         compositeCheckDigit = mrz[87].toInt().toChar()
-        return SUCCESS
     }
 }

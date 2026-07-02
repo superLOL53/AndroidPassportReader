@@ -11,7 +11,6 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 
 object DG13Display : CreateView() {
-    @OptIn(ExperimentalStdlibApi::class)
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.ldS1Application.dg13.rawFileContent == null) return
         if (EMRTD.showDetails) {

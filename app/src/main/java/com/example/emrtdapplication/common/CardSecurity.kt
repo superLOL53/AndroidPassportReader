@@ -31,7 +31,7 @@ import org.spongycastle.asn1.cms.SignedData
  * @property securityInfos Array list of [SecurityInfo] contained in the file
  * @property signedData
  */
-class CardSecurity() {
+class CardSecurity {
     private val csID1: Byte = 0x01
     private val csID2: Byte = 0x1D
     val securityInfos = ArrayList<SecurityInfo>()

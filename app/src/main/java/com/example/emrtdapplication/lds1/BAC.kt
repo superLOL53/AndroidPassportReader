@@ -9,14 +9,14 @@ import com.example.emrtdapplication.constants.BACConstants.ERROR_NONCE_REQUEST_F
 import com.example.emrtdapplication.constants.BACConstants.ERROR_NO_MRZ
 import com.example.emrtdapplication.constants.BACConstants.ERROR_UNINITIALIZED_MRZ_INFORMATION
 import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
-import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.utils.Crypto
 import java.security.SecureRandom
 import javax.crypto.Cipher
 import kotlin.experimental.xor
@@ -91,16 +91,15 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
             s[i+16] = kIfd[i]
         }
         val hash = Crypto.hash("SHA-1", mrzInformation!!.toByteArray())
-        val kSeed = hash?.slice(0..15)?.toByteArray()
-        if (kSeed == null) return ERROR_BAC_PROTOCOL_FAILED
-        var kEnc = Crypto.computeKey("SHA-1", kSeed, ENCRYPTION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
-        if (kEnc == null) return ERROR_BAC_PROTOCOL_FAILED
+        val kSeed = hash?.slice(0..15)?.toByteArray() ?: return ERROR_BAC_PROTOCOL_FAILED
+        var kEnc = Crypto.computeKey("SHA-1", kSeed, ENCRYPTION_KEY_VALUE_C, true)?.slice(0..15)
+            ?.toByteArray() ?: return ERROR_BAC_PROTOCOL_FAILED
         kEnc += kEnc.slice(0..7).toByteArray()
-        var kMAC = Crypto.computeKey("SHA-1", kSeed, MAC_COMPUTATION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
-        if (kMAC == null) return ERROR_BAC_PROTOCOL_FAILED
+        var kMAC =
+            Crypto.computeKey("SHA-1", kSeed, MAC_COMPUTATION_KEY_VALUE_C, true)?.slice(0..15)
+                ?.toByteArray() ?: return ERROR_BAC_PROTOCOL_FAILED
         kMAC += kMAC.slice(0..7).toByteArray()
-        val eIfd = Crypto.cipher3DES(s, kEnc)
-        if (eIfd == null) return ERROR_BAC_PROTOCOL_FAILED
+        val eIfd = Crypto.cipher3DES(s, kEnc) ?: return ERROR_BAC_PROTOCOL_FAILED
         val mIfd = Crypto.computeMAC(eIfd, kMAC)
         info = APDUControl.sendAPDU(
             APDU(
@@ -125,7 +124,7 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
             return ERROR_INVALID_MAC
         }
         val con = Crypto.cipher3DES(encData, kEnc, Cipher.DECRYPT_MODE)
-        if (con == null) return ERROR_BAC_PROTOCOL_FAILED
+            ?: return ERROR_BAC_PROTOCOL_FAILED
         if (!con.slice(8..15).toByteArray().contentEquals(rndIfd)) {
             return ERROR_INVALID_NONCE
         }
@@ -135,11 +134,13 @@ class BAC(private var random: SecureRandom? = SecureRandom()) {
         for (i in 0..15) {
             kSessionSeed[i] = kIC[i] xor kIfd[i]
         }
-        val encryptionKeyBAC = Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
-        if (encryptionKeyBAC == null) return ERROR_BAC_PROTOCOL_FAILED
+        val encryptionKeyBAC =
+            Crypto.computeKey("SHA-1", kSessionSeed, ENCRYPTION_KEY_VALUE_C, true)?.slice(0..15)
+                ?.toByteArray() ?: return ERROR_BAC_PROTOCOL_FAILED
         APDUControl.setEncryptionKeyBAC(encryptionKeyBAC)
-        val encryptionKeyMAC = Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true)?.slice(0..15)?.toByteArray()
-        if (encryptionKeyMAC == null) return ERROR_BAC_PROTOCOL_FAILED
+        val encryptionKeyMAC =
+            Crypto.computeKey("SHA-1", kSessionSeed, MAC_COMPUTATION_KEY_VALUE_C, true)
+                ?.slice(0..15)?.toByteArray() ?: return ERROR_BAC_PROTOCOL_FAILED
         APDUControl.setEncryptionKeyMAC(encryptionKeyMAC)
         APDUControl.setSequenceCounter(
             (rndIC.slice(4..7).toByteArray() + rndIfd.slice(4..7).toByteArray())

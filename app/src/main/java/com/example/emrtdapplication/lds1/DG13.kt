@@ -15,7 +15,7 @@ import com.example.emrtdapplication.constants.TlvTags.DG13_SHORT_EF_ID
  * @property efTag The tag of the DG13 file
  *
  */
-class DG13() : ElementaryFileTemplate() {
+class DG13 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG13_SHORT_EF_ID
     override val efTag = DG13_FILE_TAG

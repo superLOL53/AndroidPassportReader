@@ -79,53 +79,53 @@ class EntryExitRecordTest {
                 ri.toByteArray() + tm.toByteArray() + ds.toByteArray() + cond.toByteArray())
         var eer = TLVSequence(tr.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         eer = TLVSequence(state.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         eer = TLVSequence(state.toByteArray() +
                 tr.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         eer = TLVSequence(state.toByteArray() +
                 tr.toByteArray() + signature.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         tr = TLV(0x73, visa.toByteArray() +
                 travelDate.toByteArray() + ia.toByteArray() + il.toByteArray() + ir.toByteArray() +
                 ri.toByteArray() + tm.toByteArray() + ds.toByteArray() + cond.toByteArray())
         eer = TLVSequence(state.toByteArray() + tr.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         tr = TLV(0x73, state.toByteArray() + visa.toByteArray() +
                 ia.toByteArray() + il.toByteArray() + ir.toByteArray() +
                 ri.toByteArray() + tm.toByteArray() + ds.toByteArray() + cond.toByteArray())
         eer = TLVSequence(state.toByteArray() + tr.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         tr = TLV(0x73, state.toByteArray() + visa.toByteArray() +
                 travelDate.toByteArray() + il.toByteArray() + ir.toByteArray() +
                 ri.toByteArray() + tm.toByteArray() + ds.toByteArray() + cond.toByteArray())
         eer = TLVSequence(state.toByteArray() + tr.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         tr = TLV(0x73, state.toByteArray() + visa.toByteArray() +
                 travelDate.toByteArray() + ia.toByteArray() + ir.toByteArray() +
                 ri.toByteArray() + tm.toByteArray() + ds.toByteArray() + cond.toByteArray())
         eer = TLVSequence(state.toByteArray() + tr.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
 
         tr = TLV(0x73, state.toByteArray() + visa.toByteArray() +
                 travelDate.toByteArray() + ia.toByteArray() + il.toByteArray() +
                 ri.toByteArray() + tm.toByteArray() + ds.toByteArray() + cond.toByteArray())
         eer = TLVSequence(state.toByteArray() + tr.toByteArray() +
                 signature.toByteArray() + certRef.toByteArray())
-        assertFailsWith(IllegalArgumentException().javaClass.kotlin, {EntryExitRecord(eer, 0x2)})
+        assertFailsWith(IllegalArgumentException().javaClass.kotlin) { EntryExitRecord(eer, 0x2) }
     }
 }

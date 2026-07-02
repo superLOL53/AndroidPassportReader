@@ -1,13 +1,7 @@
 package com.example.emrtdapplication.lds1
 
-import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
-import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_OID
-import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
-import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_OID
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_OID
 import com.example.emrtdapplication.common.ActiveAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
@@ -16,6 +10,12 @@ import com.example.emrtdapplication.common.PACEDomainParameterInfo
 import com.example.emrtdapplication.common.PACEInfo
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.EF_DIR_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_OID
+import com.example.emrtdapplication.constants.SecurityInfoConstants.TERMINAL_AUTHENTICATION_OID
 import com.example.emrtdapplication.constants.TlvTags.DG14_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG14_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
@@ -30,7 +30,7 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier
  * @property efTag The tag of the DG14 file
  * @property securityInfos A list of [SecurityInfo] contained in DG14
  */
-class DG14() : ElementaryFileTemplate() {
+class DG14 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG14_SHORT_EF_ID
     override val efTag = DG14_FILE_TAG

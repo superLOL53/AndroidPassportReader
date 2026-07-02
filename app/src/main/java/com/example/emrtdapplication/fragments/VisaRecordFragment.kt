@@ -14,7 +14,7 @@ import com.example.emrtdapplication.display.lds2.VisaRecordApplicationDisplay
  *
  * @property view View for displaying Visa Record application content in the fragment
  */
-class VisaRecordFragment() : Fragment(R.layout.visa_records) {
+class VisaRecordFragment : Fragment(R.layout.visa_records) {
     private var view : ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -9,8 +9,6 @@ import com.example.emrtdapplication.constants.DG15Constants.SHA_224
 import com.example.emrtdapplication.constants.DG15Constants.SHA_256
 import com.example.emrtdapplication.constants.DG15Constants.SHA_384
 import com.example.emrtdapplication.constants.DG15Constants.SHA_512
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
@@ -19,6 +17,8 @@ import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG15_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG15_SHORT_EF_ID
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import org.spongycastle.crypto.digests.SHA1Digest
 import org.spongycastle.crypto.digests.SHA224Digest
@@ -42,7 +42,7 @@ import javax.crypto.Cipher
  * @property publicKeyInfo The public key used for the Active Authentication protocol as a [SubjectPublicKeyInfo] or null
  * @property isAuthenticated Indicates if the Active Authentication protocol was successful
  */
-class DG15() : ElementaryFileTemplate() {
+class DG15 : ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG15_SHORT_EF_ID
     override val efTag = DG15_FILE_TAG

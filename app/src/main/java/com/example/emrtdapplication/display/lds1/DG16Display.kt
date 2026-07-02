@@ -7,6 +7,7 @@ import android.widget.TableRow
 import android.widget.TextView
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.utils.Person
 
 object DG16Display : CreateView() {
 
@@ -18,8 +19,7 @@ object DG16Display : CreateView() {
      */
     override fun <T : LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.ldS1Application.dg16.persons == null) return
-        var i = 0
-        for (p in EMRTD.ldS1Application.dg16.persons) {
+        for ((i, p) in (EMRTD.ldS1Application.dg16.persons as Array<out Person>).withIndex()) {
             val table = TableLayout(context)
             table.layoutParams = TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT,
                 TableLayout.LayoutParams.WRAP_CONTENT)
@@ -32,7 +32,6 @@ object DG16Display : CreateView() {
             val s = "Emergency Contact $i"
             text.text = s
             row.addView(text)
-            i++
             row = createRow(context, table)
             provideTextForRow(row, "Name:", p.name)
             row = createRow(context, table)

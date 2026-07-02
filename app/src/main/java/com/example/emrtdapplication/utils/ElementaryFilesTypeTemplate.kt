@@ -4,7 +4,7 @@ import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
 
-abstract class ElementaryFilesTypeTemplate<T>() : ElementaryFileTemplate() {
+abstract class ElementaryFilesTypeTemplate<T> : ElementaryFileTemplate() {
     var tlvS : Array<T>? = null
         protected set
 

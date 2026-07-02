@@ -31,9 +31,9 @@ class SettingsFragment : Fragment(R.layout.settings) {
         this.view = view.findViewById(R.id.settingsScroll)
         val details = view.findViewById<SwitchMaterial>(R.id.detail_button)
         details.isChecked = EMRTD.showDetails
-        details.setOnCheckedChangeListener { buttonView, isChecked -> EMRTD.showDetails = isChecked }
+        details.setOnCheckedChangeListener { _, isChecked -> EMRTD.showDetails = isChecked }
         val showContents = view.findViewById<SwitchMaterial>(R.id.unparsed_button)
         showContents.isChecked = EMRTD.showUnparsedContent
-        showContents.setOnCheckedChangeListener { buttonView, isChecked ->  EMRTD.showUnparsedContent = isChecked}
+        showContents.setOnCheckedChangeListener { _, isChecked ->  EMRTD.showUnparsedContent = isChecked}
     }
 }

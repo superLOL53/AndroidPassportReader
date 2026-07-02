@@ -102,8 +102,16 @@ object DG14Display : CreateView() {
     }
 
     private fun <T : LinearLayout> displayPDType(context: Context, parent: T, paceDomainParameterInfo: PACEDomainParameterInfo) {
-        //TODO: Display information
         createHeader(context, parent, "Domain Parameters")
+        val table = createTable(context, parent)
+        var row = createRow(context, table)
+        provideTextForRow(row, "Protocol OID:", paceDomainParameterInfo.objectIdentifier)
+        row = createRow(context, parent)
+        provideTextForRow(row, "Algorithm Parameter OID:", paceDomainParameterInfo.algorithmIdentifier.algorithm.id)
+        if (paceDomainParameterInfo.parameterId != null) {
+            row = createRow(context, parent)
+            provideTextForRow(row, "Parameter ID:", paceDomainParameterInfo.parameterId.toString(10))
+        }
     }
 
     private fun <T : LinearLayout> displayAAType(context: Context, parent: T,activeAuthenticationInfo: ActiveAuthenticationInfo) {

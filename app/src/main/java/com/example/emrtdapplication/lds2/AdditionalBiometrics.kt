@@ -7,14 +7,14 @@ import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.MAX_
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.READ_LENGTH
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
@@ -24,7 +24,7 @@ import java.math.BigInteger
  * @property applicationIdentifier The identifier of the application
  * @property biometricFiles A list containing [Biometric] files read from the eMRTD
  */
-class AdditionalBiometrics() : LDS2Application() {
+class AdditionalBiometrics : LDS2Application() {
     override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
     var biometricFiles : Array<Biometric>? = null
         private set

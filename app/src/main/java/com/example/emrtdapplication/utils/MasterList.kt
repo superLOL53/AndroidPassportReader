@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.AUTHORITY_KEY_IDENTIFIER_OID
 import com.example.emrtdapplication.utils.MasterList.signedData
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1ObjectIdentifier
@@ -69,14 +70,14 @@ object MasterList {
 
     fun getCSCA(certificate: Certificate) : Array<Certificate> {
         val certs = ArrayList<Certificate>()
-        val keyIDOID = ASN1ObjectIdentifier("2.5.29.35")
-        val certificateKeyID = certificate.tbsCertificate.extensions.getExtension(keyIDOID)
+        val keyIdOid = ASN1ObjectIdentifier(AUTHORITY_KEY_IDENTIFIER_OID)
+        val certificateKeyID = certificate.tbsCertificate.extensions.getExtension(keyIdOid)
         if (certificateMap != null) {
             for (c in certificateMap) {
                 if (c.subject.equals(certificate.issuer) && certificate.startDate.date.time >= c.startDate.date.time &&
                     c.endDate.date.time >= certificate.endDate.date.time &&
                     c.signatureAlgorithm.algorithm.id == certificate.signatureAlgorithm.algorithm.id) {
-                    val keyID = c.tbsCertificate.extensions.getExtension(keyIDOID)
+                    val keyID = c.tbsCertificate.extensions.getExtension(keyIdOid)
                     if (keyID != null) {
                         if (certificateKeyID != null && keyID.extnValue.octets.contentEquals(
                                 certificateKeyID.extnValue.octets
@@ -95,11 +96,11 @@ object MasterList {
     }
 
     fun getCSCA(crl: X509CRL) : Certificate? {
-        val keyIDOID = ASN1ObjectIdentifier("2.5.29.35")
-        val crlkeyIDExtension = crl.getExtensionValue("2.5.29.35")
-        val crlKeyID = if (crlkeyIDExtension != null) {
+        val keyIdOid = ASN1ObjectIdentifier(AUTHORITY_KEY_IDENTIFIER_OID)
+        val crlKeyIDExtension = crl.getExtensionValue(AUTHORITY_KEY_IDENTIFIER_OID)
+        val crlKeyID = if (crlKeyIDExtension != null) {
             try {
-                val authorityKeyIdentifierOctetString = ASN1OctetString.getInstance(crlkeyIDExtension)
+                val authorityKeyIdentifierOctetString = ASN1OctetString.getInstance(crlKeyIDExtension)
                 AuthorityKeyIdentifier.getInstance(authorityKeyIdentifierOctetString.octets)
             } catch (_ : Exception) {
                 null
@@ -114,7 +115,7 @@ object MasterList {
                     crl.thisUpdate.after(certificate.startDate.date) &&
                     crl.nextUpdate.before(certificate.endDate.date) &&
                     certificate.signatureAlgorithm.algorithm.id == crl.sigAlgOID) {
-                    val keyID = certificate.tbsCertificate.extensions.getExtension(keyIDOID)
+                    val keyID = certificate.tbsCertificate.extensions.getExtension(keyIdOid)
                     if (keyID != null) {
                         try {
                             if (crlKeyID != null &&

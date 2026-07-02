@@ -14,7 +14,7 @@ import com.example.emrtdapplication.display.lds1.LDS1Display
  *
  * @property view View for displaying LDS1 application content in the fragment
  */
-class LDS1Fragment() : Fragment(R.layout.lds1) {
+class LDS1Fragment : Fragment(R.layout.lds1) {
     private var view : ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

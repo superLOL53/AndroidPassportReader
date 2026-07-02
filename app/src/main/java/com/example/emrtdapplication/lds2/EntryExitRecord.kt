@@ -22,7 +22,7 @@ import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 
 /**
- * Class representing a Entry or Exit Record. Both have the same format:
+ * Class representing an Entry or Exit Record. Both have the same format:
  *
  *      Tag     Content
  *      '5F44'  Embarkation/Debarkation State

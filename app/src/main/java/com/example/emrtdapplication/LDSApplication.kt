@@ -1,8 +1,6 @@
 package com.example.emrtdapplication
 
 import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
@@ -10,6 +8,8 @@ import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 
 /**
  * Represents a LDS application on an eMRTD
@@ -17,7 +17,7 @@ import com.example.emrtdapplication.constants.SUCCESS
  * @property applicationIdentifier The identifier of the eMRTD application
  * @property isPresent Indicates if the application is on the eMRTD
  */
-abstract class LDSApplication() {
+abstract class LDSApplication {
     abstract val applicationIdentifier : ByteArray
     var isPresent = false
 

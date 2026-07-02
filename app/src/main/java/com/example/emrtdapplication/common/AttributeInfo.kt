@@ -1,7 +1,5 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.utils.APDU
-import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
@@ -9,6 +7,8 @@ import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
+import com.example.emrtdapplication.utils.APDU
+import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.utils.TLVSequence
 import kotlin.experimental.and
@@ -42,7 +42,7 @@ const val AI_MIN_LENGTH = 12
  * @property maxAPDUTransferBytes The maximum bytes that can be sent with a single APDU
  * @property maxAPDUReceiveBytes The maximum bytes that can be received from a single APDU
  */
-class AttributeInfo() {
+class AttributeInfo {
     var supportFullDFNameSelection = false
         private set
     var supportShortEFNameSelection = false
@@ -108,7 +108,7 @@ class AttributeInfo() {
     /**
      * Parsing the contents of the EF.ATR/INFO file. The file is structured as a TLV structure. The information
      * contained in the EF.ATR/INFO file is stored in the variables of this class
-     * @param contents: The contents of the EF.ATR/INFO file without the respond code of the APDU
+     * @param contents: The contents of the EF.ATR/INFO file without the response code of the APDU
      * @return [FILE_UNABLE_TO_READ] or [FILE_SUCCESSFUL_READ] on parsing the data
      */
     private fun parse(contents : ByteArray) : Int {

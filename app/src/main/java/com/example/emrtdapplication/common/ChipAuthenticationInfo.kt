@@ -2,8 +2,8 @@ package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.SecurityInfo
 import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
 /**
@@ -25,7 +25,7 @@ import java.math.BigInteger
  *
  * @param tlv TLV structure containing an encoded instance of ChipAuthenticationInfo
  * @property version Protocol version, must be 1
- * @property keyId Id of the public key if multiple public keys for chip authentication are present
+ * @property keyId ID of the public key if multiple public keys for chip authentication are present
  * @throws IllegalArgumentException If [tlv] does not contain a ChipAuthenticationInfo
  */
 class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_TYPE) {

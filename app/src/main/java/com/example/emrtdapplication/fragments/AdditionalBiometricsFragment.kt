@@ -14,7 +14,7 @@ import com.example.emrtdapplication.display.lds2.AdditionalBiometricApplicationD
  *
  * @property view View for displaying Visa Record application content in the fragment
  */
-class AdditionalBiometricsFragment() : Fragment(R.layout.additional_biometrics) {
+class AdditionalBiometricsFragment : Fragment(R.layout.additional_biometrics) {
     private var view : ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {

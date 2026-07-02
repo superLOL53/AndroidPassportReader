@@ -22,6 +22,7 @@ import org.spongycastle.asn1.x509.Certificate
 import java.security.PrivateKey
 import java.security.Signature
 
+@Suppress("unused")
 class TerminalAuthentication(
     private val terminalAuthenticationInfo: TerminalAuthenticationInfo,
     private val privateKey: PrivateKey) {

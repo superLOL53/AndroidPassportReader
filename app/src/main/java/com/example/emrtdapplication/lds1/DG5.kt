@@ -15,7 +15,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property efTag The tag of the DG2 file
  *
  */
-class DG5() : ElementaryFilesTypeTemplate<DisplayedPortrait>() {
+class DG5 : ElementaryFilesTypeTemplate<DisplayedPortrait>() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG5_SHORT_EF_ID
     override val efTag = DG5_FILE_TAG

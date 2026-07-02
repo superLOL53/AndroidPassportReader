@@ -6,7 +6,7 @@ package com.example.emrtdapplication.constants
 
 object ManualInputConstants {
     /**
-     * Constant for converting a upper case letter to a numerical value according to ICAO Doc9303-3
+     * Constant for converting an upper case letter to a numerical value according to ICAO Doc9303-3
      */
     const val UPPER_CASE_DIGIT = 55
 
