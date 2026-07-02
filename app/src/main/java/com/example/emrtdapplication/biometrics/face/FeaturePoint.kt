@@ -1,8 +1,15 @@
 package com.example.emrtdapplication.biometrics.face
 
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
+import com.example.emrtdapplication.constants.BYTE_BIT_SIZE
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_HORIZONTAL_POSITION_INDEX_1
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_HORIZONTAL_POSITION_INDEX_2
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_POINT_INDEX
 import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_SIZE
 import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_TYPE
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_TYPE_INDEX
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_VERTICAL_POSITION_INDEX_1
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_VERTICAL_POSITION_INDEX_2
+import com.example.emrtdapplication.constants.FeaturePointConstants.INVALID_FEATURE_POINT_SIZE_STRING
 
 /**
  * Class representing a feature point on a facial image according to ISO/IEC 19794-5.
@@ -20,12 +27,12 @@ class FeaturePoint(features: ByteArray) {
     val verticalPosition : Int
 
     init {
-        if (features.size != FEATURE_POINT_SIZE || features[0] != FEATURE_POINT_TYPE) {
-            throw IllegalArgumentException("Feature Point must be of size ${FEATURE_POINT_SIZE}!")
+        if (features.size != FEATURE_POINT_SIZE || features[FEATURE_POINT_TYPE_INDEX] != FEATURE_POINT_TYPE) {
+            throw IllegalArgumentException(INVALID_FEATURE_POINT_SIZE_STRING)
         }
-        type = features[0]
-        point = features[1]
-        horizontalPosition = features[2]*U_BYTE_MODULO + features[3]
-        verticalPosition = features[4]*U_BYTE_MODULO + features[5]
+        type = features[FEATURE_POINT_TYPE_INDEX]
+        point = features[FEATURE_POINT_POINT_INDEX]
+        horizontalPosition = (features[FEATURE_POINT_HORIZONTAL_POSITION_INDEX_1].toInt() shl BYTE_BIT_SIZE) + features[FEATURE_POINT_HORIZONTAL_POSITION_INDEX_2]
+        verticalPosition = (features[FEATURE_POINT_VERTICAL_POSITION_INDEX_1].toInt() shl BYTE_BIT_SIZE) + features[FEATURE_POINT_VERTICAL_POSITION_INDEX_2]
     }
 }

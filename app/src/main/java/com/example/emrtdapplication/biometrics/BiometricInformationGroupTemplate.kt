@@ -1,5 +1,16 @@
 package com.example.emrtdapplication.biometrics
 
+import android.util.Log
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_INVALID_TEMPLATE_STRING
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_NUMBER_OF_INSTANCE_TAG_SIZE
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_NUMBER_OF_INSTANCE_VALUE_SIZE
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_TAG_1
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_TAG_2
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_TAG_SIZE
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_TEMPLATE_NUMBER_DIFFERENCE
+import com.example.emrtdapplication.constants.BiometricInformationGroupTemplateConstants.BIOMETRIC_GROUP_TEMPLATE_UNABLE_TO_DECODE
+import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.constants.ZERO_BYTE
 import com.example.emrtdapplication.utils.TLV
 
@@ -15,27 +26,30 @@ class BiometricInformationGroupTemplate(groupTemplate: TLV, type: BiometricType)
         private set
 
     init {
-        if (groupTemplate.tag.size != 2 || groupTemplate.tag[0] != 0x7F.toByte() || groupTemplate.tag[1] != 0x61.toByte() ||
+        if (groupTemplate.tag.size != BIOMETRIC_GROUP_TEMPLATE_TAG_SIZE ||
+            groupTemplate.tag[0] != BIOMETRIC_GROUP_TEMPLATE_TAG_1 ||
+            groupTemplate.tag[1] != BIOMETRIC_GROUP_TEMPLATE_TAG_2 ||
             groupTemplate.list == null || groupTemplate.list!!.tlvSequence.isEmpty()
         ) {
-            throw IllegalArgumentException("Invalid Biometric Group Template")
+            throw IllegalArgumentException(BIOMETRIC_GROUP_TEMPLATE_INVALID_TEMPLATE_STRING)
         }
         val instances = groupTemplate.list!!.tlvSequence[0]
-        if (instances.tag.size != 1 || instances.tag[0] != 0x02.toByte() ||
-            instances.value == null || instances.value!!.size != 1) {
-            throw IllegalArgumentException("Invalid instance TLV")
+        if (instances.tag.size != BIOMETRIC_GROUP_TEMPLATE_NUMBER_OF_INSTANCE_TAG_SIZE || instances.tag[0] != TlvTags.INTEGER ||
+            instances.value == null || instances.value!!.size != BIOMETRIC_GROUP_TEMPLATE_NUMBER_OF_INSTANCE_VALUE_SIZE) {
+            throw IllegalArgumentException(BIOMETRIC_GROUP_TEMPLATE_INVALID_TEMPLATE_STRING)
         }
         if (instances.value!![0] == ZERO_BYTE) {
             biometricInformationList = null
         } else {
             if (groupTemplate.list!!.tlvSequence.size != instances.value!![0].toInt()+1) {
-                throw IllegalArgumentException("Number of Biometric Templates is not equal to the actual number of templates")
+                throw IllegalArgumentException(BIOMETRIC_GROUP_TEMPLATE_TEMPLATE_NUMBER_DIFFERENCE)
             }
             val info = ArrayList<BiometricInformationTemplate>()
             for (i in 1..<groupTemplate.list!!.tlvSequence.size) {
                 try {
                     info.add(BiometricInformationTemplate(groupTemplate.list!!.tlvSequence[i], type))
-                } catch (_ : IllegalArgumentException) {
+                } catch (e : IllegalArgumentException) {
+                    Log.i(ANDROID_LOG_INFO_TAG,  BIOMETRIC_GROUP_TEMPLATE_UNABLE_TO_DECODE+ e.message)
                 }
             }
             biometricInformationList = info.toTypedArray()

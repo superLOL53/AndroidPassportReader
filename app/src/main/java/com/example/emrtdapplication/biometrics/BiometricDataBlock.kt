@@ -4,6 +4,13 @@ import com.example.emrtdapplication.biometrics.face.FacialRecordData
 import com.example.emrtdapplication.biometrics.face.FacialRecordHeader
 import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordHeader
 import com.example.emrtdapplication.biometrics.iris.IrisRecordHeader
+import com.example.emrtdapplication.constants.BiometricDataBlockConstants.BIOMETRIC_DATA_BLOCK_INVALID_TAG_STRING
+import com.example.emrtdapplication.constants.BiometricDataBlockConstants.BIOMETRIC_DATA_BLOCK_NO_VALUE_STRING
+import com.example.emrtdapplication.constants.BiometricDataBlockConstants.BIOMETRIC_DATA_BLOCK_TAG_1
+import com.example.emrtdapplication.constants.BiometricDataBlockConstants.BIOMETRIC_DATA_BLOCK_TAG_2_1
+import com.example.emrtdapplication.constants.BiometricDataBlockConstants.BIOMETRIC_DATA_BLOCK_TAG_2_2
+import com.example.emrtdapplication.constants.BiometricDataBlockConstants.BIOMETRIC_DATA_BLOCK_TAG_SIZE
+import com.example.emrtdapplication.constants.FacialRecordHeaderConstants.FACIAL_RECORD_HEADER_SIZE
 import com.example.emrtdapplication.utils.TLV
 
 
@@ -21,19 +28,19 @@ class BiometricDataBlock(biometricDataBlock : TLV, val type : BiometricType) {
     val biometricData : BiometricData?
 
     init {
-        if (biometricDataBlock.tag.size != 2 || biometricDataBlock.tag[1] != 0x2E.toByte() ||
-            (biometricDataBlock.tag[0] != 0x5F.toByte() && biometricDataBlock.tag[0] != 0x7F.toByte())) {
-            throw IllegalArgumentException("Invalid Tag for Biometric Data Block")
+        if (biometricDataBlock.tag.size != BIOMETRIC_DATA_BLOCK_TAG_SIZE || biometricDataBlock.tag[1] != BIOMETRIC_DATA_BLOCK_TAG_1 ||
+            (biometricDataBlock.tag[0] != BIOMETRIC_DATA_BLOCK_TAG_2_1 && biometricDataBlock.tag[0] != BIOMETRIC_DATA_BLOCK_TAG_2_2)) {
+            throw IllegalArgumentException(BIOMETRIC_DATA_BLOCK_INVALID_TAG_STRING)
         }
         if (biometricDataBlock.value == null) {
-            throw IllegalArgumentException("No value for Biometric Data Block (BDB)")
+            throw IllegalArgumentException(BIOMETRIC_DATA_BLOCK_NO_VALUE_STRING)
         }
         when (type) {
             BiometricType.FACE -> {
                 biometricHeader =
-                    FacialRecordHeader(biometricDataBlock.value!!.slice(0..13).toByteArray())
+                    FacialRecordHeader(biometricDataBlock.value!!.slice(0..<FACIAL_RECORD_HEADER_SIZE).toByteArray())
                 biometricData = FacialRecordData(
-                    biometricDataBlock.value!!.slice(14..<biometricDataBlock.value!!.size)
+                    biometricDataBlock.value!!.slice(FACIAL_RECORD_HEADER_SIZE..<biometricDataBlock.value!!.size)
                         .toByteArray()
                 )
             }

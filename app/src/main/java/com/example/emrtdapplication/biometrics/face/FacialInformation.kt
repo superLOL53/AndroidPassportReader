@@ -1,5 +1,51 @@
 package com.example.emrtdapplication.biometrics.face
 
+import com.example.emrtdapplication.constants.BALD_STRING
+import com.example.emrtdapplication.constants.BLACK_STRING
+import com.example.emrtdapplication.constants.BLONDE_STRING
+import com.example.emrtdapplication.constants.BLUE_STRING
+import com.example.emrtdapplication.constants.BROWN_STRING
+import com.example.emrtdapplication.constants.BYTE_BIT_SIZE
+import com.example.emrtdapplication.constants.CLOSED_SMILE_STRING
+import com.example.emrtdapplication.constants.EYES_LOOKING_AWAY_STRING
+import com.example.emrtdapplication.constants.FEMALE_STRING
+import com.example.emrtdapplication.constants.FROWNING_STRING
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_EXPRESSION_LOW_BYTE
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_EYE_COLOR_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_MASK_INDEX_1
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_MASK_INDEX_2
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_MASK_INDEX_3
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_GENDER_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_HAIR_COLOR_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_END_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_START_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_SIZE
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_SIZE_STRING
+import com.example.emrtdapplication.constants.GRAY_STRING
+import com.example.emrtdapplication.constants.GREEN_STRING
+import com.example.emrtdapplication.constants.MALE_STRING
+import com.example.emrtdapplication.constants.MULTI_COLOURED_STRING
+import com.example.emrtdapplication.constants.NEUTRAL_STRING
+import com.example.emrtdapplication.constants.PINK_STRING
+import com.example.emrtdapplication.constants.RAISED_EYEBROWS_STRING
+import com.example.emrtdapplication.constants.RED_STRING
+import com.example.emrtdapplication.constants.RESERVED_STRING
+import com.example.emrtdapplication.constants.SMILE_STRING
+import com.example.emrtdapplication.constants.SQUINTING_STRING
+import com.example.emrtdapplication.constants.UNKNOWN_STRING
+import com.example.emrtdapplication.constants.UNSPECIFIED_STRING
+import com.example.emrtdapplication.constants.VENDOR_SPECIFIC_STRING
+import com.example.emrtdapplication.constants.WHITE_STRING
+
 /**
  * Class representing facial information in a facial data record according to ISO/IEC 19794-5
  * @param facialInformation Byte array containing encoded facial information
@@ -26,79 +72,77 @@ class FacialInformation(facialInformation: ByteArray) {
     val poseAngleUncertainty : ByteArray
 
     init {
-        if (facialInformation.size != 20) {
-            throw IllegalArgumentException("Size of Facial Information must be 20!")
+        if (facialInformation.size != FACIAL_INFORMATION_SIZE) {
+            throw IllegalArgumentException(FACIAL_INFORMATION_SIZE_STRING)
         }
-        faceImageBlockLength = facialInformation[0]*256*256*256 + facialInformation[1]*256*256 + facialInformation[2]*256+facialInformation[3]
-        featurePoints = facialInformation[4]*256 + facialInformation[5]
-        gender = setGender(facialInformation[6])
-        eyeColor = setEyeColor(facialInformation[7])
-        hairColor = setHairColor(facialInformation[8])
-        featureMask = facialInformation[9]*256*256 + facialInformation[10]*256+facialInformation[11]
-        expression = setExpression(facialInformation[12], facialInformation[13])
-        poseAngle = facialInformation.slice(14..16).toByteArray()
-        poseAngleUncertainty = facialInformation.slice(17..19).toByteArray()
+        faceImageBlockLength = (facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1].toInt() shl (BYTE_BIT_SIZE*3)) + (facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2].toInt() shl (BYTE_BIT_SIZE*2)) + (facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3].toInt() shl BYTE_BIT_SIZE)+facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4]
+        featurePoints = (facialInformation[FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1].toInt() shl BYTE_BIT_SIZE) + facialInformation[FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2]
+        gender = setGender(facialInformation[FACIAL_INFORMATION_GENDER_INDEX])
+        eyeColor = setEyeColor(facialInformation[FACIAL_INFORMATION_EYE_COLOR_INDEX])
+        hairColor = setHairColor(facialInformation[FACIAL_INFORMATION_HAIR_COLOR_INDEX])
+        featureMask = (facialInformation[FACIAL_INFORMATION_FEATURE_MASK_INDEX_1].toInt() shl (BYTE_BIT_SIZE*2)) + (facialInformation[FACIAL_INFORMATION_FEATURE_MASK_INDEX_2].toInt() shl BYTE_BIT_SIZE)+facialInformation[FACIAL_INFORMATION_FEATURE_MASK_INDEX_3]
+        expression = setExpression(facialInformation[FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE], facialInformation[FACIAL_INFORMATION_EXPRESSION_LOW_BYTE])
+        poseAngle = facialInformation.slice(FACIAL_INFORMATION_POSE_ANGLE_START_INDEX..FACIAL_INFORMATION_POSE_ANGLE_END_INDEX).toByteArray()
+        poseAngleUncertainty = facialInformation.slice(FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX..FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX).toByteArray()
     }
 
     private fun setGender(gender: Byte) : String {
         return when (gender) {
-            0.toByte() -> "Unspecified"
-            1.toByte() -> "Male"
-            2.toByte() -> "Female"
-            3.toByte() -> "Unknown"
-            else -> "Unknown"
+            0.toByte() -> UNSPECIFIED_STRING
+            1.toByte() -> MALE_STRING
+            2.toByte() -> FEMALE_STRING
+            3.toByte() -> UNKNOWN_STRING
+            else -> UNKNOWN_STRING
         }
     }
 
     private fun setEyeColor(color: Byte) : String {
         return when (color) {
-            0.toByte() -> "Unspecified"
-            1.toByte() -> "Black"
-            2.toByte() -> "Blue"
-            3.toByte() -> "Brown"
-            4.toByte() -> "Gray"
-            5.toByte() -> "Green"
-            6.toByte() -> "Multi-Coloured"
-            7.toByte() -> "Pink"
-            8.toByte() -> "Other or Unknown"
-            else -> "Unknown"
+            0.toByte() -> UNSPECIFIED_STRING
+            1.toByte() -> BLACK_STRING
+            2.toByte() -> BLUE_STRING
+            3.toByte() -> BROWN_STRING
+            4.toByte() -> GRAY_STRING
+            5.toByte() -> GREEN_STRING
+            6.toByte() -> MULTI_COLOURED_STRING
+            7.toByte() -> PINK_STRING
+            else -> UNKNOWN_STRING
         }
     }
 
     private fun setHairColor(color: Byte) : String {
         return when (color) {
-            0.toByte() -> "Unspecified"
-            1.toByte() -> "Bald"
-            2.toByte() -> "Black"
-            3.toByte() -> "Blonde"
-            4.toByte() -> "Brown"
-            5.toByte() -> "Gray"
-            6.toByte() -> "White"
-            7.toByte() -> "Red"
-            8.toByte() -> "Green"
-            9.toByte() -> "Blue"
-            0xFF.toByte() -> "Unknown or Other"
-            else -> "Reserved (Unknown)"
+            0.toByte() -> UNSPECIFIED_STRING
+            1.toByte() -> BALD_STRING
+            2.toByte() -> BLACK_STRING
+            3.toByte() -> BLONDE_STRING
+            4.toByte() -> BROWN_STRING
+            5.toByte() -> GRAY_STRING
+            6.toByte() -> WHITE_STRING
+            7.toByte() -> RED_STRING
+            8.toByte() -> GREEN_STRING
+            9.toByte() -> BLUE_STRING
+            else -> UNKNOWN_STRING
         }
     }
 
     private fun setExpression(highByte: Byte, lowByte: Byte) : String {
         if (highByte == 0.toByte()) {
             return when (lowByte) {
-                0.toByte() -> "Unspecified"
-                1.toByte() -> "Neutral"
-                2.toByte() -> "Smile (closed mouth)"
-                3.toByte() -> "Smile"
-                4.toByte() -> "Raised eyebrows"
-                5.toByte() -> "Eyes looking away from camera"
-                6.toByte() -> "Squinting"
-                7.toByte() -> "Frowning"
-                else -> "Reserved"
+                0.toByte() -> UNSPECIFIED_STRING
+                1.toByte() -> NEUTRAL_STRING
+                2.toByte() -> CLOSED_SMILE_STRING
+                3.toByte() -> SMILE_STRING
+                4.toByte() -> RAISED_EYEBROWS_STRING
+                5.toByte() -> EYES_LOOKING_AWAY_STRING
+                6.toByte() -> SQUINTING_STRING
+                7.toByte() -> FROWNING_STRING
+                else -> RESERVED_STRING
             }
         } else if (highByte > 0) {
-            return "Reserved"
+            return RESERVED_STRING
         } else {
-            return "Vendor specific"
+            return VENDOR_SPECIFIC_STRING
         }
     }
 }

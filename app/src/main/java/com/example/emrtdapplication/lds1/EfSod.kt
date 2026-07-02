@@ -88,7 +88,7 @@ class EfSod: ElementaryFileTemplate() {
         private set
     var validCRL = false
         private set
-    var certificationRevocationStatus = CertificationRevocationStatus.UNREVOKED
+    var certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
         private set
     var isCRLLocationInCSCA = false
         private set
@@ -149,7 +149,7 @@ class EfSod: ElementaryFileTemplate() {
         isDocumentSignerCertificateValid = false
         validCRL = false
         isCRLLocationInCSCA = false
-        certificationRevocationStatus = CertificationRevocationStatus.UNREVOKED
+        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
         if (documentSignerCertificate == null ||
             certificate == null || ldsSecurityObject == null) return FAILURE
         try {
@@ -167,6 +167,7 @@ class EfSod: ElementaryFileTemplate() {
         } else {
             for (c in listCSCA) {
                 if (validateDocumentSignerCertificate(c)) {
+                    usedCSCA = c
                     validateCSCA(c)
                     break
                 }
@@ -267,15 +268,24 @@ class EfSod: ElementaryFileTemplate() {
      * Checks the CRL for its validity if the CRL distribution point(s) are in the CSCA certificate
      */
     fun checkCRLs() {
+        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
         usedCSCA?.let {
             val crlDistributionPoints =
                 it.tbsCertificate.extensions.getExtension(ASN1ObjectIdentifier(CRL_DISTRIBUTION_POINT_OID))
-                    ?: return
+            if (crlDistributionPoints == null) {
+                certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                return
+            }
             isCRLLocationInCSCA = true
             val crl = getCRL(crlDistributionPoints.extnValue.octets)
             if (crl != null) {
-                val csca = MasterList.getCSCA(crl) ?: return
+                val csca = MasterList.getCSCA(crl)
+                if (csca == null) {
+                    certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                    return
+                }
                 if (!Crypto.verifyCertificate(csca, csca)) {
+                    certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
                     return
                 }
                 val publicKey = Crypto.generatePublicKey(csca)
@@ -296,21 +306,31 @@ class EfSod: ElementaryFileTemplate() {
                                 .generateCertificate(documentSignerCertificate!!.encoded.inputStream())
                         )) {
                             certificationRevocationStatus = CertificationRevocationStatus.REVOKED
+                            return
                         }
                     } catch (_ : Exception) {
+                        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                        return
                     }
                 }
                 try {
                     if (crl.isRevoked(
                         CertificateFactory.getInstance("X.509").generateCertificate(csca.encoded.inputStream()))) {
                         certificationRevocationStatus = CertificationRevocationStatus.REVOKED
+                        return
                     }
                 } catch (_ : Exception) {
+                    certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                    return
                 }
+                certificationRevocationStatus = CertificationRevocationStatus.UNREVOKED
+                return
             } else {
                 certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
             }
+            certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
         }
+        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
     }
 
     /**

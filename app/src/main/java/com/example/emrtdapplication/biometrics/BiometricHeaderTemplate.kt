@@ -1,5 +1,29 @@
 package com.example.emrtdapplication.biometrics
 
+import com.example.emrtdapplication.constants.BYTE_BIT_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_BIOMETRIC_TYPE_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_CREATION_TIME_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_CREATOR_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_FORMAT_TYPE_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_FORMAT_TYPE_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_HEADER_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_HEADER_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_INVALID_FORMAT_TYPE_SIZE_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_INVALID_HEADER_SIZE_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_INVALID_OWNER_SIZE_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_INVALID_SUBTYPE_SIZE_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_INVALID_TAG_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_INVALID_TEMPLATE_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_MAX_SEQUENCE_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_MIN_SEQUENCE_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_OWNER_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_OWNER_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_SUBTYPE_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_SUBTYPE_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_TAG
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_TAG_SIZE
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_UNKNOWN_OWNER_OR_TYPE_STRING
+import com.example.emrtdapplication.constants.BiometricHeaderTemplateConstants.BIOMETRIC_HEADER_TEMPLATE_VALIDITY_PERIOD_TAG
 import com.example.emrtdapplication.utils.TLV
 
 /**
@@ -26,30 +50,30 @@ class BiometricHeaderTemplate(biometricHeaderTemplate : TLV) {
     val formatType : Short
 
     init {
-        if (biometricHeaderTemplate.tag.size != 1 || biometricHeaderTemplate.tag[0] != 0xA1.toByte() ||
-            biometricHeaderTemplate.list == null || biometricHeaderTemplate.list!!.tlvSequence.size < 2 ||
-            8 < biometricHeaderTemplate.list!!.tlvSequence.size) {
-            throw IllegalArgumentException("Biometric Header Template does not conform to the Specification")
+        if (biometricHeaderTemplate.tag.size != BIOMETRIC_HEADER_TEMPLATE_TAG_SIZE || biometricHeaderTemplate.tag[0] != BIOMETRIC_HEADER_TEMPLATE_TAG ||
+            biometricHeaderTemplate.list == null || biometricHeaderTemplate.list!!.tlvSequence.size < BIOMETRIC_HEADER_TEMPLATE_MIN_SEQUENCE_SIZE ||
+            BIOMETRIC_HEADER_TEMPLATE_MAX_SEQUENCE_SIZE < biometricHeaderTemplate.list!!.tlvSequence.size) {
+            throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_INVALID_TEMPLATE_STRING)
         }
         var owner : Short? = null
         var type : Short? = null
         for (tlv in biometricHeaderTemplate.list!!.tlvSequence) {
-            if (tlv.tag.size != 1) {
-                throw IllegalArgumentException("Illegal Tag in the Biometric Header Template")
+            if (tlv.tag.size != BIOMETRIC_HEADER_TEMPLATE_TAG_SIZE) {
+                throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_INVALID_TAG_STRING)
             }
             when (tlv.tag[0]) {
-                0x80.toByte() -> setHeaderVersion(tlv.value)
-                0x81.toByte() -> biometricType = tlv.value
-                0x82.toByte() -> setSubType(tlv.value)
-                0x83.toByte() -> creationTime = tlv.value
-                0x84.toByte() -> validityPeriod = tlv.value
-                0x86.toByte() -> setCreator(tlv.value)
-                0x87.toByte() -> owner = setOwner(tlv.value)
-                0x88.toByte() -> type = setFormatType(tlv.value)
+                BIOMETRIC_HEADER_TEMPLATE_HEADER_TAG -> setHeaderVersion(tlv.value)
+                BIOMETRIC_HEADER_TEMPLATE_BIOMETRIC_TYPE_TAG -> biometricType = tlv.value
+                BIOMETRIC_HEADER_TEMPLATE_SUBTYPE_TAG -> setSubType(tlv.value)
+                BIOMETRIC_HEADER_TEMPLATE_CREATION_TIME_TAG -> creationTime = tlv.value
+                BIOMETRIC_HEADER_TEMPLATE_VALIDITY_PERIOD_TAG -> validityPeriod = tlv.value
+                BIOMETRIC_HEADER_TEMPLATE_CREATOR_TAG -> setCreator(tlv.value)
+                BIOMETRIC_HEADER_TEMPLATE_OWNER_TAG -> owner = setOwner(tlv.value)
+                BIOMETRIC_HEADER_TEMPLATE_FORMAT_TYPE_TAG -> type = setFormatType(tlv.value)
             }
         }
         if (owner == null || type == null) {
-            throw IllegalArgumentException("Owner and/or Type is not present")
+            throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_UNKNOWN_OWNER_OR_TYPE_STRING)
         }
         formatOwner = owner
         formatType = type
@@ -57,16 +81,16 @@ class BiometricHeaderTemplate(biometricHeaderTemplate : TLV) {
 
     private fun setHeaderVersion(header : ByteArray?) {
         if (header == null) return
-        if (header.size != 2) {
-            throw IllegalArgumentException("Header version has invalid length")
+        if (header.size != BIOMETRIC_HEADER_TEMPLATE_HEADER_SIZE) {
+            throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_INVALID_HEADER_SIZE_STRING)
         }
-        headerVersion = (header[0]*256 + header[1]).toShort()
+        headerVersion = ((header[0].toInt() shl BYTE_BIT_SIZE) + header[1]).toShort()
     }
 
     private fun setSubType(subType : ByteArray?) {
         if (subType == null) return
-        if (subType.size != 1) {
-            throw IllegalArgumentException("Invalid Subtype value")
+        if (subType.size != BIOMETRIC_HEADER_TEMPLATE_SUBTYPE_SIZE) {
+            throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_INVALID_SUBTYPE_SIZE_STRING)
         }
         biometricSubType = subType[0]
     }
@@ -75,22 +99,22 @@ class BiometricHeaderTemplate(biometricHeaderTemplate : TLV) {
         if (creator == null) return
         biometricReferenceDataCreator = 0
         for (b in creator) {
-            biometricReferenceDataCreator = biometricReferenceDataCreator!!*256 + b
+            biometricReferenceDataCreator = (biometricReferenceDataCreator!! shl BYTE_BIT_SIZE) + b
         }
     }
 
     private fun setOwner(owner : ByteArray?) : Short {
         if (owner == null) return 0
-        if (owner.size != 2) {
-            throw IllegalArgumentException("Invalid length for the owner field")
+        if (owner.size != BIOMETRIC_HEADER_TEMPLATE_OWNER_SIZE) {
+            throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_INVALID_OWNER_SIZE_STRING)
         }
-        return (owner[0]*256 + owner[1]).toShort()
+        return ((owner[0].toInt() shl BYTE_BIT_SIZE) + owner[1]).toShort()
     }
 
     private fun setFormatType(type : ByteArray?) : Short {
-        if (type == null || type.size != 2) {
-            throw IllegalArgumentException("Invalid length for the format type field")
+        if (type == null || type.size != BIOMETRIC_HEADER_TEMPLATE_FORMAT_TYPE_SIZE) {
+            throw IllegalArgumentException(BIOMETRIC_HEADER_TEMPLATE_INVALID_FORMAT_TYPE_SIZE_STRING)
         }
-        return (type[0]*256+type[1]).toShort()
+        return ((type[0].toInt() shl BYTE_BIT_SIZE)+type[1]).toShort()
     }
 }

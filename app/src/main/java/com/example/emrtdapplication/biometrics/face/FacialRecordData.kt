@@ -4,6 +4,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import com.example.emrtdapplication.biometrics.BiometricData
 import com.example.emrtdapplication.biometrics.BiometricType
+import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_SIZE
+import com.example.emrtdapplication.constants.FacialRecordDataConstants.UNABLE_TO_DECODE_STRING
+import com.example.emrtdapplication.constants.FeaturePointConstants.FEATURE_POINT_SIZE
+import com.example.emrtdapplication.constants.ImageInformationConstants.IMAGE_INFORMATION_SIZE
 
 /**
  * Class representing face biometrics data.
@@ -15,7 +19,7 @@ import com.example.emrtdapplication.biometrics.BiometricType
  * @throws IllegalArgumentException If the facial information in [facialRecord] could not be decoded
  */
 class FacialRecordData(facialRecord : ByteArray) : BiometricData(BiometricType.FACE) {
-    val facialInformation : FacialInformation = FacialInformation(facialRecord.slice(0..19).toByteArray())
+    val facialInformation : FacialInformation = FacialInformation(facialRecord.slice(0..<FACIAL_INFORMATION_SIZE).toByteArray())
     val featureList : Array<FeaturePoint>
     val imageInformation : ImageInformation
     val image : Bitmap
@@ -23,22 +27,22 @@ class FacialRecordData(facialRecord : ByteArray) : BiometricData(BiometricType.F
     init {
         try {
             val points = ArrayList<FeaturePoint>()
-            for (i in 1..facialInformation.featurePoints) {
-                points.add(FeaturePoint(facialRecord.slice(i * 8..i * 8 + 7).toByteArray()))
+            for (i in 0..<facialInformation.featurePoints) {
+                points.add(FeaturePoint(facialRecord.slice(FACIAL_INFORMATION_SIZE + i * FEATURE_POINT_SIZE..<FACIAL_INFORMATION_SIZE + i * FEATURE_POINT_SIZE + FEATURE_POINT_SIZE).toByteArray()))
             }
             featureList = points.toTypedArray()
             imageInformation = ImageInformation(
-                facialRecord.slice(20 + 8 * facialInformation.featurePoints..20 + 8 * facialInformation.featurePoints + 11)
+                facialRecord.slice(FACIAL_INFORMATION_SIZE + FEATURE_POINT_SIZE * facialInformation.featurePoints..<FACIAL_INFORMATION_SIZE + FEATURE_POINT_SIZE * facialInformation.featurePoints + IMAGE_INFORMATION_SIZE)
                     .toByteArray()
             )
             image = BitmapFactory.decodeByteArray(
-                facialRecord.slice(20 + 8 * facialInformation.featurePoints + 12..<facialRecord.size)
+                facialRecord.slice(FACIAL_INFORMATION_SIZE + FEATURE_POINT_SIZE * facialInformation.featurePoints + IMAGE_INFORMATION_SIZE..<facialRecord.size)
                     .toByteArray(),
                 0,
-                facialRecord.size - (20 + 8 * facialInformation.featurePoints + 12)
+                facialRecord.size - (FACIAL_INFORMATION_SIZE + FEATURE_POINT_SIZE * facialInformation.featurePoints + IMAGE_INFORMATION_SIZE)
             )
         } catch (_ : Exception) {
-            throw IllegalArgumentException("Unable to decode facial feature!")
+            throw IllegalArgumentException(UNABLE_TO_DECODE_STRING)
         }
     }
 }
