@@ -10,6 +10,7 @@ import android.widget.TableRow
 import android.widget.TextView
 import androidx.core.view.children
 import com.example.emrtdapplication.constants.CertificationRevocationStatus
+import com.example.emrtdapplication.constants.MAX_LINES_IN_DISPLAY
 
 abstract class CreateView {
     protected var alternate = false
@@ -68,7 +69,7 @@ abstract class CreateView {
         value.gravity = Gravity.END
         value.setPadding(0, 0, 10, 0)
         value.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
-        value.maxLines = 10
+        value.maxLines = MAX_LINES_IN_DISPLAY
         row.addView(description)
         row.addView(value)
         parent.addView(row)

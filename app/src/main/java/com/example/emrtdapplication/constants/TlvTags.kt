@@ -83,6 +83,7 @@ object TlvTags {
     const val PERSON_TAG_NAME : Byte = 0x51
     const val PERSON_TAG_TELEPHONE_NUMBER : Byte = 0x52
     const val PERSON_TAG_ADDRESS : Byte = 0x53
+    const val READ_LARGE_OFFSET : Byte = 0x54
     const val DOCUMENT_PERSONALIZATION_TIME : Byte = 0x55
     const val PERSONALIZATION_SYSTEM_SERIAL_NUMBER : Byte = 0x56
     const val DOCUMENT_NUMBER : Byte = 0x5A

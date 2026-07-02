@@ -20,4 +20,6 @@ object ElementaryFileTemplateConstants {
      * Modulo value for Byte conversion
      */
     const val BYTE_MODULO = 128
+
+    const val TLV_LENGTH_INDEX = 1
 }

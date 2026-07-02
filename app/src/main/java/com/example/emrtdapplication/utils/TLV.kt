@@ -1,5 +1,6 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.constants.BYTE_BIT_SIZE
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.TlvTags
@@ -214,7 +215,7 @@ class TLV {
             }
             ba[0] = ba[0] or i.toByte()
             for (j in i-1 downTo 0) {
-                ba += length.ushr(j*8).toByte()
+                ba += length.ushr(j* BYTE_BIT_SIZE).toByte()
             }
             return ba
         }

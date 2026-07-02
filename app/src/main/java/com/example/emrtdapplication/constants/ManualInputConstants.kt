@@ -39,4 +39,10 @@ object ManualInputConstants {
      * Third byte in the Check Digit sequence
      */
     const val CHECK_DIGIT_SEQUENCE_3 : Byte = 1
+
+    const val CHECK_DIGIT_MODULO = 10
+    const val PASSPORT_NUMBER_STRING = "passportNumber"
+    const val BIRTHDAY_STRING = "birthday"
+    const val EXPIRATION_DATE_STRING = "expirationDate"
+    const val INVALID_INPUT_STRING = "Unable to decode given information. Please make sure you entered everything correctly."
 }

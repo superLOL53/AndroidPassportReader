@@ -1,6 +1,8 @@
 package com.example.emrtdapplication.utils
 
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.constants.EF_TYPE_TEMPLATE_SEQUENCE_SIZE
+import com.example.emrtdapplication.constants.EF_TYPE_TEMPLATE_TAG_SIZE
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.SUCCESS
 
@@ -13,12 +15,12 @@ abstract class ElementaryFilesTypeTemplate<T> : ElementaryFileTemplate() {
             return FAILURE
         }
         val tlv = TLV(rawFileContent!!)
-        if (tlv.tag.size != 1 || tlv.tag[0] != efTag ||
+        if (tlv.tag.size != EF_TYPE_TEMPLATE_TAG_SIZE || tlv.tag[0] != efTag ||
             tlv.list == null || tlv.list!!.tlvSequence.isEmpty()
         ) {
             return FAILURE
         }
-        if (tlv.list!!.tlvSequence.size > 1) {
+        if (tlv.list!!.tlvSequence.size > EF_TYPE_TEMPLATE_SEQUENCE_SIZE) {
             val list = ArrayList<T>()
             for (i in 1..<tlv.list!!.tlvSequence.size) {
                 try {

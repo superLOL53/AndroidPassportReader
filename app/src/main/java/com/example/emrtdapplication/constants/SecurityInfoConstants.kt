@@ -78,4 +78,13 @@ object SecurityInfoConstants {
      * OID size of PACE Domain Parameter Info type
      */
     const val PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE = 10
+
+    const val INVALID_OPTIONAL_DATA_STRING = "Invalid present optional data for type SecurityInfo!"
+    const val INVALID_OID_STRING = "Unable to decode object identifier!"
+    const val INVALID_SEQUENCE_STRING = "Invalid Sequence for type SecurityInfo"
+    const val MIN_SEQUENCE_SIZE = 2
+    const val MAX_SEQUENCE_SIZE = 3
+    const val REQUIRED_DATA_SEQUENCE_INDEX = 1
+    const val PROTOCOL_OID_SEQUENCE_INDEX = 0
+    const val OPTIONAL_DATA_SEQUENCE_INDEX = 2
 }

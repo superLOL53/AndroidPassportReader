@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.constants.MASTER_LIST_PAHT
+import com.example.emrtdapplication.constants.MESSAGE_STRING
 import com.example.emrtdapplication.utils.MasterList
 import kotlin.concurrent.thread
 
@@ -18,14 +21,14 @@ class ApplicationEMRTD : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         thread {
             if (!MasterList.isDecoded) {
-                val directory = resources.assets.list("MasterList")
+                val directory = resources.assets.list(MASTER_LIST_PAHT)
                 if (directory != null) {
                     val filename = directory[0]
-                    val readFile = resources.assets.open("MasterList/$filename")
+                    val readFile = resources.assets.open("$MASTER_LIST_PAHT/$filename")
                     try {
                         MasterList.decodeMasterList(readFile.readBytes())
                     } catch (e: IllegalArgumentException) {
-                        Log.d("Failure", "Message: " + e.message)
+                        Log.i(ANDROID_LOG_INFO_TAG, MESSAGE_STRING + e.message)
                     }
                     readFile.close()
                 }

@@ -2,12 +2,14 @@ package com.example.emrtdapplication.utils
 
 import com.example.emrtdapplication.constants.APDUConstants.BYTE_MASK
 import com.example.emrtdapplication.constants.APDUConstants.EXTENDED_LENGTH_SHIFT_COUNT
+import com.example.emrtdapplication.constants.APDUConstants.EXTENDED_LENGTH_SIZE_IN_BYTES
 import com.example.emrtdapplication.constants.APDUConstants.LC_EXT_MAX
 import com.example.emrtdapplication.constants.APDUConstants.LC_MAX
 import com.example.emrtdapplication.constants.APDUConstants.LE_EXT_MAX
 import com.example.emrtdapplication.constants.APDUConstants.LE_MAX
 import com.example.emrtdapplication.constants.APDUConstants.LE_MIN
 import com.example.emrtdapplication.constants.APDUConstants.MIN_APDU_LENGTH
+import com.example.emrtdapplication.constants.APDUConstants.NORMAL_LENGTH_SIZE_IN_BYTES
 
 /**
  * Class representing an APDU
@@ -116,16 +118,16 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
         var apduLength = MIN_APDU_LENGTH
         if (useLe) {
             apduLength += if (useLeExt) {
-                3
+                EXTENDED_LENGTH_SIZE_IN_BYTES
             } else {
-                1
+                NORMAL_LENGTH_SIZE_IN_BYTES
             }
         }
         if (useLc) {
             apduLength += if (useLcExt) {
-                3
+                EXTENDED_LENGTH_SIZE_IN_BYTES
             } else {
-                1
+                NORMAL_LENGTH_SIZE_IN_BYTES
             }
             apduLength += data.size
         }

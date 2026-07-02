@@ -73,4 +73,12 @@ object APDUControlConstants {
      * Response APDU data offset counting from the end
      */
     const val APDU_NO_DATA_SIZE = 17
+
+    const val SENDING_APDU = "Sending APDU: "
+
+    const val RECEIVED_APDU = "Received APDU: "
+
+    const val SENDING_SECURED_APDU = "Sending secured APDU: "
+
+    const val RECEIVED_SECURED_APDU = "Received secured APDU: "
 }

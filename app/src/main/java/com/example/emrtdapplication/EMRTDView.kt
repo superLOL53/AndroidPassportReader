@@ -8,6 +8,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
+import com.example.emrtdapplication.constants.EMRTDViewConstants.ACTION_BAR_TITLE_STRING
+import com.example.emrtdapplication.constants.EMRTDViewConstants.BIOMETRICS_FRAGMENT_ID
+import com.example.emrtdapplication.constants.EMRTDViewConstants.CURRENT_FRAGMENT_STRING
+import com.example.emrtdapplication.constants.EMRTDViewConstants.LDS1_FRAGMENT_ID
+import com.example.emrtdapplication.constants.EMRTDViewConstants.SETTINGS_FRAGMENT_ID
+import com.example.emrtdapplication.constants.EMRTDViewConstants.TRAVEL_RECORDS_FRAGMENT_ID
+import com.example.emrtdapplication.constants.EMRTDViewConstants.VISA_RECORDS_FRAGMENT_ID
 import com.example.emrtdapplication.fragments.AdditionalBiometricsFragment
 import com.example.emrtdapplication.fragments.LDS1Fragment
 import com.example.emrtdapplication.fragments.SettingsFragment
@@ -30,8 +37,8 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
         super.onCreate(savedInstanceState)
         setContentView(R.layout.emrtd_view)
         if (savedInstanceState != null) {
-            currentFragment = savedInstanceState.getInt("currentFragment", 0)
-            val title = savedInstanceState.getCharSequence("actionBarTitle")
+            currentFragment = savedInstanceState.getInt(CURRENT_FRAGMENT_STRING, 0)
+            val title = savedInstanceState.getCharSequence(ACTION_BAR_TITLE_STRING)
             if (title != null) {
                 supportActionBar?.title = title
             } else {
@@ -52,10 +59,11 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
         actionBarDrawerToggle!!.syncState()
 
         val fragment = when(currentFragment) {
-            0 -> LDS1Fragment()
-            1 -> TravelRecordsFragment()
-            2 -> VisaRecordFragment()
-            3 -> AdditionalBiometricsFragment()
+            LDS1_FRAGMENT_ID -> LDS1Fragment()
+            TRAVEL_RECORDS_FRAGMENT_ID -> TravelRecordsFragment()
+            VISA_RECORDS_FRAGMENT_ID -> VisaRecordFragment()
+            BIOMETRICS_FRAGMENT_ID -> AdditionalBiometricsFragment()
+            SETTINGS_FRAGMENT_ID -> SettingsFragment()
             else -> LDS1Fragment()
         }
         findViewById<NavigationView>(R.id.nvView).setNavigationItemSelectedListener(this)
@@ -69,8 +77,8 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putInt("currentFragment", currentFragment)
-        outState.putCharSequence("actionBarTitle", supportActionBar?.title)
+        outState.putInt(CURRENT_FRAGMENT_STRING, currentFragment)
+        outState.putCharSequence(ACTION_BAR_TITLE_STRING, supportActionBar?.title)
         super.onSaveInstanceState(outState)
     }
 
@@ -78,27 +86,27 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
         var fragment : Fragment? = null
         when (p0.itemId) {
             R.id.nav_lds1 -> {
-                currentFragment = 0
+                currentFragment = LDS1_FRAGMENT_ID
                 fragment = LDS1Fragment()
                 supportActionBar?.setTitle(R.string.lds1)
             }
             R.id.nav_travel -> {
-                currentFragment = 1
+                currentFragment = TRAVEL_RECORDS_FRAGMENT_ID
                 fragment = TravelRecordsFragment()
                 supportActionBar?.setTitle(R.string.travel_records)
             }
             R.id.nav_visa -> {
-                currentFragment = 2
+                currentFragment = VISA_RECORDS_FRAGMENT_ID
                 fragment = VisaRecordFragment()
                 supportActionBar?.setTitle(R.string.visa_records)
             }
             R.id.nav_biometrics -> {
-                currentFragment = 3
+                currentFragment = BIOMETRICS_FRAGMENT_ID
                 fragment = AdditionalBiometricsFragment()
                 supportActionBar?.setTitle(R.string.additional_biometrics)
             }
             R.id.nav_settings -> {
-                currentFragment = 4
+                currentFragment = SETTINGS_FRAGMENT_ID
                 fragment = SettingsFragment()
                 supportActionBar?.setTitle(R.string.settings)
             }

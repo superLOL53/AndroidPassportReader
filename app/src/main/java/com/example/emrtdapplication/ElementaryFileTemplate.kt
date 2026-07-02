@@ -4,15 +4,18 @@ import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
 import com.example.emrtdapplication.constants.APDUConstants
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.LONG_EF_ID
+import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.TLV_LENGTH_INDEX
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
+import com.example.emrtdapplication.constants.MAXIMUM_EF_FILE_SIZE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
 import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.constants.TlvTags.READ_LARGE_OFFSET
 import com.example.emrtdapplication.lds1.EfSod
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -79,13 +82,13 @@ abstract class ElementaryFileTemplate {
         if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
         }
-        val le = if (info[1] < 0) {
-            contentStart = 2 + info[1]+BYTE_MODULO
+        val le = if (info[TLV_LENGTH_INDEX] < 0) {
+            contentStart = 2 + info[TLV_LENGTH_INDEX]+BYTE_MODULO
             var l = 0
-            for (i in 0..<(info[1]+BYTE_MODULO)) {
+            for (i in 0..<(info[TLV_LENGTH_INDEX]+BYTE_MODULO)) {
                 l = l*U_BYTE_MODULO + info[i+2].toUByte().toInt()
             }
-            l += 2 + (info[1] + BYTE_MODULO)
+            l += 2 + (info[TLV_LENGTH_INDEX] + BYTE_MODULO)
             l
         } else {
             contentStart = 2
@@ -95,7 +98,7 @@ abstract class ElementaryFileTemplate {
         if (le >= APDUControl.maxResponseLength - ADDITIONAL_ENCRYPTION_LENGTH) {
             val tmp = ByteArray(le)
             var i = 0
-            while (i < le && i < 32767) {
+            while (i < le && i < MAXIMUM_EF_FILE_SIZE) {
                 val readBytes = readSmallOffset(i, le)
                 if (readBytes != null) {
                     readBytes.copyInto(tmp, i, 0)
@@ -144,8 +147,8 @@ abstract class ElementaryFileTemplate {
     private fun readSmallOffset(offset: Int, fileSize: Int) : ByteArray? {
         val p1 = (offset / U_BYTE_MODULO).toByte()
         val p2 = (offset % U_BYTE_MODULO).toByte()
-        val readBytes = if (offset + APDUControl.maxResponseLength > 32767) {
-            32767 - offset
+        val readBytes = if (offset + APDUControl.maxResponseLength > MAXIMUM_EF_FILE_SIZE) {
+            MAXIMUM_EF_FILE_SIZE - offset
         } else if (offset + APDUControl.maxResponseLength > fileSize) {
             fileSize - offset
         } else {
@@ -179,7 +182,7 @@ abstract class ElementaryFileTemplate {
         } else {
             APDUControl.maxResponseLength
         }
-        val data = TLV(0x54, offset.toBigInteger().toByteArray())
+        val data = TLV(READ_LARGE_OFFSET, offset.toBigInteger().toByteArray())
         val info = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,

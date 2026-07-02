@@ -14,6 +14,11 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.constants.BOUNCY_CASTLE_STRING
+import com.example.emrtdapplication.constants.MRZ_STRING
+import com.example.emrtdapplication.constants.NFC_PRESENCE_CHECK_DELAY
+import com.example.emrtdapplication.constants.PACE_STATUS_STRING
 import com.example.emrtdapplication.constants.SUCCESS
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
@@ -33,19 +38,19 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.read_passport_view)
         if (savedInstanceState != null) {
-            mrz = savedInstanceState.getString("MRZ")
+            mrz = savedInstanceState.getString(MRZ_STRING)
             if (mrz != null) {
                 EMRTD.mrz = mrz
             }
         } else {
-            EMRTD.mrz = intent.getStringExtra("MRZ")
+            EMRTD.mrz = intent.getStringExtra(MRZ_STRING)
         }
         val prov = BouncyCastleProvider()
-        Security.removeProvider("BC")
+        Security.removeProvider(BOUNCY_CASTLE_STRING)
         Security.addProvider(prov)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         val b = Bundle()
-        b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 60000)
+        b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, NFC_PRESENCE_CHECK_DELAY)
         nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
                 NfcAdapter.FLAG_READER_NFC_B or
                 NfcAdapter.FLAG_READER_NFC_F or
@@ -90,7 +95,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
             findViewById<LinearLayout>(R.id.readView).removeView(overlay)
         }
         val options = Bundle()
-        options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 60000)
+        options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, NFC_PRESENCE_CHECK_DELAY)
         nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
                 NfcAdapter.FLAG_READER_NFC_B or
                 NfcAdapter.FLAG_READER_NFC_F or
@@ -106,7 +111,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("MRZ", mrz)
+        outState.putString(MRZ_STRING, mrz)
         super.onSaveInstanceState(outState)
     }
 
@@ -167,7 +172,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
         EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
         val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
-        Log.i("PACESuccess", "PACE status: $isPACESuccess")
+        Log.i(ANDROID_LOG_INFO_TAG, PACE_STATUS_STRING + "$isPACESuccess")
         if (isPACESuccess) {
             EMRTD.cs.read()
         }

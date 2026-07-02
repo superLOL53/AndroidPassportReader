@@ -1,7 +1,11 @@
 package com.example.emrtdapplication.utils
 
 import android.util.Log
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.constants.BOUNCY_CASTLE_STRING
 import com.example.emrtdapplication.constants.CryptoConstants.AES
+import com.example.emrtdapplication.constants.CryptoConstants.AES_128_KEY_SIZE
+import com.example.emrtdapplication.constants.CryptoConstants.AES_192_KEY_SIZE
 import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
 import com.example.emrtdapplication.constants.CryptoConstants.BYTE_TO_BITS
 import com.example.emrtdapplication.constants.CryptoConstants.C_0_128
@@ -10,10 +14,16 @@ import com.example.emrtdapplication.constants.CryptoConstants.C_1_128
 import com.example.emrtdapplication.constants.CryptoConstants.C_1_256
 import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE
 import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE_CBC_NO_PADDING
+import com.example.emrtdapplication.constants.CryptoConstants.DES_KEY_SIZE
+import com.example.emrtdapplication.constants.CryptoConstants.ILLEGAL_CIPHER_ALGORITHM
 import com.example.emrtdapplication.constants.CryptoConstants.KEY_3DES_COUNT_ONES
 import com.example.emrtdapplication.constants.CryptoConstants.MAC_SIZE
 import com.example.emrtdapplication.constants.CryptoConstants.MAPPING_CONSTANT
 import com.example.emrtdapplication.constants.CryptoConstants.PAD_START_BYTE
+import com.example.emrtdapplication.constants.CryptoConstants.SHA_1
+import com.example.emrtdapplication.constants.CryptoConstants.SHA_256
+import com.example.emrtdapplication.constants.CryptoConstants.UNABLE_TO_DE_ENCRYPT
+import com.example.emrtdapplication.constants.CryptoConstants.UNABLE_TO_HASH
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
 import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
@@ -43,7 +53,6 @@ import org.spongycastle.math.ec.ECPoint
 import java.math.BigInteger
 import java.security.KeyFactory
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.security.PublicKey
 import java.security.SecureRandom
 import java.security.Signature
@@ -292,7 +301,7 @@ object Crypto {
             c.init(mode, k, i)
             return c.doFinal(data)
         } catch (e : Exception) {
-            Log.d("Crypto", "Unable to en-/decrypt with 3DES.\n${e.message}")
+            Log.d(ANDROID_LOG_INFO_TAG, UNABLE_TO_DE_ENCRYPT + e.message)
         }
         return null
     }
@@ -320,7 +329,7 @@ object Crypto {
             c.init(mode, k, i)
             return c.doFinal(data)
         } catch (e : Exception) {
-            Log.d("Crypto", "Unable to en-/decrypt with AES.\n${e.message}")
+            Log.d(ANDROID_LOG_INFO_TAG, UNABLE_TO_DE_ENCRYPT + e.message)
         }
         return null
     }
@@ -360,21 +369,21 @@ object Crypto {
     fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray? {
         return when (cipherId) {
             DES_CBC_CBC -> {
-                val encKey = computeKey("SHA-1", seed, cValue, true) ?: return null
-                encKey.slice(0..15).toByteArray()
-                encKey + encKey.slice(0..7).toByteArray()
+                val encKey = computeKey(SHA_1, seed, cValue, true) ?: return null
+                encKey.slice(0..<DES_KEY_SIZE*2).toByteArray()
+                encKey + encKey.slice(0..<DES_KEY_SIZE).toByteArray()
             }
             AES_CBC_CMAC_128 -> {
-                computeKey("SHA-1", seed, cValue)?.slice(0..15)?.toByteArray()
+                computeKey(SHA_1, seed, cValue)?.slice(0..<AES_128_KEY_SIZE)?.toByteArray()
 
             }
             AES_CBC_CMAC_192 -> {
-                computeKey("SHA-256", seed, cValue)?.slice(0..23)?.toByteArray()
+                computeKey(SHA_256, seed, cValue)?.slice(0..<AES_192_KEY_SIZE)?.toByteArray()
             }
             AES_CBC_CMAC_256 -> {
-                computeKey("SHA-256", seed, cValue)
+                computeKey(SHA_256, seed, cValue)
             }
-            else -> throw IllegalArgumentException("Illegal cipher algorithm for key computation!")
+            else -> throw IllegalArgumentException(ILLEGAL_CIPHER_ALGORITHM)
         }
     }
 
@@ -390,8 +399,8 @@ object Crypto {
             val md = MessageDigest.getInstance(hashName)
             md.update(hashBytes)
             return md.digest()
-        } catch (_ : NoSuchAlgorithmException) {
-            Log.d("Crypto" , "Unable to find hash algorithm $hashName")
+        } catch (_ : Exception) {
+            Log.d(ANDROID_LOG_INFO_TAG,  UNABLE_TO_HASH + hashName)
         }
         return null
     }
@@ -442,7 +451,7 @@ object Crypto {
             val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
             val fac = KeyFactory.getInstance(
                 certificate.subjectPublicKeyInfo.algorithm.algorithm.id,
-                "BC"
+                BOUNCY_CASTLE_STRING
             )
             return fac!!.generatePublic(spec)
         } catch (_ : Exception) {
@@ -488,7 +497,7 @@ object Crypto {
         try {
             val sign = Signature.getInstance(
                 signatureOID,
-                "BC"
+                BOUNCY_CASTLE_STRING
             )
             sign.initVerify(publicKey)
             sign.update(signedData)

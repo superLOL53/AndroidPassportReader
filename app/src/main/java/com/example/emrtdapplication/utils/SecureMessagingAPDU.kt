@@ -1,6 +1,8 @@
 package com.example.emrtdapplication.utils
 
 import android.annotation.SuppressLint
+import android.util.Log
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.constants.APDUControlConstants.APDU_NO_DATA_SIZE
 import com.example.emrtdapplication.constants.APDUControlConstants.MIN_APDU_SIZE_FOR_MAC_VERIFICATION
 import com.example.emrtdapplication.constants.APDUControlConstants.PADDING_SIZE
@@ -8,8 +10,10 @@ import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_
 import com.example.emrtdapplication.constants.APDUControlConstants.SINGLE_KEY_SIZE_3DES
 import com.example.emrtdapplication.constants.CryptoConstants.AES
 import com.example.emrtdapplication.constants.CryptoConstants.AES_ECB_NO_PADDING
+import com.example.emrtdapplication.constants.DO8X_TAG_OVERHEAD_LENGTH
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
 import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
+import com.example.emrtdapplication.constants.INVALID_RESPONSE_MAC
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.TlvTags.DO01
 import com.example.emrtdapplication.constants.TlvTags.DO08
@@ -206,13 +210,15 @@ class SecureMessagingAPDU {
      */
     private fun extractAPDU(rApdu: ByteArray) : ByteArray {
         if (rApdu.size > MIN_APDU_SIZE_FOR_MAC_VERIFICATION) {
-            verifyMAC(rApdu)
+            if (!verifyMAC(rApdu)) {
+                Log.i(ANDROID_LOG_INFO_TAG, INVALID_RESPONSE_MAC)
+            }
         }
         val normalAPDU : ByteArray = if (rApdu[0] == DO87 || rApdu[0] == DO85) {
             val l = if (rApdu[1] < 0) {
-                (rApdu[1] + BYTE_MODULO) + 3
+                (rApdu[1] + BYTE_MODULO) + DO8X_TAG_OVERHEAD_LENGTH
             } else {
-                3
+                DO8X_TAG_OVERHEAD_LENGTH
             }
             val decrypted = decrypt(rApdu.slice(l..rApdu.size-APDU_NO_DATA_SIZE).toByteArray())
             if (decrypted == null) {

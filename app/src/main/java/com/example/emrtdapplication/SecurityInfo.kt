@@ -1,5 +1,13 @@
 package com.example.emrtdapplication
 
+import com.example.emrtdapplication.constants.SecurityInfoConstants.INVALID_OID_STRING
+import com.example.emrtdapplication.constants.SecurityInfoConstants.INVALID_OPTIONAL_DATA_STRING
+import com.example.emrtdapplication.constants.SecurityInfoConstants.INVALID_SEQUENCE_STRING
+import com.example.emrtdapplication.constants.SecurityInfoConstants.MAX_SEQUENCE_SIZE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.MIN_SEQUENCE_SIZE
+import com.example.emrtdapplication.constants.SecurityInfoConstants.OPTIONAL_DATA_SEQUENCE_INDEX
+import com.example.emrtdapplication.constants.SecurityInfoConstants.PROTOCOL_OID_SEQUENCE_INDEX
+import com.example.emrtdapplication.constants.SecurityInfoConstants.REQUIRED_DATA_SEQUENCE_INDEX
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.ASN1ObjectIdentifier
 
@@ -35,20 +43,20 @@ open class SecurityInfo(tlv: TLV, val type : Int) {
     val protocol : ByteArray
 
     init {
-        if (!tlv.isValid || !tlv.isConstruct() || tlv.list == null || tlv.list!!.tlvSequence.size < 2 || 3 < tlv.list!!.tlvSequence.size) {
-            throw IllegalArgumentException("Invalid Sequence for type SecurityInfo")
+        if (!tlv.isValid || !tlv.isConstruct() || tlv.list == null || tlv.list!!.tlvSequence.size < MIN_SEQUENCE_SIZE || MAX_SEQUENCE_SIZE < tlv.list!!.tlvSequence.size) {
+            throw IllegalArgumentException(INVALID_SEQUENCE_STRING)
         }
         try {
-            objectIdentifier = ASN1ObjectIdentifier.getInstance(tlv.list!!.tlvSequence[0].toByteArray()).id
+            objectIdentifier = ASN1ObjectIdentifier.getInstance(tlv.list!!.tlvSequence[PROTOCOL_OID_SEQUENCE_INDEX].toByteArray()).id
         } catch (_ : Exception) {
-            throw IllegalArgumentException("Unable to decode object identifier!")
+            throw IllegalArgumentException(INVALID_OID_STRING)
         }
-        requiredData = tlv.list!!.tlvSequence[1]
-        protocol = tlv.list!!.tlvSequence[0].value!!
-        if (tlv.list!!.tlvSequence.size == 3) {
-            optionalData = tlv.list!!.tlvSequence[2]
+        requiredData = tlv.list!!.tlvSequence[REQUIRED_DATA_SEQUENCE_INDEX]
+        protocol = tlv.list!!.tlvSequence[PROTOCOL_OID_SEQUENCE_INDEX].value!!
+        if (tlv.list!!.tlvSequence.size == MAX_SEQUENCE_SIZE) {
+            optionalData = tlv.list!!.tlvSequence[OPTIONAL_DATA_SEQUENCE_INDEX]
             if (!optionalData.isValid) {
-                throw IllegalArgumentException("Invalid present optional data for type SecurityInfo")
+                throw IllegalArgumentException(INVALID_OPTIONAL_DATA_STRING)
             }
         } else {
             optionalData = null

@@ -3,6 +3,7 @@ package com.example.emrtdapplication.utils
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.util.Log
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
@@ -11,7 +12,11 @@ import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_NFC_
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CLOSE
 import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CONNECT
 import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
+import com.example.emrtdapplication.constants.APDUControlConstants.RECEIVED_APDU
+import com.example.emrtdapplication.constants.APDUControlConstants.RECEIVED_SECURED_APDU
 import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
+import com.example.emrtdapplication.constants.APDUControlConstants.SENDING_APDU
+import com.example.emrtdapplication.constants.APDUControlConstants.SENDING_SECURED_APDU
 import com.example.emrtdapplication.constants.APDUControlConstants.TIME_OUT
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
@@ -89,7 +94,7 @@ object APDUControl {
     //@OptIn(ExperimentalStdlibApi::class)
     fun sendAPDU(apdu : APDU) : ByteArray {
         exchangedAPDUPairs++
-        Log.d("APDU", "Sending APDU: " + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
+        Log.i(ANDROID_LOG_INFO_TAG, SENDING_APDU + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
             upperCase = true}))
         val apdu = if (sendEncryptedAPDU) {
             sendEncryptedAPDU(apdu)
@@ -97,7 +102,7 @@ object APDUControl {
             sendEncryptedAPDU = false
             sendISODEP(apdu)
         }
-        Log.d("APDU", "Received APDU: " + apdu.toHexString(HexFormat { bytes.byteSeparator = " "
+        Log.i(ANDROID_LOG_INFO_TAG,  RECEIVED_APDU+ apdu.toHexString(HexFormat { bytes.byteSeparator = " "
             upperCase = true}))
         return apdu
     }
@@ -215,16 +220,15 @@ object APDUControl {
      * @param apdu The APDU to encrypt and send to the eMRTD
      * @return The decrypted response APDU
      */
-    //@OptIn(ExperimentalStdlibApi::class)
     private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
         if (isoDep == null) return ByteArray(0)
         inc()
         val secureAPDU = SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, apdu)
-        Log.d("APDU", "Sending secured APDU: ${secureAPDU.encryptedAPDUArray.toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true})}")
+        Log.i(ANDROID_LOG_INFO_TAG, SENDING_SECURED_APDU + secureAPDU.encryptedAPDUArray.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true}))
         val responseAPDU = isoDep!!.transceive(secureAPDU.encryptedAPDUArray)
-        Log.d("APDU", "Received secured APDU: ${responseAPDU.toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true})}")
+        Log.i(ANDROID_LOG_INFO_TAG, RECEIVED_SECURED_APDU + responseAPDU.toHexString(HexFormat { bytes.byteSeparator = " "
+            upperCase = true}))
         inc()
         return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, responseAPDU).apduArray
     }

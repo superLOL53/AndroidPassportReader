@@ -45,4 +45,8 @@ object APDUConstants {
      * (Le or Lc) to a byte
      */
     const val EXTENDED_LENGTH_SHIFT_COUNT = 8
+
+    const val EXTENDED_LENGTH_SIZE_IN_BYTES = 3
+
+    const val NORMAL_LENGTH_SIZE_IN_BYTES = 1
 }

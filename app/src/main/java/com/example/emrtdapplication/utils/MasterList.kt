@@ -1,6 +1,12 @@
 package com.example.emrtdapplication.utils
 
+import android.util.Log
+import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.constants.AUTHORITY_KEY_IDENTIFIER_OID
+import com.example.emrtdapplication.constants.INVALID_MASTER_LIST_CONTENT
+import com.example.emrtdapplication.constants.INVALID_MASTER_LIST_STRING
+import com.example.emrtdapplication.constants.UNABLE_TO_DECODE_CSCA_CERTIFICATES
+import com.example.emrtdapplication.constants.UNABLE_TO_DECODE_MASTER_LIST_CERTIFICATES
 import com.example.emrtdapplication.utils.MasterList.signedData
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1ObjectIdentifier
@@ -40,7 +46,8 @@ object MasterList {
                 ).`object`
             )
         } catch (_ : Exception) {
-            throw IllegalArgumentException("Byte array does not contain an encoded Master List!")
+            Log.i(ANDROID_LOG_INFO_TAG, INVALID_MASTER_LIST_STRING)
+            return
         }
         if (signedData == null) {
             isFinished = true
@@ -51,21 +58,28 @@ object MasterList {
                 val certificateInstance = Certificate.getInstance(certificate.toASN1Primitive().encoded)
                 map.add(certificateInstance)
             } catch (_ : Exception) {
+                Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_DECODE_MASTER_LIST_CERTIFICATES)
+                return
             }
         }
-        val contentInfo = TLV(signedData!!.encapContentInfo.content.toASN1Primitive().encoded)
-        if (contentInfo.value == null) {
+        try {
+            val contentInfo = TLV(signedData!!.encapContentInfo.content.toASN1Primitive().encoded)
+            if (contentInfo.value == null) {
+                isFinished = true
+                Log.i(ANDROID_LOG_INFO_TAG, INVALID_MASTER_LIST_CONTENT)
+                return
+            }
+            val list = DERSequence.getInstance(contentInfo.value)
+            val certList = list.getObjectAt(1) as DLSet
+            for (certificate in certList.objects) {
+                map.add(Certificate.getInstance(certificate))
+            }
+            certificateMap = map.toTypedArray()
+            isDecoded = true
             isFinished = true
-            throw IllegalArgumentException("Signed data does not contain expected content!")
+        } catch (_ : Exception) {
+            Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_DECODE_CSCA_CERTIFICATES)
         }
-        val list = DERSequence.getInstance(contentInfo.value)
-        val certList = list.getObjectAt(1) as DLSet
-        for (certificate in certList.objects) {
-            map.add(Certificate.getInstance(certificate))
-        }
-        certificateMap = map.toTypedArray()
-        isDecoded = true
-        isFinished = true
     }
 
     fun getCSCA(certificate: Certificate) : Array<Certificate> {

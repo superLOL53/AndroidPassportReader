@@ -74,4 +74,21 @@ object CryptoConstants {
      * Constant for calculating the length of the random number for the PACE integrated mapping protocol
      */
     const val MAPPING_CONSTANT = 64
+
+    const val UNABLE_TO_HASH = "Unable to hash with the algorithm "
+
+    const val SHA_1 = "SHA-1"
+
+    const val SHA_256 = "SHA-256"
+
+    const val ILLEGAL_CIPHER_ALGORITHM = "Illegal cipher algorithm for key computation!"
+
+    const val AES_128_KEY_SIZE = 16
+
+    const val AES_192_KEY_SIZE = 24
+
+    const val DES_KEY_SIZE = 8
+
+    const val UNABLE_TO_DE_ENCRYPT = "Unable to en-/decrypt with AES or DES.\n"
+
 }

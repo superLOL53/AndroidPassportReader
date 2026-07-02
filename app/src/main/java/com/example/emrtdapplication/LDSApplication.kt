@@ -5,8 +5,6 @@ import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.NfcRespondCodeSW1
-import com.example.emrtdapplication.constants.NfcRespondCodeSW2
 import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
@@ -27,7 +25,7 @@ abstract class LDSApplication {
      */
     fun selectApplication() : Int {
         val info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.SELECT, NfcP1Byte.SELECT_DF, NfcP2Byte.SELECT_FILE, applicationIdentifier))
-        return if (info[info.size-2] == NfcRespondCodeSW1.OK && info[info.size-1] == NfcRespondCodeSW2.OK) {
+        return if (APDUControl.checkResponse(info)) {
             isPresent = true
             SUCCESS
         } else {

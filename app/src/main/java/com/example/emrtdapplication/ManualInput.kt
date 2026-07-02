@@ -7,12 +7,18 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.example.emrtdapplication.constants.MRZ_STRING
+import com.example.emrtdapplication.constants.ManualInputConstants.BIRTHDAY_STRING
+import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_MODULO
 import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_1
 import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_2
 import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_3
 import com.example.emrtdapplication.constants.ManualInputConstants.DATE_LENGTH
+import com.example.emrtdapplication.constants.ManualInputConstants.EXPIRATION_DATE_STRING
+import com.example.emrtdapplication.constants.ManualInputConstants.INVALID_INPUT_STRING
 import com.example.emrtdapplication.constants.ManualInputConstants.LOWER_CASE_DIGIT
 import com.example.emrtdapplication.constants.ManualInputConstants.PASSPORT_NUMBER_LENGTH
+import com.example.emrtdapplication.constants.ManualInputConstants.PASSPORT_NUMBER_STRING
 import com.example.emrtdapplication.constants.ManualInputConstants.UPPER_CASE_DIGIT
 
 
@@ -44,9 +50,9 @@ class ManualInput : AppCompatActivity() {
         val birthdayText = findViewById<EditText>(R.id.birthday)
         val expirationDateText = findViewById<EditText>(R.id.expirationDate)
         if (savedInstanceState != null) {
-            val number = savedInstanceState.getString("passportNumber")
-            val expirationDate = savedInstanceState.getString("expirationDate")
-            val birthday = savedInstanceState.getString("birthday")
+            val number = savedInstanceState.getString(PASSPORT_NUMBER_STRING)
+            val expirationDate = savedInstanceState.getString(EXPIRATION_DATE_STRING)
+            val birthday = savedInstanceState.getString(BIRTHDAY_STRING)
             if (number != null) {
                 passportNumberText.text = SpannableStringBuilder(number)
             }
@@ -64,11 +70,11 @@ class ManualInput : AppCompatActivity() {
             val mrzInfo = parse()
             if (mrzInfo != null) {
                 val intent = Intent(this, ReadPassport::class.java)
-                intent.putExtra("MRZ", mrzInfo)
+                intent.putExtra(MRZ_STRING, mrzInfo)
                 startActivity(intent)
             } else {
                 val info = Toast(this)
-                info.setText("Unable to decode given information. Please make sure you entered everything correctly.")
+                info.setText(INVALID_INPUT_STRING)
                 info.duration = Toast.LENGTH_LONG
                 info.show()
             }
@@ -77,9 +83,9 @@ class ManualInput : AppCompatActivity() {
 
     @Override
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString("passportNumber", findViewById<EditText>(R.id.passportNr).text.toString())
-        outState.putString("birthday", findViewById<EditText>(R.id.birthday).text.toString())
-        outState.putString("expirationDate", findViewById<EditText>(R.id.expirationDate).text.toString())
+        outState.putString(PASSPORT_NUMBER_STRING, findViewById<EditText>(R.id.passportNr).text.toString())
+        outState.putString(BIRTHDAY_STRING, findViewById<EditText>(R.id.birthday).text.toString())
+        outState.putString(EXPIRATION_DATE_STRING, findViewById<EditText>(R.id.expirationDate).text.toString())
         super.onSaveInstanceState(outState)
     }
 
@@ -141,7 +147,7 @@ class ManualInput : AppCompatActivity() {
         for (i in s.indices) {
             checkDigit += computeValueForCheckDigit(s[i])*checkDigitSequence[i%checkDigitSequence.size]
         }
-        return (checkDigit % 10).toString()[0]
+        return (checkDigit % CHECK_DIGIT_MODULO).toString()[0]
     }
 
     /**
