@@ -12,7 +12,13 @@ class TLVSequence(byteArray: ByteArray) {
         var l = 0
         var i = 0
         while (l < byteArray.size) {
-            tlvSequence.add(TLV(byteArray.slice(l..<byteArray.size).toByteArray()))
+            tlvSequence.add(
+                TLV(
+                    byteArray.
+                    slice(l..<byteArray.size).
+                    toByteArray()
+                )
+            )
             l += tlvSequence[i].toByteArray().size
             i++
         }

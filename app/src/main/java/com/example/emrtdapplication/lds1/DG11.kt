@@ -2,9 +2,14 @@ package com.example.emrtdapplication.lds1
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.FILLER_CHARACTER
+import com.example.emrtdapplication.NAMES_MIN_SEQUENCE
+import com.example.emrtdapplication.SUCCESS
+import com.example.emrtdapplication.UNABLE_TO_DECODE_IMAGE
 import com.example.emrtdapplication.constants.TlvTags.BIRTHDATE
 import com.example.emrtdapplication.constants.TlvTags.BIRTH_PLACE
 import com.example.emrtdapplication.constants.TlvTags.CUSTODY_INFORMATION
@@ -44,35 +49,35 @@ import com.example.emrtdapplication.utils.TLV
  * @property image Image of citizenship document
  * @property otherNames Other names of the document holder
  */
-class DG11 : ElementaryFileTemplate() {
+class DG11: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG11_SHORT_EF_ID
     override val efTag = DG11_FILE_TAG
-    var fullName : String? = null
+    var fullName: String? = null
         private set
-    var personalNumber : String? = null
+    var personalNumber: String? = null
         private set
-    var fullDateOfBirth : String? = null
+    var fullDateOfBirth: String? = null
         private set
-    var placeOfBirth : String? = null
+    var placeOfBirth: String? = null
         private set
-    var permanentAddress : String? = null
+    var permanentAddress: String? = null
         private set
-    var telephone : String? = null
+    var telephone: String? = null
         private set
-    var profession : String? = null
+    var profession: String? = null
         private set
-    var title : String? = null
+    var title: String? = null
         private set
-    var personalSummary : String? = null
+    var personalSummary: String? = null
         private set
-    var custodyInformation : String? = null
+    var custodyInformation: String? = null
         private set
-    var otherTDNumbers : Array<String>? = null
+    var otherTDNumbers: Array<String>? = null
         private set
-    var image : Bitmap? = null
+    var image: Bitmap? = null
         private set
-    var otherNames : Array<String>? = null
+    var otherNames: Array<String>? = null
         private set
 
     /**
@@ -94,18 +99,36 @@ class DG11 : ElementaryFileTemplate() {
             if (tag.tag.size == 2) {
                 if (tag.tag[0] == MULTIPLE_BYTES_TAG) {
                     when (tag.tag[1]) {
-                        FULL_NAME -> fullName = tag.value?.decodeToString()?.replace('<', ' ')
-                        PERSONAL_NUMBER -> personalNumber = tag.value?.decodeToString()
-                        BIRTHDATE -> fullDateOfBirth = tag.value?.decodeToString()
-                        BIRTH_PLACE -> placeOfBirth = tag.value?.decodeToString()?.replace('<', ' ')
-                        PERMANENT_ADDRESS -> permanentAddress = tag.value?.decodeToString()?.replace('<', ' ')
-                        TELEPHONE_NUMBER -> telephone = tag.value?.decodeToString()
-                        PROFESSION -> profession = tag.value?.decodeToString()
-                        TITLE -> title = tag.value?.decodeToString()
-                        PERSONAL_SUMMARY -> personalSummary = tag.value?.decodeToString()
-                        IMAGE -> decodeImage(tag)
-                        DOCUMENT_NUMBERS -> decodeDocumentNumbers(tag)
-                        CUSTODY_INFORMATION -> custodyInformation = tag.value?.decodeToString()
+                        FULL_NAME ->
+                            fullName = tag.value?.
+                                decodeToString()?.
+                                replace(FILLER_CHARACTER, ' ')
+                        PERSONAL_NUMBER ->
+                            personalNumber = tag.value?.decodeToString()
+                        BIRTHDATE ->
+                            fullDateOfBirth = tag.value?.decodeToString()
+                        BIRTH_PLACE ->
+                            placeOfBirth = tag.value?.
+                                decodeToString()?.
+                                replace(FILLER_CHARACTER, ' ')
+                        PERMANENT_ADDRESS ->
+                            permanentAddress = tag.value?.
+                                decodeToString()?.
+                                replace(FILLER_CHARACTER, ' ')
+                        TELEPHONE_NUMBER ->
+                            telephone = tag.value?.decodeToString()
+                        PROFESSION ->
+                            profession = tag.value?.decodeToString()
+                        TITLE ->
+                            title = tag.value?.decodeToString()
+                        PERSONAL_SUMMARY ->
+                            personalSummary = tag.value?.decodeToString()
+                        IMAGE ->
+                            decodeImage(tag)
+                        DOCUMENT_NUMBERS ->
+                            decodeDocumentNumbers(tag)
+                        CUSTODY_INFORMATION ->
+                            custodyInformation = tag.value?.decodeToString()
                     }
                 }
             } else if (tag.tag.size ==1) {
@@ -123,15 +146,19 @@ class DG11 : ElementaryFileTemplate() {
      *
      * @param names A TLV structure containing additional names of the document holder
      */
-    private fun readNames(names : TLV) {
-        if (names.list == null || names.list!!.tlvSequence.size < 2) {
+    private fun readNames(names: TLV) {
+        if (names.list == null || names.list!!.tlvSequence.size < NAMES_MIN_SEQUENCE) {
             return
         }
         val list = ArrayList<String>()
         val tlv = names.list!!.tlvSequence
         for (i in 1..<tlv.size) {
             if (tlv[i].value != null) {
-                list.add(tlv[i].value!!.decodeToString().replace('<', ' '))
+                list.add(
+                    tlv[i].value!!.
+                        decodeToString().
+                        replace(FILLER_CHARACTER, ' ')
+                )
             }
         }
         otherNames = list.toTypedArray()
@@ -142,9 +169,17 @@ class DG11 : ElementaryFileTemplate() {
      *
      * @param image A TLV structure containing an image
      */
-    private fun decodeImage(image : TLV) {
+    private fun decodeImage(image: TLV) {
         if (image.value == null) return
-        this.image = BitmapFactory.decodeByteArray(image.value!!, 0, image.value!!.size)
+        try {
+            this.image = BitmapFactory.decodeByteArray(
+                image.value!!,
+                0,
+                image.value!!.size
+            )
+        }catch (_: Exception) {
+            Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_DECODE_IMAGE)
+        }
     }
 
     /**
@@ -156,6 +191,9 @@ class DG11 : ElementaryFileTemplate() {
         if (numbers.value == null || numbers.value!!.isEmpty()) {
             return
         }
-        otherTDNumbers = numbers.value!!.decodeToString().split('<').toTypedArray()
+        otherTDNumbers = numbers.value!!.
+            decodeToString().
+            split(FILLER_CHARACTER).
+            toTypedArray()
     }
 }

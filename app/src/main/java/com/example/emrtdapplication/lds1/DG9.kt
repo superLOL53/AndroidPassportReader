@@ -14,7 +14,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property efTag The tag of the DG2 file
  *
  */
-class DG9 : ElementaryFilesTypeTemplate<TLV>() {
+class DG9: ElementaryFilesTypeTemplate<TLV>() {
 
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG9_SHORT_EF_ID

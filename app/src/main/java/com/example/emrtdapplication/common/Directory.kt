@@ -1,24 +1,13 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.DirectoryConstants.ADDITIONAL_BIOMETRICS_APPLICATION_ID
-import com.example.emrtdapplication.constants.DirectoryConstants.AID
-import com.example.emrtdapplication.constants.DirectoryConstants.AID_LENGTH
-import com.example.emrtdapplication.constants.DirectoryConstants.DIR_ID_1
-import com.example.emrtdapplication.constants.DirectoryConstants.DIR_ID_2
-import com.example.emrtdapplication.constants.DirectoryConstants.LDS1_ID_1
-import com.example.emrtdapplication.constants.DirectoryConstants.LDS1_ID_2
-import com.example.emrtdapplication.constants.DirectoryConstants.LDS2_ID
-import com.example.emrtdapplication.constants.DirectoryConstants.TEMPLATE_LENGTH
-import com.example.emrtdapplication.constants.DirectoryConstants.TRAVEL_RECORDS_APPLICATION_ID
-import com.example.emrtdapplication.constants.DirectoryConstants.VISA_RECORDS_APPLICATION_ID
-import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
-import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
-import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
+import com.example.emrtdapplication.FILE_SUCCESSFUL_READ
+import com.example.emrtdapplication.FILE_UNABLE_TO_READ
+import com.example.emrtdapplication.FILE_UNABLE_TO_SELECT
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.APPLICATION_TEMPLATE
 import com.example.emrtdapplication.constants.TlvTags.INTERNATIONAL_AID
 import com.example.emrtdapplication.utils.APDU
@@ -27,11 +16,72 @@ import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
 /**
+ * First byte of the file identifier for EF.DIR
+ */
+const val DIR_ID_1: Byte = 0x2F
+
+/**
+ * Second byte of the file identifier for EF.DIR
+ */
+const val DIR_ID_2: Byte = 0x00
+
+/**
+ * Length for a TLV holding an application identifier
+ */
+const val TEMPLATE_LENGTH = 9
+
+/**
+ * Length of application identifiers
+ */
+const val AID_LENGTH = 7
+
+/**
+ * Identifier for eMRTD applications
+ */
+const val AID = "A000000247"
+
+/**
+ * First byte of the LDS1 application identifier
+ */
+const val LDS1_ID_1: Byte = 0x10
+
+/**
+ * Second byte of the LDS1 application identifier
+ */
+const val LDS1_ID_2: Byte = 0x01
+
+/**
+ * LDS2 application identifier
+ */
+const val LDS2_ID: Byte = 0x20
+
+/**
+ * Application identifier Travel Records application
+ */
+const val TRAVEL_RECORDS_APPLICATION_ID: Byte = 0x01
+
+/**
+ * Application identifier Visa Records application
+ */
+const val VISA_RECORDS_APPLICATION_ID: Byte = 0x02
+
+/**
+ * Application identifier Additional Biometrics application
+ */
+const val ADDITIONAL_BIOMETRICS_APPLICATION_ID: Byte = 0x03
+const val AID_EQUAL_LENGTH = 4
+const val LDS_ID_INDEX_1 = 5
+const val LDS_ID_INDEX_2 = 6
+
+/**
  * Implements the EF.DIR file. Required if LDS2 applications are supported
  *
- * @property hasTravelRecordsApplication Indicates if the eMRTD supports the Travel Records application
- * @property hasVisaRecordsApplication Indicates if the eMRTD supports the Visa Record application
- * @property hasAdditionalBiometricsApplication Indicates if the eMRTD supports the Additional Biometric application
+ * @property hasTravelRecordsApplication Indicates if the eMRTD
+ * supports the Travel Records application
+ * @property hasVisaRecordsApplication Indicates if the eMRTD
+ * supports the Visa Record application
+ * @property hasAdditionalBiometricsApplication Indicates if
+ * the eMRTD supports the Additional Biometric application
  */
 class Directory() {
     var hasTravelRecordsApplication = false
@@ -41,7 +91,7 @@ class Directory() {
     var hasAdditionalBiometricsApplication = false
         private set
 
-    constructor(byteArray: ByteArray) : this() {
+    constructor(byteArray: ByteArray): this() {
         parseData(byteArray)
     }
 
@@ -49,7 +99,7 @@ class Directory() {
      * Reading the EF.DIR file from the eMRTD
      * @return [FILE_UNABLE_TO_SELECT], [FILE_UNABLE_TO_READ] or [SUCCESS]
      */
-    fun read() : Int {
+    fun read(): Int {
         var info = APDUControl.sendAPDU(APDU(
             NfcClassByte.ZERO,
             NfcInsByte.SELECT,
@@ -72,9 +122,10 @@ class Directory() {
 
     /**
      * Parses the data from the EF.DIR file. Currently not implemented
-     * @return [FILE_SUCCESSFUL_READ] if the file was parsed correctly, otherwise [FILE_UNABLE_TO_READ]
+     * @return [FILE_SUCCESSFUL_READ] if the file was parsed correctly
+     * otherwise [FILE_UNABLE_TO_READ]
      */
-    private fun parseData(byteArray: ByteArray) :Int {
+    private fun parseData(byteArray: ByteArray):Int {
         var tlv: TLV
         var l = 0
         do {
@@ -90,30 +141,54 @@ class Directory() {
     /**
      * Parses the content of the file
      * @param tlv The TLV structure containing the file content
-     * @return [FILE_UNABLE_TO_READ] if the content cannot be parsed correctly, otherwise [SUCCESS]
+     * @return [FILE_UNABLE_TO_READ] if the content cannot be parsed correctly
+     * otherwise [SUCCESS]
      */
-    private fun parseTLV(tlv: TLV) : Int {
-        if (!tlv.isValid || tlv.tag.size != 1 || tlv.tag[0] != APPLICATION_TEMPLATE || tlv.length != TEMPLATE_LENGTH || tlv.list == null || tlv.list!!.tlvSequence.size != 1) {
+    private fun parseTLV(tlv: TLV): Int {
+        if (!tlv.isValid ||
+            tlv.tag.size != 1 ||
+            tlv.tag[0] != APPLICATION_TEMPLATE ||
+            tlv.length != TEMPLATE_LENGTH ||
+            tlv.list == null ||
+            tlv.list!!.tlvSequence.size != 1
+        ) {
             return FILE_UNABLE_TO_READ
         }
         val innerTLV = tlv.list!!.tlvSequence[0]
-        if (!innerTLV.isValid || innerTLV.tag.size != 1 || innerTLV.tag[0] != INTERNATIONAL_AID || innerTLV.length != AID_LENGTH) {
+        if (!innerTLV.isValid ||
+            innerTLV.tag.size != 1 ||
+            innerTLV.tag[0] != INTERNATIONAL_AID ||
+            innerTLV.length != AID_LENGTH
+        ) {
             return FILE_UNABLE_TO_READ
         }
-        if (!innerTLV.value!!.slice(0..4).toByteArray().contentEquals(BigInteger(AID, 16).toByteArray().slice(1..5).toByteArray())) {
+        if (!innerTLV.value!!.slice(
+                0..AID_EQUAL_LENGTH
+            ).
+            toByteArray().
+            contentEquals(
+                BigInteger(AID, 16).
+                toByteArray().
+                slice(1..AID_EQUAL_LENGTH+1).
+                toByteArray()
+            )
+        ) {
             return FILE_UNABLE_TO_READ
         }
-        when (innerTLV.value?.get(5)) {
+        when (innerTLV.value?.get(LDS_ID_INDEX_1)) {
             LDS1_ID_1 -> {
-                if (innerTLV.value!![6] != LDS1_ID_2) {
+                if (innerTLV.value!![LDS_ID_INDEX_2] != LDS1_ID_2) {
                     return FILE_UNABLE_TO_READ
                 }
             }
             LDS2_ID -> {
-                when (innerTLV.value!![6]) {
-                    TRAVEL_RECORDS_APPLICATION_ID -> hasTravelRecordsApplication = true
-                    VISA_RECORDS_APPLICATION_ID -> hasVisaRecordsApplication = true
-                    ADDITIONAL_BIOMETRICS_APPLICATION_ID -> hasAdditionalBiometricsApplication = true
+                when (innerTLV.value!![LDS_ID_INDEX_2]) {
+                    TRAVEL_RECORDS_APPLICATION_ID ->
+                        hasTravelRecordsApplication = true
+                    VISA_RECORDS_APPLICATION_ID ->
+                        hasVisaRecordsApplication = true
+                    ADDITIONAL_BIOMETRICS_APPLICATION_ID ->
+                        hasAdditionalBiometricsApplication = true
                 }
             }
         }

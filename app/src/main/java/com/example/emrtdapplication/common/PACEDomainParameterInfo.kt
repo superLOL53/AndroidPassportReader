@@ -1,16 +1,16 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.constants.SecurityInfoConstants.PACE_DOMAIN_PARAMETER_INFO_TYPE
-import com.example.emrtdapplication.utils.TLV
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x509.AlgorithmIdentifier
 import java.math.BigInteger
 
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence PACEDomainParameterInfo:
  *
- *      PACEDomainParameterInfo ::= SEQUENCE {
+ *      PACEDomainParameterInfo::= SEQUENCE {
  *              protocol OBJECT IDENTIFIER(
  *                      id-PACE-DH-GM |
  *                      id-PACE-ECDH-GM |
@@ -25,18 +25,25 @@ import java.math.BigInteger
  * @property parameterId The ID of the cryptographic domain parameters
  * @property algorithmIdentifier ASN1 Algorithm Identifier
  */
-class PACEDomainParameterInfo(tlv: TLV) : SecurityInfo(tlv, PACE_DOMAIN_PARAMETER_INFO_TYPE) {
-    val parameterId : BigInteger?
-    val algorithmIdentifier : AlgorithmIdentifier
+class PACEDomainParameterInfo(
+    tlv: TLV
+): SecurityInfo(tlv, PACE_DOMAIN_PARAMETER_INFO_TYPE) {
+    val parameterId: BigInteger?
+    val algorithmIdentifier: AlgorithmIdentifier
 
     init {
         try {
-            algorithmIdentifier = AlgorithmIdentifier.getInstance(requiredData.toByteArray())
-        } catch (_ : Exception) {
-            throw IllegalArgumentException("Required data does not contain an AlgorithmIdentifier!")
+            algorithmIdentifier = AlgorithmIdentifier.getInstance(
+                requiredData.toByteArray()
+            )
+        } catch (_: Exception) {
+            throw IllegalArgumentException(ILLEGAL_REQUIRED_DATA_CHIP_AUTHENTICATION_PUBLIC_KEY)
         }
-        parameterId = if (optionalData == null || optionalData.tag.size != 1 || optionalData.tag[0] != TlvTags.INTEGER ||
-            optionalData.value == null) {
+        parameterId = if (optionalData == null ||
+            optionalData.tag.size != 1 ||
+            optionalData.tag[0] != TlvTags.INTEGER ||
+            optionalData.value == null
+        ) {
             null
         } else {
             BigInteger(optionalData.value!!)

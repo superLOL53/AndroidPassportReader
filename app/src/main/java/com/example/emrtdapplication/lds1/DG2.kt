@@ -1,10 +1,10 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.biometrics.BiometricInformationGroupTemplate
 import com.example.emrtdapplication.biometrics.BiometricType
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG2_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG2_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
@@ -17,11 +17,11 @@ import com.example.emrtdapplication.utils.TLV
  * @property efTag The tag of the DG2 file
  *
  */
-class DG2 : ElementaryFileTemplate() {
+class DG2: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier: Byte = DG2_SHORT_EF_ID
     override val efTag: Byte = DG2_FILE_TAG
-    var biometricInformation : BiometricInformationGroupTemplate? = null
+    var biometricInformation: BiometricInformationGroupTemplate? = null
         private set
 
     /**
@@ -41,8 +41,12 @@ class DG2 : ElementaryFileTemplate() {
         }
         tlv = tlv.list!!.tlvSequence[0]
         try {
-            biometricInformation = BiometricInformationGroupTemplate(tlv, BiometricType.FACE)
-            isParsed = biometricInformation != null && !biometricInformation!!.biometricInformationList.isNullOrEmpty()
+            biometricInformation = BiometricInformationGroupTemplate(
+                tlv,
+                BiometricType.FACE
+            )
+            isParsed = biometricInformation != null &&
+                    !biometricInformation!!.biometricInformationList.isNullOrEmpty()
         } catch (_: IllegalArgumentException){
             isParsed = false
         }

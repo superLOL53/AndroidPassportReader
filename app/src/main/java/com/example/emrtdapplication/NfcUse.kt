@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.constants
+package com.example.emrtdapplication
 
 /**
  * Enum class for NFC types. eMRTD uses ISO DEP as communication protocol. All others are insufficient and not used.

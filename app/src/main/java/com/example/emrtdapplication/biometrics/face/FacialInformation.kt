@@ -1,50 +1,51 @@
 package com.example.emrtdapplication.biometrics.face
 
-import com.example.emrtdapplication.constants.BALD_STRING
-import com.example.emrtdapplication.constants.BLACK_STRING
-import com.example.emrtdapplication.constants.BLONDE_STRING
-import com.example.emrtdapplication.constants.BLUE_STRING
-import com.example.emrtdapplication.constants.BROWN_STRING
-import com.example.emrtdapplication.constants.BYTE_BIT_SIZE
-import com.example.emrtdapplication.constants.CLOSED_SMILE_STRING
-import com.example.emrtdapplication.constants.EYES_LOOKING_AWAY_STRING
-import com.example.emrtdapplication.constants.FEMALE_STRING
-import com.example.emrtdapplication.constants.FROWNING_STRING
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_EXPRESSION_LOW_BYTE
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_EYE_COLOR_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_MASK_INDEX_1
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_MASK_INDEX_2
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_MASK_INDEX_3
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_GENDER_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_HAIR_COLOR_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_END_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_START_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_SIZE
-import com.example.emrtdapplication.constants.FacialInformationConstants.FACIAL_INFORMATION_SIZE_STRING
-import com.example.emrtdapplication.constants.GRAY_STRING
-import com.example.emrtdapplication.constants.GREEN_STRING
-import com.example.emrtdapplication.constants.MALE_STRING
-import com.example.emrtdapplication.constants.MULTI_COLOURED_STRING
-import com.example.emrtdapplication.constants.NEUTRAL_STRING
-import com.example.emrtdapplication.constants.PINK_STRING
-import com.example.emrtdapplication.constants.RAISED_EYEBROWS_STRING
-import com.example.emrtdapplication.constants.RED_STRING
-import com.example.emrtdapplication.constants.RESERVED_STRING
-import com.example.emrtdapplication.constants.SMILE_STRING
-import com.example.emrtdapplication.constants.SQUINTING_STRING
-import com.example.emrtdapplication.constants.UNKNOWN_STRING
-import com.example.emrtdapplication.constants.UNSPECIFIED_STRING
-import com.example.emrtdapplication.constants.VENDOR_SPECIFIC_STRING
-import com.example.emrtdapplication.constants.WHITE_STRING
+import com.example.emrtdapplication.BALD_STRING
+import com.example.emrtdapplication.BLACK_STRING
+import com.example.emrtdapplication.BLONDE_STRING
+import com.example.emrtdapplication.BLUE_STRING
+import com.example.emrtdapplication.BROWN_STRING
+import com.example.emrtdapplication.BYTE_BIT_SIZE
+import com.example.emrtdapplication.CLOSED_SMILE_STRING
+import com.example.emrtdapplication.EYES_LOOKING_AWAY_STRING
+import com.example.emrtdapplication.FEMALE_STRING
+import com.example.emrtdapplication.FROWNING_STRING
+import com.example.emrtdapplication.GRAY_STRING
+import com.example.emrtdapplication.GREEN_STRING
+import com.example.emrtdapplication.MALE_STRING
+import com.example.emrtdapplication.MULTI_COLOURED_STRING
+import com.example.emrtdapplication.NEUTRAL_STRING
+import com.example.emrtdapplication.PINK_STRING
+import com.example.emrtdapplication.RAISED_EYEBROWS_STRING
+import com.example.emrtdapplication.RED_STRING
+import com.example.emrtdapplication.RESERVED_STRING
+import com.example.emrtdapplication.SMILE_STRING
+import com.example.emrtdapplication.SQUINTING_STRING
+import com.example.emrtdapplication.UNKNOWN_STRING
+import com.example.emrtdapplication.UNSPECIFIED_STRING
+import com.example.emrtdapplication.VENDOR_SPECIFIC_STRING
+import com.example.emrtdapplication.WHITE_STRING
+
+const val FACIAL_INFORMATION_SIZE = 20
+const val FACIAL_INFORMATION_SIZE_STRING = "Size of Facial Information must be ${FACIAL_INFORMATION_SIZE}!"
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1 = 0
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2 = 1
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3 = 2
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4 = 3
+const val FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1 = 4
+const val FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2 = 5
+const val FACIAL_INFORMATION_GENDER_INDEX = 6
+const val FACIAL_INFORMATION_EYE_COLOR_INDEX = 7
+const val FACIAL_INFORMATION_HAIR_COLOR_INDEX = 8
+const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_1 = 9
+const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_2 = 10
+const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_3 = 11
+const val FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE = 12
+const val FACIAL_INFORMATION_EXPRESSION_LOW_BYTE = 13
+const val FACIAL_INFORMATION_POSE_ANGLE_START_INDEX = 14
+const val FACIAL_INFORMATION_POSE_ANGLE_END_INDEX = 16
+const val FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX = 17
+const val FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX = 19
 
 /**
  * Class representing facial information in a facial data record according to ISO/IEC 19794-5
@@ -58,35 +59,69 @@ import com.example.emrtdapplication.constants.WHITE_STRING
  * @property expression Facial expression of the person in the image
  * @property poseAngle The angle from which the image was taken
  * @property poseAngleUncertainty The uncertainty of the shooting angles
- * @throws IllegalArgumentException If [facialInformation] does not contain an encoded facial information
+ * @throws IllegalArgumentException If [facialInformation]
+ * does not contain an encoded facial information
  */
 class FacialInformation(facialInformation: ByteArray) {
-    val faceImageBlockLength : Int
-    val featurePoints : Int
-    val gender : String
+    val faceImageBlockLength: Int
+    val featurePoints: Int
+    val gender: String
     val eyeColor: String
-    val hairColor : String
-    val featureMask : Int
-    val expression : String
-    val poseAngle : ByteArray
-    val poseAngleUncertainty : ByteArray
+    val hairColor: String
+    val featureMask: Int
+    val expression: String
+    val poseAngle: ByteArray
+    val poseAngleUncertainty: ByteArray
 
     init {
         if (facialInformation.size != FACIAL_INFORMATION_SIZE) {
             throw IllegalArgumentException(FACIAL_INFORMATION_SIZE_STRING)
         }
-        faceImageBlockLength = (facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1].toInt() shl (BYTE_BIT_SIZE*3)) + (facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2].toInt() shl (BYTE_BIT_SIZE*2)) + (facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3].toInt() shl BYTE_BIT_SIZE)+facialInformation[FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4]
-        featurePoints = (facialInformation[FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1].toInt() shl BYTE_BIT_SIZE) + facialInformation[FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2]
+        faceImageBlockLength = (facialInformation[
+                FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1
+            ].toInt() shl (BYTE_BIT_SIZE*3)) +
+                (facialInformation[
+                    FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2
+                ].toInt() shl (BYTE_BIT_SIZE*2)) +
+                (facialInformation[
+                    FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3
+                ].toInt() shl BYTE_BIT_SIZE) +
+                facialInformation[
+                    FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4
+                ]
+        featurePoints = (facialInformation[
+                FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1
+            ].toInt() shl BYTE_BIT_SIZE) +
+            facialInformation[
+                FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2
+            ]
         gender = setGender(facialInformation[FACIAL_INFORMATION_GENDER_INDEX])
         eyeColor = setEyeColor(facialInformation[FACIAL_INFORMATION_EYE_COLOR_INDEX])
         hairColor = setHairColor(facialInformation[FACIAL_INFORMATION_HAIR_COLOR_INDEX])
-        featureMask = (facialInformation[FACIAL_INFORMATION_FEATURE_MASK_INDEX_1].toInt() shl (BYTE_BIT_SIZE*2)) + (facialInformation[FACIAL_INFORMATION_FEATURE_MASK_INDEX_2].toInt() shl BYTE_BIT_SIZE)+facialInformation[FACIAL_INFORMATION_FEATURE_MASK_INDEX_3]
-        expression = setExpression(facialInformation[FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE], facialInformation[FACIAL_INFORMATION_EXPRESSION_LOW_BYTE])
-        poseAngle = facialInformation.slice(FACIAL_INFORMATION_POSE_ANGLE_START_INDEX..FACIAL_INFORMATION_POSE_ANGLE_END_INDEX).toByteArray()
-        poseAngleUncertainty = facialInformation.slice(FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX..FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX).toByteArray()
+        featureMask = (facialInformation[
+                FACIAL_INFORMATION_FEATURE_MASK_INDEX_1
+            ].toInt() shl (BYTE_BIT_SIZE*2)) +
+                (facialInformation[
+                    FACIAL_INFORMATION_FEATURE_MASK_INDEX_2
+                ].toInt() shl BYTE_BIT_SIZE) +
+                facialInformation[
+                    FACIAL_INFORMATION_FEATURE_MASK_INDEX_3
+                ]
+        expression = setExpression(
+            facialInformation[FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE],
+            facialInformation[FACIAL_INFORMATION_EXPRESSION_LOW_BYTE]
+        )
+        poseAngle = facialInformation.slice(
+            FACIAL_INFORMATION_POSE_ANGLE_START_INDEX..
+                    FACIAL_INFORMATION_POSE_ANGLE_END_INDEX
+        ).toByteArray()
+        poseAngleUncertainty = facialInformation.slice(
+            FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX..
+                    FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX
+        ).toByteArray()
     }
 
-    private fun setGender(gender: Byte) : String {
+    private fun setGender(gender: Byte): String {
         return when (gender) {
             0.toByte() -> UNSPECIFIED_STRING
             1.toByte() -> MALE_STRING
@@ -96,7 +131,7 @@ class FacialInformation(facialInformation: ByteArray) {
         }
     }
 
-    private fun setEyeColor(color: Byte) : String {
+    private fun setEyeColor(color: Byte): String {
         return when (color) {
             0.toByte() -> UNSPECIFIED_STRING
             1.toByte() -> BLACK_STRING
@@ -110,7 +145,7 @@ class FacialInformation(facialInformation: ByteArray) {
         }
     }
 
-    private fun setHairColor(color: Byte) : String {
+    private fun setHairColor(color: Byte): String {
         return when (color) {
             0.toByte() -> UNSPECIFIED_STRING
             1.toByte() -> BALD_STRING
@@ -126,7 +161,7 @@ class FacialInformation(facialInformation: ByteArray) {
         }
     }
 
-    private fun setExpression(highByte: Byte, lowByte: Byte) : String {
+    private fun setExpression(highByte: Byte, lowByte: Byte): String {
         if (highByte == 0.toByte()) {
             return when (lowByte) {
                 0.toByte() -> UNSPECIFIED_STRING

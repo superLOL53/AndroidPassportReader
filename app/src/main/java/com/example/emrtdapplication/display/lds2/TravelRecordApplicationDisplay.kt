@@ -11,8 +11,8 @@ import com.example.emrtdapplication.R
 import com.example.emrtdapplication.display.lds2.records.CertificateRecordDisplay
 import com.example.emrtdapplication.display.lds2.records.EntryExitRecordDisplay
 
-object TravelRecordApplicationDisplay : CreateView() {
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+object TravelRecordApplicationDisplay: CreateView() {
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.travelRecords.isPresent) {
             createEntryRecordsView(context, parent)
             createExitRecordsView(context, parent)
@@ -25,7 +25,9 @@ object TravelRecordApplicationDisplay : CreateView() {
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
             view.gravity = Gravity.CENTER
-            view.text = context.getString(R.string.application_is_not_implemented_on_the_emrtd)
+            view.text = context.getString(
+                R.string.application_is_not_implemented_on_the_emrtd
+            )
             parent.addView(view)
         }
     }
@@ -36,7 +38,7 @@ object TravelRecordApplicationDisplay : CreateView() {
      *
      * @param view The parent for which views for an Entry Record are generated
      */
-    private fun createEntryRecordsView(context : Context, view: View) {
+    private fun createEntryRecordsView(context: Context, view: View) {
         val entryRecordLayout = view.findViewById<LinearLayout>(R.id.entry_records)
         if (EMRTD.travelRecords.entryRecords.isNullOrEmpty()) {
             val unableReadView = TextView(context)
@@ -44,12 +46,17 @@ object TravelRecordApplicationDisplay : CreateView() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            unableReadView.text = context.getString(R.string.unable_to_read_file_from_passport)
+            unableReadView.text = context.getString(
+                R.string.unable_to_read_file_from_passport
+            )
             entryRecordLayout.addView(unableReadView)
             return
         }
         for (entryRecord in EMRTD.travelRecords.entryRecords) {
-            EntryExitRecordDisplay(entryRecord, true).createView(context, entryRecordLayout)
+            EntryExitRecordDisplay(
+                entryRecord,
+                true
+            ).createView(context, entryRecordLayout)
         }
     }
 
@@ -71,7 +78,10 @@ object TravelRecordApplicationDisplay : CreateView() {
             return
         }
         for (exitRecord in EMRTD.travelRecords.exitRecords) {
-            EntryExitRecordDisplay(exitRecord, false).createView(context, exitRecordLayout)
+            EntryExitRecordDisplay(
+                exitRecord,
+                false
+            ).createView(context, exitRecordLayout)
         }
     }
 
@@ -80,8 +90,9 @@ object TravelRecordApplicationDisplay : CreateView() {
      *
      * @param view The parent for which views for a Certificate Record are generated
      */
-    private fun createCertificateRecordsView(context : Context, view: View) {
-        val certificateRecordsLayout = view.findViewById<LinearLayout>(R.id.travel_certificate_records)
+    private fun createCertificateRecordsView(context: Context, view: View) {
+        val certificateRecordsLayout =
+            view.findViewById<LinearLayout>(R.id.travel_certificate_records)
         if (EMRTD.travelRecords.certificateRecords.isNullOrEmpty()) {
             val unableReadView = TextView(context)
             unableReadView.layoutParams = LinearLayout.LayoutParams(
@@ -93,7 +104,10 @@ object TravelRecordApplicationDisplay : CreateView() {
             return
         }
         for (certificateRecord in EMRTD.travelRecords.certificateRecords) {
-            CertificateRecordDisplay(certificateRecord).createView(context, certificateRecordsLayout)
+            CertificateRecordDisplay(certificateRecord).createView(
+                context,
+                certificateRecordsLayout
+            )
         }
     }
 }

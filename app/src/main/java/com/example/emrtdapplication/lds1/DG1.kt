@@ -1,17 +1,78 @@
 package com.example.emrtdapplication.lds1
 
 import android.util.Log
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.DG1Constants.TD1_SIZE
-import com.example.emrtdapplication.constants.DG1Constants.TD2_SIZE
-import com.example.emrtdapplication.constants.DG1Constants.TD3_SIZE
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.FILLER_CHARACTER
+import com.example.emrtdapplication.MESSAGE_STRING
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG1_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG1_SHORT_EF_ID
 import com.example.emrtdapplication.constants.TlvTags.MRZ
 import com.example.emrtdapplication.constants.TlvTags.MULTIPLE_BYTES_TAG
 import com.example.emrtdapplication.utils.TLV
+
+const val TD1_SIZE = 90
+const val TD2_SIZE = 72
+const val TD3_SIZE = 88
+const val DOCUMENT_CODE_START_INDEX = 0
+const val DOCUMENT_CODE_END_INDEX = 1
+const val ISSUER_CODE_START_INDEX = 2
+const val ISSUER_CODE_END_INDEX = 4
+const val HOLDER_NAME_START_INDEX = 5
+const val HOLDER_NAME_TD3_END_INDEX = 43
+const val DOCUMENT_NUMBER_TD3_START_INDEX = 44
+const val DOCUMENT_NUMBER_TD3_END_INDEX = 52
+const val CHECK_DIGIT_DOCUMENT_NUMBER_TD3_INDEX = 53
+const val NATIONALITY_TD3_START_INDEX = 54
+const val NATIONALITY_TD3_END_INDEX = 56
+const val BIRTH_DATE_TD3_START_INDEX = 57
+const val BIRTH_DATE_TD3_END_INDEX = 62
+const val CHECK_DIGIT_BIRTH_DATE_TD3_INDEX = 63
+const val SEX_TD3_INDEX = 64
+const val EXPIRATION_DATE_TD3_START_INDEX = 65
+const val EXPIRATION_DATE_TD3_END_INDEX = 70
+const val CHECK_DIGIT_EXPIRATION_DATE_TD3_INDEX = 71
+const val OPTIONAL_DATA_TD3_START_INDEX = 72
+const val OPTIONAL_DATA_TD3_END_INDEX = 85
+const val CHECK_DIGIT_TD3_INDEX = 86
+const val COMPOSITE_CHECK_DIGIT_TD3_INDEX = 87
+const val HOLDER_NAME_TD2_END_INDEX = 35
+const val DOCUMENT_NUMBER_TD2_START_INDEX = 36
+const val DOCUMENT_NUMBER_TD2_END_INDEX = 44
+const val CHECK_DIGIT_DOCUMENT_NUMBER_TD2 = 45
+const val NATIONALITY_TD2_START_INDEX = 46
+const val NATIONALITY_TD2_END_INDEX = 48
+const val BIRTH_DATE_TD2_START_INDEX = 49
+const val BIRTH_DATE_TD2_END_INDEX = 54
+const val CHECK_DIGIT_BIRTH_DATE_TD2 = 55
+const val SEX_TD2_INDEX = 56
+const val EXPIRATION_DATE_TD2_START_INDEX = 57
+const val EXPIRATION_DATE_TD2_END_INDEX = 62
+const val CHECK_DIGIT_EXPIRATION_DATE_TD2_INDEX = 63
+const val OPTIONAL_DATA_TD2_START_INDEX = 64
+const val OPTIONAL_DATA_TD2_END_INDEX = 70
+const val COMPOSITE_CHECK_DIGIT_TD2_INDEX = 71
+const val DOCUMENT_NUMBER_TD1_START_INDEX = 5
+const val DOCUMENT_NUMBER_TD1_END_INDEX = 13
+const val CHECK_DIGIT_DOCUMENT_NUMBER_TD1 = 14
+const val OPTIONAL_DATA_DOCUMENT_NUMBER_TD1_START_INDEX = 15
+const val OPTIONAL_DATA_DOCUMENT_NUMBER_TD1_END_INDEX = 29
+const val BIRTH_DATE_TD1_START_INDEX = 30
+const val BIRTH_DATE_TD1_END_INDEX = 35
+const val CHECK_DIGIT_BIRTH_DATE_TD1 = 36
+const val SEX_TD1_INDEX = 37
+const val EXPIRATION_DATE_TD1_START_INDEX = 38
+const val EXPIRATION_DATE_TD1_END_INDEX = 43
+const val CHECK_DIGIT_EXPIRATION_DATE_TD1_INDEX = 44
+const val NATIONALITY_TD1_START_INDEX = 45
+const val NATIONALITY_TD1_END_INDEX = 47
+const val OPTIONAL_DATA_TD1_START_INDEX = 48
+const val OPTIONAL_DATA_TD1_END_INDEX = 58
+const val COMPOSITE_CHECK_DIGIT_TD1_INDEX = 59
+const val HOLDER_NAME_TD1_START_INDEX = 60
+const val HOLDER_NAME_TD1_END_INDEX = 89
 
 /**
  * Implements the DG1 file
@@ -23,7 +84,8 @@ import com.example.emrtdapplication.utils.TLV
  * @property issuerCode The issuing State or organization
  * @property documentNumber The document number
  * @property checkDigitDocumentNumber The check digit of the [documentNumber]
- * @property optionalDataDocumentNumber Optional data or the least significant characters of the [documentNumber] if it exceeds 9 characters
+ * @property optionalDataDocumentNumber Optional data or the least significant
+ * characters of the [documentNumber] if it exceeds 9 characters
  * @property dateOfBirth The date of birth of the eMRTD holder
  * @property checkDigitDateOfBirth The check digit of the [dateOfBirth]
  * @property sex The sex of the eMRTD holder
@@ -38,33 +100,33 @@ class DG1: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG1_SHORT_EF_ID
     override val efTag = DG1_FILE_TAG
-    var documentCode : String? = null
+    var documentCode: String? = null
         private set
-    var issuerCode : String? = null
+    var issuerCode: String? = null
         private set
-    var documentNumber : String? = null
+    var documentNumber: String? = null
         private set
     var checkDigitDocumentNumber = 0.toChar()
         private set
-    var optionalDataDocumentNumber : String? = null
+    var optionalDataDocumentNumber: String? = null
         private set
-    var dateOfBirth : String? = null
+    var dateOfBirth: String? = null
         private set
     var checkDigitDateOfBirth = 0.toChar()
         private set
-    var sex : Char = 0.toChar()
+    var sex: Char = 0.toChar()
         private set
-    var dateOfExpiry : String? = null
+    var dateOfExpiry: String? = null
         private set
     var checkDigitDateOfExpiry = 0.toChar()
         private set
-    var nationality : String? = null
+    var nationality: String? = null
         private set
-    var optionalData : String? = null
+    var optionalData: String? = null
         private set
     var compositeCheckDigit = 0.toChar()
         private set
-    var holderName : String? = null
+    var holderName: String? = null
         private set
     var checkDigit = 0.toChar()
         private set
@@ -74,7 +136,7 @@ class DG1: ElementaryFileTemplate() {
      *
      * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
      */
-    override fun parse() : Int {
+    override fun parse(): Int {
         isParsed = false
         if (rawFileContent == null) {
             return FAILURE
@@ -87,8 +149,11 @@ class DG1: ElementaryFileTemplate() {
             return FAILURE
         }
         tlv = tlv.list!!.tlvSequence[0]
-        if (tlv.tag.size != 2 || tlv.tag[0] != MULTIPLE_BYTES_TAG || tlv.tag[1] != MRZ || tlv.value == null) {
-            return FAILURE
+        if (tlv.tag.size != 2 ||
+            tlv.tag[0] != MULTIPLE_BYTES_TAG ||
+            tlv.tag[1] != MRZ ||
+            tlv.value == null) {
+                return FAILURE
         }
         val mrz = tlv.value!!
         try {
@@ -99,7 +164,7 @@ class DG1: ElementaryFileTemplate() {
                 else -> FAILURE
             }
         } catch (e: Exception) {
-            Log.d("Failure", "Message: " + e.message)
+            Log.i(ANDROID_LOG_INFO_TAG, MESSAGE_STRING + e.message)
             return FAILURE
         }
         isParsed = true
@@ -112,21 +177,80 @@ class DG1: ElementaryFileTemplate() {
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
-    private fun decodeTD1MRZ(mrz : ByteArray) {
-        documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
-        issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
-        documentNumber = mrz.slice(5..13).toByteArray().decodeToString().replace("<", "")
-        checkDigitDocumentNumber = mrz[14].toInt().toChar()
-        optionalDataDocumentNumber = mrz.slice(15..29).toByteArray().decodeToString().replace("<", "")
-        dateOfBirth = mrz.slice(30..35).toByteArray().decodeToString().replace("<", "")
-        checkDigitDateOfBirth = mrz[36].toInt().toChar()
-        sex = mrz[37].toInt().toChar()
-        dateOfExpiry = mrz.slice(38..43).toByteArray().decodeToString().replace("<", "")
-        checkDigitDateOfExpiry = mrz[44].toInt().toChar()
-        nationality = mrz.slice(45..47).toByteArray().decodeToString().replace("<", "")
-        optionalData = mrz.slice(48..58).toByteArray().decodeToString().replace("<", "")
-        compositeCheckDigit = mrz[59].toInt().toChar()
-        holderName = mrz.slice(60..89).toByteArray().decodeToString().replace("<", " ").trim()
+    private fun decodeTD1MRZ(mrz: ByteArray) {
+        documentCode =
+            mrz.slice(DOCUMENT_CODE_START_INDEX..
+                    DOCUMENT_CODE_END_INDEX).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        issuerCode =
+            mrz.slice(ISSUER_CODE_START_INDEX..
+                    ISSUER_CODE_END_INDEX).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        documentNumber =
+            mrz.slice(DOCUMENT_NUMBER_TD1_START_INDEX..
+                    DOCUMENT_NUMBER_TD1_END_INDEX).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDocumentNumber =
+            mrz[CHECK_DIGIT_DOCUMENT_NUMBER_TD1].toInt().toChar()
+        optionalDataDocumentNumber =
+            mrz.slice(
+                OPTIONAL_DATA_DOCUMENT_NUMBER_TD1_START_INDEX..
+                        OPTIONAL_DATA_DOCUMENT_NUMBER_TD1_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        dateOfBirth =
+            mrz.slice(
+                BIRTH_DATE_TD1_START_INDEX..
+                    BIRTH_DATE_TD1_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDateOfBirth =
+            mrz[CHECK_DIGIT_BIRTH_DATE_TD1].toInt().toChar()
+        sex =
+            mrz[SEX_TD1_INDEX].toInt().toChar()
+        dateOfExpiry =
+            mrz.slice(
+                EXPIRATION_DATE_TD1_START_INDEX..
+                    EXPIRATION_DATE_TD1_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDateOfExpiry =
+            mrz[CHECK_DIGIT_EXPIRATION_DATE_TD1_INDEX].toInt().toChar()
+        nationality =
+            mrz.slice(
+                NATIONALITY_TD1_START_INDEX..
+                    NATIONALITY_TD1_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        optionalData =
+            mrz.slice(
+                OPTIONAL_DATA_TD1_START_INDEX..
+                    OPTIONAL_DATA_TD1_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        compositeCheckDigit =
+            mrz[COMPOSITE_CHECK_DIGIT_TD1_INDEX].toInt().toChar()
+        holderName =
+            mrz.slice(HOLDER_NAME_TD1_START_INDEX..HOLDER_NAME_TD1_END_INDEX).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER, ' ').trim()
     }
 
     /**
@@ -135,20 +259,81 @@ class DG1: ElementaryFileTemplate() {
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
-    private fun decodeTD2MRZ(mrz : ByteArray) {
-        documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
-        issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
-        holderName = mrz.slice(5..35).toByteArray().decodeToString().replace("<", " ").trim()
-        documentNumber = mrz.slice(36..44).toByteArray().decodeToString().replace("<", "")
-        checkDigitDocumentNumber = mrz[45].toInt().toChar()
-        nationality = mrz.slice(46..48).toByteArray().decodeToString().replace("<", "")
-        dateOfBirth = mrz.slice(49..54).toByteArray().decodeToString().replace("<", "")
-        checkDigitDateOfBirth = mrz[55].toInt().toChar()
-        sex = mrz[56].toInt().toChar()
-        dateOfExpiry = mrz.slice(57..62).toByteArray().decodeToString().replace("<", "")
-        checkDigitDateOfExpiry = mrz[63].toInt().toChar()
-        optionalData = mrz.slice(64..70).toByteArray().decodeToString().replace("<", "")
-        compositeCheckDigit = mrz[71].toInt().toChar()
+    private fun decodeTD2MRZ(mrz: ByteArray) {
+        documentCode =
+            mrz.slice(
+                DOCUMENT_CODE_START_INDEX..
+                        DOCUMENT_CODE_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        issuerCode =
+            mrz.slice(
+                ISSUER_CODE_START_INDEX..
+                        ISSUER_CODE_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        holderName =
+            mrz.slice(
+                HOLDER_NAME_START_INDEX..
+                        HOLDER_NAME_TD2_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER, ' ').trim()
+        documentNumber =
+            mrz.slice(
+                DOCUMENT_NUMBER_TD2_START_INDEX..
+                        DOCUMENT_NUMBER_TD2_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDocumentNumber =
+            mrz[CHECK_DIGIT_DOCUMENT_NUMBER_TD2].toInt().toChar()
+        nationality =
+            mrz.slice(
+                NATIONALITY_TD2_START_INDEX..
+                        NATIONALITY_TD2_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        dateOfBirth =
+            mrz.slice(
+                BIRTH_DATE_TD2_START_INDEX..
+                        BIRTH_DATE_TD2_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDateOfBirth =
+            mrz[CHECK_DIGIT_BIRTH_DATE_TD2].toInt().toChar()
+        sex =
+            mrz[SEX_TD2_INDEX].toInt().toChar()
+        dateOfExpiry =
+            mrz.slice(
+                EXPIRATION_DATE_TD2_START_INDEX..
+                        EXPIRATION_DATE_TD2_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDateOfExpiry =
+            mrz[CHECK_DIGIT_EXPIRATION_DATE_TD2_INDEX].toInt().toChar()
+        optionalData =
+            mrz.slice(
+                OPTIONAL_DATA_TD2_START_INDEX..
+                        OPTIONAL_DATA_TD2_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        compositeCheckDigit =
+            mrz[COMPOSITE_CHECK_DIGIT_TD2_INDEX].toInt().toChar()
     }
 
     /**
@@ -157,20 +342,82 @@ class DG1: ElementaryFileTemplate() {
      * @param mrz The MRZ of the eMRTD
      * @return [SUCCESS]
      */
-    private fun decodeTD3MRZ(mrz : ByteArray) {
-        documentCode = mrz.slice(0..1).toByteArray().decodeToString().replace("<", "")
-        issuerCode = mrz.slice(2..4).toByteArray().decodeToString().replace("<", "")
-        holderName = mrz.slice(5..43).toByteArray().decodeToString().replace("<", " ").trim()
-        documentNumber = mrz.slice(44..52).toByteArray().decodeToString().replace("<", "")
-        checkDigitDocumentNumber = mrz[53].toInt().toChar()
-        nationality = mrz.slice(54..56).toByteArray().decodeToString().replace("<", "")
-        dateOfBirth = mrz.slice(57..62).toByteArray().decodeToString().replace("<", "")
-        checkDigitDateOfBirth = mrz[63].toInt().toChar()
-        sex = mrz[64].toInt().toChar()
-        dateOfExpiry = mrz.slice(65..70).toByteArray().decodeToString().replace("<", "")
-        checkDigitDateOfExpiry = mrz[71].toInt().toChar()
-        optionalData = mrz.slice(72..85).toByteArray().decodeToString().replace("<", "")
-        checkDigit = mrz[86].toInt().toChar()
-        compositeCheckDigit = mrz[87].toInt().toChar()
+    private fun decodeTD3MRZ(mrz: ByteArray) {
+        documentCode =
+            mrz.slice(
+                DOCUMENT_CODE_START_INDEX..
+                        DOCUMENT_CODE_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        issuerCode =
+            mrz.slice(
+                ISSUER_CODE_START_INDEX..
+                        ISSUER_CODE_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        holderName =
+            mrz.slice(
+                HOLDER_NAME_START_INDEX..
+                        HOLDER_NAME_TD3_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER, ' ').trim()
+        documentNumber =
+            mrz.slice(
+                DOCUMENT_NUMBER_TD3_START_INDEX..
+                        DOCUMENT_NUMBER_TD3_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDocumentNumber =
+            mrz[CHECK_DIGIT_DOCUMENT_NUMBER_TD3_INDEX].toInt().toChar()
+        nationality =
+            mrz.slice(
+                NATIONALITY_TD3_START_INDEX..
+                        NATIONALITY_TD3_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        dateOfBirth =
+            mrz.slice(
+                BIRTH_DATE_TD3_START_INDEX..
+                        BIRTH_DATE_TD3_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDateOfBirth =
+            mrz[CHECK_DIGIT_BIRTH_DATE_TD3_INDEX].toInt().toChar()
+        sex =
+            mrz[SEX_TD3_INDEX].toInt().toChar()
+        dateOfExpiry =
+            mrz.slice(
+                EXPIRATION_DATE_TD3_START_INDEX..
+                        EXPIRATION_DATE_TD3_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigitDateOfExpiry =
+            mrz[CHECK_DIGIT_EXPIRATION_DATE_TD3_INDEX].toInt().toChar()
+        optionalData =
+            mrz.slice(
+                OPTIONAL_DATA_TD3_START_INDEX..
+                        OPTIONAL_DATA_TD3_END_INDEX
+            ).
+            toByteArray().
+            decodeToString().
+            replace(FILLER_CHARACTER.toString(), "")
+        checkDigit =
+            mrz[CHECK_DIGIT_TD3_INDEX].toInt().toChar()
+        compositeCheckDigit =
+            mrz[COMPOSITE_CHECK_DIGIT_TD3_INDEX].toInt().toChar()
     }
 }

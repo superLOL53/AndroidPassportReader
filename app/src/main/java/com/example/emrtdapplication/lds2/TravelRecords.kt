@@ -2,13 +2,43 @@ package com.example.emrtdapplication.lds2
 
 import com.example.emrtdapplication.ReadPassport
 import com.example.emrtdapplication.constants.TlvTags
-import com.example.emrtdapplication.constants.TravelRecordsConstants.APPLICATION_ID
-import com.example.emrtdapplication.constants.TravelRecordsConstants.ENTRY_RECORDS_ID_1
-import com.example.emrtdapplication.constants.TravelRecordsConstants.ENTRY_RECORDS_ID_2
-import com.example.emrtdapplication.constants.TravelRecordsConstants.EXIT_RECORDS_ID_1
-import com.example.emrtdapplication.constants.TravelRecordsConstants.EXIT_RECORDS_ID_2
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
+
+/**
+ * Travel Records application identifier
+ */
+const val APPLICATION_ID = "A0000002472001"
+
+/**
+ * First byte of the file identifier for Entry Records
+ */
+const val ENTRY_RECORDS_ID_1: Byte = 0x01
+
+/**
+ * Second byte of the file identifier for Entry Records
+ */
+const val ENTRY_RECORDS_ID_2: Byte = 0x01
+
+/**
+ * First byte of the file identifier for Exit Records
+ */
+const val EXIT_RECORDS_ID_1: Byte = 0x01
+
+/**
+ * Second byte of the file identifier for Exit Records
+ */
+const val EXIT_RECORDS_ID_2: Byte = 0x02
+
+/**
+ * First byte of the file identifier for Certificate Records
+ */
+const val CERTIFICATE_RECORDS_ID_1: Byte = 0x01
+
+/**
+ * Second byte of the file identifier for Certificate Records
+ */
+const val CERTIFICATE_RECORDS_ID_2: Byte = 0x01A
 
 /**
  * Class representing the Travel Records application
@@ -18,11 +48,15 @@ import java.math.BigInteger
  * @property exitRecords Exit records stored in the application
  * @property entryRecords Entry records stored in the application
  */
-class TravelRecords : LDS2Application() {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
-    var exitRecords : Array<EntryExitRecord>? = null
+class TravelRecords: LDS2Application() {
+    override val applicationIdentifier: ByteArray =
+        BigInteger(APPLICATION_ID, 16).
+        toByteArray().
+        slice(1..7).
+        toByteArray()
+    var exitRecords: Array<EntryExitRecord>? = null
         private set
-    var entryRecords : Array<EntryExitRecord>? = null
+    var entryRecords: Array<EntryExitRecord>? = null
         private set
 
     /**
@@ -40,7 +74,12 @@ class TravelRecords : LDS2Application() {
      * Reads entry records from the application
      */
     private fun readEntryRecords() {
-        val numberOfEntryRecords = readNumberOfRecords(TLV(TlvTags.DO51, byteArrayOf(ENTRY_RECORDS_ID_1, ENTRY_RECORDS_ID_2)))
+        val numberOfEntryRecords = readNumberOfRecords(
+            TLV(
+                TlvTags.DO51,
+                byteArrayOf(ENTRY_RECORDS_ID_1, ENTRY_RECORDS_ID_2)
+            )
+        )
         if (numberOfEntryRecords == 0.toByte()) {
             return
         }
@@ -58,7 +97,12 @@ class TravelRecords : LDS2Application() {
      * Reads exit records from the application
      */
     private fun readExitRecords() {
-        val numberOfEntryRecords = readNumberOfRecords(TLV(TlvTags.DO51, byteArrayOf(EXIT_RECORDS_ID_1, EXIT_RECORDS_ID_2)))
+        val numberOfEntryRecords = readNumberOfRecords(
+            TLV(
+                TlvTags.DO51,
+                byteArrayOf(EXIT_RECORDS_ID_1, EXIT_RECORDS_ID_2)
+            )
+        )
         if (numberOfEntryRecords == 0.toByte()) {
             return
         }
@@ -78,7 +122,7 @@ class TravelRecords : LDS2Application() {
      * @param recordNumber The record number of the record to read
      * @return An [EntryExitRecord] or null if the record could not be read or decoded
      */
-    private fun readEntryExitRecord(recordNumber: Byte) : EntryExitRecord? {
+    private fun readEntryExitRecord(recordNumber: Byte): EntryExitRecord? {
         val sequence = readRecord(recordNumber)
         return try {
             if (sequence != null) {
@@ -86,7 +130,7 @@ class TravelRecords : LDS2Application() {
             } else {
                 null
             }
-        } catch (_ : IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             null
         }
     }

@@ -3,25 +3,11 @@ package com.example.emrtdapplication.utils
 import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.util.Log
-import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
-import com.example.emrtdapplication.constants.APDUControlConstants.CLOSE_SUCCESS
-import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_ISO_DEP_NOT_SELECTED
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_ISO_DEP_SUPPORT
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_NO_NFC_TAG
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CLOSE
-import com.example.emrtdapplication.constants.APDUControlConstants.ERROR_UNABLE_TO_CONNECT
-import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
-import com.example.emrtdapplication.constants.APDUControlConstants.RECEIVED_APDU
-import com.example.emrtdapplication.constants.APDUControlConstants.RECEIVED_SECURED_APDU
-import com.example.emrtdapplication.constants.APDUControlConstants.RESPOND_CODE_SIZE
-import com.example.emrtdapplication.constants.APDUControlConstants.SENDING_APDU
-import com.example.emrtdapplication.constants.APDUControlConstants.SENDING_SECURED_APDU
-import com.example.emrtdapplication.constants.APDUControlConstants.TIME_OUT
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.ZERO_BYTE
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
-import com.example.emrtdapplication.constants.NfcUse
-import com.example.emrtdapplication.constants.ZERO_BYTE
+import com.example.emrtdapplication.NfcUse
 import com.example.emrtdapplication.utils.APDUControl.encryptionKey
 import com.example.emrtdapplication.utils.APDUControl.encryptionKeyMAC
 import com.example.emrtdapplication.utils.APDUControl.isAES
@@ -34,6 +20,84 @@ import com.example.emrtdapplication.utils.APDUControl.nfcTechUse
 import com.example.emrtdapplication.utils.APDUControl.sendEncryptedAPDU
 import com.example.emrtdapplication.utils.APDUControl.ssc
 import java.io.IOException
+
+/**
+ * Initialization of the NFC IsoDep was successful
+ */
+const val INIT_SUCCESS = 0
+
+/**
+ * Connection to the discovered NFC Tag was a success
+ */
+const val CONNECT_SUCCESS = 1
+
+/**
+ * Closing the NFC Tag connection was a success
+ */
+const val CLOSE_SUCCESS = 2
+
+/**
+ * Discovered tag was null
+ */
+const val ERROR_NO_NFC_TAG = -1
+
+/**
+ * Discovered tag does not support IsoDep, which is mandatory for eMRTDs
+ */
+const val ERROR_NO_ISO_DEP_SUPPORT = -2
+
+/**
+ * Error code for NFC tag connection establishment failure
+ */
+const val ERROR_UNABLE_TO_CONNECT = -3
+
+/**
+ * Error code for uninitialized connection attempt to the NFC tag
+ */
+const val ERROR_ISO_DEP_NOT_SELECTED = -4
+
+/**
+ * Error code for failure in closing NFC connection
+ */
+const val ERROR_UNABLE_TO_CLOSE = -5
+
+/**
+ * NFC response timeout setting
+ */
+const val TIME_OUT = 50000
+
+/**
+ * Byte array size for APDU response codes
+ */
+const val RESPOND_CODE_SIZE = 2
+
+/**
+ * Minimum size for a response APDU with a MAC
+ */
+const val MIN_APDU_SIZE_FOR_MAC_VERIFICATION = 13
+
+/**
+ * Padding size for encryption and MAC ciphers
+ */
+const val PADDING_SIZE = 8
+
+/**
+ * DES key size in bytes
+ */
+const val SINGLE_KEY_SIZE_3DES = 8
+
+/**
+ * Response APDU data offset counting from the end
+ */
+const val APDU_NO_DATA_SIZE = 17
+
+const val SENDING_APDU = "Sending APDU: "
+
+const val RECEIVED_APDU = "Received APDU: "
+
+const val SENDING_SECURED_APDU = "Sending secured APDU: "
+
+const val RECEIVED_SECURED_APDU = "Received secured APDU: "
 
 /**
  * Class for sending and receiving APDUs from the ePassport
@@ -52,10 +116,10 @@ import java.io.IOException
 object APDUControl {
     var maxResponseLength = 0
     var maxCommandLength = 0
-    private var isoDepSupport : Boolean = false
-    private var isoDep : IsoDep? = null
-    private var nfcTechUse : NfcUse = NfcUse.UNDEFINED
-    private var maxTransceiveLength : Int = 0
+    private var isoDepSupport: Boolean = false
+    private var isoDep: IsoDep? = null
+    private var nfcTechUse: NfcUse = NfcUse.UNDEFINED
+    private var maxTransceiveLength: Int = 0
     var sendEncryptedAPDU = false
     var isAES = false
     private var encryptionKey = byteArrayOf(0)
@@ -69,7 +133,7 @@ object APDUControl {
      * @param tag: The NFC tag to connect to
      * @return [INIT_SUCCESS], [ERROR_NO_NFC_TAG] or [ERROR_NO_ISO_DEP_SUPPORT]
      */
-    fun init(tag: Tag?) : Int {
+    fun init(tag: Tag?): Int {
         if (tag == null) {
             return ERROR_NO_NFC_TAG
         }
@@ -86,24 +150,39 @@ object APDUControl {
     }
 
     /**
-     * Sends and receives APDUs from the eMRTD. If encryption is used, it sends the APDU to other functions
+     * Sends and receives APDUs from the eMRTD.
+     * If encryption is used, it sends the APDU to other functions
      * for further processing
      * @param apdu: The APDU to be sent to the eMRTD
      * @return The received APDU from the eMRTD
      */
     //@OptIn(ExperimentalStdlibApi::class)
-    fun sendAPDU(apdu : APDU) : ByteArray {
+    fun sendAPDU(apdu: APDU): ByteArray {
         exchangedAPDUPairs++
-        Log.i(ANDROID_LOG_INFO_TAG, SENDING_APDU + apdu.getByteArray().toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true}))
+        Log.i(
+            ANDROID_LOG_INFO_TAG,
+            SENDING_APDU + apdu.getByteArray().toHexString(
+                HexFormat {
+                    bytes.byteSeparator = " "
+                    upperCase = true
+                }
+            )
+        )
         val apdu = if (sendEncryptedAPDU) {
             sendEncryptedAPDU(apdu)
         } else {
             sendEncryptedAPDU = false
             sendISODEP(apdu)
         }
-        Log.i(ANDROID_LOG_INFO_TAG,  RECEIVED_APDU+ apdu.toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true}))
+        Log.i(
+            ANDROID_LOG_INFO_TAG,
+            RECEIVED_APDU + apdu.toHexString(
+                HexFormat {
+                    bytes.byteSeparator = " "
+                    upperCase = true
+                }
+            )
+        )
         return apdu
     }
 
@@ -112,8 +191,7 @@ object APDUControl {
      * @param apdu The APDU to send
      * @return The received byte array from the ePassport
      */
-    //@OptIn(ExperimentalStdlibApi::class)
-    private fun sendISODEP(apdu: APDU) : ByteArray {
+    private fun sendISODEP(apdu: APDU): ByteArray {
         return if (isoDep != null) {
             isoDep!!.transceive(apdu.getByteArray())
         } else {
@@ -125,7 +203,7 @@ object APDUControl {
      * Set the 3DES Encryption key of the BAC protocol
      * @param key: The BAC encryption key
      */
-    fun setEncryptionKeyBAC(key : ByteArray) {
+    fun setEncryptionKeyBAC(key: ByteArray) {
         encryptionKey = key
     }
 
@@ -140,7 +218,7 @@ object APDUControl {
      * Set the sequence counter
      * @param counter: The sequence counter as byte array
      */
-    fun setSequenceCounter(counter : ByteArray) {
+    fun setSequenceCounter(counter: ByteArray) {
         ssc = counter
     }
 
@@ -148,7 +226,7 @@ object APDUControl {
      * Connects to the eMRTD
      * @return [CONNECT_SUCCESS], [ERROR_UNABLE_TO_CONNECT] or [ERROR_ISO_DEP_NOT_SELECTED]
      */
-    fun connectToNFC() : Int{
+    fun connectToNFC(): Int{
         try {
             when (nfcTechUse) {
                 NfcUse.ISO_DEP -> {
@@ -159,7 +237,7 @@ object APDUControl {
                     return ERROR_ISO_DEP_NOT_SELECTED
                 }
             }
-        } catch (_ : IOException) {
+        } catch (_: IOException) {
             return ERROR_UNABLE_TO_CONNECT
         }
     }
@@ -168,7 +246,7 @@ object APDUControl {
      * Closes the NFC Connection from the eMRTD
      * @return [CLOSE_SUCCESS] or [ERROR_UNABLE_TO_CLOSE]
      */
-    fun closeNFC() : Int {
+    fun closeNFC(): Int {
         try {
             when (nfcTechUse) {
                 NfcUse.ISO_DEP -> {
@@ -179,7 +257,7 @@ object APDUControl {
                     return ERROR_UNABLE_TO_CLOSE
                 }
             }
-        } catch (_ : IOException) {
+        } catch (_: IOException) {
             return ERROR_UNABLE_TO_CLOSE
         }
     }
@@ -190,7 +268,9 @@ object APDUControl {
      * @return True if the ePassport responded with an OK status code, otherwise false
      */
     fun checkResponse(bytes: ByteArray): Boolean {
-        return !(bytes.size < RESPOND_CODE_SIZE || bytes[bytes.size-RESPOND_CODE_SIZE] != NfcRespondCodeSW1.OK || bytes[bytes.size-1] != NfcRespondCodeSW2.OK)
+        return !(bytes.size < RESPOND_CODE_SIZE ||
+                bytes[bytes.size-RESPOND_CODE_SIZE] != NfcRespondCodeSW1.OK ||
+                bytes[bytes.size-1] != NfcRespondCodeSW2.OK)
     }
 
     /**
@@ -220,17 +300,43 @@ object APDUControl {
      * @param apdu The APDU to encrypt and send to the eMRTD
      * @return The decrypted response APDU
      */
-    private fun sendEncryptedAPDU(apdu: APDU) : ByteArray {
+    private fun sendEncryptedAPDU(apdu: APDU): ByteArray {
         if (isoDep == null) return ByteArray(0)
         inc()
-        val secureAPDU = SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, apdu)
-        Log.i(ANDROID_LOG_INFO_TAG, SENDING_SECURED_APDU + secureAPDU.encryptedAPDUArray.toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true}))
+        val secureAPDU = SecureMessagingAPDU(
+            ssc,
+            encryptionKey,
+            encryptionKeyMAC,
+            isAES,
+            apdu
+        )
+        Log.i(
+            ANDROID_LOG_INFO_TAG,
+            SENDING_SECURED_APDU + secureAPDU.encryptedAPDUArray.toHexString(
+                HexFormat {
+                    bytes.byteSeparator = " "
+                    upperCase = true
+                }
+            )
+        )
         val responseAPDU = isoDep!!.transceive(secureAPDU.encryptedAPDUArray)
-        Log.i(ANDROID_LOG_INFO_TAG, RECEIVED_SECURED_APDU + responseAPDU.toHexString(HexFormat { bytes.byteSeparator = " "
-            upperCase = true}))
+        Log.i(
+            ANDROID_LOG_INFO_TAG,
+            RECEIVED_SECURED_APDU + responseAPDU.toHexString(
+                HexFormat {
+                    bytes.byteSeparator = " "
+                    upperCase = true
+                }
+            )
+        )
         inc()
-        return SecureMessagingAPDU(ssc, encryptionKey, encryptionKeyMAC, isAES, responseAPDU).apduArray
+        return SecureMessagingAPDU(
+            ssc,
+            encryptionKey,
+            encryptionKeyMAC,
+            isAES,
+            responseAPDU
+        ).apduArray
     }
 
     fun reset() {

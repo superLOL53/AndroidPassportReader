@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.lds1.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.APDUControl.setEncryptionKeyBAC

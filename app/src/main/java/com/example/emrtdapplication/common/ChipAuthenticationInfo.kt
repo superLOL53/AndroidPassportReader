@@ -1,15 +1,17 @@
 package com.example.emrtdapplication.common
 
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.SecurityInfo
-import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
+const val CHIP_AUTHENTICATION_INFO_DH_ID = 1
+const val CHIP_AUTHENTICATION_INFO_ECDH_ID = 2
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationInfo:
  *
- *      ChipAuthenticationInfo ::= SEQUENCE {
+ *      ChipAuthenticationInfo::= SEQUENCE {
  *          protocol    OBJECT IDENTIFIER(
  *                      id-CA-DH-3DES-CBC-CBC |
  *                      id-CA-DH-AES-CBC-CMAC-128 |
@@ -23,20 +25,27 @@ import java.math.BigInteger
  *          keyId INTEGER OPTIONAL
  *      }
  *
- * @param tlv TLV structure containing an encoded instance of ChipAuthenticationInfo
+ * @param tlv TLV structure containing an encoded
+ * instance of ChipAuthenticationInfo
  * @property version Protocol version, must be 1
- * @property keyId ID of the public key if multiple public keys for chip authentication are present
- * @throws IllegalArgumentException If [tlv] does not contain a ChipAuthenticationInfo
+ * @property keyId ID of the public key if multiple
+ * public keys for chip authentication are present
+ * @throws IllegalArgumentException If [tlv] does
+ * not contain a ChipAuthenticationInfo
  */
-class ChipAuthenticationInfo(tlv: TLV) : SecurityInfo(tlv, CHIP_AUTHENTICATION_TYPE) {
-    var version : Int
+class ChipAuthenticationInfo(tlv: TLV): SecurityInfo(tlv, CHIP_AUTHENTICATION_TYPE) {
+    var version: Int
         private set
-    var keyId : BigInteger?
+    var keyId: BigInteger?
         private set
 
     init {
-        if (protocol.size < 2 || protocol[protocol.size-1] < 1 || 4 < protocol[protocol.size-1] ||
-            protocol[protocol.size-2] < 1 || 2 < protocol[protocol.size-2]) {
+        if (protocol.size < 2 ||
+            protocol[protocol.size-1] < DES_CBC_CBC ||
+            AES_CBC_CMAC_256 < protocol[protocol.size-1] ||
+            protocol[protocol.size-2] < CHIP_AUTHENTICATION_INFO_DH_ID ||
+            CHIP_AUTHENTICATION_INFO_ECDH_ID < protocol[protocol.size-2]
+        ) {
             throw IllegalArgumentException()
         }
         if (requiredData.tag.size != 1 || requiredData.tag[0] != TlvTags.INTEGER ||

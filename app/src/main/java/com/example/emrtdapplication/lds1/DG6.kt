@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG6_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG6_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
@@ -16,7 +16,7 @@ import com.example.emrtdapplication.utils.TLV
  * @property efTag The tag of the DG2 file
  *
  */
-class DG6 : ElementaryFileTemplate() {
+class DG6: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG6_SHORT_EF_ID
     override val efTag = DG6_FILE_TAG

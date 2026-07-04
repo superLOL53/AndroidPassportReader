@@ -14,13 +14,14 @@ import com.example.emrtdapplication.display.lds1.LDS1Display
  *
  * @property view View for displaying LDS1 application content in the fragment
  */
-class LDS1Fragment : Fragment(R.layout.lds1) {
-    private var view : ScrollView? = null
+class LDS1Fragment: Fragment(R.layout.lds1) {
+    private var view: ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (view != null) {
-            val toReplace = requireView().findViewById<ScrollView>(R.id.lds1scroll)
+            val toReplace =
+                requireView().findViewById<ScrollView>(R.id.lds1scroll)
             val rootView = toReplace.parent as ViewGroup
             rootView.removeView(toReplace)
             rootView.addView(view)

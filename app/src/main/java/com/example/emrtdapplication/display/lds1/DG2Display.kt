@@ -6,10 +6,14 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.EXPRESSION
+import com.example.emrtdapplication.EYE_COLOR
+import com.example.emrtdapplication.GENDER
+import com.example.emrtdapplication.HAIR_COLOR
 import com.example.emrtdapplication.R
 import com.example.emrtdapplication.biometrics.face.FacialRecordData
 
-object DG2Display : CreateView() {
+object DG2Display: CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
@@ -17,16 +21,30 @@ object DG2Display : CreateView() {
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        if (EMRTD.ldS1Application.efSod.isValid && EMRTD.ldS1Application.dg1.matchHash) {
-            parent.setBackgroundColor(context.resources.getColor(R.color.green, null))
-        } else if (EMRTD.ldS1Application.efSod.isValid || EMRTD.ldS1Application.dg1.matchHash) {
-            parent.setBackgroundColor(context.resources.getColor(R.color.yellow, null))
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
+        if (EMRTD.ldS1Application.efSod.isValid &&
+            EMRTD.ldS1Application.dg1.matchHash
+        ) {
+            parent.setBackgroundColor(
+                context.resources.getColor(R.color.green, null)
+            )
+        } else if (EMRTD.ldS1Application.efSod.isValid ||
+            EMRTD.ldS1Application.dg1.matchHash
+        ) {
+            parent.setBackgroundColor(
+                context.resources.getColor(R.color.yellow, null)
+            )
         } else {
-            parent.setBackgroundColor(context.resources.getColor(R.color.red, null))
+            parent.setBackgroundColor(
+                context.resources.getColor(R.color.red, null)
+            )
         }
-        if (EMRTD.ldS1Application.dg2.biometricInformation != null && EMRTD.ldS1Application.dg2.biometricInformation!!.biometricInformationList != null) {
-            for (bios in EMRTD.ldS1Application.dg2.biometricInformation!!.biometricInformationList) {
+        if (EMRTD.ldS1Application.dg2.biometricInformation != null &&
+            EMRTD.ldS1Application.dg2.biometricInformation!!.biometricInformationList != null
+        ) {
+            for (
+                bios in EMRTD.ldS1Application.dg2.biometricInformation!!.biometricInformationList
+            ) {
                 if (bios == null) continue
                 val biometricData = bios.biometricDataBlock.biometricData as FacialRecordData
                 val box = LinearLayout(context)
@@ -35,16 +53,22 @@ object DG2Display : CreateView() {
                     LinearLayout.LayoutParams.WRAP_CONTENT
                 )
                 if (alternate) {
-                    box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+                    box.setBackgroundColor(
+                        context.resources.getColor(R.color.gray, null)
+                    )
                 } else {
-                    box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+                    box.setBackgroundColor(
+                        context.resources.getColor(R.color.black, null)
+                    )
                 }
                 alternate = !alternate
                 parent.addView(box)
                 val image = biometricData.image
                 val view = ImageView(context)
-                view.layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT)
+                view.layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
                 view.setImageBitmap(image)
                 box.addView(view)
                 if (EMRTD.showDetails) {
@@ -57,13 +81,13 @@ object DG2Display : CreateView() {
                     table.isStretchAllColumns = true
                     parent.addView(table)
                     var row = createRow(context, table)
-                    provideTextForRow(row, "Eye color: ", facialInfo.eyeColor)
+                    provideTextForRow(row, EYE_COLOR, facialInfo.eyeColor)
                     row = createRow(context, table)
-                    provideTextForRow(row, "Hair color: ", facialInfo.hairColor)
+                    provideTextForRow(row, HAIR_COLOR, facialInfo.hairColor)
                     row = createRow(context, table)
-                    provideTextForRow(row, "Gender: ", facialInfo.gender)
+                    provideTextForRow(row, GENDER, facialInfo.gender)
                     row = createRow(context, table)
-                    provideTextForRow(row, "Expression:", facialInfo.expression)
+                    provideTextForRow(row, EXPRESSION, facialInfo.expression)
                 }
             }
         }

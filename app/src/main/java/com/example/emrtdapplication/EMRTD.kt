@@ -18,16 +18,13 @@ import com.example.emrtdapplication.common.CardAccess
 import com.example.emrtdapplication.common.CardSecurity
 import com.example.emrtdapplication.common.Directory
 import com.example.emrtdapplication.common.PACE
-import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
-import com.example.emrtdapplication.constants.APDUControlConstants.CONNECT_SUCCESS
-import com.example.emrtdapplication.constants.APDUControlConstants.INIT_SUCCESS
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.lds1.LDS1Application
 import com.example.emrtdapplication.lds2.AdditionalBiometrics
 import com.example.emrtdapplication.lds2.TravelRecords
 import com.example.emrtdapplication.lds2.VisaRecords
 import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.utils.CONNECT_SUCCESS
+import com.example.emrtdapplication.utils.INIT_SUCCESS
 
 /**
  * Class representing an eMRTD. Holds all information read from an eMRTD
@@ -55,10 +52,10 @@ object EMRTD {
         private set
     var dir = Directory()
         private set
-    var idPaceOid : ByteArray? = null
+    var idPaceOid: ByteArray? = null
     var pace = PACE()
         private set
-    var mrz : String? = null
+    var mrz: String? = null
     var ldS1Application = LDS1Application()
         private set
     var travelRecords = TravelRecords()
@@ -104,7 +101,7 @@ object EMRTD {
      * @param tag The tag to connect to
      * @return [SUCCESS] if a connection is established, otherwise [FAILURE]
      */
-    fun connectToNFCTag(tag: Tag) : Int {
+    fun connectToNFCTag(tag: Tag): Int {
         if (APDUControl.init(tag) != INIT_SUCCESS) {
             return FAILURE
         }

@@ -2,48 +2,115 @@ package com.example.emrtdapplication.display.lds2.records
 
 import android.content.Context
 import android.widget.LinearLayout
+import com.example.emrtdapplication.CERTIFICATE_REFERENCE
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.lds2.EntryExitRecord
 
-class EntryExitRecordDisplay(private val entryExitRecord: EntryExitRecord, val isEntryRecord : Boolean) : CreateView() {
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+const val CONDITIONS = "Conditions"
+const val TRAVEL_MODE = "Travel Mode"
+const val INSPECTION_RESULT = "Inspection Result"
+const val VISA_STATUS = "Visa Status"
+const val INSPECTION_REFERENCE = "Inspection Reference"
+const val INSPECTION_LOCATION = "Inspection Location"
+const val INSPECTION_AUTHORITY = "Inspection Authority"
+const val DATE = "Date"
+const val ENTRY_RECORD = "Entry Record "
+const val EXIT_RECORD = "Exit Record "
+
+class EntryExitRecordDisplay(
+    private val entryExitRecord: EntryExitRecord,
+    val isEntryRecord: Boolean
+): CreateView() {
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
         if (isEntryRecord) {
-            createHeader(context, parent, "Entry Record ${entryExitRecord.recordNumber}")
+            createHeader(
+                context,
+                parent,
+                ENTRY_RECORD + "${entryExitRecord.recordNumber}"
+            )
         } else {
-            createHeader(context, parent, "Exit Record ${entryExitRecord.recordNumber}")
+            createHeader(
+                context,
+                parent,
+                EXIT_RECORD + "${entryExitRecord.recordNumber}"
+            )
         }
         val table = createTable(context, parent)
         var row = createRow(context, table)
-        provideTextForRow(row, "State:", entryExitRecord.state)
+        provideTextForRow(
+            row,
+            STATE,
+            entryExitRecord.state
+        )
         row = createRow(context, table)
-        provideTextForRow(row, "Date:", entryExitRecord.date)
+        provideTextForRow(
+            row,
+            DATE,
+            entryExitRecord.date
+        )
         row = createRow(context, table)
-        provideTextForRow(row, "Inspection Authority:", entryExitRecord.inspectionAuthority)
+        provideTextForRow(
+            row,
+            INSPECTION_AUTHORITY,
+            entryExitRecord.inspectionAuthority
+        )
         row = createRow(context, table)
-        provideTextForRow(row, "Inspection Location:", entryExitRecord.inspectionLocation)
+        provideTextForRow(
+            row,
+            INSPECTION_LOCATION,
+            entryExitRecord.inspectionLocation
+        )
         row = createRow(context, table)
-        provideTextForRow(row, "Inspection Reference:", entryExitRecord.inspectorReference)
+        provideTextForRow(
+            row,
+            INSPECTION_REFERENCE,
+            entryExitRecord.inspectorReference
+        )
         row = createRow(context, table)
-        provideTextForRow(row, "Certificate Reference:", "${entryExitRecord.certificateReference}")
+        provideTextForRow(
+            row,
+            CERTIFICATE_REFERENCE,
+            "${entryExitRecord.certificateReference}"
+        )
         if (entryExitRecord.visaStatus != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Visa Status:", entryExitRecord.visaStatus)
+            provideTextForRow(
+                row,
+                VISA_STATUS,
+                entryExitRecord.visaStatus
+            )
         }
         if (entryExitRecord.inspectionResult != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Inspection Result:", entryExitRecord.inspectionResult)
+            provideTextForRow(
+                row,
+                INSPECTION_RESULT,
+                entryExitRecord.inspectionResult
+            )
         }
         if (entryExitRecord.travelMode != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Travel Mode:", entryExitRecord.travelMode)
+            provideTextForRow(
+                row,
+                TRAVEL_MODE,
+                entryExitRecord.travelMode
+            )
         }
         if (entryExitRecord.stayDuration != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Stay Duration:", "${entryExitRecord.stayDuration}")
+            provideTextForRow(
+                row,
+                STAY_DURATION,
+                "${entryExitRecord.stayDuration}"
+            )
         }
         if (entryExitRecord.conditions != null) {
             row = createRow(context, table)
-            provideTextForRow(row, "Conditions:", entryExitRecord.conditions)
+            provideTextForRow(
+                row,
+                CONDITIONS,
+                entryExitRecord.conditions
+            )
         }
         createSignatureView(context, parent, entryExitRecord.signature)
     }

@@ -14,12 +14,6 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
-import com.example.emrtdapplication.constants.BOUNCY_CASTLE_STRING
-import com.example.emrtdapplication.constants.MRZ_STRING
-import com.example.emrtdapplication.constants.NFC_PRESENCE_CHECK_DELAY
-import com.example.emrtdapplication.constants.PACE_STATUS_STRING
-import com.example.emrtdapplication.constants.SUCCESS
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import java.security.Security
 
@@ -30,9 +24,9 @@ import java.security.Security
  * @property mrz Encoded MRZ string from [ManualInput]
  *
  */
-class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
-    private lateinit var nfcAdapter : NfcAdapter
-    private var mrz : String? = null
+class ReadPassport: AppCompatActivity(), NfcAdapter.ReaderCallback {
+    private lateinit var nfcAdapter: NfcAdapter
+    private var mrz: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,13 +45,16 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         val b = Bundle()
         b.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, NFC_PRESENCE_CHECK_DELAY)
-        nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
-                NfcAdapter.FLAG_READER_NFC_B or
-                NfcAdapter.FLAG_READER_NFC_F or
-                NfcAdapter.FLAG_READER_NFC_V or
-                NfcAdapter.FLAG_READER_NFC_BARCODE or
-                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
-                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, b)
+        nfcAdapter.enableReaderMode(this, this,
+            NfcAdapter.FLAG_READER_NFC_A or
+            NfcAdapter.FLAG_READER_NFC_B or
+            NfcAdapter.FLAG_READER_NFC_F or
+            NfcAdapter.FLAG_READER_NFC_V or
+            NfcAdapter.FLAG_READER_NFC_BARCODE or
+            NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
+            NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
+            b
+        )
         val overlay = findViewById<LinearLayout>(R.id.overlayNFCEnable)
         val readView = findViewById<RelativeLayout>(R.id.readView)
         if (!nfcAdapter.isEnabled) {
@@ -96,13 +93,16 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         }
         val options = Bundle()
         options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, NFC_PRESENCE_CHECK_DELAY)
-        nfcAdapter.enableReaderMode(this, this, NfcAdapter.FLAG_READER_NFC_A or
-                NfcAdapter.FLAG_READER_NFC_B or
-                NfcAdapter.FLAG_READER_NFC_F or
-                NfcAdapter.FLAG_READER_NFC_V or
-                NfcAdapter.FLAG_READER_NFC_BARCODE or
-                NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
-                NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, options)
+        nfcAdapter.enableReaderMode(this, this,
+            NfcAdapter.FLAG_READER_NFC_A or
+            NfcAdapter.FLAG_READER_NFC_B or
+            NfcAdapter.FLAG_READER_NFC_F or
+            NfcAdapter.FLAG_READER_NFC_V or
+            NfcAdapter.FLAG_READER_NFC_BARCODE or
+            NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS or
+            NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
+            options
+        )
     }
 
     override fun onPause() {
@@ -139,7 +139,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
     }
 
     /**
-     * Reading the whole eMRTD
+     * Reads the whole eMRTD
      *
      * @param tag The discovered tag from the [nfcAdapter]
      *
@@ -170,7 +170,9 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
         changeProgressBar(getString(R.string.reading_common_files), 0)
         EMRTD.readCommonFiles()
         changeProgressBar(getString(R.string.initialize_secure_messaging), 10)
-        EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid, EMRTD.ca.paceInfos[0].parameterId!!)
+        EMRTD.pace.init(EMRTD.mrz, false, EMRTD.idPaceOid,
+            EMRTD.ca.paceInfos[0].parameterId!!
+        )
         val isPACESuccess = EMRTD.pace.paceProtocol() == SUCCESS
         Log.i(ANDROID_LOG_INFO_TAG, PACE_STATUS_STRING + "$isPACESuccess")
         if (isPACESuccess) {
@@ -212,7 +214,7 @@ class ReadPassport : AppCompatActivity(), NfcAdapter.ReaderCallback {
      * @param text The text to be displayed while reading
      * @param increment Progress amount of the current reading operation
      */
-    fun changeProgressBar(text : String, increment : Int) {
+    fun changeProgressBar(text: String, increment: Int) {
         runOnUiThread {
             findViewById<TextView>(R.id.progressBarText).text = text
             findViewById<ProgressBar>(R.id.progressBar).incrementProgressBy(increment)

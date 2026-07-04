@@ -7,20 +7,47 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.emrtdapplication.constants.MRZ_STRING
-import com.example.emrtdapplication.constants.ManualInputConstants.BIRTHDAY_STRING
-import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_MODULO
-import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_1
-import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_2
-import com.example.emrtdapplication.constants.ManualInputConstants.CHECK_DIGIT_SEQUENCE_3
-import com.example.emrtdapplication.constants.ManualInputConstants.DATE_LENGTH
-import com.example.emrtdapplication.constants.ManualInputConstants.EXPIRATION_DATE_STRING
-import com.example.emrtdapplication.constants.ManualInputConstants.INVALID_INPUT_STRING
-import com.example.emrtdapplication.constants.ManualInputConstants.LOWER_CASE_DIGIT
-import com.example.emrtdapplication.constants.ManualInputConstants.PASSPORT_NUMBER_LENGTH
-import com.example.emrtdapplication.constants.ManualInputConstants.PASSPORT_NUMBER_STRING
-import com.example.emrtdapplication.constants.ManualInputConstants.UPPER_CASE_DIGIT
 
+/**
+ * Constant for converting an upper case letter to a numerical value according to ICAO Doc9303-3
+ */
+const val UPPER_CASE_DIGIT = 55
+
+/**
+ * Constant for converting a lower case letter to a numerical value according to ICAO Doc9303-3
+ */
+const val LOWER_CASE_DIGIT = 87
+
+/**
+ * Length of the passport number field in the MRZ
+ */
+const val PASSPORT_NUMBER_LENGTH = 8
+
+/**
+ * Length of the expiration/birthday date field in the MRZ
+ */
+const val DATE_LENGTH = 6
+
+/**
+ * First byte in the Check Digit sequence
+ */
+const val CHECK_DIGIT_SEQUENCE_1: Byte = 7
+
+/**
+ * Second byte in the Check Digit sequence
+ */
+const val CHECK_DIGIT_SEQUENCE_2: Byte = 3
+
+/**
+ * Third byte in the Check Digit sequence
+ */
+const val CHECK_DIGIT_SEQUENCE_3: Byte = 1
+
+const val CHECK_DIGIT_MODULO = 10
+const val PASSPORT_NUMBER_STRING = "passportNumber"
+const val BIRTHDAY_STRING = "birthday"
+const val EXPIRATION_DATE_STRING = "expirationDate"
+const val INVALID_INPUT_STRING = "Unable to decode given information. Please make sure you entered everything correctly."
 
 /** Class for manual input from the user. The manual input consists of:
  *
@@ -35,11 +62,15 @@ import com.example.emrtdapplication.constants.ManualInputConstants.UPPER_CASE_DI
  * @property checkDigitSequence The byte sequence used to compute the check digit number
  *
  */
-class ManualInput : AppCompatActivity() {
-    private var passportNr : String? = null
-    private var expirationDate : String? = null
-    private var birthday : String? = null
-    private var checkDigitSequence = byteArrayOf(CHECK_DIGIT_SEQUENCE_1, CHECK_DIGIT_SEQUENCE_2, CHECK_DIGIT_SEQUENCE_3)
+class ManualInput: AppCompatActivity() {
+    private var passportNr: String? = null
+    private var expirationDate: String? = null
+    private var birthday: String? = null
+    private var checkDigitSequence = byteArrayOf(
+        CHECK_DIGIT_SEQUENCE_1,
+        CHECK_DIGIT_SEQUENCE_2,
+        CHECK_DIGIT_SEQUENCE_3
+    )
 
 
     @Override
@@ -83,9 +114,18 @@ class ManualInput : AppCompatActivity() {
 
     @Override
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(PASSPORT_NUMBER_STRING, findViewById<EditText>(R.id.passportNr).text.toString())
-        outState.putString(BIRTHDAY_STRING, findViewById<EditText>(R.id.birthday).text.toString())
-        outState.putString(EXPIRATION_DATE_STRING, findViewById<EditText>(R.id.expirationDate).text.toString())
+        outState.putString(
+            PASSPORT_NUMBER_STRING,
+            findViewById<EditText>(R.id.passportNr).text.toString()
+        )
+        outState.putString(
+            BIRTHDAY_STRING,
+            findViewById<EditText>(R.id.birthday).text.toString()
+        )
+        outState.putString(
+            EXPIRATION_DATE_STRING,
+            findViewById<EditText>(R.id.expirationDate).text.toString()
+        )
         super.onSaveInstanceState(outState)
     }
 
@@ -95,7 +135,7 @@ class ManualInput : AppCompatActivity() {
      * Parsing the manual input and checks for validity of the input.
      * @return The MRZ information inclusive the check digits or null if any validity check fails
      */
-    private fun parse() : String? {
+    private fun parse(): String? {
         if (passportNr == null) {
             return null
         }
@@ -116,7 +156,7 @@ class ManualInput : AppCompatActivity() {
      * Builds the MRZ information based on the validated input inclusive the check digit
      * @return The MRZ information inclusive the check digits
      */
-    private fun computeCheckDigit() : String {
+    private fun computeCheckDigit(): String {
         val sb = StringBuilder()
         val nameCD = if (passportNr == null) {
             ""
@@ -142,10 +182,11 @@ class ManualInput : AppCompatActivity() {
      * @param s: The string for which the check digit is computed
      * @return The check digit as a char
      */
-    private fun checkDigit(s : String) : Char {
+    private fun checkDigit(s: String): Char {
         var checkDigit = 0
         for (i in s.indices) {
-            checkDigit += computeValueForCheckDigit(s[i])*checkDigitSequence[i%checkDigitSequence.size]
+            checkDigit += computeValueForCheckDigit(s[i]) *
+                    checkDigitSequence[i%checkDigitSequence.size]
         }
         return (checkDigit % CHECK_DIGIT_MODULO).toString()[0]
     }
@@ -155,7 +196,7 @@ class ManualInput : AppCompatActivity() {
      * @param ch: The char to convert
      * @return The corresponding numeric value of the char
      */
-    private fun computeValueForCheckDigit(ch: Char) : Int {
+    private fun computeValueForCheckDigit(ch: Char): Int {
         return if (ch.isDigit()) {
             ch.digitToInt()
         } else if (ch.isUpperCase()) {

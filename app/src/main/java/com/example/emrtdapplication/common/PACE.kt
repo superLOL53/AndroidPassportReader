@@ -1,47 +1,19 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.BACConstants.MAC_COMPUTATION_KEY_VALUE_C
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.INVALID_ARGUMENT
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.INVALID_ARGUMENT
+import com.example.emrtdapplication.SUCCESS
+import com.example.emrtdapplication.ZERO_BYTE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.PACEConstants.INVALID_GENERAL_AUTHENTICATE
-import com.example.emrtdapplication.constants.PACEConstants.INVALID_MSE_COMMAND
-import com.example.emrtdapplication.constants.PACEConstants.INVALID_NONCE
-import com.example.emrtdapplication.constants.PACEConstants.NO_PACE_OID
-import com.example.emrtdapplication.constants.PACEConstants.NO_PASSWORD
-import com.example.emrtdapplication.constants.PACEConstants.POSITIVE_NUMBER
-import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
-import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
-import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
-import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P192R1
-import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P224R1
-import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P256R1
-import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P320R1
-import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P384R1
-import com.example.emrtdapplication.constants.PACEInfoConstants.BRAIN_POOL_P512R1
-import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
-import com.example.emrtdapplication.constants.PACEInfoConstants.DH_GM
-import com.example.emrtdapplication.constants.PACEInfoConstants.DH_IM
-import com.example.emrtdapplication.constants.PACEInfoConstants.ECDH_CAM
-import com.example.emrtdapplication.constants.PACEInfoConstants.ECDH_GM
-import com.example.emrtdapplication.constants.PACEInfoConstants.ECDH_IM
-import com.example.emrtdapplication.constants.PACEInfoConstants.MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP
-import com.example.emrtdapplication.constants.PACEInfoConstants.MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP
-import com.example.emrtdapplication.constants.PACEInfoConstants.MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP
-import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P192
-import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P224
-import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P256
-import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P384
-import com.example.emrtdapplication.constants.PACEInfoConstants.NIST_P521
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags
-import com.example.emrtdapplication.constants.ZERO_BYTE
+import com.example.emrtdapplication.lds1.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
+import com.example.emrtdapplication.utils.SHA_1
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x9.ECNamedCurveTable
 import org.spongycastle.asn1.x9.X9ECParameters
@@ -56,42 +28,95 @@ import org.spongycastle.crypto.params.ECPublicKeyParameters
 import java.math.BigInteger
 import java.security.SecureRandom
 import javax.crypto.Cipher
+/**
+ * Error code for no password to initialize PACE
+ */
+const val NO_PASSWORD = -1
+
+/**
+ * Error code for when no PACE protocol OID is given/supported
+ */
+const val NO_PACE_OID = -2
+
+/**
+ * Error code indicating a failure in setting up PACE
+ */
+const val INVALID_MSE_COMMAND = -3
+
+/**
+ * Error code indicating a failure in retrieving a nonce from the eMRTD
+ */
+const val INVALID_GENERAL_AUTHENTICATE = -4
+
+/**
+ * Error code indicating a failure in extracting the nonce from the eMRTD
+ */
+const val INVALID_NONCE = -5
+
+/**
+ * Constant for generating positive BigInteger numbers
+ */
+const val POSITIVE_NUMBER = 1
+
+const val TOKEN_DATA_TAG_1: Byte = 0x7F
+const val TOKEN_DATA_TAG_2: Byte = 0x49
+const val SEQUENCE_COUNTER_SIZE = 16
+const val IV_VECTOR_SIZE = 16
+const val CHIP_AUTHENTICATION_DATA_SEQUENCE_INDEX = 1
+const val PACE_MRZ_ID: Byte = 1
+const val PACE_CAN_ID: Byte = 2
+const val PACE_KEY_COMPUTATION_SEED: Byte = 3
+const val P_192 = "P-192"
+const val P_224 = "P-224"
+const val P_256 = "P-256"
+const val P_384 = "P-384"
+const val P_521 = "P-521"
+const val BP_P_192 = "brainpoolp192r1"
+const val BP_P_224 = "brainpoolp224r1"
+const val BP_P_256 = "brainpoolp256r1"
+const val BP_P_320 = "brainpoolp320r1"
+const val BP_P_384 = "brainpoolp384r1"
+const val BP_P_512 = "brainpoolp512r1"
 
 /**
  * Implements the PACE protocol.
  *
  * @property mrzInformation The MRZ information of the eMRTD
  * @property useCAN If the CAN is used for deriving keys
- * @property useLongConstants Indicates if integrated mapping uses the long(256 bits) or short(128 bits) c0 and c1 constants
+ * @property useLongConstants Indicates if integrated mapping uses the
+ * long(256 bits) or short(128 bits) c0 and c1 constants
  * @property idPACEOid The object identifier of the PACE protocol to use
  * @property encKey The encryption key
  * @property macKey The MAC key
  * @property parameters The ID of the parameters to use
- * @property chipAuthenticationData The data for the chip authentication protocol. Only used with PACE-CAM.
- * @property chipPublicKey The public key for the chip authentication protocol. Only used with PACE-CAM.
+ * @property chipAuthenticationData The data for the chip authentication
+ * protocol. Only used with PACE-CAM.
+ * @property chipPublicKey The public key for the chip authentication
+ * protocol. Only used with PACE-CAM.
  */
 class PACE(private val random: SecureRandom? = SecureRandom()) {
-    private var mrzInformation : String? = null
+    private var mrzInformation: String? = null
     private var useCAN = false
     private var useLongConstants = false
-    private var idPACEOid : ByteArray? = null
-    private var encKey : ByteArray? = null
-    private var macKey : ByteArray? = null
-    private var parameters : Byte = -1
+    private var idPACEOid: ByteArray? = null
+    private var encKey: ByteArray? = null
+    private var macKey: ByteArray? = null
+    private var parameters: Byte = -1
     var chipAuthenticationData: ByteArray? = null
         private set
     var chipPublicKey: ECPublicKeyParameters? = null
         private set
 
     /**
-     * Initializes the PACE protocol with the MRZ information or CAN from the manual input.
+     * Initializes the PACE protocol with the MRZ information or
+     * CAN from the manual input.
      *
      * @param mrz: The MRZ information from the manual input
      * @param can: The CAN from the manual input
      * @param paceOid: The supported Cryptographic PACE protocol
      * @return [SUCCESS] or error code indicating a failure
      */
-    fun init(mrz :String?, can : Boolean, paceOid : ByteArray?, parameters: Byte): Int {
+    fun init(mrz:String?, can: Boolean, paceOid: ByteArray?, parameters: Byte): Int {
         mrzInformation = null
         idPACEOid = null
         this.parameters = parameters
@@ -117,24 +142,34 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      *
      * @return [SUCCESS] or error code indicating a failure
      */
-    fun paceProtocol() : Int {
+    fun paceProtocol(): Int {
         if (idPACEOid == null) {
             return NO_PACE_OID
         }
-        var info = byteArrayOf(TlvTags.CRYPTOGRAPHIC_REFERENCE, idPACEOid!!.size.toByte()) + idPACEOid!! + byteArrayOf(
-            TlvTags.KEY_REFERENCE, 0x01)
+        var info = byteArrayOf(TlvTags.CRYPTOGRAPHIC_REFERENCE, idPACEOid!!.size.toByte()) +
+                idPACEOid!! +
+                byteArrayOf(TlvTags.KEY_REFERENCE, 0x01)
         info += if (mrzInformation == null) {
             return NO_PASSWORD
         } else if (useCAN) {
-            0x02
+            PACE_CAN_ID
         } else {
-            0x01
+            PACE_MRZ_ID
         }
         info += byteArrayOf(TlvTags.UNSIGNED_INTEGER, 0x1, parameters)
-        val key = Crypto.hash("SHA-1", mrzInformation!!.toByteArray()) ?: return FAILURE
-        computeKeys(key, 3)
+        val key = Crypto.hash(
+            SHA_1,
+            mrzInformation!!.toByteArray()
+        ) ?: return FAILURE
+        computeKeys(key, PACE_KEY_COMPUTATION_SEED)
         info = APDUControl.sendAPDU(
-            APDU(NfcClassByte.ZERO, NfcInsByte.MANAGE_SECURITY_ENVIRONMENT, NfcP1Byte.SET_AUTHENTICATION_TEMPLATE, NfcP2Byte.SET_AUTHENTICATION_TEMPLATE, info)
+            APDU(
+                NfcClassByte.ZERO,
+                NfcInsByte.MANAGE_SECURITY_ENVIRONMENT,
+                NfcP1Byte.SET_AUTHENTICATION_TEMPLATE,
+                NfcP2Byte.SET_AUTHENTICATION_TEMPLATE,
+                info
+            )
         )
         if (!APDUControl.checkResponse(info)) {
             return INVALID_MSE_COMMAND
@@ -148,16 +183,18 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
                     ZERO_BYTE,
                     ZERO_BYTE,
                     info,
-                    256
+                    0
                 )
             )
             if (!APDUControl.checkResponse(info)) {
                 return INVALID_GENERAL_AUTHENTICATE
             }
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return FAILURE
         }
-        val z = TLV(APDUControl.removeRespondCodes(info)).list!!.tlvSequence[0].value
+        val z = TLV(
+            APDUControl.removeRespondCodes(info)
+        ).list!!.tlvSequence[0].value
             ?: return INVALID_NONCE
         val s = decryptNonce(z) ?: return INVALID_ARGUMENT
         return when (idPACEOid!![idPACEOid!!.size-2]) {
@@ -176,20 +213,41 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
-    private fun paceECGM(nonce: ByteArray) : Int {
+    private fun paceECGM(nonce: ByteArray): Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
-        var domainParameters = ECDomainParameters(params.curve, params.g, params.n, params.h)
+        var domainParameters =
+            ECDomainParameters(params.curve, params.g, params.n, params.h)
         var keys = Crypto.generateECKeyPair(domainParameters)
-        var publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.MAPPING_DATA)
-        val sa = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        var publicKey = exchangeKeys(
+                keys.public as ECPublicKeyParameters,
+                TlvTags.MAPPING_DATA
+            )
+        val sa = Crypto.calculateECDHAgreement(
+            keys.private as ECPrivateKeyParameters,
+            publicKey
+        )
         val h = Crypto.getECPointFromBigInteger(sa, domainParameters)
         val g = Crypto.genericMappingEC(domainParameters.g, nonce, h)
-        domainParameters = ECDomainParameters(domainParameters.curve, g, domainParameters.n, domainParameters.h)
+        domainParameters = ECDomainParameters(
+            domainParameters.curve,
+            g,
+            domainParameters.n,
+            domainParameters.h
+        )
         keys = Crypto.generateECKeyPair(domainParameters)
-        publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        publicKey = exchangeKeys(
+            keys.public as ECPublicKeyParameters,
+            TlvTags.PUBLIC_KEY
+        )
+        val sharedSecret = Crypto.calculateECDHAgreement(
+            keys.private as ECPrivateKeyParameters,
+            publicKey
+        )
         computeKeys(sharedSecret.toByteArray())
-        return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
+        return tokenAuthentication(
+            keys.public as ECPublicKeyParameters,
+            publicKey
+        )
     }
 
     /**
@@ -198,18 +256,33 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
-    private fun paceDHGM(nonce: ByteArray) : Int {
+    private fun paceDHGM(nonce: ByteArray): Int {
         var params = getDHParams() ?: return INVALID_ARGUMENT
         var keys = Crypto.generateDHKeyPair(params)
-        var publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.MAPPING_DATA)
-        val h = Crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
+        var publicKey = exchangeKeys(
+            keys.public as DHPublicKeyParameters,
+            TlvTags.MAPPING_DATA
+        )
+        val h = Crypto.calculateDHAgreement(
+            keys.private as DHPrivateKeyParameters,
+            publicKey
+        )
         val g = Crypto.genericMappingDH(params.g, nonce, params.p, h)
         params = DHParameters(params.p, g, params.q)
         keys = Crypto.generateDHKeyPair(params)
-        publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = Crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
+        publicKey = exchangeKeys(
+            keys.public as DHPublicKeyParameters,
+            TlvTags.PUBLIC_KEY
+        )
+        val sharedSecret = Crypto.calculateDHAgreement(
+            keys.private as DHPrivateKeyParameters,
+            publicKey
+        )
         computeKeys(sharedSecret.toByteArray())
-        return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
+        return tokenAuthentication(
+            keys.public as DHPublicKeyParameters,
+            publicKey
+        )
     }
 
     /**
@@ -218,27 +291,52 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
-    private fun paceECIM(nonce: ByteArray) : Int {
+    private fun paceECIM(nonce: ByteArray): Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
-        var domainParams = ECDomainParameters(params.curve, params.g, params.n, params.h)
+        var domainParams =
+            ECDomainParameters(params.curve, params.g, params.n, params.h)
         var t = ByteArray(nonce.size)
         if (random == null) {
-            t = byteArrayOf(0x5D, 0xD4.toByte(), 0xCB.toByte(), 0xFC.toByte(), 0x96.toByte(), 0xF5.toByte(), 0x45, 0x3B, 0x13, 0x0D, 0x89.toByte(), 0x0A, 0x1C, 0xDB.toByte(), 0xAE.toByte(), 0x32)
+            t = byteArrayOf(
+                0x5D, 0xD4.toByte(), 0xCB.toByte(), 0xFC.toByte(),
+                0x96.toByte(), 0xF5.toByte(), 0x45, 0x3B,
+                0x13, 0x0D, 0x89.toByte(), 0x0A,
+                0x1C, 0xDB.toByte(), 0xAE.toByte(), 0x32
+            )
         } else {
             random.nextBytes(t)
         }
         if (!APDUControl.checkResponse(sendNonce(t))) {
             return FAILURE
         }
-        val r = Crypto.integratedMappingPRNG(nonce, t, params.curve.field.characteristic, useLongConstants)
-        val x = Crypto.integratedMappingEC(r, params.curve.a.toBigInteger(), params.curve.b.toBigInteger(), params.curve.field.characteristic)
+        val r = Crypto.integratedMappingPRNG(
+            nonce,
+            t,
+            params.curve.field.characteristic,
+            useLongConstants
+        )
+        val x = Crypto.integratedMappingEC(
+            r,
+            params.curve.a.toBigInteger(),
+            params.curve.b.toBigInteger(),
+            params.curve.field.characteristic
+        )
         val g = Crypto.getECPointFromBigInteger(x, domainParams)
         domainParams = ECDomainParameters(params.curve, g, params.n, params.h)
         val keys = Crypto.generateECKeyPair(domainParams)
-        val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        val publicKey = exchangeKeys(
+            keys.public as ECPublicKeyParameters,
+            TlvTags.PUBLIC_KEY
+        )
+        val sharedSecret = Crypto.calculateECDHAgreement(
+            keys.private as ECPrivateKeyParameters,
+            publicKey
+        )
         computeKeys(sharedSecret.toByteArray())
-        return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey)
+        return tokenAuthentication(
+            keys.public as ECPublicKeyParameters,
+            publicKey
+        )
     }
 
     /**
@@ -247,11 +345,16 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
-    private fun paceDHIM(nonce: ByteArray) : Int {
+    private fun paceDHIM(nonce: ByteArray): Int {
         var params = getDHParams() ?: return INVALID_ARGUMENT
         var t = ByteArray(nonce.size)
         if (random == null) {
-            t = byteArrayOf(0xB3.toByte(), 0xA6.toByte(), 0xDB.toByte(), 0x3C, 0x87.toByte(), 0x0C, 0x3E, 0x99.toByte(), 0x24, 0x5E, 0x0D, 0x1C, 0x06, 0xB7.toByte(), 0x47, 0xDE.toByte())
+            t = byteArrayOf(
+                0xB3.toByte(), 0xA6.toByte(), 0xDB.toByte(), 0x3C,
+                0x87.toByte(), 0x0C, 0x3E, 0x99.toByte(),
+                0x24, 0x5E, 0x0D, 0x1C,
+                0x06, 0xB7.toByte(), 0x47, 0xDE.toByte()
+            )
         } else {
             random.nextBytes(t)
         }
@@ -262,10 +365,19 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
         val g = Crypto.integratedMappingDH(r, params.p, params.q)
         params = DHParameters(params.p, g, params.q)
         val keys = Crypto.generateDHKeyPair(params)
-        val publicKey = exchangeKeys(keys.public as DHPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = Crypto.calculateDHAgreement(keys.private as DHPrivateKeyParameters, publicKey)
+        val publicKey = exchangeKeys(
+            keys.public as DHPublicKeyParameters,
+            TlvTags.PUBLIC_KEY
+        )
+        val sharedSecret = Crypto.calculateDHAgreement(
+            keys.private as DHPrivateKeyParameters,
+            publicKey
+        )
         computeKeys(sharedSecret.toByteArray())
-        return tokenAuthentication(keys.public as DHPublicKeyParameters, publicKey)
+        return tokenAuthentication(
+            keys.public as DHPublicKeyParameters,
+            publicKey
+        )
     }
 
 
@@ -275,20 +387,37 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce used for generic mapping
      * @return [SUCCESS] if protocol was successful, otherwise [FAILURE]
      */
-    private fun paceECCAM(nonce: ByteArray) : Int {
+    private fun paceECCAM(nonce: ByteArray): Int {
         val params = getECParams() ?: return INVALID_ARGUMENT
-        var domainParams = ECDomainParameters(params.curve, params.g, params.n, params.h)
+        var domainParams =
+            ECDomainParameters(params.curve, params.g, params.n, params.h)
         var keys = Crypto.generateECKeyPair(domainParams)
-        chipPublicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.MAPPING_DATA)
-        val sa = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, chipPublicKey!!)
+        chipPublicKey = exchangeKeys(
+            keys.public as ECPublicKeyParameters,
+            TlvTags.MAPPING_DATA
+        )
+        val sa = Crypto.calculateECDHAgreement(
+            keys.private as ECPrivateKeyParameters,
+            chipPublicKey!!
+        )
         val h = Crypto.getECPointFromBigInteger(sa, domainParams)
         val g = Crypto.genericMappingEC(domainParams.g, nonce, h)
         domainParams = ECDomainParameters(params.curve, g, params.n, params.h)
         keys = Crypto.generateECKeyPair(domainParams)
-        val publicKey = exchangeKeys(keys.public as ECPublicKeyParameters, TlvTags.PUBLIC_KEY)
-        val sharedSecret = Crypto.calculateECDHAgreement(keys.private as ECPrivateKeyParameters, publicKey)
+        val publicKey = exchangeKeys(
+            keys.public as ECPublicKeyParameters,
+            TlvTags.PUBLIC_KEY
+        )
+        val sharedSecret = Crypto.calculateECDHAgreement(
+            keys.private as ECPrivateKeyParameters,
+            publicKey
+        )
         computeKeys(sharedSecret.toByteArray())
-        return tokenAuthentication(keys.public as ECPublicKeyParameters, publicKey, true)
+        return tokenAuthentication(
+            keys.public as ECPublicKeyParameters,
+            publicKey,
+            true
+        )
     }
 
     /**
@@ -296,11 +425,14 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      *
      * @return [DHParameters] or null
      */
-    private fun getDHParams() : DHParameters? {
+    private fun getDHParams(): DHParameters? {
         return when (parameters) {
-            MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP -> DHStandardGroups.rfc5114_1024_160
-            MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP -> DHStandardGroups.rfc5114_2048_224
-            MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP -> DHStandardGroups.rfc5114_2048_256
+            MOD_P_1024_BIT_GROUP_WITH_160_BIT_PRIME_ORDER_SUBGROUP ->
+                DHStandardGroups.rfc5114_1024_160
+            MOD_P_2048_BIT_GROUP_WITH_224_BIT_PRIME_ORDER_SUBGROUP ->
+                DHStandardGroups.rfc5114_2048_224
+            MOD_P_2048_BIT_GROUP_WITH_256_BIT_PRIME_ORDER_SUBGROUP ->
+                DHStandardGroups.rfc5114_2048_256
             else -> null
         }
     }
@@ -309,19 +441,19 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      *
      * @return [X9ECParameters] or null
      */
-    private fun getECParams() : X9ECParameters? {
+    private fun getECParams(): X9ECParameters? {
         return when (parameters) {
-            NIST_P192 -> ECNamedCurveTable.getByName("P-192")
-            NIST_P224 -> ECNamedCurveTable.getByName("P-224")
-            NIST_P256 -> ECNamedCurveTable.getByName("P-256")
-            NIST_P384 -> ECNamedCurveTable.getByName("P-384")
-            NIST_P521 -> ECNamedCurveTable.getByName("P-521")
-            BRAIN_POOL_P192R1 -> ECNamedCurveTable.getByName("brainpoolp192r1")
-            BRAIN_POOL_P224R1 -> ECNamedCurveTable.getByName("brainpoolp224r1")
-            BRAIN_POOL_P256R1 -> ECNamedCurveTable.getByName("brainpoolp256r1")
-            BRAIN_POOL_P320R1 -> ECNamedCurveTable.getByName("brainpoolp320r1")
-            BRAIN_POOL_P384R1 -> ECNamedCurveTable.getByName("brainpoolp384r1")
-            BRAIN_POOL_P512R1 -> ECNamedCurveTable.getByName("brainpoolp512r1")
+            NIST_P192 -> ECNamedCurveTable.getByName(P_192)
+            NIST_P224 -> ECNamedCurveTable.getByName(P_224)
+            NIST_P256 -> ECNamedCurveTable.getByName(P_256)
+            NIST_P384 -> ECNamedCurveTable.getByName(P_384)
+            NIST_P521 -> ECNamedCurveTable.getByName(P_521)
+            BRAIN_POOL_P192R1 -> ECNamedCurveTable.getByName(BP_P_192)
+            BRAIN_POOL_P224R1 -> ECNamedCurveTable.getByName(BP_P_224)
+            BRAIN_POOL_P256R1 -> ECNamedCurveTable.getByName(BP_P_256)
+            BRAIN_POOL_P320R1 -> ECNamedCurveTable.getByName(BP_P_320)
+            BRAIN_POOL_P384R1 -> ECNamedCurveTable.getByName(BP_P_384)
+            BRAIN_POOL_P512R1 -> ECNamedCurveTable.getByName(BP_P_512)
             else -> null
         }
     }
@@ -332,14 +464,22 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param secret The secret for computing the keys
      * @param seed The seed for computing the keys
      */
-    private fun computeKeys(secret: ByteArray, seed : Byte = 1) {
+    private fun computeKeys(secret: ByteArray, seed: Byte = 1) {
         val key = if (secret[0] == 0.toByte() && secret[1] < 0) {
             secret.slice(1..<secret.size).toByteArray()
         } else {
             secret
         }
-        encKey = Crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], seed)
-        macKey = Crypto.computeKey(key, idPACEOid!![idPACEOid!!.size-1], MAC_COMPUTATION_KEY_VALUE_C)
+        encKey = Crypto.computeKey(
+            key,
+            idPACEOid!![idPACEOid!!.size-1],
+            seed
+        )
+        macKey = Crypto.computeKey(
+            key,
+            idPACEOid!![idPACEOid!!.size-1],
+            MAC_COMPUTATION_KEY_VALUE_C
+        )
         when (idPACEOid!![idPACEOid!!.size-1]) {
             DES_CBC_CBC -> APDUControl.isAES = false
             AES_CBC_CMAC_128 -> APDUControl.isAES = true
@@ -361,7 +501,11 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param chipPublicKey The public key from the eMRTD
      * @param isCAM Indicates if PACE with CAM is used
      */
-    private fun tokenAuthentication(publicKey: ECPublicKeyParameters, chipPublicKey: ECPublicKeyParameters, isCAM: Boolean = false) : Int {
+    private fun tokenAuthentication(
+        publicKey: ECPublicKeyParameters,
+        chipPublicKey: ECPublicKeyParameters,
+        isCAM: Boolean = false
+    ): Int {
         val token = generateTokenData(publicKey)
         val chipToken = generateTokenData(chipPublicKey)
         return checkToken(token, chipToken, isCAM)
@@ -373,7 +517,10 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param publicKey The public key from the phone
      * @param chipPublicKey The public key from the eMRTD
      */
-    private fun tokenAuthentication(publicKey: DHPublicKeyParameters, chipPublicKey: DHPublicKeyParameters) : Int {
+    private fun tokenAuthentication(
+        publicKey: DHPublicKeyParameters,
+        chipPublicKey: DHPublicKeyParameters
+    ): Int {
         val token = generateTokenData(publicKey)
         val chipToken = generateTokenData(chipPublicKey)
         return checkToken(token, chipToken)
@@ -386,24 +533,50 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param chipToken The token generated by the eMRTD
      * @param isCAM Indicates if PACE with CAM is used
      */
-    private fun checkToken(token: ByteArray, chipToken: ByteArray, isCAM: Boolean = false) : Int {
+    private fun checkToken(
+        token: ByteArray,
+        chipToken: ByteArray,
+        isCAM: Boolean = false
+    ): Int {
         val token1 = computeToken(chipToken)
         var data = TLV(TlvTags.TERMINAL_AUTHENTICATION_TOKEN, token1)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        val info = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.GENERAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, data.toByteArray(), 256))
+        val info = APDUControl.sendAPDU(
+            APDU(
+                NfcClassByte.ZERO,
+                NfcInsByte.GENERAL_AUTHENTICATE,
+                NfcP1Byte.ZERO,
+                NfcP2Byte.ZERO,
+                data.toByteArray(),
+                0
+            )
+        )
         if (!APDUControl.checkResponse(info)) {
             return FAILURE
         }
         data = TLV(APDUControl.removeRespondCodes(info))
         val receivedToken = data.list!!.tlvSequence[0].value
         if (isCAM) {
-            chipAuthenticationData = data.list?.tlvSequence?.get(1)?.value
+            chipAuthenticationData = data.list?.tlvSequence?.get(
+                CHIP_AUTHENTICATION_DATA_SEQUENCE_INDEX
+            )?.value
             val iv = ByteArray(encKey!!.size)
             iv.fill(-1)
-            val newIV = Crypto.cipherAES(iv, encKey!!, Cipher.ENCRYPT_MODE, ByteArray(16))
+            val newIV = Crypto.cipherAES(
+                iv,
+                encKey!!,
+                Cipher.ENCRYPT_MODE,
+                ByteArray(IV_VECTOR_SIZE)
+            )
             if (newIV != null) {
-                chipAuthenticationData = Crypto.cipherAES(chipAuthenticationData!!, encKey!!, Cipher.DECRYPT_MODE, newIV)
-                chipAuthenticationData = Crypto.removePadding(chipAuthenticationData!!)
+                chipAuthenticationData = Crypto.cipherAES(
+                    chipAuthenticationData!!,
+                    encKey!!,
+                    Cipher.DECRYPT_MODE,
+                    newIV
+                )
+                chipAuthenticationData =
+                    Crypto.removePadding(chipAuthenticationData!!)
             }
         }
         val token2 = computeToken(token)
@@ -411,7 +584,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
             APDUControl.sendEncryptedAPDU = true
             APDUControl.setEncryptionKeyBAC(encKey!!)
             APDUControl.setEncryptionKeyMAC(macKey!!)
-            APDUControl.setSequenceCounter(ByteArray(16))
+            APDUControl.setSequenceCounter(ByteArray(SEQUENCE_COUNTER_SIZE))
             return SUCCESS
         } else {
             return FAILURE
@@ -424,7 +597,7 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param byteArray The byte array for which the token is computed
      * @return The token as a ByteArray
      */
-    private fun computeToken(byteArray: ByteArray) : ByteArray {
+    private fun computeToken(byteArray: ByteArray): ByteArray {
         return if (idPACEOid!![idPACEOid!!.size-1] == DES_CBC_CBC) {
             Crypto.computeMAC(byteArray, macKey!!)
         } else {
@@ -438,11 +611,14 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param publicKey The public key for the token computation
      * @return Input data for the token computation
      */
-    private fun generateTokenData(publicKey: ECPublicKeyParameters) : ByteArray {
+    private fun generateTokenData(publicKey: ECPublicKeyParameters): ByteArray {
         val oid = TLV(TlvTags.OID, idPACEOid!!)
         val pub = X9ECPoint(publicKey.q, false).encoded
         pub[0] = TlvTags.EC_PUBLIC_POINT
-        return TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray() + pub).toByteArray()
+        return TLV(
+            byteArrayOf(TOKEN_DATA_TAG_1, TOKEN_DATA_TAG_2),
+            oid.toByteArray() + pub
+        ).toByteArray()
     }
 
     /**
@@ -451,14 +627,17 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param publicKey The public key for the token computation
      * @return Input data for the token computation
      */
-    private fun generateTokenData(publicKey: DHPublicKeyParameters) : ByteArray {
+    private fun generateTokenData(publicKey: DHPublicKeyParameters): ByteArray {
         val oid = TLV(TlvTags.OID, idPACEOid!!)
         var key = publicKey.y.toByteArray()
         if (key[0] == 0.toByte() && key[1] < 0) {
             key = key.slice(1..<key.size).toByteArray()
         }
         val pub = TLV(TlvTags.UNSIGNED_INTEGER, key)
-        return TLV(byteArrayOf(0x7F, 0x49), oid.toByteArray()+pub.toByteArray()).toByteArray()
+        return TLV(
+            byteArrayOf(TOKEN_DATA_TAG_1, TOKEN_DATA_TAG_2),
+            oid.toByteArray()+pub.toByteArray()
+        ).toByteArray()
     }
 
     /**
@@ -467,11 +646,29 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param publicKey The public key to send to the eMRTD
      * @return The EC public key of the eMRTD
      */
-    private fun exchangeKeys(publicKey: ECPublicKeyParameters, tag: Byte) : ECPublicKeyParameters {
+    private fun exchangeKeys(
+        publicKey: ECPublicKeyParameters,
+        tag: Byte
+    ): ECPublicKeyParameters {
         var data = TLV(tag, publicKey.q.getEncoded(false))
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        val response = TLV(APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
-        return ECPublicKeyParameters(publicKey.parameters.curve.decodePoint(response.list!!.tlvSequence[0].value!!), publicKey.parameters)
+        val response = TLV(
+            APDUControl.sendAPDU(
+                APDU(
+                    NfcClassByte.COMMAND_CHAINING,
+                    NfcInsByte.GENERAL_AUTHENTICATE,
+                    ZERO_BYTE,
+                    ZERO_BYTE,
+                    data.toByteArray(), 0
+                )
+            )
+        )
+        return ECPublicKeyParameters(
+            publicKey.parameters.curve.decodePoint(
+                response.list!!.tlvSequence[0].value!!
+            ),
+            publicKey.parameters
+        )
     }
 
     /**
@@ -480,15 +677,35 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param publicKey The public key to send to the eMRTD
      * @return The DH public key of the eMRTD
      */
-    private fun exchangeKeys(publicKey: DHPublicKeyParameters, tag: Byte) : DHPublicKeyParameters {
+    private fun exchangeKeys(
+        publicKey: DHPublicKeyParameters,
+        tag: Byte
+    ): DHPublicKeyParameters {
         var key = publicKey.y.toByteArray()
         if (key[0] == 0.toByte() && key[1] < 0) {
             key = key.slice(1..<key.size).toByteArray()
         }
         var data = TLV(tag, key)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        val response = TLV(APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256)))
-        return DHPublicKeyParameters(BigInteger(POSITIVE_NUMBER, response.list!!.tlvSequence[0].value!!), publicKey.parameters)
+        val response = TLV(
+            APDUControl.sendAPDU(
+                APDU(
+                    NfcClassByte.COMMAND_CHAINING,
+                    NfcInsByte.GENERAL_AUTHENTICATE,
+                    ZERO_BYTE,
+                    ZERO_BYTE,
+                    data.toByteArray(),
+                    0
+                )
+            )
+        )
+        return DHPublicKeyParameters(
+            BigInteger(
+                POSITIVE_NUMBER,
+                response.list!!.tlvSequence[0].value!!
+            ),
+            publicKey.parameters
+        )
     }
 
     /**
@@ -497,10 +714,19 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce to send to the eMRTD
      * @return Response from the eMRTD
      */
-    private fun sendNonce(nonce: ByteArray) : ByteArray {
+    private fun sendNonce(nonce: ByteArray): ByteArray {
         var data = TLV(TlvTags.MAPPING_DATA, nonce)
         data = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, data.toByteArray())
-        return APDUControl.sendAPDU(APDU(NfcClassByte.COMMAND_CHAINING, NfcInsByte.GENERAL_AUTHENTICATE, ZERO_BYTE, ZERO_BYTE, data.toByteArray(), 256))
+        return APDUControl.sendAPDU(
+            APDU(
+                NfcClassByte.COMMAND_CHAINING,
+                NfcInsByte.GENERAL_AUTHENTICATE,
+                ZERO_BYTE,
+                ZERO_BYTE,
+                data.toByteArray(),
+                0
+            )
+        )
     }
 
     /**
@@ -509,12 +735,16 @@ class PACE(private val random: SecureRandom? = SecureRandom()) {
      * @param nonce The nonce to decrypt
      * @return The decrypted nonce or null
      */
-    private fun decryptNonce(nonce: ByteArray) : ByteArray? {
+    private fun decryptNonce(nonce: ByteArray): ByteArray? {
         return when(idPACEOid!![idPACEOid!!.size-1]) {
-            AES_CBC_CMAC_128 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            AES_CBC_CMAC_192 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            AES_CBC_CMAC_256 -> Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
-            DES_CBC_CBC -> Crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            AES_CBC_CMAC_128 ->
+                Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            AES_CBC_CMAC_192 ->
+                Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            AES_CBC_CMAC_256 ->
+                Crypto.cipherAES(nonce, encKey!!, Cipher.DECRYPT_MODE)
+            DES_CBC_CBC ->
+                Crypto.cipher3DES(nonce, encKey!!, Cipher.DECRYPT_MODE)
             else -> null
         }
     }

@@ -1,16 +1,30 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.EFComConstants.LDS_VERSION_LENGTH
-import com.example.emrtdapplication.constants.EFComConstants.UNICODE_VERSION_LENGTH
-import com.example.emrtdapplication.constants.FILE_SUCCESSFUL_READ
-import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FILE_SUCCESSFUL_READ
+import com.example.emrtdapplication.FILE_UNABLE_TO_READ
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.LDS_VERSION
 import com.example.emrtdapplication.constants.TlvTags.TAG_LIST
 import com.example.emrtdapplication.constants.TlvTags.UNICODE_VERSION
 import com.example.emrtdapplication.constants.TlvTags.VERSION
 import com.example.emrtdapplication.utils.TLV
+
+/**
+ * Byte length for value in a TLV holding LDS version information
+ */
+const val LDS_VERSION_LENGTH = 0x04
+
+/**
+ * Byte length for value in a TLV holding Unicode version information
+ */
+const val UNICODE_VERSION_LENGTH = 0x06
+
+const val EF_COM_TAG: Byte = 0x60
+const val EF_COM_SHORT_ID: Byte = 0x1E
+const val VERSION_TAG_SIZE = 2
+const val VERSION_COMPUTATION_DIFFERENCE = 48
+const val VERSION_COMPUTATION_MULTIPLIER = 10
 
 /**
  * Implements the EF.COM file
@@ -31,10 +45,10 @@ class EfCom: ElementaryFileTemplate() {
     private var unicodeMajorVersion = 0
     private var unicodeMinorVersion = 0
     private var unicodeReleaseVersion = 0
-    private var tagList : ByteArray? = null
+    private var tagList: ByteArray? = null
 
-    override val efTag: Byte = 0x60
-    override val shortEFIdentifier: Byte = 0x1E
+    override val efTag = EF_COM_TAG
+    override val shortEFIdentifier = EF_COM_SHORT_ID
     override var rawFileContent: ByteArray? = null
 
     /**
@@ -42,7 +56,7 @@ class EfCom: ElementaryFileTemplate() {
      *
      * @return [SUCCESS] if the file could be decoded, otherwise an error code
      */
-    override fun parse() : Int {
+    override fun parse(): Int {
         isParsed = false
         if (rawFileContent == null) {
             return SUCCESS
@@ -58,7 +72,7 @@ class EfCom: ElementaryFileTemplate() {
             val value = tag.value
             when (tag.tag[0]) {
                 VERSION -> {
-                    if (tag.tag.size != 2) {
+                    if (tag.tag.size != VERSION_TAG_SIZE) {
                         return FILE_UNABLE_TO_READ
                     }
                     when (tag.tag[1]) {
@@ -66,20 +80,31 @@ class EfCom: ElementaryFileTemplate() {
                             if (tag.length != LDS_VERSION_LENGTH) {
                                 return FILE_UNABLE_TO_READ
                             }
-                            ldsVersion = computeVersion(value?.get(0) ?: 0, value?.get(1) ?: 0)
-                            ldsUpdateLevel = computeVersion(value?.get(2) ?: 0, value?.get(3) ?: 0)
+                            ldsVersion =
+                                computeVersion(
+                                    value?.get(0) ?: 0,
+                                    value?.get(1) ?: 0
+                                )
+                            ldsUpdateLevel =
+                                computeVersion(
+                                    value?.get(2) ?: 0,
+                                    value?.get(3) ?: 0
+                                )
                         }
                         UNICODE_VERSION -> {
                             if (tag.length != UNICODE_VERSION_LENGTH) {
                                 return FILE_UNABLE_TO_READ
                             }
-                            unicodeMajorVersion = computeVersion(value?.get(0) ?: 0,
+                            unicodeMajorVersion = computeVersion(
+                                value?.get(0) ?: 0,
                                 value?.get(1) ?: 0
                             )
-                            unicodeMinorVersion = computeVersion(value?.get(2) ?: 0,
+                            unicodeMinorVersion = computeVersion(
+                                value?.get(2) ?: 0,
                                 value?.get(3) ?: 0
                             )
-                            unicodeReleaseVersion = computeVersion(value?.get(4) ?: 0,
+                            unicodeReleaseVersion = computeVersion(
+                                value?.get(4) ?: 0,
                                 value?.get(5) ?: 0
                             )
                         }
@@ -102,6 +127,7 @@ class EfCom: ElementaryFileTemplate() {
      * @return The decoded version as integer
      */
     private fun computeVersion(b1: Byte, b2: Byte): Int {
-        return (b1-48)*10+(b2-48)
+        return (b1-VERSION_COMPUTATION_DIFFERENCE) * VERSION_COMPUTATION_MULTIPLIER +
+                (b2-VERSION_COMPUTATION_DIFFERENCE)
     }
 }

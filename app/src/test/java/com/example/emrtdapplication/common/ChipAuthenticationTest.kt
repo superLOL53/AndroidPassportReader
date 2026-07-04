@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.utils.TLV
 import org.junit.Test
 import org.spongycastle.asn1.x9.ECNamedCurveTable

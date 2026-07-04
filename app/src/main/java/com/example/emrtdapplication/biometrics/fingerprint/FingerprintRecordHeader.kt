@@ -11,6 +11,9 @@ import java.io.ByteArrayInputStream
  * @property fingerprintHeader Decoded fingerprint header
  * @throws java.io.IOException If [header] could not be decoded
  */
-class FingerprintRecordHeader(header : ByteArray) : BiometricHeader(BiometricType.FINGERPRINT) {
-    val fingerprintHeader = FingerInfo(ByteArrayInputStream(header))
+class FingerprintRecordHeader(
+    header: ByteArray
+): BiometricHeader(BiometricType.FINGERPRINT) {
+    val fingerprintHeader =
+        FingerInfo(ByteArrayInputStream(header))
 }

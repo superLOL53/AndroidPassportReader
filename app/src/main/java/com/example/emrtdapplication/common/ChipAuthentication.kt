@@ -1,17 +1,16 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.constants.APDUConstants
-import com.example.emrtdapplication.constants.BACConstants
-import com.example.emrtdapplication.constants.ChipAuthenticationConstants
-import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.lds1.DG1
+import com.example.emrtdapplication.lds1.ENCRYPTION_KEY_VALUE_C
+import com.example.emrtdapplication.lds1.MAC_COMPUTATION_KEY_VALUE_C
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.Crypto
@@ -26,39 +25,79 @@ import org.spongycastle.crypto.params.ECPublicKeyParameters
 import org.spongycastle.crypto.util.PublicKeyFactory
 import java.math.BigInteger
 
+//const val ID_CA = "0.4.0.127.0.7.2.2.3"
+/**
+ * OID for chip authentication with DH
+ */
+const val ID_CA_DH = "0.4.0.127.0.7.2.2.3.1"
+
+/**
+ * OID for chip authentication with DH and 3DES secure messaging
+ */
+const val ID_CA_DH_3DES_CBC_CBC = "0.4.0.127.0.7.2.2.3.1.1"
+//const val ID_CA_DH_AES_CBC_CMAC_128 = "0.4.0.127.0.7.2.2.3.1.2"
+//const val ID_CA_DH_AES_CBC_CMAC_192 = "0.4.0.127.0.7.2.2.3.1.3"
+//const val ID_CA_DH_AES_CBC_CMAC_256 = "0.4.0.127.0.7.2.2.3.1.4"
+
+/**
+ * OID for chip authentication with ECDH
+ */
+const val ID_CA_ECDH = "0.4.0.127.0.7.2.2.3.2"
+
+/**
+ * OID for chip authentication with ECDH and 3DES secure messaging
+ */
+const val ID_CA_ECDH_3DES_CBC_CBC = "0.4.0.127.0.7.2.2.3.2.1"
+//const val ID_CA_ECDH_AES_CBC_CMAC_128 = "0.4.0.127.0.7.2.2.3.2.2"
+//const val ID_CA_ECDH_AES_CBC_CMAC_192 = "0.4.0.127.0.7.2.2.3.2.3"
+//const val ID_CA_ECDH_AES_CBC_CMAC_256 = "0.4.0.127.0.7.2.2.3.2.4"
+//const val ID_PK = "0.4.0.127.0.7.2.2.1"
+//const val ID_PK_DH = "0.4.0.127.0.7.2.2.1.1"
+//const val ID_PK_ECDH = "0.4.0.127.0.7.2.2.1.2"
+
 /**
  * Implements the chip authentication protocol
  *
  * @property publicKeyInfo Public key info for Chip Authentication protocol
- * @property chipAuthenticationData Decrypted Chip Authentication Data retrieved during the last step of the PACE protocol
- * @property chipAuthenticationInfo [ChipAuthenticationInfo] object containing information about the protocol itself
+ * @property chipAuthenticationData Decrypted Chip Authentication Data
+ * retrieved during the last step of the PACE protocol
+ * @property chipAuthenticationInfo [ChipAuthenticationInfo] object
+ * containing information about the protocol itself
  * @property isDH If the protocol is a DH key agreement protocol
  * @property isEC If the protocol is an EC key agreement protocol
  * @property keyParamsDH DH parameters for the protocol
  * @property keyParamsECDH EC parameters for the protocol
- * @property publicKeyDH eMRTDs static public key stored in [com.example.emrtdapplication.lds1.DG14]
- * @property publicKeyECDH eMRTDs static public key stored in [com.example.emrtdapplication.lds1.DG14]
- * @property is3DES If the protocol uses 3DES as the symmetric protocol, otherwise AES is used
+ * @property publicKeyDH eMRTDs static public key stored
+ * in [com.example.emrtdapplication.lds1.DG14]
+ * @property publicKeyECDH eMRTDs static public key stored
+ * in [com.example.emrtdapplication.lds1.DG14]
+ * @property is3DES If the protocol uses 3DES as the symmetric protocol
+ * otherwise AES is used
  */
 class ChipAuthentication {
     private val publicKeyInfo: ChipAuthenticationPublicKeyInfo
-    private val chipAuthenticationData : ByteArray?
+    private val chipAuthenticationData: ByteArray?
     private val chipAuthenticationInfo: ChipAuthenticationInfo?
     private var isDH = false
     private var isEC = false
-    private var keyParamsDH : DHParameters? = null
-    private var keyParamsECDH : ECDomainParameters? = null
-    private var publicKeyDH : DHPublicKeyParameters? = null
-    private var publicKeyECDH : ECPublicKeyParameters? = null
+    private var keyParamsDH: DHParameters? = null
+    private var keyParamsECDH: ECDomainParameters? = null
+    private var publicKeyDH: DHPublicKeyParameters? = null
+    private var publicKeyECDH: ECPublicKeyParameters? = null
     private var is3DES = false
 
     /**
      * Creates a ChipAuthentication object for authenticating the eMRTDs chip
      *
-     * @param publicKeyInfo The eMRTDs static public key stored in [com.example.emrtdapplication.lds1.DG14]
-     * @param chipAuthenticationInfo Information about the protocol stored in [com.example.emrtdapplication.lds1.DG14]
+     * @param publicKeyInfo The eMRTDs static public key stored
+     * in [com.example.emrtdapplication.lds1.DG14]
+     * @param chipAuthenticationInfo Information about the protocol
+     * stored in [com.example.emrtdapplication.lds1.DG14]
      */
-    constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationInfo: ChipAuthenticationInfo) {
+    constructor(
+        publicKeyInfo: ChipAuthenticationPublicKeyInfo,
+        chipAuthenticationInfo: ChipAuthenticationInfo
+    ) {
         this.publicKeyInfo = publicKeyInfo
         this.chipAuthenticationInfo = chipAuthenticationInfo
          chipAuthenticationData = null
@@ -68,10 +107,15 @@ class ChipAuthentication {
      * Creates a ChipAuthentication object for PACE with Chip Authentication Mapping
      *
      * @param publicKeyInfo Public key info for the Chip Authentication protocol
-     * @param chipAuthenticationData Decrypted Chip Authentication Data retrieved during the last step in the PACE protocol
+     * @param chipAuthenticationData Decrypted Chip Authentication Data retrieved
+     * during the last step in the PACE protocol
      * @param publicKey eMRTDs public key during the mapping phase of the PACE protocol
      */
-    constructor(publicKeyInfo: ChipAuthenticationPublicKeyInfo, chipAuthenticationData : ByteArray, publicKey : ECPublicKeyParameters) {
+    constructor(
+        publicKeyInfo: ChipAuthenticationPublicKeyInfo,
+        chipAuthenticationData: ByteArray,
+        publicKey: ECPublicKeyParameters
+    ) {
         this.chipAuthenticationData = chipAuthenticationData
         publicKeyECDH = publicKey
         chipAuthenticationInfo = null
@@ -81,27 +125,30 @@ class ChipAuthentication {
     /**
      * Authenticate the chip
      *
-     * @return [com.example.emrtdapplication.constants.SUCCESS] if the protocol was successful, otherwise [com.example.emrtdapplication.constants.FAILURE]
+     * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
      */
-    fun authenticate() : Int {
+    fun authenticate(): Int {
         return if (chipAuthenticationData != null && publicKeyECDH != null) {
             authenticatePACECAMMapping()
         } else if(chipAuthenticationInfo != null) {
             if (chipAuthenticationInfo.objectIdentifier.startsWith(
-                    ChipAuthenticationConstants.ID_CA_DH
-                )) {
+                    ID_CA_DH
+                )
+            ) {
                 isDH = true
             } else if (chipAuthenticationInfo.objectIdentifier.startsWith(
-                    ChipAuthenticationConstants.ID_CA_ECDH
-                )) {
+                    ID_CA_ECDH
+                )
+            ) {
                 isEC = true
             }
             is3DES = (chipAuthenticationInfo.objectIdentifier.startsWith(
-                ChipAuthenticationConstants.ID_CA_ECDH_3DES_CBC_CBC
+                ID_CA_ECDH_3DES_CBC_CBC
             ) ||
-                        chipAuthenticationInfo.objectIdentifier.startsWith(
-                            ChipAuthenticationConstants.ID_CA_DH_3DES_CBC_CBC
-                        ))
+                chipAuthenticationInfo.objectIdentifier.startsWith(
+                    ID_CA_DH_3DES_CBC_CBC
+                )
+            )
             setParameters()
             if (keyParamsDH == null && keyParamsECDH == null) {
                 return FAILURE
@@ -149,12 +196,15 @@ class ChipAuthentication {
      * @param publicKeyData Public key of the reader encoded as byte array
      * @return [SUCCESS] if APDU exchange was successful, otherwise [FAILURE]
      */
-    private fun authenticate3DES(publicKeyData : ByteArray) : Int {
+    private fun authenticate3DES(publicKeyData: ByteArray): Int {
         val pubData = TLV(TlvTags.EPHEMERAL_PUBLIC_KEY, publicKeyData)
         val keyRef = if (publicKeyInfo.keyId == null) {
             null
         } else {
-            TLV(TlvTags.PRIVATE_KEY_REFERENCE, publicKeyInfo.keyId!!.toByteArray())
+            TLV(
+                TlvTags.PRIVATE_KEY_REFERENCE,
+                publicKeyInfo.keyId!!.toByteArray()
+            )
         }
         val data = if (keyRef != null) {
             pubData.toByteArray() + keyRef.toByteArray()
@@ -182,8 +232,11 @@ class ChipAuthentication {
      * @param publicKeyData Public key of the reader encoded as byte array
      * @return [SUCCESS] if APDU exchange was successful, otherwise [FAILURE]
      */
-    private fun authenticateAES(publicKeyData: ByteArray) : Int {
-        val protocol = TLV(TlvTags.CRYPTOGRAPHIC_REFERENCE, chipAuthenticationInfo!!.protocol)
+    private fun authenticateAES(publicKeyData: ByteArray): Int {
+        val protocol = TLV(
+            TlvTags.CRYPTOGRAPHIC_REFERENCE,
+            chipAuthenticationInfo!!.protocol
+        )
         val keyId = if (publicKeyInfo.keyId != null) {
                         publicKeyInfo.keyId!!.toByteArray()
                     } else {
@@ -205,8 +258,14 @@ class ChipAuthentication {
         if (!APDUControl.checkResponse(info)) {
             return FAILURE
         }
-        val pubData = TLV(TlvTags.CRYPTOGRAPHIC_REFERENCE, publicKeyData)
-        val tlv = TLV(TlvTags.DYNAMIC_AUTHENTICATION_DATA, pubData.toByteArray())
+        val pubData = TLV(
+            TlvTags.CRYPTOGRAPHIC_REFERENCE,
+            publicKeyData
+        )
+        val tlv = TLV(
+            TlvTags.DYNAMIC_AUTHENTICATION_DATA,
+            pubData.toByteArray()
+        )
         info = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -214,7 +273,7 @@ class ChipAuthentication {
                 NfcP1Byte.ZERO,
                 NfcP2Byte.ZERO,
                 tlv.toByteArray(),
-                APDUConstants.LE_MAX
+                0
             )
         )
         if (!APDUControl.checkResponse(info)) {
@@ -228,11 +287,25 @@ class ChipAuthentication {
      *
      * @return [SUCCESS] or [FAILURE]
      */
-    private fun authenticatePACECAMMapping() : Int {
-        val pub = ECPublicKeyParameters(publicKeyECDH!!.parameters.curve.decodePoint(publicKeyInfo.publicKeyInfo.publicKeyData.bytes), publicKeyECDH!!.parameters)
-        val privateKey = ECPrivateKeyParameters(BigInteger(byteArrayOf(0x00) + chipAuthenticationData!!), pub.parameters)
-        val agreement = Crypto.calculateECDHAgreement(privateKey, pub).toByteArray()
-        return if (agreement.contentEquals(publicKeyECDH!!.q.xCoord.toBigInteger().toByteArray())) {
+    private fun authenticatePACECAMMapping(): Int {
+        val pub = ECPublicKeyParameters(
+            publicKeyECDH!!.parameters.curve.decodePoint(
+                publicKeyInfo.publicKeyInfo.publicKeyData.bytes
+            ),
+            publicKeyECDH!!.parameters
+        )
+        val privateKey = ECPrivateKeyParameters(
+            BigInteger(byteArrayOf(0x00) + chipAuthenticationData!!),
+            pub.parameters
+        )
+        val agreement = Crypto.calculateECDHAgreement(
+            privateKey,
+            pub
+        ).toByteArray()
+        return if (agreement.contentEquals(
+                publicKeyECDH!!.q.xCoord.toBigInteger().toByteArray()
+            )
+        ) {
             SUCCESS
         } else {
             FAILURE
@@ -244,7 +317,7 @@ class ChipAuthentication {
      *
      * @return Generated key pair
      */
-    private fun generateKeyPair() : AsymmetricCipherKeyPair? {
+    private fun generateKeyPair(): AsymmetricCipherKeyPair? {
         return if (isDH && keyParamsDH != null) {
             Crypto.generateDHKeyPair(keyParamsDH!!)
         } else if (isEC && keyParamsECDH != null) {
@@ -260,8 +333,8 @@ class ChipAuthentication {
      * @param keyPair Key pair from which the public key is encoded
      * @return The public key as a byte array
      */
-    private fun getEncodedPublicKey(keyPair: AsymmetricCipherKeyPair) : ByteArray? {
-        var publicKeyData : ByteArray? = null
+    private fun getEncodedPublicKey(keyPair: AsymmetricCipherKeyPair): ByteArray? {
+        var publicKeyData: ByteArray? = null
         try {
             if (isDH) {
                 val publicKey = keyPair.public as DHPublicKeyParameters
@@ -270,7 +343,7 @@ class ChipAuthentication {
                 val publicKey = keyPair.public as ECPublicKeyParameters
                 publicKeyData = publicKey.q.getEncoded(false)
             }
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             println(e)
         }
         return publicKeyData
@@ -298,7 +371,7 @@ class ChipAuthentication {
                     publicKeyDH!!.parameters.q
                 )
             }
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
 
         }
     }
@@ -309,11 +382,19 @@ class ChipAuthentication {
      * @param agreement The computed agreement in the key agreement step in the protocol
      */
     @OptIn(ExperimentalStdlibApi::class)
-    private fun computeKeys(agreement : ByteArray) {
+    private fun computeKeys(agreement: ByteArray) {
         if (chipAuthenticationInfo == null) return
         val oid = chipAuthenticationInfo.objectIdentifier
-        val encryptionKeyBAC = Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), BACConstants.ENCRYPTION_KEY_VALUE_C)
-        val encryptionKeyMAC = Crypto.computeKey(agreement, (oid[oid.length-1] - '0').toByte(), BACConstants.MAC_COMPUTATION_KEY_VALUE_C)
+        val encryptionKeyBAC = Crypto.computeKey(
+            agreement,
+            (oid[oid.length-1] - '0').toByte(),
+            ENCRYPTION_KEY_VALUE_C
+        )
+        val encryptionKeyMAC = Crypto.computeKey(
+            agreement,
+            (oid[oid.length-1] - '0').toByte(),
+            MAC_COMPUTATION_KEY_VALUE_C
+        )
         if (encryptionKeyBAC == null || encryptionKeyMAC == null) return
         APDUControl.setEncryptionKeyBAC(encryptionKeyBAC)
         APDUControl.setEncryptionKeyMAC(encryptionKeyMAC)
@@ -329,7 +410,7 @@ class ChipAuthentication {
      * Verify that the computed keys for chip authentication actually can read from the eMRTD
      * @return [SUCCESS] or [FAILURE]
      */
-    private fun verify() : Int {
+    private fun verify(): Int {
         val dg1 = DG1()
         dg1.read()
         dg1.parse()

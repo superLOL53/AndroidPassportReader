@@ -1,13 +1,13 @@
 package com.example.emrtdapplication.utils
 
+import com.example.emrtdapplication.EF_TYPE_TEMPLATE_SEQUENCE_SIZE
+import com.example.emrtdapplication.EF_TYPE_TEMPLATE_TAG_SIZE
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.EF_TYPE_TEMPLATE_SEQUENCE_SIZE
-import com.example.emrtdapplication.constants.EF_TYPE_TEMPLATE_TAG_SIZE
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 
-abstract class ElementaryFilesTypeTemplate<T> : ElementaryFileTemplate() {
-    var tlvS : Array<T>? = null
+abstract class ElementaryFilesTypeTemplate<T>: ElementaryFileTemplate() {
+    var tlvS: Array<T>? = null
         protected set
 
     override fun parse(): Int {
@@ -26,7 +26,7 @@ abstract class ElementaryFilesTypeTemplate<T> : ElementaryFileTemplate() {
                 try {
                     val el = tlv.list!!.tlvSequence[i]
                     add(el, list)
-                } catch (e : Exception) {
+                } catch (e: Exception) {
                     println(e.message)
                 }
             }
@@ -41,6 +41,6 @@ abstract class ElementaryFilesTypeTemplate<T> : ElementaryFileTemplate() {
         }
     }
 
-    protected abstract fun add(tlv : TLV, list: ArrayList<T>)
+    protected abstract fun add(tlv: TLV, list: ArrayList<T>)
     protected abstract fun toTypedArray(list: ArrayList<T>)
 }

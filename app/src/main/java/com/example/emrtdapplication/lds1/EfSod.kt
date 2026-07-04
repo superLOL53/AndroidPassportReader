@@ -1,10 +1,13 @@
 package com.example.emrtdapplication.lds1
 
+import android.util.Log
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.CRL_DISTRIBUTION_POINT_OID
+import com.example.emrtdapplication.CertificationRevocationStatus
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.CRL_DISTRIBUTION_POINT_OID
-import com.example.emrtdapplication.constants.CertificationRevocationStatus
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
+import com.example.emrtdapplication.X509
 import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.MasterList
 import com.example.emrtdapplication.utils.TLV
@@ -31,6 +34,17 @@ import java.security.cert.X509CRL
 import java.util.Date
 import kotlin.time.Clock
 
+const val EF_SOD_TAG: Byte = 77
+const val EF_SOD_SHORT_EF_ID: Byte = 0x1D
+const val ORIGINAL_HASH_OID = "1.2.840.113549.1.9.4"
+const val SIGNING_TIME_OID = "1.2.840.113549.1.9.5"
+const val CONTENT_TYPE_OID = "1.2.840.113549.1.9.3"
+const val CONTENT_TYPE_ID = "2.23.136.1.1.1"
+const val UNABLE_TO_CHECK_CRL = "Unable to check CRL list!"
+const val HTTP = "http"
+const val HTTP_COLUMN = "http:"
+const val HTTPS_COLUMN = "https:"
+
 /**
  * Implements the EF.SOD file and performs passive authentication against provided CSCAs
  *
@@ -38,17 +52,22 @@ import kotlin.time.Clock
  * @property rawFileContent The content of the file as a ByteArray
  * @property shortEFIdentifier The short EF id of the file
  * @property ldsSecurityObject The LDS Security Object contained in the file
- * @property documentSignerCertificate The Document Signer Certificate contained in the file
+ * @property documentSignerCertificate The Document Signer
+ * Certificate contained in the file
  * @property certificate The file content as a certificate
- * @property isValid Indicates if the [documentSignerCertificate] was signed by the CSCA of the same entity
- * @property isDocumentSignerCertificateValid If the signature of the Document Signer Certificate is valid
- * @property isDocumentSignerCertificateExpired If the Document Signer Certificate is expired by the time of reading
+ * @property isValid Indicates if the [documentSignerCertificate]
+ * was signed by the CSCA of the same entity
+ * @property isDocumentSignerCertificateValid If the signature of
+ * the Document Signer Certificate is valid
+ * @property isDocumentSignerCertificateExpired If the Document
+ * Signer Certificate is expired by the time of reading
  * @property isCSCAValid If the signature on the CSCA is valid
  * @property isCSCAExpired If the CSCA is expired by the time of reading
  * @property isSignerInfoValid If the signature of the signer infos is valid
  * @property isSigningTimeValid If the signer infos are in their signed time period
  * @property doesHashMatch If the signed hash matches the hash of the [ldsSecurityObject]
- * @property validContentType If the content of the [ldsSecurityObject] is actually an LDS Security Object
+ * @property validContentType If the content of the [ldsSecurityObject]
+ * is actually an LDS Security Object
  * @property usedCSCA
  * @property validCRL
  * @property certificationRevocationStatus
@@ -56,15 +75,15 @@ import kotlin.time.Clock
  */
 class EfSod: ElementaryFileTemplate() {
 
-    override val efTag: Byte = 77
+    override val efTag: Byte = EF_SOD_TAG
     override var rawFileContent: ByteArray? = null
 
-    override val shortEFIdentifier: Byte = 0x1D
-    var ldsSecurityObject : LDSSecurityObject? = null
+    override val shortEFIdentifier: Byte = EF_SOD_SHORT_EF_ID
+    var ldsSecurityObject: LDSSecurityObject? = null
         private set
-    var certificate : SignedData? = null
+    var certificate: SignedData? = null
         private set
-    var documentSignerCertificate : Certificate? = null
+    var documentSignerCertificate: Certificate? = null
         private set
     var isValid = false
         private set
@@ -84,7 +103,7 @@ class EfSod: ElementaryFileTemplate() {
         private set
     var validContentType = false
         private set
-    var usedCSCA : Certificate? = null
+    var usedCSCA: Certificate? = null
         private set
     var validCRL = false
         private set
@@ -94,7 +113,8 @@ class EfSod: ElementaryFileTemplate() {
         private set
 
     /**
-     * Parses the file content. Creates the [certificate], [documentSignerCertificate] and [ldsSecurityObject]
+     * Parses the file content. Creates the [certificate],
+     * [documentSignerCertificate] and [ldsSecurityObject]
      * @return [SUCCESS] or [FAILURE]
      */
     override fun parse(): Int {
@@ -103,12 +123,26 @@ class EfSod: ElementaryFileTemplate() {
             return SUCCESS
         }
         try {
-            val input = ASN1InputStream(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
-            val cert = DERTaggedObject.getInstance(DERSequence.getInstance(input.readObject().encoded).getObjectAt(1))
+            val input = ASN1InputStream(
+                rawFileContent!!.
+                slice(contentStart..<rawFileContent!!.size).
+                toByteArray()
+            )
+            val cert = DERTaggedObject.getInstance(
+                DERSequence.getInstance(
+                    input.readObject().encoded
+                ).getObjectAt(1)
+            )
             certificate = SignedData.getInstance(cert.`object`)
             val content = certificate!!.encapContentInfo.content.toASN1Primitive().encoded
-            documentSignerCertificate = Certificate.getInstance(certificate!!.certificates.getObjectAt(0).toASN1Primitive().encoded)
-            ldsSecurityObject = LDSSecurityObject.getInstance(ASN1InputStream(TLV(content).value!!).readObject().encoded)
+            documentSignerCertificate = Certificate.getInstance(
+                certificate!!.certificates.getObjectAt(0).toASN1Primitive().encoded
+            )
+            ldsSecurityObject = LDSSecurityObject.getInstance(
+                ASN1InputStream(
+                    TLV(content).value!!
+                ).readObject().encoded
+            )
             isParsed = true
             return SUCCESS
         } catch (_: Exception) {
@@ -119,7 +153,7 @@ class EfSod: ElementaryFileTemplate() {
     /**
      * Checks the hashes of the files DG1 to DG16.
      */
-    fun checkHashes(dgs : Map<Byte, ElementaryFileTemplate>) {
+    fun checkHashes(dgs: Map<Byte, ElementaryFileTemplate>) {
         if (ldsSecurityObject == null) {
             return
         }
@@ -127,7 +161,9 @@ class EfSod: ElementaryFileTemplate() {
         for (i in groupHashes.indices) {
             val id = groupHashes[i].dataGroupNumber.toByte()
             val ef = dgs[id] ?: continue
-            val hash1 = ef.hash(ldsSecurityObject!!.digestAlgorithmIdentifier.algorithm.id) ?: continue
+            val hash1 = ef.hash(
+                ldsSecurityObject!!.digestAlgorithmIdentifier.algorithm.id
+            ) ?: continue
             val hash2 = groupHashes[i].dataGroupHashValue.octets
             if (hash1.contentEquals(hash2)) {
                 ef.matchHash = true
@@ -139,7 +175,7 @@ class EfSod: ElementaryFileTemplate() {
      * Validates the [documentSignerCertificate] by checking the signature in it with the CSCA
      * @return [SUCCESS] or [FAILURE]
      */
-    fun passiveAuthentication() : Int {
+    fun passiveAuthentication(): Int {
         isCSCAValid = false
         isCSCAExpired = true
         isValid = false
@@ -153,10 +189,12 @@ class EfSod: ElementaryFileTemplate() {
         if (documentSignerCertificate == null ||
             certificate == null || ldsSecurityObject == null) return FAILURE
         try {
-            val signerInfo = SignerInfo.getInstance(certificate!!.signerInfos.getObjectAt(0).toASN1Primitive().encoded)
+            val signerInfo = SignerInfo.getInstance(
+                certificate!!.signerInfos.getObjectAt(0).toASN1Primitive().encoded
+            )
             validateSignerInfoSignature(signerInfo)
             validateLDSSecurityObject(signerInfo)
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
         }
         while (!MasterList.isFinished) {
             sleep(500)
@@ -174,8 +212,14 @@ class EfSod: ElementaryFileTemplate() {
             }
         }
         checkCRLs()
-        isValid = isCSCAValid && isDocumentSignerCertificateValid && isSignerInfoValid &&
-                isSigningTimeValid && !isCSCAExpired && !isDocumentSignerCertificateExpired && isRead && isPresent
+        isValid = isCSCAValid &&
+                isDocumentSignerCertificateValid &&
+                isSignerInfoValid &&
+                isSigningTimeValid &&
+                !isCSCAExpired &&
+                !isDocumentSignerCertificateExpired &&
+                isRead &&
+                isPresent
         return SUCCESS
     }
 
@@ -184,25 +228,33 @@ class EfSod: ElementaryFileTemplate() {
      * @param csca The CSCA certificate to verify
      * @return True if [csca] is verified, otherwise false
      */
-    private fun validateCSCA(csca: Certificate) : Boolean {
+    private fun validateCSCA(csca: Certificate): Boolean {
         val time = Date().time
-        isCSCAExpired = time < csca.startDate.date.time || csca.endDate.date.time < time
-        isCSCAValid = Crypto.verifyCertificate(csca, csca)
+        isCSCAExpired = time < csca.startDate.date.time ||
+                csca.endDate.date.time < time
+        isCSCAValid = Crypto.verifyCertificate(
+            csca,
+            csca
+        )
         return isCSCAValid
     }
 
     /**
-     * Validates the [documentSignerCertificate] by using the public key of the [csca] X509 certificate
+     * Validates the [documentSignerCertificate] by using the
+     * public key of the [csca] X509 certificate
      * @param csca The CSCA certificate
      * @return True if [documentSignerCertificate] is verified, otherwise false
      */
-    private fun validateDocumentSignerCertificate(csca : Certificate) : Boolean {
+    private fun validateDocumentSignerCertificate(csca: Certificate): Boolean {
         val time = Date().time
         if (documentSignerCertificate != null) {
             isDocumentSignerCertificateExpired =
                         time < documentSignerCertificate!!.startDate.date.time ||
                         documentSignerCertificate!!.endDate.date.time < time
-            isDocumentSignerCertificateValid = Crypto.verifyCertificate(documentSignerCertificate!!, csca)
+            isDocumentSignerCertificateValid = Crypto.verifyCertificate(
+                documentSignerCertificate!!,
+                csca
+            )
             return isDocumentSignerCertificateValid
         } else {
             return false
@@ -210,7 +262,8 @@ class EfSod: ElementaryFileTemplate() {
     }
 
     /**
-     * Validates the [SignerInfo] field in the [SignedData] [certificate] by verifying the signature with the
+     * Validates the [SignerInfo] field in the [SignedData] [certificate]
+     * by verifying the signature with the
      * [documentSignerCertificate] public key
      * @param signerInfo The signed attributes of the [SignedData] [certificate]
      */
@@ -231,49 +284,73 @@ class EfSod: ElementaryFileTemplate() {
     }
 
     /**
-     * Validates the [ldsSecurityObject] by comparing the hash of it to the signed hash in the [SignerInfo] field
-     * of the SignedData [certificate] and comparing the signing time in the [SignerInfo] to the
+     * Validates the [ldsSecurityObject] by comparing the hash
+     * of it to the signed hash in the [SignerInfo] field
+     * of the SignedData [certificate] and comparing the signing
+     * time in the [SignerInfo] to the
      * validity period of the [documentSignerCertificate]
      * @param signerInfo The signed attributes of the [certificate]
      */
     private fun validateLDSSecurityObject(signerInfo: SignerInfo) {
-        val md = MessageDigest.getInstance(signerInfo.digestAlgorithm.algorithm.id)
+        val md = MessageDigest.getInstance(
+            signerInfo.digestAlgorithm.algorithm.id
+        )
         md.update(ldsSecurityObject!!.encoded)
         val hash = md.digest()
 
-        val attr = Attributes.getInstance(signerInfo.authenticatedAttributes.encoded)
-        var originalHash : ByteArray? = null
-        var signingTime : Long = 0
-        var contentType : ASN1ObjectIdentifier? = null
+        val attr = Attributes.getInstance(
+            signerInfo.authenticatedAttributes.encoded
+        )
+        var originalHash: ByteArray? = null
+        var signingTime: Long = 0
+        var contentType: ASN1ObjectIdentifier? = null
         for (a in attr.attributes) {
             when(a.attrType.id) {
-                "1.2.840.113549.1.9.4" -> originalHash = DEROctetString.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded).octets
-                "1.2.840.113549.1.9.5" -> {
+                ORIGINAL_HASH_OID ->
+                    originalHash = DEROctetString.getInstance(
+                        a.attrValues.getObjectAt(0).toASN1Primitive().encoded
+                    ).octets
+                SIGNING_TIME_OID -> {
                     if (a.attrValues.getObjectAt(0) is ASN1UTCTime) {
-                        signingTime = ASN1UTCTime.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded).date.time
+                        signingTime = ASN1UTCTime.getInstance(
+                            a.attrValues.getObjectAt(0).toASN1Primitive().encoded
+                        ).date.time
                     } else if (a.attrValues.getObjectAt(0) is ASN1GeneralizedTime) {
-                        signingTime = ASN1GeneralizedTime.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded).date.time
+                        signingTime = ASN1GeneralizedTime.getInstance(
+                            a.attrValues.getObjectAt(0).toASN1Primitive().encoded
+                        ).date.time
                     }
                 }
-                "1.2.840.113549.1.9.3" -> contentType = ASN1ObjectIdentifier.getInstance(a.attrValues.getObjectAt(0).toASN1Primitive().encoded)
+                CONTENT_TYPE_OID ->
+                    contentType = ASN1ObjectIdentifier.getInstance(
+                        a.attrValues.getObjectAt(0).toASN1Primitive().encoded
+                    )
             }
         }
 
-        validContentType = contentType != null && contentType.id.contentEquals("2.23.136.1.1.1")
-        doesHashMatch = originalHash != null && hash.contentEquals(originalHash)
-        isSigningTimeValid = !(signingTime < documentSignerCertificate!!.startDate.date.time || documentSignerCertificate!!.endDate.date.time < signingTime)
+        validContentType = contentType != null &&
+                contentType.id.contentEquals(CONTENT_TYPE_ID)
+        doesHashMatch = originalHash != null &&
+                hash.contentEquals(originalHash)
+        isSigningTimeValid = !(signingTime < documentSignerCertificate!!.startDate.date.time ||
+                documentSignerCertificate!!.endDate.date.time < signingTime)
     }
 
     /**
-     * Checks the CRL for its validity if the CRL distribution point(s) are in the CSCA certificate
+     * Checks the CRL for its validity if the CRL
+     * distribution point(s) are in the CSCA certificate
      */
     fun checkCRLs() {
-        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+        certificationRevocationStatus =
+            CertificationRevocationStatus.UNDETERMINED
         usedCSCA?.let {
             val crlDistributionPoints =
-                it.tbsCertificate.extensions.getExtension(ASN1ObjectIdentifier(CRL_DISTRIBUTION_POINT_OID))
+                it.tbsCertificate.extensions.getExtension(
+                    ASN1ObjectIdentifier(CRL_DISTRIBUTION_POINT_OID)
+                )
             if (crlDistributionPoints == null) {
-                certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                certificationRevocationStatus =
+                    CertificationRevocationStatus.UNDETERMINED
                 return
             }
             isCRLLocationInCSCA = true
@@ -281,78 +358,107 @@ class EfSod: ElementaryFileTemplate() {
             if (crl != null) {
                 val csca = MasterList.getCSCA(crl)
                 if (csca == null) {
-                    certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                    certificationRevocationStatus =
+                        CertificationRevocationStatus.UNDETERMINED
                     return
                 }
-                if (!Crypto.verifyCertificate(csca, csca)) {
-                    certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                if (!Crypto.verifyCertificate(
+                        csca,
+                        csca
+                )) {
+                    certificationRevocationStatus =
+                        CertificationRevocationStatus.UNDETERMINED
                     return
                 }
                 val publicKey = Crypto.generatePublicKey(csca)
                 if (publicKey != null) {
-                    validCRL =
-                        Crypto.verifySignature(crl.sigAlgName, publicKey, crl.tbsCertList, crl.signature) &&
-                                crl.thisUpdate.time <= Clock.System.now().toEpochMilliseconds() &&
-                                Clock.System.now().toEpochMilliseconds() <= crl.nextUpdate.time
+                    validCRL = Crypto.verifySignature(
+                            crl.sigAlgName,
+                            publicKey,
+                            crl.tbsCertList,
+                            crl.signature
+                        ) && crl.thisUpdate.time <=
+                            Clock.System.now().toEpochMilliseconds() &&
+                            Clock.System.now().toEpochMilliseconds() <=
+                            crl.nextUpdate.time
                     if (!validCRL) {
-                        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                        certificationRevocationStatus =
+                            CertificationRevocationStatus.UNDETERMINED
                         return
                     }
                 }
                 if (documentSignerCertificate != null) {
                     try {
                         if (crl.isRevoked(
-                            CertificateFactory.getInstance("X.509")
-                                .generateCertificate(documentSignerCertificate!!.encoded.inputStream())
+                            CertificateFactory.getInstance(X509)
+                                .generateCertificate(
+                                    documentSignerCertificate!!.encoded.inputStream()
+                                )
                         )) {
-                            certificationRevocationStatus = CertificationRevocationStatus.REVOKED
+                            certificationRevocationStatus =
+                                CertificationRevocationStatus.REVOKED
                             return
                         }
-                    } catch (_ : Exception) {
-                        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                    } catch (_: Exception) {
+                        certificationRevocationStatus =
+                            CertificationRevocationStatus.UNDETERMINED
                         return
                     }
                 }
                 try {
                     if (crl.isRevoked(
-                        CertificateFactory.getInstance("X.509").generateCertificate(csca.encoded.inputStream()))) {
-                        certificationRevocationStatus = CertificationRevocationStatus.REVOKED
+                        CertificateFactory.
+                            getInstance(X509).
+                            generateCertificate(csca.encoded.inputStream())
+                    )) {
+                        certificationRevocationStatus =
+                            CertificationRevocationStatus.REVOKED
                         return
                     }
-                } catch (_ : Exception) {
-                    certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                } catch (_: Exception) {
+                    certificationRevocationStatus =
+                        CertificationRevocationStatus.UNDETERMINED
                     return
                 }
-                certificationRevocationStatus = CertificationRevocationStatus.UNREVOKED
+                certificationRevocationStatus =
+                    CertificationRevocationStatus.UNREVOKED
                 return
             } else {
-                certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+                certificationRevocationStatus =
+                    CertificationRevocationStatus.UNDETERMINED
             }
-            certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+            certificationRevocationStatus =
+                CertificationRevocationStatus.UNDETERMINED
         }
-        certificationRevocationStatus = CertificationRevocationStatus.UNDETERMINED
+        certificationRevocationStatus =
+            CertificationRevocationStatus.UNDETERMINED
     }
 
     /**
-     * Gets the CRL from the encoded distribution points. Currently only supports fetching via the HTTP(S) protocol
+     * Gets the CRL from the encoded distribution points. Currently only
+     * supports fetching via the HTTP(S) protocol
      *
-     * @param crlDistributionPoints The distribution points of the CRL as it is in the certificate
+     * @param crlDistributionPoints The distribution points of the CRL
+     * as it is in the certificate
      * @return An X.509 CRL or null if the CRL could not be fetched
      */
-    fun getCRL(crlDistributionPoints : ByteArray) : X509CRL? {
+    fun getCRL(crlDistributionPoints: ByteArray): X509CRL? {
         val seq = ASN1Sequence.getInstance(crlDistributionPoints)
         for (i in 0..<seq.size()) {
-            val distributionPoint = DistributionPoint.getInstance((seq.getObjectAt(i)))
+            val distributionPoint = DistributionPoint.getInstance(
+                (seq.getObjectAt(i))
+            )
             if (distributionPoint.distributionPoint.type == 0) {
                 try {
                     val names = distributionPoint.distributionPoint.name as GeneralNames
                     for (name in names.names) {
                         val string = name.name.toString()
-                        if (string.startsWith("http")) {
+                        if (string.startsWith(HTTP)) {
                             return fetchCRLListWithHTTP(string)
                         }
                     }
-                } catch (_ : Exception) {
+                } catch (_: Exception) {
+                    Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_CHECK_CRL)
                 }
             }
         }
@@ -360,38 +466,52 @@ class EfSod: ElementaryFileTemplate() {
     }
 
     /**
-     *  Fetches the CRL via an HTTP connection. Tries to connect to the URL with HTTP and HTTPS.
+     *  Fetches the CRL via an HTTP connection. Tries to connect to
+     *  the URL with HTTP and HTTPS.
      *
      *  @param url The URL of the CRL
      *  @return An X.509 CRL or null if the CRL could not be fetched
      */
-    fun fetchCRLListWithHTTP(url: String) : X509CRL? {
+    fun fetchCRLListWithHTTP(url: String): X509CRL? {
         return try {
             fetchCRList(url)
         } catch (_: Exception) {
             try {
-                if (url.startsWith("http:")) {
-                    fetchCRList(url.replaceFirst("http:", "https:"))
+                if (url.startsWith(HTTP_COLUMN)) {
+                    fetchCRList(
+                        url.replaceFirst(
+                            HTTP_COLUMN,
+                            HTTPS_COLUMN
+                        )
+                    )
                 } else {
-                    fetchCRList(url.replaceFirst("https:", "http:"))
+                    fetchCRList(
+                        url.replaceFirst(
+                            HTTPS_COLUMN,
+                            HTTP_COLUMN
+                        )
+                    )
                 }
-            } catch (_ : Exception) {
+            } catch (_: Exception) {
                 return null
             }
         }
     }
 
     /**
-     * Fetches the CRL from the given URL or throws exceptions if something goes wrong
+     * Fetches the CRL from the given URL or throws
+     * exceptions if something goes wrong
      *
      * @param url The URL from which to download the CRL
      * @return The CRL from the URL
      */
-    fun fetchCRList(url : String) : X509CRL {
+    fun fetchCRList(url: String): X509CRL {
         val url = URL(url)
         val conn = url.openConnection()
         conn.connectTimeout = 60000
         val input = conn.getInputStream()
-        return CertificateFactory.getInstance("X.509").generateCRL(input) as X509CRL
+        return CertificateFactory.
+            getInstance(X509).
+            generateCRL(input) as X509CRL
     }
 }

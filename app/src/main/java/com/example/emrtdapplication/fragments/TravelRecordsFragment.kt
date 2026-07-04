@@ -14,13 +14,14 @@ import com.example.emrtdapplication.display.lds2.TravelRecordApplicationDisplay
  *
  * @property view View for displaying Travel Record application content in the fragment
  */
-class TravelRecordsFragment : Fragment(R.layout.travel_records) {
-    private var view : ScrollView? = null
+class TravelRecordsFragment: Fragment(R.layout.travel_records) {
+    private var view: ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (view != null) {
-            val toReplace = requireView().findViewById<ScrollView>(R.id.travel_records_scroll_view)
+            val toReplace =
+                requireView().findViewById<ScrollView>(R.id.travel_records_scroll_view)
             val rootView = toReplace.parent as ViewGroup
             rootView.removeView(toReplace)
             rootView.addView(view)
@@ -31,8 +32,13 @@ class TravelRecordsFragment : Fragment(R.layout.travel_records) {
      * Creates views to display the contents of files in the Travel Record application
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val travelRecordsLayout = view.findViewById<LinearLayout>(R.id.travel_records_layout)
-        this.view = view.findViewById(R.id.travel_records_scroll_view)
-        TravelRecordApplicationDisplay.createView(requireContext(), travelRecordsLayout)
+        val travelRecordsLayout =
+            view.findViewById<LinearLayout>(R.id.travel_records_layout)
+        this.view =
+            view.findViewById(R.id.travel_records_scroll_view)
+        TravelRecordApplicationDisplay.createView(
+            requireContext(),
+            travelRecordsLayout
+        )
     }
 }

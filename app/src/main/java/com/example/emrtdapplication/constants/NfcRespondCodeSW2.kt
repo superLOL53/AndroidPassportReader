@@ -7,5 +7,5 @@ object NfcRespondCodeSW2 {
     /**
      * Respond code indicating a successful execution of the command APDU
      */
-    const val OK : Byte = 0x00
+    const val OK: Byte = 0x00
 }

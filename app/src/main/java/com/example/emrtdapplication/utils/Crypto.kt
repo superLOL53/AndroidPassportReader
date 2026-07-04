@@ -1,33 +1,12 @@
 package com.example.emrtdapplication.utils
 
 import android.util.Log
-import com.example.emrtdapplication.constants.ANDROID_LOG_INFO_TAG
-import com.example.emrtdapplication.constants.BOUNCY_CASTLE_STRING
-import com.example.emrtdapplication.constants.CryptoConstants.AES
-import com.example.emrtdapplication.constants.CryptoConstants.AES_128_KEY_SIZE
-import com.example.emrtdapplication.constants.CryptoConstants.AES_192_KEY_SIZE
-import com.example.emrtdapplication.constants.CryptoConstants.AES_CBC_NO_PADDING
-import com.example.emrtdapplication.constants.CryptoConstants.BYTE_TO_BITS
-import com.example.emrtdapplication.constants.CryptoConstants.C_0_128
-import com.example.emrtdapplication.constants.CryptoConstants.C_0_256
-import com.example.emrtdapplication.constants.CryptoConstants.C_1_128
-import com.example.emrtdapplication.constants.CryptoConstants.C_1_256
-import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE
-import com.example.emrtdapplication.constants.CryptoConstants.DES_EDE_CBC_NO_PADDING
-import com.example.emrtdapplication.constants.CryptoConstants.DES_KEY_SIZE
-import com.example.emrtdapplication.constants.CryptoConstants.ILLEGAL_CIPHER_ALGORITHM
-import com.example.emrtdapplication.constants.CryptoConstants.KEY_3DES_COUNT_ONES
-import com.example.emrtdapplication.constants.CryptoConstants.MAC_SIZE
-import com.example.emrtdapplication.constants.CryptoConstants.MAPPING_CONSTANT
-import com.example.emrtdapplication.constants.CryptoConstants.PAD_START_BYTE
-import com.example.emrtdapplication.constants.CryptoConstants.SHA_1
-import com.example.emrtdapplication.constants.CryptoConstants.SHA_256
-import com.example.emrtdapplication.constants.CryptoConstants.UNABLE_TO_DE_ENCRYPT
-import com.example.emrtdapplication.constants.CryptoConstants.UNABLE_TO_HASH
-import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_128
-import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_192
-import com.example.emrtdapplication.constants.PACEInfoConstants.AES_CBC_CMAC_256
-import com.example.emrtdapplication.constants.PACEInfoConstants.DES_CBC_CBC
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.BOUNCY_CASTLE_STRING
+import com.example.emrtdapplication.common.AES_CBC_CMAC_128
+import com.example.emrtdapplication.common.AES_CBC_CMAC_192
+import com.example.emrtdapplication.common.AES_CBC_CMAC_256
+import com.example.emrtdapplication.common.DES_CBC_CBC
 import com.example.emrtdapplication.constants.TlvTags.EC_POINT_SINGLE_COORDINATE
 import org.spongycastle.asn1.x509.Certificate
 import org.spongycastle.crypto.AsymmetricCipherKeyPair
@@ -64,36 +43,140 @@ import kotlin.experimental.and
 import kotlin.experimental.or
 
 /**
+ * Constant for AES
+ */
+const val AES = "AES"
+
+/**
+ * Constant for DES in encryption-decryption-encryption mode
+ */
+const val DES_EDE = "DESede"
+
+/**
+ * Starting value for adding padding to payload
+ */
+const val PAD_START_BYTE: Byte = 0x80.toByte()
+
+/**
+ * Mask for counting 1-bits in a DES key
+ */
+const val KEY_3DES_COUNT_ONES: Byte = 0xFE.toByte()
+
+/**
+ * Constant for getting cipher for AES in CBC mode and no padding
+ */
+const val AES_CBC_NO_PADDING = "$AES/CBC/NoPadding"
+
+/**
+ * Constant for getting cipher for AES in ECB mode and no padding.
+ * Used to get the IV for AES de-/encryption
+ */
+const val AES_ECB_NO_PADDING = "$AES/ECB/NoPadding"
+
+/**
+ * Constant for DESede in CBC mode and no padding
+ */
+const val DES_EDE_CBC_NO_PADDING = "$DES_EDE/CBC/NoPadding"
+
+/**
+ * Constant for converting number of bytes into number of bits
+ */
+const val BYTE_TO_BITS = 8
+
+/**
+ * MAC size for secure messaging APDUs
+ */
+const val MAC_SIZE = 8
+
+/**
+ * Constant value for random number generation for the PACE integrated mapping protocol
+ */
+const val C_0_128 = "a668892a7c41e3ca739f40b057d85904"
+
+/**
+ * Constant value for random number generation for the PACE integrated mapping protocol
+ */
+const val C_1_128 = "a4e136ac725f738b01c1f60217c188ad"
+
+/**
+ * Constant value for random number generation for the PACE integrated mapping protocol
+ */
+const val C_0_256 = "d463d65234124ef7897054986dca0a174e28df758cbaa03f240616414d5a1676"
+
+/**
+ * Constant value for random number generation for the PACE integrated mapping protocol
+ */
+const val C_1_256 = "54bd7255f0aaf831bec3423fcf39d69b6cbf066677d0faae5aadd99df8e53517"
+
+/**
+ * Constant for calculating the length of the random number for the PACE integrated mapping protocol
+ */
+const val MAPPING_CONSTANT = 64
+
+const val UNABLE_TO_HASH = "Unable to hash with the algorithm "
+
+const val SHA_1 = "SHA-1"
+
+const val SHA_256 = "SHA-256"
+
+const val ILLEGAL_CIPHER_ALGORITHM = "Illegal cipher algorithm for key computation!"
+
+const val AES_128_KEY_SIZE = 16
+
+const val AES_192_KEY_SIZE = 24
+
+const val DES_KEY_SIZE = 8
+
+const val UNABLE_TO_DE_ENCRYPT = "Unable to en-/decrypt with AES or DES.\n"
+
+/**
  * Implements several cryptographic operations used throughout the application
  */
 object Crypto {
 
     /**
-     * Calculates the mapping value for the PACE protocol with integrated mapping for Diffie-Hellman
+     * Calculates the mapping value for the PACE protocol
+     * with integrated mapping for Diffie-Hellman
      * @param r The pseudo random generated number
      * @param p The exponent and modulo for the calculation
      * @param q The exponent divider for the calculation
      * @return The calculated mapping value
      * @return The result of the mapping calculation
      */
-    fun integratedMappingDH(r: BigInteger, p: BigInteger, q: BigInteger) : BigInteger {
+    fun integratedMappingDH(r: BigInteger, p: BigInteger, q: BigInteger): BigInteger {
         return r.modPow(p.dec().divide(q), p)
     }
 
     /**
-     * Calculates the mapping value for the PACE protocol with integrated mapping for Elliptic Curves
+     * Calculates the mapping value for the PACE protocol
+     * with integrated mapping for Elliptic Curves
      * @param t Pseudo-generated random number
      * @param a Elliptic curve parameter a
      * @param b Elliptic curve parameter b
      * @param p The modulo for the calculation
      * @return The result of the mapping calculation
      */
-    fun integratedMappingEC(t: BigInteger, a: BigInteger, b: BigInteger, p: BigInteger) : BigInteger {
+    fun integratedMappingEC(
+        t: BigInteger,
+        a: BigInteger,
+        b: BigInteger,
+        p: BigInteger
+    ): BigInteger {
         val alpha = t.pow(2).negate().mod(p)
-        val x2 = b.multiply(a.modInverse(p)).negate().multiply(BigInteger.ONE.add(alpha.add(alpha.pow(2)).modInverse(p))).mod(p)
+
+        val x2 = b.multiply(a.modInverse(p)).
+            negate().
+            multiply(BigInteger.ONE.add(alpha.add(alpha.pow(2)).modInverse(p))).
+            mod(p)
+
         val x3 = alpha.multiply(x2).mod(p)
         val h2 = x2.pow(3).add(a.multiply(x2)).add(b).mod(p)
-        val aa = h2.modPow(p.dec().subtract(p.inc().divide(BigInteger("4"))), p)
+
+        val aa = h2.modPow(
+            p.dec().subtract(p.inc().divide(BigInteger("4"))),
+            p
+        )
+
         return if (aa.pow(2).multiply(h2).mod(p) == BigInteger.ONE) {
             x2
         } else {
@@ -106,28 +189,67 @@ object Crypto {
      * @param s First nonce for mapping
      * @param t Second nonce for mapping
      * @param p The modulo for the PRNG
-     * @param useLongConstants Tells if long constants are used. Long constants are used with AES-192
+     * @param useLongConstants Tells if long constants are used.
+     * Long constants are used with AES-192
      * or AES-256
      * @return The result of the mapping calculation
      */
-    fun integratedMappingPRNG(s: ByteArray, t: ByteArray, p: BigInteger, useLongConstants: Boolean = false) : BigInteger {
-        val c0128 = BigInteger(C_0_128, 16).toByteArray().slice(1..16).toByteArray()
-        val c1128 = BigInteger(C_1_128, 16).toByteArray().slice(1..16).toByteArray()
-        val c0256 = BigInteger(C_0_256, 16).toByteArray().slice(1..32).toByteArray()
+    fun integratedMappingPRNG(
+        s: ByteArray,
+        t: ByteArray,
+        p: BigInteger,
+        useLongConstants: Boolean = false
+    ): BigInteger {
+        val c0128 = BigInteger(C_0_128, 16).
+            toByteArray().
+            slice(1..16).
+            toByteArray()
+        val c1128 = BigInteger(C_1_128, 16).
+            toByteArray().
+            slice(1..16).
+            toByteArray()
+        val c0256 = BigInteger(C_0_256, 16).
+            toByteArray().
+            slice(1..32).
+            toByteArray()
         val c1256 = BigInteger(C_1_256, 16).toByteArray()
         val n = (p.bitLength() + MAPPING_CONSTANT)/(BYTE_TO_BITS*s.size)+1
         val cipher = Cipher.getInstance(AES_CBC_NO_PADDING)
-        cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(t, AES), IvParameterSpec(ByteArray(s.size)))
+        cipher.init(
+            Cipher.ENCRYPT_MODE,
+            SecretKeySpec(t, AES),
+            IvParameterSpec(ByteArray(s.size))
+        )
         var enc = cipher.doFinal(s)
         val x = ByteArray(s.size*n)
         for (i in 0..<n) {
-            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(enc, AES), IvParameterSpec(ByteArray(s.size)))
+            cipher.init(
+                Cipher.ENCRYPT_MODE,
+                SecretKeySpec(enc, AES),
+                IvParameterSpec(ByteArray(s.size))
+            )
             if (useLongConstants) {
-                cipher.doFinal(c1256, 0, c1256.size, x, i*s.size)
+                cipher.doFinal(
+                    c1256,
+                    0,
+                    c1256.size,
+                    x,
+                    i*s.size
+                )
             } else {
-                cipher.doFinal(c1128, 0, c1128.size, x, i*s.size)
+                cipher.doFinal(
+                    c1128,
+                    0,
+                    c1128.size,
+                    x,
+                    i*s.size
+                )
             }
-            cipher.init(Cipher.ENCRYPT_MODE, SecretKeySpec(enc, AES), IvParameterSpec(ByteArray(s.size)))
+            cipher.init(
+                Cipher.ENCRYPT_MODE,
+                SecretKeySpec(enc, AES),
+                IvParameterSpec(ByteArray(s.size))
+            )
             enc = if (useLongConstants) {
                 cipher.doFinal(c0256)
             } else {
@@ -147,9 +269,11 @@ object Crypto {
      * @param parameters The domain parameters for the EC key generation
      * @return The generated EC key pair
      */
-    fun generateECKeyPair(parameters: ECDomainParameters) : AsymmetricCipherKeyPair {
+    fun generateECKeyPair(parameters: ECDomainParameters): AsymmetricCipherKeyPair {
         val generator = ECKeyPairGenerator()
-        generator.init(ECKeyGenerationParameters(parameters, SecureRandom()))
+        generator.init(
+            ECKeyGenerationParameters(parameters, SecureRandom())
+        )
         return generator.generateKeyPair()
     }
 
@@ -159,9 +283,11 @@ object Crypto {
      * @param parameters The domain parameters for the DH key generation
      * @return The generated DH key pair
      */
-    fun generateDHKeyPair(parameters: DHParameters) : AsymmetricCipherKeyPair {
+    fun generateDHKeyPair(parameters: DHParameters): AsymmetricCipherKeyPair {
         val generator = DHKeyPairGenerator()
-        generator.init(DHKeyGenerationParameters(SecureRandom(), parameters))
+        generator.init(
+            DHKeyGenerationParameters(SecureRandom(), parameters)
+        )
         return generator.generateKeyPair()
     }
 
@@ -174,8 +300,12 @@ object Crypto {
      * @param h The DH group element for the calculation
      * @return The calculated mapping value
      */
-    fun genericMappingDH(g: BigInteger, s: ByteArray, p: BigInteger, h: BigInteger) : BigInteger {
-        return g.modPow(BigInteger(1, s), p).multiply(h).mod(p)
+    fun genericMappingDH(
+        g: BigInteger, s: ByteArray, p: BigInteger, h: BigInteger
+    ): BigInteger {
+        return g.
+            modPow(BigInteger(1, s), p).
+            multiply(h).mod(p)
     }
 
     /**
@@ -186,7 +316,7 @@ object Crypto {
      * @param h The EC point to be added
      * @return The calculated and mapped EC Point
      */
-    fun genericMappingEC(g: ECPoint, s: ByteArray, h: ECPoint) : ECPoint {
+    fun genericMappingEC(g: ECPoint, s: ByteArray, h: ECPoint): ECPoint {
         return g.multiply(BigInteger(s)).add(h).normalize()
     }
 
@@ -197,10 +327,13 @@ object Crypto {
      * @param parameters The EC parameters for the conversion
      * @return The decoded EC point
      */
-    fun getECPointFromBigInteger(x : BigInteger, parameters: ECDomainParameters) : ECPoint {
+    fun getECPointFromBigInteger(x: BigInteger, parameters: ECDomainParameters): ECPoint {
         val ba = x.toByteArray()
         return if (ba[0] == 0.toByte() && ba[1] < 0) {
-            parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + ba.slice(1..<x.toByteArray().size).toByteArray())
+            parameters.curve.decodePoint(
+                byteArrayOf(EC_POINT_SINGLE_COORDINATE) +
+                        ba.slice(1..<x.toByteArray().size).toByteArray()
+            )
         } else {
             parameters.curve.decodePoint(byteArrayOf(EC_POINT_SINGLE_COORDINATE) + ba)
         }
@@ -213,7 +346,10 @@ object Crypto {
      * @param publicKey The public key for the agreement protocol
      * @return The calculated agreement
      */
-    fun calculateECDHAgreement(privateKey: ECPrivateKeyParameters, publicKey: ECPublicKeyParameters) : BigInteger {
+    fun calculateECDHAgreement(
+        privateKey: ECPrivateKeyParameters,
+        publicKey: ECPublicKeyParameters
+    ): BigInteger {
         val ka = ECDHBasicAgreement()
         ka.init(privateKey)
         return ka.calculateAgreement(publicKey)
@@ -226,7 +362,10 @@ object Crypto {
      * @param publicKey The public key for the agreement protocol
      * @return The calculated agreement
      */
-    fun calculateDHAgreement(privateKey: DHPrivateKeyParameters, publicKey: DHPublicKeyParameters) : BigInteger {
+    fun calculateDHAgreement(
+        privateKey: DHPrivateKeyParameters,
+        publicKey: DHPublicKeyParameters
+    ): BigInteger {
         val ka = DHBasicAgreement()
         ka.init(privateKey)
         return ka.calculateAgreement(publicKey)
@@ -240,7 +379,7 @@ object Crypto {
      * @param size The size of the CMAC
      * @return The calculated CMAC
      */
-    fun computeCMAC(m: ByteArray, key: ByteArray, size: Int = MAC_SIZE) : ByteArray {
+    fun computeCMAC(m: ByteArray, key: ByteArray, size: Int = MAC_SIZE): ByteArray {
         val cMac = CMac(AESEngine(), size*BYTE_TO_BITS)
         cMac.init(KeyParameter(key))
         cMac.update(m, 0, m.size)
@@ -258,7 +397,9 @@ object Crypto {
      * @param usePadding If padding is used in the MAC calculation
      * @return True if [m] matches the calculated MAC, otherwise false
      */
-    fun checkMAC(c: ByteArray, m: ByteArray, key: ByteArray, usePadding: Boolean = true) : Boolean {
+    fun checkMAC(
+        c: ByteArray, m: ByteArray, key: ByteArray, usePadding: Boolean = true
+    ): Boolean {
         return m.contentEquals(computeMAC(c, key, m.size, usePadding))
     }
 
@@ -271,9 +412,15 @@ object Crypto {
      * @param usePadding If padding is used for the MAC calculation
      * @return The calculated MAC
      */
-    fun computeMAC(m : ByteArray, key: ByteArray, size: Int = MAC_SIZE, usePadding : Boolean = true) : ByteArray {
+    fun computeMAC(
+        m: ByteArray, key: ByteArray, size: Int = MAC_SIZE, usePadding: Boolean = true
+    ): ByteArray {
         val mac = if (usePadding) {
-            ISO9797Alg3Mac(DESEngine(), size*BYTE_TO_BITS, ISO7816d4Padding())
+            ISO9797Alg3Mac(
+                DESEngine(),
+                size*BYTE_TO_BITS,
+                ISO7816d4Padding()
+            )
         } else {
             ISO9797Alg3Mac(DESEngine(), size*BYTE_TO_BITS)
         }
@@ -293,14 +440,19 @@ object Crypto {
      * @param iv The IV used for the cipher
      * @return The en-/decrypted byte array
      */
-    fun cipher3DES(data: ByteArray, key: ByteArray, mode : Int = Cipher.ENCRYPT_MODE, iv : ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)) : ByteArray? {
+    fun cipher3DES(
+        data: ByteArray,
+        key: ByteArray,
+        mode: Int = Cipher.ENCRYPT_MODE,
+        iv: ByteArray = byteArrayOf(0,0,0,0,0,0,0,0)
+    ): ByteArray? {
         try {
             val k = SecretKeySpec(key, DES_EDE)
             val c = Cipher.getInstance(DES_EDE_CBC_NO_PADDING)
             val i = IvParameterSpec(iv)
             c.init(mode, k, i)
             return c.doFinal(data)
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             Log.d(ANDROID_LOG_INFO_TAG, UNABLE_TO_DE_ENCRYPT + e.message)
         }
         return null
@@ -315,7 +467,9 @@ object Crypto {
      * @param iv The IV used for the cipher
      * @return The en-/decrypted byte array or null if [data] could not be en-/decrypted
      */
-    fun cipherAES(data: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null) : ByteArray? {
+    fun cipherAES(
+        data: ByteArray, key: ByteArray, mode: Int = Cipher.ENCRYPT_MODE, iv: ByteArray? = null
+    ): ByteArray? {
         try {
             val k = SecretKeySpec(key, AES)
             val c = Cipher.getInstance(AES_CBC_NO_PADDING)
@@ -328,7 +482,7 @@ object Crypto {
             }
             c.init(mode, k, i)
             return c.doFinal(data)
-        } catch (e : Exception) {
+        } catch (e: Exception) {
             Log.d(ANDROID_LOG_INFO_TAG, UNABLE_TO_DE_ENCRYPT + e.message)
         }
         return null
@@ -343,7 +497,9 @@ object Crypto {
      * @param is3DES Indicates if the key generated is a 3DES or AES key
      * @return The generated symmetric key or null if no key could be generated
      */
-    fun computeKey(hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false) : ByteArray? {
+    fun computeKey(
+        hashName: String, seed: ByteArray, c: Byte, is3DES: Boolean = false
+    ): ByteArray? {
         val key = hash(hashName, seed + byteArrayOf(0, 0, 0, c)) ?: return null
         if (is3DES) {
             for (i in key.indices) {
@@ -361,24 +517,34 @@ object Crypto {
      * Generates an AES or 3DES key.
      *
      * @param seed The seed for the key generation
-     * @param cipherId The symmetric protocol id for which a key is generated. Must be one of [DES_CBC_CBC], [AES_CBC_CMAC_128], [AES_CBC_CMAC_192], [AES_CBC_CMAC_256]
+     * @param cipherId The symmetric protocol id for which a key is generated.
+     * Must be one of [DES_CBC_CBC], [AES_CBC_CMAC_128], [AES_CBC_CMAC_192], [AES_CBC_CMAC_256]
      * @param cValue Counter value for key generation
      * @return The generated symmetric key
      * @throws IllegalArgumentException If the cipherId is invalid
      */
-    fun computeKey(seed: ByteArray, cipherId : Byte, cValue : Byte) : ByteArray? {
+    fun computeKey(seed: ByteArray, cipherId: Byte, cValue: Byte): ByteArray? {
         return when (cipherId) {
             DES_CBC_CBC -> {
-                val encKey = computeKey(SHA_1, seed, cValue, true) ?: return null
+                val encKey = computeKey(
+                    SHA_1,
+                    seed,
+                    cValue,
+                    true
+                ) ?: return null
                 encKey.slice(0..<DES_KEY_SIZE*2).toByteArray()
                 encKey + encKey.slice(0..<DES_KEY_SIZE).toByteArray()
             }
             AES_CBC_CMAC_128 -> {
-                computeKey(SHA_1, seed, cValue)?.slice(0..<AES_128_KEY_SIZE)?.toByteArray()
+                computeKey(SHA_1, seed, cValue)?.
+                slice(0..<AES_128_KEY_SIZE)?.
+                toByteArray()
 
             }
             AES_CBC_CMAC_192 -> {
-                computeKey(SHA_256, seed, cValue)?.slice(0..<AES_192_KEY_SIZE)?.toByteArray()
+                computeKey(SHA_256, seed, cValue)?.
+                slice(0..<AES_192_KEY_SIZE)?.
+                toByteArray()
             }
             AES_CBC_CMAC_256 -> {
                 computeKey(SHA_256, seed, cValue)
@@ -392,14 +558,15 @@ object Crypto {
      *
      * @param hashName The name of the hash algorithm
      * @param hashBytes The bytes to be hashed
-     * @return The output of the hash algorithm or null if no hash algorithm with the given name was found
+     * @return The output of the hash algorithm or null if no
+     * hash algorithm with the given name was found
      */
-    fun hash(hashName: String, hashBytes: ByteArray) : ByteArray? {
+    fun hash(hashName: String, hashBytes: ByteArray): ByteArray? {
         try {
             val md = MessageDigest.getInstance(hashName)
             md.update(hashBytes)
             return md.digest()
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             Log.d(ANDROID_LOG_INFO_TAG,  UNABLE_TO_HASH + hashName)
         }
         return null
@@ -412,7 +579,7 @@ object Crypto {
      * @param paddingSize The size of the padding
      * @return The padded byte array
      */
-    fun addPadding(paddingBytes : ByteArray, paddingSize : Int) : ByteArray {
+    fun addPadding(paddingBytes: ByteArray, paddingSize: Int): ByteArray {
         var pad = paddingSize - paddingBytes.size % paddingSize
         if (pad == paddingSize) {
             return paddingBytes + byteArrayOf(PAD_START_BYTE, 0,0,0,0,0,0,0)
@@ -431,7 +598,7 @@ object Crypto {
      * @param paddedBytes The byte array from which padding is removed
      * @return The unpadded byte array
      */
-    fun removePadding(paddedBytes : ByteArray) : ByteArray {
+    fun removePadding(paddedBytes: ByteArray): ByteArray {
         val last = paddedBytes.lastIndexOf(PAD_START_BYTE)
         return if (last == -1) {
             paddedBytes
@@ -444,9 +611,10 @@ object Crypto {
      * Generates a public key from the given certificate
      *
      * @param certificate The certificate from which to create the public key
-     * @return The generated public key from the certificate or null if a public key could not be generated
+     * @return The generated public key from the certificate or null if a public
+     * key could not be generated
      */
-    fun generatePublicKey(certificate: Certificate) : PublicKey? {
+    fun generatePublicKey(certificate: Certificate): PublicKey? {
         try {
             val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
             val fac = KeyFactory.getInstance(
@@ -454,7 +622,7 @@ object Crypto {
                 BOUNCY_CASTLE_STRING
             )
             return fac!!.generatePublic(spec)
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return null
         }
     }
@@ -466,7 +634,10 @@ object Crypto {
      * @param signerCertificate The certificate which signed the [signedCertificate]
      * @return True if the [signedCertificate] was signed by the [signerCertificate] otherwise false
      */
-    fun verifyCertificate(signedCertificate: Certificate, signerCertificate: Certificate) : Boolean {
+    fun verifyCertificate(
+        signedCertificate: Certificate,
+        signerCertificate: Certificate
+    ): Boolean {
         try {
             val pub = generatePublicKey(signerCertificate)
             return if (pub != null) {
@@ -479,7 +650,7 @@ object Crypto {
             } else {
                 false
             }
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return false
         }
     }
@@ -493,7 +664,12 @@ object Crypto {
      * @param signature The signature of the [signedData]
      * @return True if the signature is valid otherwise false
      */
-    fun verifySignature(signatureOID: String, publicKey: PublicKey, signedData: ByteArray, signature: ByteArray) : Boolean {
+    fun verifySignature(
+        signatureOID: String,
+        publicKey: PublicKey,
+        signedData: ByteArray,
+        signature: ByteArray
+    ): Boolean {
         try {
             val sign = Signature.getInstance(
                 signatureOID,
@@ -502,7 +678,7 @@ object Crypto {
             sign.initVerify(publicKey)
             sign.update(signedData)
             return sign.verify(signature)
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return false
         }
     }

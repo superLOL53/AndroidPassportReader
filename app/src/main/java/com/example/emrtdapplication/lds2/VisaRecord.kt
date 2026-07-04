@@ -1,5 +1,7 @@
 package com.example.emrtdapplication.lds2
 
+import android.util.Log
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.constants.TlvTags.ADDITIONAL_BIOMETRICS_REFERENCE
 import com.example.emrtdapplication.constants.TlvTags.ADDITIONAL_INFORMATION
 import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
@@ -26,12 +28,32 @@ import com.example.emrtdapplication.constants.TlvTags.VISA_1
 import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE
 import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE_A
 import com.example.emrtdapplication.constants.TlvTags.VISA_TYPE_B
-import com.example.emrtdapplication.constants.VisaRecordConstants.VISA_RECORD_SIZE
+import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.x509.Certificate
-import java.security.KeyFactory
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
+
+const val VISA_RECORD_SIZE = 4
+const val INVALID_VISA_RECORD_SIZE = "Record sequence must be of size $VISA_RECORD_SIZE!"
+const val EMPTY_VISA_RECORD = "Empty visa record!"
+const val INVALID_TAG_IN_SEQUENCE = "Invalid tag in record sequence!"
+const val UNSPECIFIED_ISSUANCE_PLACE = "Unspecified issuance place in Visa Record!"
+const val UNSPECIFIED_ISSUANCE_DATE = "Unspecified issuance date in Visa Record!"
+const val UNSPECIFIED_EXPIRATION_DATE = "Unspecified expiration date in Visa Record!"
+const val UNSPECIFIED_DOCUMENT_NUMBER = "Unspecified document number in Visa Record!"
+const val UNSPECIFIED_HOLDER_NAME = "Unspecified holder name in Visa Record!"
+const val UNSPECIFIED_SURNAME = "Unspecified surname in Visa Record!"
+const val UNSPECIFIED_GIVEN_NAME = "Unspecified given name in Visa Record!"
+const val UNSPECIFIED_SEX = "Unspecified sex in Visa Record!"
+const val UNSPECIFIED_BIRTH_DATE = "Unspecified birth date in Visa Record!"
+const val UNSPECIFIED_NATIONALITY = "Unspecified nationality in Visa Record!"
+const val UNSPECIFIED_MRZ = "Unspecified MRZ in Visa Record!"
+const val UNSPECIFIED_DOCUMENT_TYPE = "Unspecified document type in Visa Record!"
+const val ILLEGAL_BIOMETRIC_FILE_REFERENCE = "Illegal length for the Biometrics EF file reference"
+const val UNKNOWN_CERTIFICATE_REFERENCE = "Unspecified or invalid certificate reference in Visa Record!"
+const val UNABLE_TO_VERIFY_SIGNATURE_VISA_RECORD = "Unable to verify signature of the Visa Record!"
+const val INVALID_STAY_DURATION = "Invalid length for duration of stays!"
+const val NO_SIGNED_INFORMATION = "No signed information in the record!"
+const val MISSING_STATE_ENTRIES = "State entries are not present or mismatch!"
 
 /**
  * Class representing a single Visa Record. The format is as follows:
@@ -48,76 +70,76 @@ import java.security.spec.X509EncodedKeySpec
  * @throws IllegalArgumentException If any of the mandatory fields are missing/invalid or if any tags are invalid
  */
 class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
-    val signedInfo : ByteArray
-    val state : String
-    val documentType : String
-    val machineReadableVisaTypeA : String?
-    val machineReadableVisaTypeB : String?
-    val numberOfEntries : Int?
-    val stayDurationYears : Int?
-    val stayDurationMonths : Int?
-    val stayDurationDays : Int?
-    val passportNumber : String?
-    val visaType : ByteArray?
-    val territoryInformation : ByteArray?
-    val issuancePlace : String
-    val issuanceDate : String
-    val expirationDate : String
-    val documentNumber : String
-    val additionalInformation : String?
-    val holderName : String
-    val surname : String
-    val givenName : String
-    val sex : Char
-    val birthDate : String
-    val nationality : String
-    val mrz : String
-    val additionalBiometricsReference : Byte?
-    val signature : ByteArray
-    val certificateReference : Byte
+    val signedInfo: ByteArray
+    val state: String
+    val documentType: String
+    val machineReadableVisaTypeA: String?
+    val machineReadableVisaTypeB: String?
+    val numberOfEntries: Int?
+    val stayDurationYears: Int?
+    val stayDurationMonths: Int?
+    val stayDurationDays: Int?
+    val passportNumber: String?
+    val visaType: ByteArray?
+    val territoryInformation: ByteArray?
+    val issuancePlace: String
+    val issuanceDate: String
+    val expirationDate: String
+    val documentNumber: String
+    val additionalInformation: String?
+    val holderName: String
+    val surname: String
+    val givenName: String
+    val sex: Char
+    val birthDate: String
+    val nationality: String
+    val mrz: String
+    val additionalBiometricsReference: Byte?
+    val signature: ByteArray
+    val certificateReference: Byte
     var isVerified = false
         private set
 
     init {
-        var signedInfo : ByteArray? = null
-        var state1 : String? = null
-        var state2 : String? = null
-        var documentType : String? = null
-        var machineReadableVisaTypeA : String? = null
-        var machineReadableVisaTypeB : String? = null
-        var numberOfEntries : ByteArray? = null
-        var stayDurationYears : Int? = null
-        var stayDurationMonths : Int? = null
-        var stayDurationDays : Int? = null
-        var passportNumber : String? = null
-        var visaType : ByteArray? = null
-        var territoryInformation : ByteArray? = null
-        var issuancePlace : String? = null
-        var issuanceDate : String? = null
-        var expirationDate : String? = null
-        var documentNumber : String? = null
-        var additionalInformation : String? = null
-        var holderName : String? = null
-        var surname : String? = null
-        var givenName : String? = null
-        var sex : String? = null
-        var birthDate : String? = null
-        var nationality : String? = null
-        var mrz : String? = null
-        var additionalBiometricsReference : ByteArray? = null
-        var signature : ByteArray? = null
-        var certificateReference : ByteArray? = null
+        var signedInfo: ByteArray? = null
+        var state1: String? = null
+        var state2: String? = null
+        var documentType: String? = null
+        var machineReadableVisaTypeA: String? = null
+        var machineReadableVisaTypeB: String? = null
+        var numberOfEntries: ByteArray? = null
+        var stayDurationYears: Int? = null
+        var stayDurationMonths: Int? = null
+        var stayDurationDays: Int? = null
+        var passportNumber: String? = null
+        var visaType: ByteArray? = null
+        var territoryInformation: ByteArray? = null
+        var issuancePlace: String? = null
+        var issuanceDate: String? = null
+        var expirationDate: String? = null
+        var documentNumber: String? = null
+        var additionalInformation: String? = null
+        var holderName: String? = null
+        var surname: String? = null
+        var givenName: String? = null
+        var sex: String? = null
+        var birthDate: String? = null
+        var nationality: String? = null
+        var mrz: String? = null
+        var additionalBiometricsReference: ByteArray? = null
+        var signature: ByteArray? = null
+        var certificateReference: ByteArray? = null
         if (record.tlvSequence.size != VISA_RECORD_SIZE) {
-            throw IllegalArgumentException("Record sequence must be of size $VISA_RECORD_SIZE!")
+            throw IllegalArgumentException(INVALID_VISA_RECORD_SIZE)
         }
         for (tlv in record.tlvSequence) {
             if (tlv.tag.size == 1) {
                 if (tlv.tag[0] != SIGNED_INFO_VISA_RECORD) {
-                    throw IllegalArgumentException("Invalid tag in record sequence!")
+                    throw IllegalArgumentException(INVALID_TAG_IN_SEQUENCE)
                 }
                 signedInfo = tlv.toByteArray()
                 if (tlv.list == null || tlv.list!!.tlvSequence.isEmpty()) {
-                    throw IllegalArgumentException("Empty visa record!")
+                    throw IllegalArgumentException(EMPTY_VISA_RECORD)
                 }
                 for (t in tlv.list!!.tlvSequence) {
                     if (t.value == null) {
@@ -135,39 +157,59 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
                             continue
                         }
                         when (t.tag[1]) {
-                            ISSUING_AUTHORITY -> state2 = t.value!!.decodeToString()
-                            VISA_TYPE_A -> machineReadableVisaTypeA = t.value!!.decodeToString()
-                            VISA_TYPE_B -> machineReadableVisaTypeB = t.value!!.decodeToString()
-                            NUMBER_OF_ENTRIES -> numberOfEntries = t.value
+                            ISSUING_AUTHORITY ->
+                                state2 = t.value!!.decodeToString()
+                            VISA_TYPE_A ->
+                                machineReadableVisaTypeA = t.value!!.decodeToString()
+                            VISA_TYPE_B ->
+                                machineReadableVisaTypeB = t.value!!.decodeToString()
+                            NUMBER_OF_ENTRIES ->
+                                numberOfEntries = t.value
                             STAY_DURATION_VISA_RECORD -> {
                                 if (t.value!!.size == 3) {
                                     stayDurationDays = t.value!![0].toUByte().toInt()
                                     stayDurationMonths = t.value!![1].toUByte().toInt()
                                     stayDurationYears = t.value!![2].toUByte().toInt()
                                 } else {
-                                    throw IllegalArgumentException("Invalid length for duration of stays!")
+                                    throw IllegalArgumentException(INVALID_STAY_DURATION)
                                 }
                             }
-                            PASSPORT_NUMBER -> passportNumber = t.value!!.decodeToString()
-                            VISA_TYPE -> visaType = t.value
-                            TERRITORY_INFORMATION -> territoryInformation = t.value
-                            ISSUANCE_DATE -> issuanceDate = t.value!!.decodeToString()
-                            EXPIRATION_DATE -> expirationDate = t.value!!.decodeToString()
-                            ADDITIONAL_INFORMATION -> additionalInformation = t.value!!.decodeToString()
-                            SURNAME -> surname = t.value!!.decodeToString()
-                            GIVEN_NAME -> givenName = t.value!!.decodeToString()
-                            SEX -> sex = t.value!!.decodeToString()
-                            BIRTHDATE -> birthDate = t.value!!.decodeToString()
-                            NATIONALITY -> nationality = t.value!!.decodeToString()
-                            MRZ -> mrz = t.value!!.decodeToString()
-                            ADDITIONAL_BIOMETRICS_REFERENCE -> additionalBiometricsReference = t.value
+                            PASSPORT_NUMBER ->
+                                passportNumber = t.value!!.decodeToString()
+                            VISA_TYPE ->
+                                visaType = t.value
+                            TERRITORY_INFORMATION ->
+                                territoryInformation = t.value
+                            ISSUANCE_DATE ->
+                                issuanceDate = t.value!!.decodeToString()
+                            EXPIRATION_DATE ->
+                                expirationDate = t.value!!.decodeToString()
+                            ADDITIONAL_INFORMATION ->
+                                additionalInformation = t.value!!.decodeToString()
+                            SURNAME ->
+                                surname = t.value!!.decodeToString()
+                            GIVEN_NAME ->
+                                givenName = t.value!!.decodeToString()
+                            SEX ->
+                                sex = t.value!!.decodeToString()
+                            BIRTHDATE ->
+                                birthDate = t.value!!.decodeToString()
+                            NATIONALITY ->
+                                nationality = t.value!!.decodeToString()
+                            MRZ ->
+                                mrz = t.value!!.decodeToString()
+                            ADDITIONAL_BIOMETRICS_REFERENCE ->
+                                additionalBiometricsReference = t.value
                         }
                     }
                 }
             } else if (tlv.tag.size == 2) {
-                if (tlv.tag[0] != VISA_1 || (tlv.tag[1] != ISSUING_AUTHORITY &&
-                        tlv.tag[1] != AUTHENTICITY_TOKEN && tlv.tag[1] != CERTIFICATE_REFERENCE)) {
-                    throw IllegalArgumentException("Invalid tag in record sequence!")
+                if (tlv.tag[0] != VISA_1 ||
+                    (tlv.tag[1] != ISSUING_AUTHORITY &&
+                            tlv.tag[1] != AUTHENTICITY_TOKEN &&
+                            tlv.tag[1] != CERTIFICATE_REFERENCE)
+                    ) {
+                        throw IllegalArgumentException(INVALID_TAG_IN_SEQUENCE)
                 }
                 when (tlv.tag[1]) {
                     ISSUING_AUTHORITY -> state1 = tlv.value!!.decodeToString()
@@ -177,24 +219,25 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
             }
         }
         if (signedInfo == null) {
-            throw IllegalArgumentException("No signed information in the record!")
+            throw IllegalArgumentException(NO_SIGNED_INFORMATION)
         }
         this.signedInfo = signedInfo
         if (state1 == null || !state1.contentEquals(state2)) {
-            throw IllegalArgumentException("State entries are not present or mismatch!")
+            throw IllegalArgumentException(MISSING_STATE_ENTRIES)
         }
         this.state = state1
         if (documentType == null) {
-            throw IllegalArgumentException("Unspecified document type in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_DOCUMENT_TYPE)
         }
         this.documentType = documentType
         this.machineReadableVisaTypeA = machineReadableVisaTypeA
         this.machineReadableVisaTypeB = machineReadableVisaTypeB
-        this.numberOfEntries = if (numberOfEntries == null || numberOfEntries.size != 1) {
-                                    null
-                                } else {
-                                    numberOfEntries[0].toInt()
-                                }
+        this.numberOfEntries =
+            if (numberOfEntries == null || numberOfEntries.size != 1) {
+                null
+            } else {
+                numberOfEntries[0].toInt()
+            }
         this.stayDurationYears = stayDurationYears
         this.stayDurationMonths = stayDurationMonths
         this.stayDurationDays = stayDurationDays
@@ -202,74 +245,78 @@ class VisaRecord(val record: TLVSequence, val recordNumber: Byte) {
         this.visaType = visaType
         this.territoryInformation = territoryInformation
         if (issuancePlace == null) {
-            throw IllegalArgumentException("Unspecified issuance place in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_ISSUANCE_PLACE)
         }
         this.issuancePlace = issuancePlace
         if (issuanceDate == null) {
-            throw IllegalArgumentException("Unspecified issuance date in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_ISSUANCE_DATE)
         }
         this.issuanceDate = issuanceDate
         if (expirationDate == null) {
-            throw IllegalArgumentException("Unspecified expiration date in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_EXPIRATION_DATE)
         }
         this.expirationDate = expirationDate
         if (documentNumber == null) {
-            throw IllegalArgumentException("Unspecified document number in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_DOCUMENT_NUMBER)
         }
         this.documentNumber = documentNumber
         this.additionalInformation = additionalInformation
         if (holderName == null) {
-            throw IllegalArgumentException("Unspecified holder name in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_HOLDER_NAME)
         }
         this.holderName = holderName
         if (surname == null) {
-            throw IllegalArgumentException("Unspecified surname in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_SURNAME)
         }
         this.surname = surname
         if (givenName == null) {
-            throw IllegalArgumentException("Unspecified given name in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_GIVEN_NAME)
         }
         this.givenName = givenName
         if (sex == null || sex.length != 1) {
-            throw IllegalArgumentException("Unspecified sex in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_SEX)
         }
         this.sex = sex[0]
         if (birthDate == null) {
-            throw IllegalArgumentException("Unspecified birth date in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_BIRTH_DATE)
         }
         this.birthDate = birthDate
         if (nationality == null) {
-            throw IllegalArgumentException("Unspecified nationality in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_NATIONALITY)
         }
         this.nationality = nationality
         if (mrz == null) {
-            throw IllegalArgumentException("Unspecified MRZ in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_MRZ)
         }
         this.mrz = mrz
-        if (additionalBiometricsReference != null && additionalBiometricsReference.size != 2) {
-            throw IllegalArgumentException("Illegal length for the Biometrics EF file reference")
+        if (additionalBiometricsReference != null &&
+            additionalBiometricsReference.size != 2) {
+                throw IllegalArgumentException(ILLEGAL_BIOMETRIC_FILE_REFERENCE)
         }
         this.additionalBiometricsReference = additionalBiometricsReference?.get(1)
         if (signature == null) {
-            throw IllegalArgumentException("Unspecified document type in Visa Record!")
+            throw IllegalArgumentException(UNSPECIFIED_DOCUMENT_TYPE)
         }
         this.signature = signature
         if (certificateReference == null || certificateReference.size != 1) {
-            throw IllegalArgumentException("Unspecified or invalid certificate reference in Visa Record!")
+            throw IllegalArgumentException(UNKNOWN_CERTIFICATE_REFERENCE)
         }
         this.certificateReference = certificateReference[0]
     }
 
     fun verify(certificate: Certificate) {
         try {
-            val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
-            val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
-            val pub = fac!!.generatePublic(spec)
-            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id, "BC")
-            sigAlg.initVerify(pub)
-            sigAlg.update(signedInfo)
-            isVerified = sigAlg.verify(signature)
-        } catch (_ : Exception) {
+            val publicKey = Crypto.generatePublicKey(certificate)
+            isVerified = Crypto.verifySignature(
+                certificate.signatureAlgorithm.algorithm.id,
+                publicKey!!,
+                signedInfo,
+                signature
+            )
+            return
+        } catch (_: Exception) {
+            Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_VERIFY_SIGNATURE_VISA_RECORD)
         }
+        isVerified = false
     }
 }

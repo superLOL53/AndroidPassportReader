@@ -9,7 +9,7 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 import com.example.emrtdapplication.biometrics.iris.IrisRecordHeader
 
-object DG4Display : CreateView() {
+object DG4Display: CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
@@ -17,12 +17,17 @@ object DG4Display : CreateView() {
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        if (EMRTD.ldS1Application.dg4.biometricInformation != null && EMRTD.ldS1Application.dg4.biometricInformation!!.biometricInformationList != null) {
-            for (bios in EMRTD.ldS1Application.dg4.biometricInformation!!.biometricInformationList) {
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
+        if (EMRTD.ldS1Application.dg4.biometricInformation != null &&
+            EMRTD.ldS1Application.dg4.biometricInformation!!.biometricInformationList != null
+        ) {
+            for (
+                bios in EMRTD.ldS1Application.dg4.biometricInformation!!.biometricInformationList
+            ) {
                 try {
                     if (bios == null) continue
-                    val biometricData = bios.biometricDataBlock.biometricHeader as IrisRecordHeader
+                    val biometricData =
+                        bios.biometricDataBlock.biometricHeader as IrisRecordHeader
                     for (subtype in biometricData.irisHeader.irisBiometricSubtypeInfos) {
                         for (image in subtype.irisImageInfos) {
                             val box = LinearLayout(context)
@@ -48,7 +53,11 @@ object DG4Display : CreateView() {
                             alternate = !alternate
                             parent.addView(box)
                             val im = image.imageInputStream.readBytes()
-                            val bitmap = BitmapFactory.decodeByteArray(im, 0, im.size)
+                            val bitmap = BitmapFactory.decodeByteArray(
+                                im,
+                                0,
+                                im.size
+                            )
                             val view = ImageView(context)
                             view.layoutParams = LinearLayout.LayoutParams(
                                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -59,7 +68,7 @@ object DG4Display : CreateView() {
                             image.imageInputStream.close()
                         }
                     }
-                } catch (_ : Exception) {
+                } catch (_: Exception) {
                 }
             }
         }

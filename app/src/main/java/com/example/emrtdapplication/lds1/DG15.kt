@@ -1,20 +1,16 @@
 package com.example.emrtdapplication.lds1
 
+import android.util.Log
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.BOUNCY_CASTLE_STRING
 import com.example.emrtdapplication.ElementaryFileTemplate
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.common.ActiveAuthenticationInfo
-import com.example.emrtdapplication.constants.DG15Constants.ECDSA_OID
-import com.example.emrtdapplication.constants.DG15Constants.PARTIAL_MESSAGE_RECOVERY
-import com.example.emrtdapplication.constants.DG15Constants.SHA_1
-import com.example.emrtdapplication.constants.DG15Constants.SHA_224
-import com.example.emrtdapplication.constants.DG15Constants.SHA_256
-import com.example.emrtdapplication.constants.DG15Constants.SHA_384
-import com.example.emrtdapplication.constants.DG15Constants.SHA_512
-import com.example.emrtdapplication.constants.FAILURE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG15_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG15_SHORT_EF_ID
 import com.example.emrtdapplication.utils.APDU
@@ -32,6 +28,39 @@ import java.security.Signature
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.Cipher
 
+/**
+ * Byte value indicating the use of SHA-1 as message digest in the active authentication protocol
+ */
+const val ACTIVE_AUTHENTICATION_SHA_1: Byte = 0xBC.toByte()
+
+/**
+ * Byte value indicating the use of SHA-224 as message digest in the active authentication protocol
+ */
+const val ACTIVE_AUTHENTICATION_SHA_224: Byte = 0x38
+
+/**
+ * Byte value indicating the use of SHA-256 as message digest in the active authentication protocol
+ */
+const val ACTIVE_AUTHENTICATION_SHA_256: Byte = 0x34
+
+/**
+ * Byte value indicating the use of SHA-384 as message digest in the active authentication protocol
+ */
+const val ACTIVE_AUTHENTICATION_SHA_384: Byte = 0x36
+
+/**
+ * Byte value indicating the use of SHA-512 as message digest in the active authentication protocol
+ */
+const val ACTIVE_AUTHENTICATION_SHA_512: Byte = 0x35
+
+/**
+ * Byte value indicating partial message recovery in the active authentication protocol
+ */
+const val PARTIAL_MESSAGE_RECOVERY: Byte = 0x6A
+
+const val ECDSA_OID = "0.4.0.127.0.7.1.1.4"
+const val RSA_CIPHER = "RSA/None/NoPadding"
+const val UNABLE_TO_DECRYPT_RSA = "Unable to decrypt RSA message in Active Authentication protocol"
 
 /**
  * Implements the DG15 file and inherits from [ElementaryFileTemplate]
@@ -39,18 +68,20 @@ import javax.crypto.Cipher
  * @property rawFileContent The file content as a byte array
  * @property shortEFIdentifier The short EF identifier for DG15
  * @property efTag The tag of the DG15 file
- * @property publicKeyInfo The public key used for the Active Authentication protocol as a [SubjectPublicKeyInfo] or null
- * @property isAuthenticated Indicates if the Active Authentication protocol was successful
+ * @property publicKeyInfo The public key used for the Active
+ * Authentication protocol as a [SubjectPublicKeyInfo] or null
+ * @property isAuthenticated Indicates if the Active
+ * Authentication protocol was successful
  */
-class DG15 : ElementaryFileTemplate() {
+class DG15: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG15_SHORT_EF_ID
     override val efTag = DG15_FILE_TAG
-    var publicKeyInfo : SubjectPublicKeyInfo? = null
+    var publicKeyInfo: SubjectPublicKeyInfo? = null
         private set
     var isAuthenticated = false
         private set
-    var publicKey : PublicKey? = null
+    var publicKey: PublicKey? = null
         private set
 
     /**
@@ -64,12 +95,21 @@ class DG15 : ElementaryFileTemplate() {
             return FAILURE
         }
         try {
-            publicKeyInfo = SubjectPublicKeyInfo.getInstance(rawFileContent!!.slice(contentStart..<rawFileContent!!.size).toByteArray())
-            val kf = KeyFactory.getInstance(publicKeyInfo!!.algorithm.algorithm.id, "BC")
-            publicKey = kf.generatePublic(X509EncodedKeySpec(publicKeyInfo!!.encoded))
+            publicKeyInfo = SubjectPublicKeyInfo.getInstance(
+                rawFileContent!!.
+                slice(contentStart..<rawFileContent!!.size).
+                toByteArray()
+            )
+            val kf = KeyFactory.getInstance(
+                publicKeyInfo!!.algorithm.algorithm.id,
+                BOUNCY_CASTLE_STRING
+            )
+            publicKey = kf.generatePublic(
+                X509EncodedKeySpec(publicKeyInfo!!.encoded)
+            )
             isParsed = true
             return SUCCESS
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return FAILURE
         }
     }
@@ -79,7 +119,10 @@ class DG15 : ElementaryFileTemplate() {
      *
      * @return [SUCCESS] if the protocol was successful, otherwise [FAILURE]
      */
-    fun activeAuthentication(info : ActiveAuthenticationInfo, random: SecureRandom? = SecureRandom()) : Int {
+    fun activeAuthentication(
+        info: ActiveAuthenticationInfo,
+        random: SecureRandom? = SecureRandom()
+    ): Int {
         isAuthenticated = false
         if (publicKeyInfo == null) {
             return FAILURE
@@ -97,14 +140,25 @@ class DG15 : ElementaryFileTemplate() {
             nonce[6] = 0x40.toByte()
             nonce[7] = 0xC6.toByte()
         }
-        var response = APDUControl.sendAPDU(APDU(NfcClassByte.ZERO, NfcInsByte.INTERNAL_AUTHENTICATE, NfcP1Byte.ZERO, NfcP2Byte.ZERO, nonce, 256))
+        var response = APDUControl.sendAPDU(
+            APDU(
+                NfcClassByte.ZERO,
+                NfcInsByte.INTERNAL_AUTHENTICATE,
+                NfcP1Byte.ZERO,
+                NfcP2Byte.ZERO,
+                nonce, 0
+            )
+        )
         if (!APDUControl.checkResponse(response)) {
             return FAILURE
         }
         response = APDUControl.removeRespondCodes(response)
         if (info.signatureAlgorithm.startsWith(ECDSA_OID)) {
             try {
-                val sig = Signature.getInstance(info.signatureAlgorithm, "BC")
+                val sig = Signature.getInstance(
+                    info.signatureAlgorithm,
+                    BOUNCY_CASTLE_STRING
+                )
                 sig.initVerify(publicKey)
                 sig.update(nonce)
                 isAuthenticated = sig.verify(response)
@@ -114,7 +168,7 @@ class DG15 : ElementaryFileTemplate() {
                     isAuthenticated = false
                     return FAILURE
                 }
-            } catch (_ : Exception) {
+            } catch (_: Exception) {
                 isAuthenticated = false
                 return FAILURE
             }
@@ -125,29 +179,39 @@ class DG15 : ElementaryFileTemplate() {
             } else {
                 response = d
             }
-            val hashAlgorithm = if (response[response.size - 1] == SHA_1) {
+            val hashAlgorithm = if (response[response.size - 1] == ACTIVE_AUTHENTICATION_SHA_1) {
                 SHA1Digest()
             } else {
                 when (response[response.size - 2]) {
-                    SHA_256 -> SHA256Digest()
-                    SHA_512 -> SHA512Digest()
-                    SHA_384 -> SHA384Digest()
-                    SHA_224 -> SHA224Digest()
+                    ACTIVE_AUTHENTICATION_SHA_256 -> SHA256Digest()
+                    ACTIVE_AUTHENTICATION_SHA_512 -> SHA512Digest()
+                    ACTIVE_AUTHENTICATION_SHA_384 -> SHA384Digest()
+                    ACTIVE_AUTHENTICATION_SHA_224 -> SHA224Digest()
                     else -> return FAILURE
                 }
             }
             hashAlgorithm.digestSize
-            val hash = if (response[response.size - 1] == SHA_1) {
-                response.slice(response.size - hashAlgorithm.digestSize - 1..response.size - 2)
-                    .toByteArray()
+            val hash = if (response[response.size - 1] == ACTIVE_AUTHENTICATION_SHA_1) {
+                response.
+                slice(
+                    response.size - hashAlgorithm.digestSize - 1..response.size - 2
+                ).
+                toByteArray()
             } else {
-                response.slice(response.size - hashAlgorithm.digestSize - 2..response.size - 3)
-                    .toByteArray()
+                response.
+                slice(
+                    response.size - hashAlgorithm.digestSize - 2..response.size - 3
+                ).
+                toByteArray()
             }
-            val m2 = if (response[response.size - 1] == SHA_1) {
-                response.slice(1..response.size - hashAlgorithm.digestSize - 2).toByteArray()
+            val m2 = if (response[response.size - 1] == ACTIVE_AUTHENTICATION_SHA_1) {
+                response.
+                slice(1..response.size - hashAlgorithm.digestSize - 2).
+                toByteArray()
             } else {
-                response.slice(1..response.size - hashAlgorithm.digestSize - 3).toByteArray()
+                response.
+                slice(1..response.size - hashAlgorithm.digestSize - 3).
+                toByteArray()
             }
             val m = if (response[0] == PARTIAL_MESSAGE_RECOVERY) {
                 m2 + nonce
@@ -172,13 +236,13 @@ class DG15 : ElementaryFileTemplate() {
      * @param byteArray The byte array to be decrypted
      * @return The decrypted byte array or null
      */
-    private fun decrypt(byteArray: ByteArray) : ByteArray? {
+    private fun decrypt(byteArray: ByteArray): ByteArray? {
         try {
-            val c = Cipher.getInstance("RSA/None/NoPadding")
+            val c = Cipher.getInstance(RSA_CIPHER)
             c.init(Cipher.DECRYPT_MODE, publicKey)
             return c.doFinal(byteArray)
-        } catch (_ : Exception) {
-
+        } catch (_: Exception) {
+            Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_DECRYPT_RSA)
         }
         return null
     }

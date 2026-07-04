@@ -9,7 +9,7 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 import com.example.emrtdapplication.biometrics.fingerprint.FingerprintRecordHeader
 
-object DG3Display : CreateView() {
+object DG3Display: CreateView() {
 
     /**
      * Dynamically create a view for every biometric information in this file.
@@ -17,12 +17,17 @@ object DG3Display : CreateView() {
      * @param context The context in which to create the view
      * @param parent The parent of the view to create
      */
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
-        if (EMRTD.ldS1Application.dg3.biometricInformation != null && EMRTD.ldS1Application.dg3.biometricInformation!!.biometricInformationList != null) {
-            for (bios in EMRTD.ldS1Application.dg3.biometricInformation!!.biometricInformationList) {
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
+        if (EMRTD.ldS1Application.dg3.biometricInformation != null &&
+            EMRTD.ldS1Application.dg3.biometricInformation!!.biometricInformationList != null
+        ) {
+            for (
+                bios in EMRTD.ldS1Application.dg3.biometricInformation!!.biometricInformationList
+            ) {
                 try {
                     if (bios == null) continue
-                    val biometricData = bios.biometricDataBlock.biometricHeader as FingerprintRecordHeader
+                    val biometricData =
+                        bios.biometricDataBlock.biometricHeader as FingerprintRecordHeader
                     for (im in biometricData.fingerprintHeader.fingerImageInfos) {
                         val box = LinearLayout(context)
                         box.layoutParams = LinearLayout.LayoutParams(
@@ -30,14 +35,22 @@ object DG3Display : CreateView() {
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         )
                         if (alternate) {
-                            box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+                            box.setBackgroundColor(
+                                context.resources.getColor(R.color.gray, null)
+                            )
                         } else {
-                            box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+                            box.setBackgroundColor(
+                                context.resources.getColor(R.color.black, null)
+                            )
                         }
                         alternate = !alternate
                         parent.addView(box)
                         val image = im.imageInputStream.readBytes()
-                        val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
+                        val bitmap = BitmapFactory.decodeByteArray(
+                            image,
+                            0,
+                            image.size
+                        )
                         val view = ImageView(context)
                         view.layoutParams = LinearLayout.LayoutParams(
                             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -47,7 +60,7 @@ object DG3Display : CreateView() {
                         box.addView(view)
                         im.imageInputStream.close()
                     }
-                } catch (_ : Exception) {
+                } catch (_: Exception) {
                 }
             }
         }

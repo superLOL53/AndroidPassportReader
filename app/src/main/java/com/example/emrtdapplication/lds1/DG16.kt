@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG16_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG16_SHORT_EF_ID
 import com.example.emrtdapplication.constants.TlvTags.MULTIPLE_BYTES_TAG
@@ -25,7 +25,7 @@ import kotlin.experimental.and
  * @property efTag The tag of the DG16 file
  * @property persons A list of [Person] for emergency contacts
  */
-class DG16 : ElementaryFileTemplate() {
+class DG16: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG16_SHORT_EF_ID
     override val efTag = DG16_FILE_TAG
@@ -35,7 +35,8 @@ class DG16 : ElementaryFileTemplate() {
     /**
      * Parses the contents of [rawFileContent]
      *
-     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     * @return [SUCCESS] if the contents were
+     * successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
         isParsed = false
@@ -49,11 +50,12 @@ class DG16 : ElementaryFileTemplate() {
         }
         val list = ArrayList<Person>()
         for (tag in tlv.list!!.tlvSequence) {
-            if (tag.tag.size == 1 && (tag.tag[0] and PERSON_TAG_MASK) == PERSON_TAG_TEMPLATE) {
-                val p = getPerson(tag)
-                if (p != null) {
-                    list.add(p)
-                }
+            if (tag.tag.size == 1 &&
+                (tag.tag[0] and PERSON_TAG_MASK) == PERSON_TAG_TEMPLATE) {
+                    val p = getPerson(tag)
+                    if (p != null) {
+                        list.add(p)
+                    }
             }
         }
         persons = list.toTypedArray()
@@ -67,7 +69,7 @@ class DG16 : ElementaryFileTemplate() {
      * @param person A TLV structure containing [Person]
      * @return [Person] if [person] could be decoded correctly, otherwise null
      */
-    private fun getPerson(person: TLV) : Person? {
+    private fun getPerson(person: TLV): Person? {
         if (person.list == null || person.list!!.tlvSequence.size != 4) {
             return null
         }
@@ -78,15 +80,22 @@ class DG16 : ElementaryFileTemplate() {
         for (tag in person.list!!.tlvSequence) {
             if (tag.tag[0] == MULTIPLE_BYTES_TAG) {
                 when (tag.tag[1]) {
-                    PERSON_TAG_DATE -> dateRecorded = tag.value?.decodeToString()
-                    PERSON_TAG_NAME -> name = tag.value?.decodeToString()
-                    PERSON_TAG_TELEPHONE_NUMBER -> telephone = tag.value?.decodeToString()
-                    PERSON_TAG_ADDRESS -> address = tag.value?.decodeToString()
+                    PERSON_TAG_DATE ->
+                        dateRecorded = tag.value?.decodeToString()
+                    PERSON_TAG_NAME ->
+                        name = tag.value?.decodeToString()
+                    PERSON_TAG_TELEPHONE_NUMBER ->
+                        telephone = tag.value?.decodeToString()
+                    PERSON_TAG_ADDRESS ->
+                        address = tag.value?.decodeToString()
                 }
             }
         }
-        return if (dateRecorded != null && name != null && telephone != null && address!= null) {
-            Person(name, address, telephone, dateRecorded)
+        return if (dateRecorded != null &&
+            name != null &&
+            telephone != null &&
+            address!= null) {
+                Person(name, address, telephone, dateRecorded)
         } else {
             null
         }

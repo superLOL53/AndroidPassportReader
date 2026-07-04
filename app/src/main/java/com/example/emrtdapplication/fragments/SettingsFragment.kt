@@ -10,13 +10,14 @@ import com.example.emrtdapplication.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 
 
-class SettingsFragment : Fragment(R.layout.settings) {
-    private var view : ScrollView? = null
+class SettingsFragment: Fragment(R.layout.settings) {
+    private var view: ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (view != null) {
-            val toReplace = requireView().findViewById<ScrollView>(R.id.lds1scroll)
+            val toReplace =
+                requireView().findViewById<ScrollView>(R.id.lds1scroll)
             val rootView = toReplace.parent as ViewGroup
             rootView.removeView(toReplace)
             rootView.addView(view)
@@ -29,11 +30,17 @@ class SettingsFragment : Fragment(R.layout.settings) {
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         this.view = view.findViewById(R.id.settingsScroll)
-        val details = view.findViewById<SwitchMaterial>(R.id.detail_button)
+        val details =
+            view.findViewById<SwitchMaterial>(R.id.detail_button)
         details.isChecked = EMRTD.showDetails
-        details.setOnCheckedChangeListener { _, isChecked -> EMRTD.showDetails = isChecked }
-        val showContents = view.findViewById<SwitchMaterial>(R.id.unparsed_button)
+        details.setOnCheckedChangeListener {
+            _, isChecked -> EMRTD.showDetails = isChecked
+        }
+        val showContents =
+            view.findViewById<SwitchMaterial>(R.id.unparsed_button)
         showContents.isChecked = EMRTD.showUnparsedContent
-        showContents.setOnCheckedChangeListener { _, isChecked ->  EMRTD.showUnparsedContent = isChecked}
+        showContents.setOnCheckedChangeListener {
+            _, isChecked ->  EMRTD.showUnparsedContent = isChecked
+        }
     }
 }

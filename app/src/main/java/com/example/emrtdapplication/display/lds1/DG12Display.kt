@@ -8,41 +8,72 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.ENDORSEMENT
+import com.example.emrtdapplication.ISSUING_AUTHORITY
+import com.example.emrtdapplication.OTHER_PERSON
+import com.example.emrtdapplication.PERSONALIZATION_DEVICE_SERIAL_NUMBER
+import com.example.emrtdapplication.PERSONALIZATION_TIME
 import com.example.emrtdapplication.R
+import com.example.emrtdapplication.TAX_EXIT_REQUIREMENTS
+import com.example.emrtdapplication.display.lds2.records.ISSUE_DATE
 
-object DG12Display : CreateView() {
+object DG12Display: CreateView() {
 
-    fun createView(context: Context, parent : TableLayout) {
-        var row : TableRow
+    fun createView(context: Context, parent: TableLayout) {
+        var row: TableRow
         if (EMRTD.ldS1Application.dg12.issuingAuthority != null) {
             row = createRow(context, parent)
-            provideTextForRow(row, "Issuing Authority: ", EMRTD.ldS1Application.dg12.issuingAuthority!!)
+            provideTextForRow(
+                row,
+                ISSUING_AUTHORITY,
+                EMRTD.ldS1Application.dg12.issuingAuthority!!
+            )
         }
         if (EMRTD.ldS1Application.dg12.dateOfIssue != null) {
             row = createRow(context, parent)
-            provideTextForRow(row, "Date of issue: ", EMRTD.ldS1Application.dg12.dateOfIssue!!)
+            provideTextForRow(
+                row,
+                ISSUE_DATE,
+                EMRTD.ldS1Application.dg12.dateOfIssue!!
+            )
         }
         if (EMRTD.ldS1Application.dg12.otherPersons != null) {
             for (p in EMRTD.ldS1Application.dg12.otherPersons) {
                 row = createRow(context, parent)
-                provideTextForRow(row, "Other Person: ", p)
+                provideTextForRow(row, OTHER_PERSON, p)
             }
         }
         if (EMRTD.ldS1Application.dg12.endorsements != null) {
             row = createRow(context, parent)
-            provideTextForRow(row, "Endorsement: ", EMRTD.ldS1Application.dg12.endorsements!!)
+            provideTextForRow(
+                row,
+                ENDORSEMENT,
+                EMRTD.ldS1Application.dg12.endorsements!!
+            )
         }
         if (EMRTD.ldS1Application.dg12.taxExitRequirements != null) {
             row = createRow(context, parent)
-            provideTextForRow(row, "Tax/Exit Requirements: ", EMRTD.ldS1Application.dg12.taxExitRequirements!!)
+            provideTextForRow(
+                row,
+                TAX_EXIT_REQUIREMENTS,
+                EMRTD.ldS1Application.dg12.taxExitRequirements!!
+            )
         }
         if (EMRTD.ldS1Application.dg12.documentPersonalizationTime != null) {
             row = createRow(context, parent)
-            provideTextForRow(row, "Document personalization time: ", EMRTD.ldS1Application.dg12.documentPersonalizationTime!!)
+            provideTextForRow(
+                row,
+                PERSONALIZATION_TIME,
+                EMRTD.ldS1Application.dg12.documentPersonalizationTime!!
+            )
         }
         if (EMRTD.ldS1Application.dg12.personalizationSystemSerialNumber != null) {
             row = createRow(context, parent)
-            provideTextForRow(row, "Personalization device serial number: ", EMRTD.ldS1Application.dg12.personalizationSystemSerialNumber!!)
+            provideTextForRow(
+                row,
+                PERSONALIZATION_DEVICE_SERIAL_NUMBER,
+                EMRTD.ldS1Application.dg12.personalizationSystemSerialNumber!!
+            )
         }
         if (EMRTD.ldS1Application.dg12.front != null) {
             val box = LinearLayout(context)
@@ -51,9 +82,13 @@ object DG12Display : CreateView() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             if (alternate) {
-                box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+                box.setBackgroundColor(
+                    context.resources.getColor(R.color.gray, null)
+                )
             } else {
-                box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+                box.setBackgroundColor(
+                    context.resources.getColor(R.color.black, null)
+                )
             }
             alternate = !alternate
             parent.addView(box)
@@ -71,9 +106,14 @@ object DG12Display : CreateView() {
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
             if (alternate) {
-                box.setBackgroundColor(context.resources.getColor(R.color.gray, null))
+                box.setBackgroundColor(
+                    context.resources.getColor(R.color.gray,
+                        null)
+                )
             } else {
-                box.setBackgroundColor(context.resources.getColor(R.color.black, null))
+                box.setBackgroundColor(
+                    context.resources.getColor(R.color.black, null)
+                )
             }
             alternate = !alternate
             parent.addView(box)
@@ -86,7 +126,7 @@ object DG12Display : CreateView() {
         }
     }
 
-    override fun <T : LinearLayout> createView(
+    override fun <T: LinearLayout> createView(
         context: Context,
         parent: T
     ) {

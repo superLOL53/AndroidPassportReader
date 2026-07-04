@@ -1,15 +1,49 @@
 package com.example.emrtdapplication.utils
 
-import com.example.emrtdapplication.constants.APDUConstants.BYTE_MASK
-import com.example.emrtdapplication.constants.APDUConstants.EXTENDED_LENGTH_SHIFT_COUNT
-import com.example.emrtdapplication.constants.APDUConstants.EXTENDED_LENGTH_SIZE_IN_BYTES
-import com.example.emrtdapplication.constants.APDUConstants.LC_EXT_MAX
-import com.example.emrtdapplication.constants.APDUConstants.LC_MAX
-import com.example.emrtdapplication.constants.APDUConstants.LE_EXT_MAX
-import com.example.emrtdapplication.constants.APDUConstants.LE_MAX
-import com.example.emrtdapplication.constants.APDUConstants.LE_MIN
-import com.example.emrtdapplication.constants.APDUConstants.MIN_APDU_LENGTH
-import com.example.emrtdapplication.constants.APDUConstants.NORMAL_LENGTH_SIZE_IN_BYTES
+/**
+ * Minimum length of a command APDU
+ */
+const val MIN_APDU_LENGTH = 4
+
+/**
+ * Maximum value for the Lc field of a command APDU, excluding 256 (0x00)
+ */
+const val LC_MAX = 255
+
+/**
+ * Maximum value for the extended Lc field of a command APDU
+ */
+const val LC_EXT_MAX = 65535
+
+/**
+ * Minimum value for the Le field to be present in a command APDU
+ */
+const val LE_MIN = 0
+
+/**
+ * Maximum value for the Le field of a command APDU
+ */
+const val LE_MAX = 256
+
+/**
+ * Maximum value for the extended Le field of a command APDU
+ */
+const val LE_EXT_MAX = 65536
+
+/**
+ * Byte mask for converting command APDU length field(s) to a byte
+ */
+const val BYTE_MASK = 0xFF
+
+/**
+ * Number of bits to be shifted to convert the high byte of a command APDU length field
+ * (Le or Lc) to a byte
+ */
+const val EXTENDED_LENGTH_SHIFT_COUNT = 8
+
+const val EXTENDED_LENGTH_SIZE_IN_BYTES = 3
+
+const val NORMAL_LENGTH_SIZE_IN_BYTES = 1
 
 /**
  * Class representing an APDU
@@ -25,16 +59,21 @@ import com.example.emrtdapplication.constants.APDUConstants.NORMAL_LENGTH_SIZE_I
  * @property useLe Indicates if the received APDU contains any data
  * @property useLeExt Indicates if the APDU uses extended length for [le]
  */
-class APDU(private val classByte: Byte, private val insByte: Byte, private val p1Byte: Byte, private val p2Byte: Byte) {
-    var lc : Int = 0
+class APDU(
+    private val classByte: Byte,
+    private val insByte: Byte,
+    private val p1Byte: Byte,
+    private val p2Byte: Byte
+) {
+    var lc: Int = 0
         private set
     var useLc = false
         private set
     var useLcExt = false
         private set
-    var data : ByteArray = ByteArray(0)
+    var data: ByteArray = ByteArray(0)
         private set
-    var le : Int = 0
+    var le: Int = 0
         private set
     var useLe = false
         private set
@@ -49,7 +88,13 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * @param p2Byte: The P2 byte of the APDU
      * @param le: The expected length of the reply APDU
      */
-    constructor(classByte: Byte, insByte: Byte, p1Byte: Byte, p2Byte: Byte, le : Int) : this(classByte, insByte, p1Byte, p2Byte) {
+    constructor(
+        classByte: Byte,
+        insByte: Byte,
+        p1Byte: Byte,
+        p2Byte: Byte,
+        le: Int
+    ): this(classByte, insByte, p1Byte, p2Byte) {
         calculateLe(le)
     }
 
@@ -61,7 +106,13 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * @param p2Byte: The P2 byte of the APDU
      * @param data: The byte array containing the data
      */
-    constructor(classByte: Byte, insByte: Byte, p1Byte: Byte, p2Byte: Byte, data : ByteArray) : this(classByte, insByte, p1Byte, p2Byte) {
+    constructor(
+        classByte: Byte,
+        insByte: Byte,
+        p1Byte: Byte,
+        p2Byte: Byte,
+        data: ByteArray
+    ): this(classByte, insByte, p1Byte, p2Byte) {
         if (data.isEmpty() || data.size > LC_EXT_MAX) {
             return
         }
@@ -82,7 +133,14 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * @param data: The byte array containing the data
      * @param le: The expected length of the response APDU
      */
-    constructor(classByte: Byte, insByte: Byte, p1Byte: Byte, p2Byte: Byte, data : ByteArray, le : Int) : this(classByte, insByte, p1Byte, p2Byte, data) {
+    constructor(
+        classByte: Byte,
+        insByte: Byte,
+        p1Byte: Byte,
+        p2Byte: Byte,
+        data: ByteArray,
+        le: Int
+    ): this(classByte, insByte, p1Byte, p2Byte, data) {
         calculateLe(le)
     }
 
@@ -106,7 +164,7 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * Returns the header of the APDU
      * @return Byte array consisting of the CLASS byte, INS byte, P1 byte and P2 byte
      */
-    fun getHeader() : ByteArray {
+    fun getHeader(): ByteArray {
         return byteArrayOf(classByte, insByte, p1Byte, p2Byte)
     }
 
@@ -114,7 +172,7 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
      * Returns the whole APDU in a single byte array
      * @return The APDU as a byte array
      */
-    fun getByteArray() : ByteArray {
+    fun getByteArray(): ByteArray {
         var apduLength = MIN_APDU_LENGTH
         if (useLe) {
             apduLength += if (useLeExt) {
@@ -155,7 +213,7 @@ class APDU(private val classByte: Byte, private val insByte: Byte, private val p
             } else {
                 ba[pos++] = lc.toByte()
             }
-            for (b : Byte in data) {
+            for (b: Byte in data) {
                 ba[pos++] = b
             }
             if (useLe) {

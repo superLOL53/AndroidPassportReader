@@ -1,22 +1,37 @@
 package com.example.emrtdapplication.lds1
 
-import android.util.Log
+import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_TYPE
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
+import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.EMRTD.mrz
+import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.ReadPassport
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.common.ActiveAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthentication
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.LDS1ApplicationConstants.APPLICATION_ID
-import com.example.emrtdapplication.constants.LDS1ApplicationConstants.INCREMENT_PROGRESS_BAR
-import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.constants.SecurityInfoConstants.ACTIVE_AUTHENTICATION_TYPE
-import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
-import com.example.emrtdapplication.constants.SecurityInfoConstants.CHIP_AUTHENTICATION_TYPE
 import java.math.BigInteger
+
+/**
+ * Application identifier for the LDS1 application
+ */
+const val APPLICATION_ID = "A0000002471001"
+
+/**
+ * Constant value for incrementing the progress bar while reading from the eMRTD
+ */
+const val INCREMENT_PROGRESS_BAR = 3
+
+const val READING_FILES = "Reading files..."
+const val READING_EF_SOD = "Reading EF.SOD file..."
+const val PERFORMING_ACTIVE_AUTHENTICATION = "Performing Active Authentication..."
+const val PERFORMING_CHIP_AUTHENTICATION = "Performing Chip Authentication..."
+const val PERFORMING_PASSIVE_AUTHENTICATION = "Performing Passive Authentication..."
+const val READING_DG = "Reading DG"
+const val FILE = " file..."
 
 /**
  * Class representing the LDS1 application on the eMRTD
@@ -44,45 +59,49 @@ import java.math.BigInteger
  * @property chipAuthenticationResult Result of the chip authentication protocol
  * @property activeAuthenticationResult Result of the active authentication protocol
  */
-class LDS1Application : LDSApplication() {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
+class LDS1Application: LDSApplication() {
+    override val applicationIdentifier: ByteArray =
+        BigInteger(APPLICATION_ID, 16).
+        toByteArray().
+        slice(1..7).
+        toByteArray()
     var bac = BAC()
         private set
-    var efCOM : EfCom = EfCom()
+    var efCOM: EfCom = EfCom()
         private set
     var efSod: EfSod = EfSod()
         private set
-    var dg1 : DG1 = DG1()
+    var dg1: DG1 = DG1()
         private set
-    var dg2 : DG2 = DG2()
+    var dg2: DG2 = DG2()
         private set
-    var dg3 : DG3 = DG3()
+    var dg3: DG3 = DG3()
         private set
-    var dg4 : DG4 = DG4()
+    var dg4: DG4 = DG4()
         private set
-    var dg5 : DG5 = DG5()
+    var dg5: DG5 = DG5()
         private set
-    var dg6 : DG6 = DG6()
+    var dg6: DG6 = DG6()
         private set
-    var dg7 : DG7 = DG7()
+    var dg7: DG7 = DG7()
         private set
-    var dg8 : DG8 = DG8()
+    var dg8: DG8 = DG8()
         private set
-    var dg9 : DG9 = DG9()
+    var dg9: DG9 = DG9()
         private set
-    var dg10 : DG10 = DG10()
+    var dg10: DG10 = DG10()
         private set
-    var dg11 : DG11 = DG11()
+    var dg11: DG11 = DG11()
         private set
-    var dg12 : DG12 = DG12()
+    var dg12: DG12 = DG12()
         private set
-    var dg13 : DG13 = DG13()
+    var dg13: DG13 = DG13()
         private set
-    var dg14 : DG14 = DG14()
+    var dg14: DG14 = DG14()
         private set
-    var dg15 : DG15 = DG15()
+    var dg15: DG15 = DG15()
         private set
-    var dg16 : DG16 = DG16()
+    var dg16: DG16 = DG16()
         private set
     var efMap = mapOf(
         dg1.shortEFIdentifier to dg1,
@@ -113,15 +132,24 @@ class LDS1Application : LDSApplication() {
      *
      * @param readActivity Activity for updating the read progress
      */
-    override fun readFiles(readActivity : ReadPassport) {
-        readActivity.changeProgressBar("Reading files...", INCREMENT_PROGRESS_BAR)
+    override fun readFiles(readActivity: ReadPassport) {
+        readActivity.changeProgressBar(
+            READING_FILES,
+            INCREMENT_PROGRESS_BAR
+        )
         efCOM.read()
         for (ef in efMap) {
-            readActivity.changeProgressBar("Reading DG${ef.key} file...", INCREMENT_PROGRESS_BAR)
+            readActivity.changeProgressBar(
+                "${READING_DG}${ef.key}${FILE}",
+                INCREMENT_PROGRESS_BAR
+            )
             ef.value.read()
             ef.value.parse()
         }
-        readActivity.changeProgressBar("Reading EF.SOD file...", INCREMENT_PROGRESS_BAR)
+        readActivity.changeProgressBar(
+            READING_EF_SOD,
+            INCREMENT_PROGRESS_BAR
+        )
         if (efSod.read() == SUCCESS) {
             efSod.parse()
         }
@@ -132,7 +160,7 @@ class LDS1Application : LDSApplication() {
      *
      * @return [SUCCESS] or [FAILURE] if the protocol failed
      */
-    fun performBACProtocol() : Int {
+    fun performBACProtocol(): Int {
         if (bac.init(mrz) != SUCCESS) {
             return FAILURE
         }
@@ -146,7 +174,6 @@ class LDS1Application : LDSApplication() {
      * @param readActivity Activity for updating the read progress
      */
     fun verify(readActivity: ReadPassport) {
-        var startTime = System.nanoTime()
         if (dg14.isRead && dg14.isPresent && dg14.securityInfos != null) {
             var chipPublicKey: ChipAuthenticationPublicKeyInfo? = null
             var chipInfo: ChipAuthenticationInfo? = null
@@ -154,36 +181,44 @@ class LDS1Application : LDSApplication() {
             for (si in dg14.securityInfos!!) {
                 when (si.type) {
                     CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE -> {
-                        chipPublicKey = si as ChipAuthenticationPublicKeyInfo
+                        chipPublicKey =
+                            si as ChipAuthenticationPublicKeyInfo
                     }
                     CHIP_AUTHENTICATION_TYPE -> {
-                        chipInfo = si as ChipAuthenticationInfo
+                        chipInfo =
+                            si as ChipAuthenticationInfo
                     }
                     ACTIVE_AUTHENTICATION_TYPE -> {
-                        activeAuthenticationInfo = si as ActiveAuthenticationInfo
+                        activeAuthenticationInfo =
+                            si as ActiveAuthenticationInfo
                     }
                 }
             }
             if (activeAuthenticationInfo != null) {
                 readActivity.changeProgressBar(
-                    "Performing Active Authentication...",
+                    PERFORMING_ACTIVE_AUTHENTICATION,
                     INCREMENT_PROGRESS_BAR
                 )
-                activeAuthenticationResult = dg15.activeAuthentication(activeAuthenticationInfo)
+                activeAuthenticationResult =
+                    dg15.activeAuthentication(activeAuthenticationInfo)
             } else {
                 readActivity.changeProgressBar(
-                    "Performing Chip Authentication...",
+                    PERFORMING_CHIP_AUTHENTICATION,
                     INCREMENT_PROGRESS_BAR
                 )
                 val auth = if (chipPublicKey != null) {
                     if (chipInfo != null) {
-                        ChipAuthentication(chipPublicKey, chipInfo)
-                    } else if (EMRTD.pace.chipAuthenticationData != null && EMRTD.pace.chipPublicKey != null) {
                         ChipAuthentication(
                             chipPublicKey,
-                            EMRTD.pace.chipAuthenticationData!!,
-                            EMRTD.pace.chipPublicKey!!
+                            chipInfo
                         )
+                    } else if (EMRTD.pace.chipAuthenticationData != null &&
+                        EMRTD.pace.chipPublicKey != null) {
+                            ChipAuthentication(
+                                chipPublicKey,
+                                EMRTD.pace.chipAuthenticationData!!,
+                                EMRTD.pace.chipPublicKey!!
+                            )
                     } else {
                         null
                     }
@@ -193,13 +228,11 @@ class LDS1Application : LDSApplication() {
                 chipAuthenticationResult = auth?.authenticate() ?: FAILURE
             }
         }
-        var endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Active Verification Time: ${endTime - startTime}")
-        readActivity.changeProgressBar("Performing Passive Authentication...", INCREMENT_PROGRESS_BAR)
-        startTime = System.nanoTime()
+        readActivity.changeProgressBar(
+            PERFORMING_PASSIVE_AUTHENTICATION,
+            INCREMENT_PROGRESS_BAR
+        )
         efSod.checkHashes(efMap)
         efSod.passiveAuthentication()
-        endTime = System.nanoTime()
-        Log.i("eMRTDTime", "Passive Verification Time: ${endTime - startTime}")
     }
 }

@@ -2,9 +2,11 @@ package com.example.emrtdapplication.lds1
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import com.example.emrtdapplication.DG12_TAG_SIZE_2_FIRST_BYTE
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.FILLER_CHARACTER
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG12_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG12_SHORT_EF_ID
 import com.example.emrtdapplication.constants.TlvTags.DOCUMENT_PERSONALIZATION_TIME
@@ -35,23 +37,23 @@ import com.example.emrtdapplication.utils.TLV
  * @property documentPersonalizationTime Date and time of personalization
  * @property personalizationSystemSerialNumber The serial number of the personalization system
  */
-class DG12 : ElementaryFileTemplate() {
+class DG12: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG12_SHORT_EF_ID
     override val efTag = DG12_FILE_TAG
-    var issuingAuthority : String? = null
+    var issuingAuthority: String? = null
         private set
-    var dateOfIssue : String? = null
+    var dateOfIssue: String? = null
         private set
-    var otherPersons : Array<String>? = null
+    var otherPersons: Array<String>? = null
         private set
-    var endorsements : String? = null
+    var endorsements: String? = null
         private set
-    var taxExitRequirements : String? = null
+    var taxExitRequirements: String? = null
         private set
-    var front : Bitmap? = null
+    var front: Bitmap? = null
         private set
-    var rear : Bitmap? = null
+    var rear: Bitmap? = null
         private set
     var documentPersonalizationTime: String? = null
         private set
@@ -79,17 +81,25 @@ class DG12 : ElementaryFileTemplate() {
                     otherPersons(tag)
                 }
             } else if (tag.tag.size == 2) {
-                if (tag.tag[0] == 0x5F.toByte()) {
+                if (tag.tag[0] == DG12_TAG_SIZE_2_FIRST_BYTE) {
                     when (tag.tag[1]) {
-                        ISSUING_AUTHORITY_DG12 -> issuingAuthority = tag.value?.decodeToString()
-                        //Date of issuance is represented as hex string?
-                        ISSUANCE_DATE_DG12 -> dateOfIssue = tag.value?.decodeToString()
-                        ENDORSEMENTS -> endorsements = tag.value?.decodeToString()
-                        TAX_EXIT_REQUIREMENTS -> taxExitRequirements = tag.value?.decodeToString()
-                        FRONT_IMAGE -> front = decodeImage(tag)
-                        REAR_IMAGE -> rear = decodeImage(tag)
-                        DOCUMENT_PERSONALIZATION_TIME -> documentPersonalizationTime = tag.value?.decodeToString()
-                        PERSONALIZATION_SYSTEM_SERIAL_NUMBER -> personalizationSystemSerialNumber = tag.value?.decodeToString()
+                        ISSUING_AUTHORITY_DG12 ->
+                            issuingAuthority = tag.value?.decodeToString()
+                        //TODO: Date of issuance is represented as hex string?
+                        ISSUANCE_DATE_DG12 ->
+                            dateOfIssue = tag.value?.decodeToString()
+                        ENDORSEMENTS ->
+                            endorsements = tag.value?.decodeToString()
+                        TAX_EXIT_REQUIREMENTS ->
+                            taxExitRequirements = tag.value?.decodeToString()
+                        FRONT_IMAGE ->
+                            front = decodeImage(tag)
+                        REAR_IMAGE ->
+                            rear = decodeImage(tag)
+                        DOCUMENT_PERSONALIZATION_TIME ->
+                            documentPersonalizationTime = tag.value?.decodeToString()
+                        PERSONALIZATION_SYSTEM_SERIAL_NUMBER ->
+                            personalizationSystemSerialNumber = tag.value?.decodeToString()
                     }
                 }
             }
@@ -112,7 +122,11 @@ class DG12 : ElementaryFileTemplate() {
         val tlv = persons.list!!.tlvSequence
         for (i in 1..<tlv.size) {
             if (tlv[i].value != null) {
-                list.add(tlv[i].value!!.decodeToString().replace('<', ' '))
+                list.add(
+                    tlv[i].value!!.
+                    decodeToString().
+                    replace(FILLER_CHARACTER, ' ')
+                )
             }
         }
         otherPersons = list.toTypedArray()
@@ -124,8 +138,12 @@ class DG12 : ElementaryFileTemplate() {
      * @param tlv A TLV structure containing an image
      * @return Decoded image as a Bitmap or null
      */
-    private fun decodeImage(tlv: TLV) : Bitmap? {
+    private fun decodeImage(tlv: TLV): Bitmap? {
         if (tlv.value == null) return null
-        return BitmapFactory.decodeByteArray(tlv.value!!, 0, tlv.value!!.size)
+        return BitmapFactory.decodeByteArray(
+            tlv.value!!,
+            0,
+            tlv.value!!.size
+        )
     }
 }

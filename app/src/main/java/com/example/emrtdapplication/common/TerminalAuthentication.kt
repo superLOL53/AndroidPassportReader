@@ -1,17 +1,11 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SUCCESS
-import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_ECDSA_SHA_224
-import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_ECDSA_SHA_256
-import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_ECDSA_SHA_384
-import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_ECDSA_SHA_512
-import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_RSA_PSS_SHA_256
-import com.example.emrtdapplication.constants.TerminalAuthenticationConstants.ID_TA_RSA_PSS_SHA_512
 import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
 import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_BODY
 import com.example.emrtdapplication.constants.TlvTags.LENGTH_MULTIPLE_BYTES
@@ -22,12 +16,42 @@ import org.spongycastle.asn1.x509.Certificate
 import java.security.PrivateKey
 import java.security.Signature
 
+/**
+ * OID for digital signature algorithm RSA-PSS with SHA-256
+ */
+const val ID_TA_RSA_PSS_SHA_256 = "0.4.0.127.0.7.2.2.2.1.4"
+
+/**
+ * OID for digital signature algorithm RSA-PSS with SHA-512
+ */
+const val ID_TA_RSA_PSS_SHA_512 = "0.4.0.127.0.7.2.2.2.1.6"
+
+/**
+ * OID for digital signature algorithm EC with SHA-224
+ */
+const val ID_TA_ECDSA_SHA_224 = "0.4.0.127.0.7.2.2.2.2.2"
+
+/**
+ * OID for digital signature algorithm EC with SHA-256
+ */
+const val ID_TA_ECDSA_SHA_256 = "0.4.0.127.0.7.2.2.2.2.3"
+
+/**
+ * OID for digital signature algorithm EC with SHA-384
+ */
+const val ID_TA_ECDSA_SHA_384 = "0.4.0.127.0.7.2.2.2.2.4"
+
+/**
+ * OID for digital signature algorithm EC with SHA-512
+ */
+const val ID_TA_ECDSA_SHA_512 = "0.4.0.127.0.7.2.2.2.2.5"
+
 @Suppress("unused")
 class TerminalAuthentication(
     private val terminalAuthenticationInfo: TerminalAuthenticationInfo,
     private val privateKey: PrivateKey) {
 
-    fun authenticate(certificateChain : Array<Certificate>) : Int {
+    fun authenticate(certificateChain: Array<Certificate>): Int {
         for (certificate in certificateChain) {
             if (doMSESetDST(certificate) != SUCCESS ||
                 doPerformSecurityOperation(certificate) != SUCCESS) {
@@ -48,9 +72,12 @@ class TerminalAuthentication(
         }
     }
 
-    private fun doMSESetDST(certificate: Certificate) : Int {
+    private fun doMSESetDST(certificate: Certificate): Int {
         //TODO: Find out public key reference
-        val data = TLV(0x83.toByte(), certificate.tbsCertificate.serialNumber.encoded)
+        val data = TLV(
+            0x83.toByte(),
+            certificate.tbsCertificate.serialNumber.encoded
+        )
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -67,9 +94,15 @@ class TerminalAuthentication(
         }
     }
 
-    private fun doPerformSecurityOperation(certificate: Certificate) : Int {
-        val certificateBody = TLV(byteArrayOf(LENGTH_MULTIPLE_BYTES, CERTIFICATE_BODY), certificate.tbsCertificate.encoded)
-        val signature = TLV(byteArrayOf(0x5F, AUTHENTICITY_TOKEN), certificate.signature.encoded)
+    private fun doPerformSecurityOperation(certificate: Certificate): Int {
+        val certificateBody = TLV(
+            byteArrayOf(LENGTH_MULTIPLE_BYTES, CERTIFICATE_BODY),
+            certificate.tbsCertificate.encoded
+        )
+        val signature = TLV(
+            byteArrayOf(0x5F, AUTHENTICITY_TOKEN),
+            certificate.signature.encoded
+        )
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -86,9 +119,12 @@ class TerminalAuthentication(
         }
     }
 
-    private fun doMSESetAT(certificate: Certificate) : Int {
+    private fun doMSESetAT(certificate: Certificate): Int {
         //TODO: Find out public key reference
-        val publicKeyReference = TLV(0x83.toByte(), certificate.tbsCertificate.encoded)
+        val publicKeyReference = TLV(
+            0x83.toByte(),
+            certificate.tbsCertificate.encoded
+        )
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -105,7 +141,7 @@ class TerminalAuthentication(
         }
     }
 
-    private fun getChallenge() : ByteArray? {
+    private fun getChallenge(): ByteArray? {
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -123,7 +159,7 @@ class TerminalAuthentication(
         }
     }
 
-    private fun externalAuthenticate(signature: ByteArray) : Int {
+    private fun externalAuthenticate(signature: ByteArray): Int {
         val response = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -140,7 +176,7 @@ class TerminalAuthentication(
         }
     }
 
-    private fun signChallenge(challenge: ByteArray) : ByteArray? {
+    private fun signChallenge(challenge: ByteArray): ByteArray? {
         val signatureAlgorithm = when(terminalAuthenticationInfo.objectIdentifier) {
             ID_TA_RSA_PSS_SHA_256 -> "SHA256withRSA/PSS"
             ID_TA_RSA_PSS_SHA_512 -> "SHA512withRSA/PSS"
@@ -155,7 +191,7 @@ class TerminalAuthentication(
             sigAlg.initSign(privateKey)
             sigAlg.update(challenge)
             return sigAlg.sign()
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return null
         }
     }

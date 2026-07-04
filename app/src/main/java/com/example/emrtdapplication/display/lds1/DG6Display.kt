@@ -8,11 +8,11 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.MAX_LINES_IN_DISPLAY
 import com.example.emrtdapplication.R
 
-object DG6Display : CreateView() {
-    @OptIn(ExperimentalStdlibApi::class)
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+object DG6Display: CreateView() {
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.ldS1Application.dg6.rawFileContent == null) return
         if (EMRTD.showDetails) {
            var text = TextView(context)
@@ -29,9 +29,14 @@ object DG6Display : CreateView() {
                ViewGroup.LayoutParams.WRAP_CONTENT
            )
            text.gravity = Gravity.CENTER
-           text.maxLines = 10
+           text.maxLines = MAX_LINES_IN_DISPLAY
            text.breakStrategy = LineBreaker.BREAK_STRATEGY_BALANCED
-           text.text = EMRTD.ldS1Application.dg6.rawFileContent?.toHexString(HexFormat { upperCase=true; bytes.byteSeparator = " "})
+           text.text = EMRTD.ldS1Application.dg6.rawFileContent?.toHexString(
+               HexFormat {
+                   upperCase=true
+                   bytes.byteSeparator = " "
+               }
+           )
         }
     }
 }

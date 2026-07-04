@@ -1,17 +1,24 @@
 package com.example.emrtdapplication.lds2
 
-import com.example.emrtdapplication.constants.BiometricConstants.BIOMETRIC_RECORD_SIZE
+import android.util.Log
+import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.constants.TlvTags.AUTHENTICITY_TOKEN
 import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC
 import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC_1
 import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC_2
 import com.example.emrtdapplication.constants.TlvTags.BIOMETRIC_DATA
 import com.example.emrtdapplication.constants.TlvTags.CERTIFICATE_REFERENCE
+import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x509.Certificate
-import java.security.KeyFactory
-import java.security.Signature
-import java.security.spec.X509EncodedKeySpec
+
+const val BIOMETRIC_RECORD_SIZE = 3
+const val UNABLE_TO_VERIFY_SIGNATURE = "Unable to verify signature for biometric data!"
+const val INVALID_CERTIFICATE_REFERENCE = "Empty or invalid certificate reference!"
+const val EMPTY_SIGNATURE = "Empty signature for Additional Biometrics file!"
+const val EMPTY_BIOMETRIC_DATA = "Empty Biometric Data!"
+const val ILLEGAL_TAG = "Illegal tag for Biometric Data Template!"
+const val BIOMETRIC_TAG_SIZE = 2
 
 /**
  * Class representing a biometric elementary file in the Additional Biometrics application.
@@ -26,30 +33,32 @@ import java.security.spec.X509EncodedKeySpec
  * @param record A TLV structure containing an EF.Biometrics file
  * @property biometricData Byte array containing the biometric data
  * @property signature The signature over [biometricData]
- * @property certificateReference A reference record number for a certificate in the certificate store
- * @throws IllegalArgumentException If any property is missing or invalid or if a tag is invalid
+ * @property certificateReference A reference record number for a
+ * certificate in the certificate store
+ * @throws IllegalArgumentException If any property is missing or
+ * invalid or if a tag is invalid
  */
-class Biometric(record: TLV, val fileID : Int) {
-    val biometricData : ByteArray
-    val signature : ByteArray
-    val certificateReference : Byte
+class Biometric(record: TLV, val fileID: Int) {
+    val biometricData: ByteArray
+    val signature: ByteArray
+    val certificateReference: Byte
     var isVerified = false
         private set
 
     init {
-        var biometricData : ByteArray? = null
-        var signature : ByteArray? = null
-        var certificateReference : ByteArray? = null
-        if (record.tag.size != 2 || record.tag[0] != BIOMETRIC_1 ||
+        var biometricData: ByteArray? = null
+        var signature: ByteArray? = null
+        var certificateReference: ByteArray? = null
+        if (record.tag.size != BIOMETRIC_TAG_SIZE || record.tag[0] != BIOMETRIC_1 ||
             record.tag[1] != BIOMETRIC_2) {
-            throw IllegalArgumentException("Illegal tag for Biometric Data Template!")
+            throw IllegalArgumentException(ILLEGAL_TAG)
         }
         if (record.list == null || record.list!!.tlvSequence.size != BIOMETRIC_RECORD_SIZE) {
-            throw IllegalArgumentException("Invalid sequence for Biometric Data Template!")
+            throw IllegalArgumentException(ILLEGAL_TAG)
         }
         for (tlv in record.list!!.tlvSequence) {
-            if (tlv.tag.size != 2 || tlv.tag[0] != BIOMETRIC) {
-                throw IllegalArgumentException("Illegal tag for Biometric Data Template!")
+            if (tlv.tag.size != BIOMETRIC_TAG_SIZE || tlv.tag[0] != BIOMETRIC) {
+                throw IllegalArgumentException(ILLEGAL_TAG)
             }
             when (tlv.tag[1]) {
                 BIOMETRIC_DATA -> biometricData = tlv.value
@@ -58,29 +67,30 @@ class Biometric(record: TLV, val fileID : Int) {
             }
         }
         if (biometricData == null) {
-            throw IllegalArgumentException("Empty Biometric Data!")
+            throw IllegalArgumentException(EMPTY_BIOMETRIC_DATA)
         }
         this.biometricData = biometricData
         if (signature == null) {
-            throw IllegalArgumentException("Empty signature for Additional Biometrics file!")
+            throw IllegalArgumentException(EMPTY_SIGNATURE)
         }
         this.signature = signature
         if (certificateReference == null || certificateReference.size != 1) {
-            throw IllegalArgumentException("Empty or invalid certificate reference!")
+            throw IllegalArgumentException(INVALID_CERTIFICATE_REFERENCE)
         }
         this.certificateReference = certificateReference[0]
     }
 
     fun verify(certificate: Certificate) {
         try {
-            val spec = X509EncodedKeySpec(certificate.subjectPublicKeyInfo.encoded)
-            val fac = KeyFactory.getInstance(certificate.subjectPublicKeyInfo.algorithm.algorithm.id)
-            val pub = fac!!.generatePublic(spec)
-            val sigAlg = Signature.getInstance(certificate.signatureAlgorithm.algorithm.id, "BC")
-            sigAlg.initVerify(pub)
-            sigAlg.update(biometricData)
-            isVerified = sigAlg.verify(signature)
-        } catch (_ : Exception) {
+            val publicKey = Crypto.generatePublicKey(certificate)
+            isVerified = Crypto.verifySignature(
+                certificate.signatureAlgorithm.algorithm.id,
+                publicKey!!, biometricData, signature
+            )
+            return
+        } catch (_: Exception) {
+            Log.i(ANDROID_LOG_INFO_TAG, UNABLE_TO_VERIFY_SIGNATURE)
         }
+        isVerified = false
     }
 }

@@ -14,13 +14,14 @@ import com.example.emrtdapplication.display.lds2.VisaRecordApplicationDisplay
  *
  * @property view View for displaying Visa Record application content in the fragment
  */
-class VisaRecordFragment : Fragment(R.layout.visa_records) {
-    private var view : ScrollView? = null
+class VisaRecordFragment: Fragment(R.layout.visa_records) {
+    private var view: ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (view != null) {
-            val toReplace = requireView().findViewById<ScrollView>(R.id.visa_records_scroll_view)
+            val toReplace =
+                requireView().findViewById<ScrollView>(R.id.visa_records_scroll_view)
             val rootView = toReplace.parent as ViewGroup
             rootView.removeView(toReplace)
             rootView.addView(view)
@@ -31,8 +32,13 @@ class VisaRecordFragment : Fragment(R.layout.visa_records) {
      * Creates views to display the contents of files in the Visa Record application
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val visaRecordsLayout = view.findViewById<LinearLayout>(R.id.visa_records_layout)
-        this.view = view.findViewById(R.id.visa_records_scroll_view)
-        VisaRecordApplicationDisplay.createView(requireContext(), visaRecordsLayout)
+        val visaRecordsLayout =
+            view.findViewById<LinearLayout>(R.id.visa_records_layout)
+        this.view =
+            view.findViewById(R.id.visa_records_scroll_view)
+        VisaRecordApplicationDisplay.createView(
+            requireContext(),
+            visaRecordsLayout
+        )
     }
 }

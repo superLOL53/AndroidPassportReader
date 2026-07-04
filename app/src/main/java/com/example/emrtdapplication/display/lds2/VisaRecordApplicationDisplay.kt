@@ -11,9 +11,9 @@ import com.example.emrtdapplication.R
 import com.example.emrtdapplication.display.lds2.records.CertificateRecordDisplay
 import com.example.emrtdapplication.display.lds2.records.VisaRecordDisplay
 
-object VisaRecordApplicationDisplay : CreateView() {
+object VisaRecordApplicationDisplay: CreateView() {
 
-    override fun <T : LinearLayout> createView(context: Context, parent: T) {
+    override fun <T: LinearLayout> createView(context: Context, parent: T) {
         if (EMRTD.visaRecords.isPresent) {
             createVisaRecordsView(context, parent)
             createCertificateRecordsView(context, parent)
@@ -25,7 +25,9 @@ object VisaRecordApplicationDisplay : CreateView() {
                 LinearLayout.LayoutParams.MATCH_PARENT
             )
             view.gravity = Gravity.CENTER
-            view.text = context.getString(R.string.application_is_not_implemented_on_the_emrtd)
+            view.text = context.getString(
+                R.string.application_is_not_implemented_on_the_emrtd
+            )
             parent.addView(view)
         }
     }
@@ -44,7 +46,9 @@ object VisaRecordApplicationDisplay : CreateView() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            unableReadView.text = context.getString(R.string.unable_to_read_file_from_passport)
+            unableReadView.text = context.getString(
+                R.string.unable_to_read_file_from_passport
+            )
             visaRecordLayout.addView(unableReadView)
             return
         }
@@ -58,7 +62,7 @@ object VisaRecordApplicationDisplay : CreateView() {
      *
      * @param view The parent for which views for a Certificate Record are generated
      */
-    private fun createCertificateRecordsView(context : Context, view: View) {
+    private fun createCertificateRecordsView(context: Context, view: View) {
         val certificateRecordsLayout = view.findViewById<LinearLayout>(R.id.visa_certificates)
         if (EMRTD.visaRecords.certificateRecords.isNullOrEmpty()) {
             val unableReadView = TextView(context)
@@ -66,12 +70,17 @@ object VisaRecordApplicationDisplay : CreateView() {
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
             )
-            unableReadView.text = context.getString(R.string.unable_to_read_file_from_passport)
+            unableReadView.text = context.getString(
+                R.string.unable_to_read_file_from_passport
+            )
             certificateRecordsLayout.addView(unableReadView)
             return
         }
         for (certificateRecord in EMRTD.visaRecords.certificateRecords) {
-            CertificateRecordDisplay(certificateRecord).createView(context, certificateRecordsLayout)
+            CertificateRecordDisplay(certificateRecord).createView(
+                context,
+                certificateRecordsLayout
+            )
         }
     }
 }

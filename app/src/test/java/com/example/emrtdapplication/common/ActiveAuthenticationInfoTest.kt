@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.SecurityInfoConstants
+import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_OID
 import com.example.emrtdapplication.utils.TLV
 import org.junit.Test
 import kotlin.test.assertContentEquals
@@ -19,7 +19,7 @@ class ActiveAuthenticationInfoTest {
         assertContentEquals(byteArrayOf(0x67, 0x81.toByte(), 0x08, 0x01, 0x01, 0x05), info.protocol)
         assertEquals(0x01, info.version)
         assertEquals("0.4.0.127.0.7.1.1.4.1.3", info.signatureAlgorithm)
-        assertEquals(SecurityInfoConstants.ACTIVE_AUTHENTICATION_OID, info.objectIdentifier)
+        assertEquals(ACTIVE_AUTHENTICATION_OID, info.objectIdentifier)
     }
 
     @Test

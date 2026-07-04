@@ -14,13 +14,14 @@ import com.example.emrtdapplication.display.lds2.AdditionalBiometricApplicationD
  *
  * @property view View for displaying Visa Record application content in the fragment
  */
-class AdditionalBiometricsFragment : Fragment(R.layout.additional_biometrics) {
-    private var view : ScrollView? = null
+class AdditionalBiometricsFragment: Fragment(R.layout.additional_biometrics) {
+    private var view: ScrollView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (view != null) {
-            val toReplace = requireView().findViewById<ScrollView>(R.id.biometrics_scroll_view)
+            val toReplace =
+                requireView().findViewById<ScrollView>(R.id.biometrics_scroll_view)
             val rootView = toReplace.parent as ViewGroup
             rootView.removeView(toReplace)
             rootView.addView(view)
@@ -31,8 +32,12 @@ class AdditionalBiometricsFragment : Fragment(R.layout.additional_biometrics) {
      * Creates views to display the contents of files in the Additional Biometrics application
      */
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val biometricsLayout = view.findViewById<LinearLayout>(R.id.biometrics_layout)
+        val biometricsLayout =
+            view.findViewById<LinearLayout>(R.id.biometrics_layout)
         this.view = view.findViewById(R.id.biometrics_scroll_view)
-        AdditionalBiometricApplicationDisplay.createView(requireContext(), biometricsLayout)
+        AdditionalBiometricApplicationDisplay.createView(
+            requireContext(),
+            biometricsLayout
+        )
     }
 }

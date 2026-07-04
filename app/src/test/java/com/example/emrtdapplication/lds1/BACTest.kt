@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.lds1
 
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.APDUControl.setEncryptionKeyBAC

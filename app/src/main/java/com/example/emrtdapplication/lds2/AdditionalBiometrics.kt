@@ -1,22 +1,34 @@
 package com.example.emrtdapplication.lds2
 
+import com.example.emrtdapplication.BYTE_MODULO
+import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.ReadPassport
-import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.APPLICATION_ID
-import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.BIOMETRIC_FILE_ID
-import com.example.emrtdapplication.constants.AdditionalBiometricsConstants.MAX_BIOMETRIC_FILES
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.READ_LENGTH
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
-import com.example.emrtdapplication.constants.FAILURE
+import com.example.emrtdapplication.SUCCESS
+import com.example.emrtdapplication.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
+
+
+/**
+ * International application identifier for the LDS2 Additional Biometric application
+ */
+const val ADDITIONAL_BIOMETRICS_APPLICATION_ID = "A0000002472003"
+
+/**
+ * First half of the identifier for a biometric file in the Additional Biometric application
+ */
+const val BIOMETRIC_FILE_ID: Byte = 0x02
+
+/**
+ * Maximum number of biometric files in the Additional Biometrics application
+ */
+const val MAX_BIOMETRIC_FILES = 0x40
 
 /**
  * Class representing the Additional Biometrics application
@@ -24,9 +36,13 @@ import java.math.BigInteger
  * @property applicationIdentifier The identifier of the application
  * @property biometricFiles A list containing [Biometric] files read from the eMRTD
  */
-class AdditionalBiometrics : LDS2Application() {
-    override val applicationIdentifier: ByteArray = BigInteger(APPLICATION_ID, 16).toByteArray().slice(1..7).toByteArray()
-    var biometricFiles : Array<Biometric>? = null
+class AdditionalBiometrics: LDS2Application() {
+    override val applicationIdentifier: ByteArray =
+        BigInteger(ADDITIONAL_BIOMETRICS_APPLICATION_ID, 16).
+        toByteArray().
+        slice(1..7).
+        toByteArray()
+    var biometricFiles: Array<Biometric>? = null
         private set
 
     /**
@@ -62,7 +78,7 @@ class AdditionalBiometrics : LDS2Application() {
      * @param fileID The identifier of the file to read
      * @return [SUCCESS] if file was selected, otherwise [FAILURE]
      */
-    private fun selectFile(fileID : Byte) : Int {
+    private fun selectFile(fileID: Byte): Int {
         val info = APDUControl.sendAPDU(
             APDU(
                 NfcClassByte.ZERO,
@@ -82,15 +98,16 @@ class AdditionalBiometrics : LDS2Application() {
      *
      * @return A [Biometric] or null if the file could not be read or decoded
      */
-    private fun readBiometricFile(fileID: Int) : Biometric? {
+    private fun readBiometricFile(fileID: Int): Biometric? {
         var info = APDUControl.sendAPDU(
-        APDU(
-            NfcClassByte.ZERO,
-            NfcInsByte.READ_BINARY,
-            NfcP1Byte.ZERO,
-            NfcP2Byte.ZERO, READ_LENGTH
+            APDU(
+                NfcClassByte.ZERO,
+                NfcInsByte.READ_BINARY,
+                NfcP1Byte.ZERO,
+                NfcP2Byte.ZERO,
+                0
+            )
         )
-    )
         if (!APDUControl.checkResponse(info)) {
             return null
         }
@@ -105,12 +122,12 @@ class AdditionalBiometrics : LDS2Application() {
             2 + info[1]
         }
         //Read the whole EF file
-        var rawFileContent : ByteArray?
+        var rawFileContent: ByteArray?
         if (le >= APDUControl.maxResponseLength) {
             val tmp = ByteArray(le)
-            var p1 : Byte
-            var p2 : Byte
-            var readBytes : Int
+            var p1: Byte
+            var p2: Byte
+            var readBytes: Int
             for (i in 0..le step APDUControl.maxResponseLength) {
                 p1 = (i/U_BYTE_MODULO).toByte()
                 p2 = (i % U_BYTE_MODULO).toByte()
@@ -130,26 +147,16 @@ class AdditionalBiometrics : LDS2Application() {
                 if (!APDUControl.checkResponse(info)) {
                     return null
                 }
-                APDUControl.removeRespondCodes(info).copyInto(tmp, i, 0)
+                APDUControl.removeRespondCodes(info).
+                    copyInto(tmp, i, 0)
             }
             rawFileContent = tmp
         } else {
-            info = APDUControl.sendAPDU(
-                APDU(
-                    NfcClassByte.ZERO,
-                    NfcInsByte.READ_BINARY,
-                    NfcP1Byte.ZERO,
-                    NfcP2Byte.ZERO, le
-                )
-            )
-            if (!APDUControl.checkResponse(info)) {
-                return null
-            }
             rawFileContent = APDUControl.removeRespondCodes(info)
         }
         return try {
             Biometric(TLV(rawFileContent), fileID)
-        } catch (_ : IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             null
         }
     }

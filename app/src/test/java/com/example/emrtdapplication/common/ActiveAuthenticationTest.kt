@@ -1,6 +1,6 @@
 package com.example.emrtdapplication.common
 
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.lds1.DG15
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl

@@ -1,28 +1,35 @@
 package com.example.emrtdapplication
 
-import com.example.emrtdapplication.constants.ADDITIONAL_ENCRYPTION_LENGTH
-import com.example.emrtdapplication.constants.APDUConstants
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.LONG_EF_ID
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.TLV_LENGTH_INDEX
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.FILE_UNABLE_TO_READ
-import com.example.emrtdapplication.constants.FILE_UNABLE_TO_SELECT
-import com.example.emrtdapplication.constants.MAXIMUM_EF_FILE_SIZE
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
 import com.example.emrtdapplication.constants.NfcP1Byte
 import com.example.emrtdapplication.constants.NfcP2Byte
-import com.example.emrtdapplication.constants.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.READ_LARGE_OFFSET
 import com.example.emrtdapplication.lds1.EfSod
 import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
+import com.example.emrtdapplication.utils.LE_MAX
 import com.example.emrtdapplication.utils.TLV
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.security.Provider
+
+/**
+ * First byte of the long identifier for EFs
+ */
+const val LONG_EF_ID : Byte = 0x01
+
+/**
+ * Modulo value for UByte conversion
+ */
+const val U_BYTE_MODULO = 256
+
+/**
+ * Modulo value for Byte conversion
+ */
+const val BYTE_MODULO = 128
+
+const val TLV_LENGTH_INDEX = 1
 
 /**
  * Abstract class representing elementary files (EFs)
@@ -58,13 +65,15 @@ abstract class ElementaryFileTemplate {
      * - [FILE_UNABLE_TO_READ] if the file could not be read from the ePassport
      * - [SUCCESS] if the whole file was successfully read from the ePassport
      */
-    fun read() : Int {
+    fun read(): Int {
         var info = APDUControl.sendAPDU(
             APDU(
-            NfcClassByte.ZERO,
-            NfcInsByte.SELECT,
-            NfcP1Byte.SELECT_EF,
-            NfcP2Byte.SELECT_FILE, byteArrayOf(longEFIdentifier, shortEFIdentifier))
+                NfcClassByte.ZERO,
+                NfcInsByte.SELECT,
+                NfcP1Byte.SELECT_EF,
+                NfcP2Byte.SELECT_FILE,
+                byteArrayOf(longEFIdentifier, shortEFIdentifier)
+            )
         )
         if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_SELECT
@@ -73,11 +82,12 @@ abstract class ElementaryFileTemplate {
         //Extract the length of the EF file
         info = APDUControl.sendAPDU(
             APDU(
-            NfcClassByte.ZERO,
-            NfcInsByte.READ_BINARY,
-            NfcP1Byte.ZERO,
-            NfcP2Byte.ZERO, 0
-        )
+                NfcClassByte.ZERO,
+                NfcInsByte.READ_BINARY,
+                NfcP1Byte.ZERO,
+                NfcP2Byte.ZERO,
+                0
+            )
         )
         if (!APDUControl.checkResponse(info)) {
             return FILE_UNABLE_TO_READ
@@ -117,7 +127,7 @@ abstract class ElementaryFileTemplate {
                 }
             }
             rawFileContent = tmp
-        } else if (le >= APDUConstants.LE_MAX - ADDITIONAL_ENCRYPTION_LENGTH) {
+        } else if (le >= LE_MAX - ADDITIONAL_ENCRYPTION_LENGTH) {
             info = APDUControl.sendAPDU(
                 APDU(
                     NfcClassByte.ZERO,
@@ -144,7 +154,7 @@ abstract class ElementaryFileTemplate {
      * @param fileSize The size of the EF file
      * @return The file content read from the specified offset or null, if an error occurred
      */
-    private fun readSmallOffset(offset: Int, fileSize: Int) : ByteArray? {
+    private fun readSmallOffset(offset: Int, fileSize: Int): ByteArray? {
         val p1 = (offset / U_BYTE_MODULO).toByte()
         val p2 = (offset % U_BYTE_MODULO).toByte()
         val readBytes = if (offset + APDUControl.maxResponseLength > MAXIMUM_EF_FILE_SIZE) {
@@ -174,9 +184,10 @@ abstract class ElementaryFileTemplate {
      *
      * @param offset The offset from which to read from the EF file
      * @param fileSize The file size of the EF file
-     * @return The read file content starting from the specified offset or null, if an error occurred
+     * @return The read file content starting from the
+     * specified offset or null, if an error occurred
      */
-    private fun readLargeOffset(offset: Int, fileSize: Int) : ByteArray? {
+    private fun readLargeOffset(offset: Int, fileSize: Int): ByteArray? {
         val readBytes = if (offset + APDUControl.maxResponseLength > fileSize) {
             fileSize - offset
         } else {
@@ -206,7 +217,7 @@ abstract class ElementaryFileTemplate {
      * @return The hash of the file content
      * @throws NoSuchAlgorithmException if the hash algorithm is not supported by any [Provider]
      */
-    fun hash(hashName : String) : ByteArray? {
+    fun hash(hashName: String): ByteArray? {
         if (rawFileContent == null) {
             return null
         }
@@ -214,7 +225,7 @@ abstract class ElementaryFileTemplate {
             val md = MessageDigest.getInstance(hashName)
             md.update(rawFileContent!!)
             return md.digest()
-        } catch (_ : Exception) {
+        } catch (_: Exception) {
             return null
         }
     }
@@ -223,5 +234,5 @@ abstract class ElementaryFileTemplate {
      * Parses the file content according to the ICAO specification
      * @return [SUCCESS] if the file content was successfully parsed, otherwise [FAILURE]
      */
-    abstract fun parse() : Int
+    abstract fun parse(): Int
 }

@@ -1,9 +1,9 @@
 package com.example.emrtdapplication.utils
 
-import com.example.emrtdapplication.constants.BYTE_BIT_SIZE
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.BYTE_MODULO
-import com.example.emrtdapplication.constants.ElementaryFileTemplateConstants.U_BYTE_MODULO
-import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.BYTE_BIT_SIZE
+import com.example.emrtdapplication.BYTE_MODULO
+import com.example.emrtdapplication.U_BYTE_MODULO
+import com.example.emrtdapplication.constants.TlvTags.CONSTRUCT_BIT
 import com.example.emrtdapplication.constants.TlvTags.LENGTH_MULTIPLE_BYTES
 import com.example.emrtdapplication.constants.TlvTags.TAG_MULTIPLE_BYTES
 import kotlin.experimental.and
@@ -121,7 +121,7 @@ class TLV {
      * @return If the TLV structure is a construct
      */
     fun isConstruct(): Boolean {
-        return tag.isEmpty() || (tag[0] and TlvTags.CONSTRUCT_BIT) == TlvTags.CONSTRUCT_BIT
+        return tag.isEmpty() || (tag[0] and CONSTRUCT_BIT) == CONSTRUCT_BIT
     }
 
     /**
@@ -179,7 +179,7 @@ class TLV {
             return ba.size
         }
         if (ba[offset] < 0) {
-            val i = ba[offset]+BYTE_MODULO
+            val i = ba[offset] + BYTE_MODULO
             if (offset+i >= ba.size) {
                 isValid = false
                 return ba.size
@@ -215,7 +215,7 @@ class TLV {
             }
             ba[0] = ba[0] or i.toByte()
             for (j in i-1 downTo 0) {
-                ba += length.ushr(j* BYTE_BIT_SIZE).toByte()
+                ba += length.ushr(j * BYTE_BIT_SIZE).toByte()
             }
             return ba
         }

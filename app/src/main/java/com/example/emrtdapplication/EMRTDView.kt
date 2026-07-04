@@ -8,13 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
-import com.example.emrtdapplication.constants.EMRTDViewConstants.ACTION_BAR_TITLE_STRING
-import com.example.emrtdapplication.constants.EMRTDViewConstants.BIOMETRICS_FRAGMENT_ID
-import com.example.emrtdapplication.constants.EMRTDViewConstants.CURRENT_FRAGMENT_STRING
-import com.example.emrtdapplication.constants.EMRTDViewConstants.LDS1_FRAGMENT_ID
-import com.example.emrtdapplication.constants.EMRTDViewConstants.SETTINGS_FRAGMENT_ID
-import com.example.emrtdapplication.constants.EMRTDViewConstants.TRAVEL_RECORDS_FRAGMENT_ID
-import com.example.emrtdapplication.constants.EMRTDViewConstants.VISA_RECORDS_FRAGMENT_ID
 import com.example.emrtdapplication.fragments.AdditionalBiometricsFragment
 import com.example.emrtdapplication.fragments.LDS1Fragment
 import com.example.emrtdapplication.fragments.SettingsFragment
@@ -22,22 +15,33 @@ import com.example.emrtdapplication.fragments.TravelRecordsFragment
 import com.example.emrtdapplication.fragments.VisaRecordFragment
 import com.google.android.material.navigation.NavigationView
 
+const val LDS1_FRAGMENT_ID = 0
+const val TRAVEL_RECORDS_FRAGMENT_ID = 1
+const val VISA_RECORDS_FRAGMENT_ID = 2
+const val BIOMETRICS_FRAGMENT_ID = 3
+const val SETTINGS_FRAGMENT_ID = 4
+const val CURRENT_FRAGMENT_STRING = "currentFragment"
+const val ACTION_BAR_TITLE_STRING = "actionBarTitle"
+
 /**
  * Activity for navigating and displaying information read from the eMRTD
  *
  * @property actionBarDrawerToggle Listener for [drawerLayout]
  * @property drawerLayout Layout for navigating between different LDS application
  */
-class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private var actionBarDrawerToggle : ActionBarDrawerToggle? = null
-    private var drawerLayout : DrawerLayout? = null
-    private var currentFragment : Int = 0
+class EMRTDView: AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+    private var actionBarDrawerToggle: ActionBarDrawerToggle? = null
+    private var drawerLayout: DrawerLayout? = null
+    private var currentFragment: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.emrtd_view)
         if (savedInstanceState != null) {
-            currentFragment = savedInstanceState.getInt(CURRENT_FRAGMENT_STRING, 0)
+            currentFragment = savedInstanceState.getInt(
+                CURRENT_FRAGMENT_STRING,
+                0
+            )
             val title = savedInstanceState.getCharSequence(ACTION_BAR_TITLE_STRING)
             if (title != null) {
                 supportActionBar?.title = title
@@ -52,7 +56,9 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
 
         drawerLayout = findViewById(R.id.drawerLayout)
         actionBarDrawerToggle = ActionBarDrawerToggle(
-            this, drawerLayout, R.string.open,R.string.close
+            this, drawerLayout,
+            R.string.open,
+            R.string.close
         )
 
         drawerLayout!!.addDrawerListener(actionBarDrawerToggle!!)
@@ -67,8 +73,10 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
             else -> LDS1Fragment()
         }
         findViewById<NavigationView>(R.id.nvView).setNavigationItemSelectedListener(this)
-        supportFragmentManager.commit { setReorderingAllowed(true)
-                                        replace(R.id.nav_host_fragment, fragment)}
+        supportFragmentManager.commit {
+            setReorderingAllowed(true)
+            replace(R.id.nav_host_fragment, fragment)
+        }
 
         onBackPressedDispatcher.addCallback(this) {
             EMRTD.reset()
@@ -83,7 +91,7 @@ class EMRTDView : AppCompatActivity(), NavigationView.OnNavigationItemSelectedLi
     }
 
     override fun onNavigationItemSelected(p0: MenuItem): Boolean {
-        var fragment : Fragment? = null
+        var fragment: Fragment? = null
         when (p0.itemId) {
             R.id.nav_lds1 -> {
                 currentFragment = LDS1_FRAGMENT_ID

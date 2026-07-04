@@ -1,8 +1,8 @@
 package com.example.emrtdapplication.lds1
 
 import com.example.emrtdapplication.ElementaryFileTemplate
-import com.example.emrtdapplication.constants.FAILURE
-import com.example.emrtdapplication.constants.SUCCESS
+import com.example.emrtdapplication.FAILURE
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG13_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG13_SHORT_EF_ID
 
@@ -15,7 +15,7 @@ import com.example.emrtdapplication.constants.TlvTags.DG13_SHORT_EF_ID
  * @property efTag The tag of the DG13 file
  *
  */
-class DG13 : ElementaryFileTemplate() {
+class DG13: ElementaryFileTemplate() {
     override var rawFileContent: ByteArray? = null
     override val shortEFIdentifier = DG13_SHORT_EF_ID
     override val efTag = DG13_FILE_TAG
@@ -23,7 +23,8 @@ class DG13 : ElementaryFileTemplate() {
     /**
      * Parses the contents of [rawFileContent]
      *
-     * @return [SUCCESS] if the contents were successfully decoded, otherwise [FAILURE]
+     * @return [SUCCESS] if the contents were
+     * successfully decoded, otherwise [FAILURE]
      */
     override fun parse(): Int {
         isParsed = false

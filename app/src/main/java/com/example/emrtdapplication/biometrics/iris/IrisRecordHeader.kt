@@ -11,6 +11,9 @@ import java.io.ByteArrayInputStream
  * @property irisHeader Decoded iris record header
  * @throws java.io.IOException If [irisRecordHeader] could not be decoded
  */
-class IrisRecordHeader(irisRecordHeader : ByteArray) : BiometricHeader(BiometricType.IRIS) {
-    val irisHeader : IrisInfo = IrisInfo(ByteArrayInputStream(irisRecordHeader))
+class IrisRecordHeader(
+    irisRecordHeader: ByteArray
+): BiometricHeader(BiometricType.IRIS) {
+    val irisHeader: IrisInfo =
+        IrisInfo(ByteArrayInputStream(irisRecordHeader))
 }
