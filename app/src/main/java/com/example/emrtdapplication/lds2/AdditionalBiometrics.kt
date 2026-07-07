@@ -14,22 +14,6 @@ import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
-
-/**
- * International application identifier for the LDS2 Additional Biometric application
- */
-const val ADDITIONAL_BIOMETRICS_APPLICATION_ID = "A0000002472003"
-
-/**
- * First half of the identifier for a biometric file in the Additional Biometric application
- */
-const val BIOMETRIC_FILE_ID: Byte = 0x02
-
-/**
- * Maximum number of biometric files in the Additional Biometrics application
- */
-const val MAX_BIOMETRIC_FILES = 0x40
-
 /**
  * Class representing the Additional Biometrics application
  *

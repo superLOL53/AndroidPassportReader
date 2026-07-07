@@ -2,7 +2,6 @@ package com.example.emrtdapplication.lds1
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import com.example.emrtdapplication.DG12_TAG_SIZE_2_FIRST_BYTE
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.FILLER_CHARACTER
@@ -19,7 +18,6 @@ import com.example.emrtdapplication.constants.TlvTags.PERSON_TAG_TEMPLATE
 import com.example.emrtdapplication.constants.TlvTags.REAR_IMAGE
 import com.example.emrtdapplication.constants.TlvTags.TAX_EXIT_REQUIREMENTS
 import com.example.emrtdapplication.utils.TLV
-
 
 /**
  * Implements the DG12 file and inherits from [ElementaryFileTemplate]

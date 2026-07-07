@@ -7,24 +7,6 @@ import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.x509.Certificate
 
 /**
- * TLV record size of a certificate record
- */
-const val CERTIFICATE_RECORD_SIZE = 2
-
-/**
- * Minimum length for the certificate serial number
- */
-const val MIN_CERTIFICATE_SERIAL_NUMBER_LENGTH = 3
-
-const val CERTIFICATE_SERIAL_NUMBER_TAG_SIZE = 2
-const val INVALID_CERTIFICATE_RECORD_SIZE = "Certificate record size must be ${CERTIFICATE_RECORD_SIZE}!"
-const val INVALID_CERTIFICATE_SERIAL_NUMBER_TAG = "Invalid tag for certificate serial number"
-const val EMPTY_CERTIFICATE_SERIAL_NUMBER = "Empty certificate serial number!"
-const val INVALID_CERTIFICATE_SERIAL_NUMBER = "Content of certificate serial number is too short!"
-const val INVALID_X509_TAG = "Invalid tag for X.509 certificate"
-const val UNABLE_TO_DECODE_CERTIFICATE = "Unable to decode certificate!"
-
-/**
  * Represents a single certificate record. The format is as follows:
  *
  *          Tag     Length  Value

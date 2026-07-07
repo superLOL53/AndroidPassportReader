@@ -5,13 +5,8 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
-import com.example.emrtdapplication.ADDRESS
 import com.example.emrtdapplication.CreateView
-import com.example.emrtdapplication.DATE_RECORDED
-import com.example.emrtdapplication.EMERGENCY_CONTACT
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.NAME
-import com.example.emrtdapplication.TELEPHONE
 import com.example.emrtdapplication.utils.Person
 
 object DG16Display: CreateView() {

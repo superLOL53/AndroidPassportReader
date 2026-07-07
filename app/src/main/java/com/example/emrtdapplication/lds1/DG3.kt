@@ -5,7 +5,6 @@ import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.SUCCESS
-import com.example.emrtdapplication.UNABLE_TO_DECODE_FINGERPRINT_DATA
 import com.example.emrtdapplication.biometrics.BiometricInformationGroupTemplate
 import com.example.emrtdapplication.biometrics.BiometricType
 import com.example.emrtdapplication.constants.TlvTags.DG3_FILE_TAG

@@ -2,33 +2,9 @@ package com.example.emrtdapplication.display.lds2.records
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.CERTIFICATE_REFERENCE
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.MRZ_STRING
 import com.example.emrtdapplication.lds2.VisaRecord
-
-const val VISA_RECORD = "Visa Record "
-const val EXPIRATION_DATE = "Expiration Date"
-const val NATIONALITY = "Nationality"
-const val STATE = "State"
-const val DOCUMENT_NUMBER = "Document Number"
-const val HOLDER_NAME = "Holder Name"
-const val BIRTH_DATE = "Date of Birth"
-const val FIRST_NAME = "First Name"
-const val SURNAME = "Surname"
-const val ISSUE_DATE = "Date of Issue"
-const val ISSUE_PLACE = "Place of Issue"
-const val DOCUMENT_TYPE = "Document Type"
-const val SEX = "Sex"
-const val VISA_TYPE_A = "Visa Type A"
-const val VISA_TYPE_B = "Visa Type B"
-const val NUMBER_OF_ENTRIES = "Number of Entries"
-const val STAY_DURATION = "Stay Duration"
-const val PASSPORT_NUMBER = "Passport number"
-const val VISA_TYPE = "Visa Type"
-const val TERRITORY_INFORMATION = "Territory Information"
-const val ADDITIONAL_INFORMATION = "Additional Information"
-const val BIOMETRIC_REFERENCE = "Biometric Reference"
 
 class VisaRecordDisplay(private val visaRecord: VisaRecord): CreateView() {
 

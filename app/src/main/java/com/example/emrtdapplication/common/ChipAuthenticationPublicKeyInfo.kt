@@ -7,10 +7,6 @@ import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import java.math.BigInteger
 
-const val ILLEGAL_REQUIRED_DATA_CHIP_AUTHENTICATION_PUBLIC_KEY =
-    "Required data does not contain a SubjectPublicKeyInfo for ChipAuthenticationPublicKeyInfo!"
-const val INVALID_KEY_ID =
-    "Invalid key identifier for ChipAuthenticationPublicKeyInfo!"
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationPublicKeyInfo:
  *

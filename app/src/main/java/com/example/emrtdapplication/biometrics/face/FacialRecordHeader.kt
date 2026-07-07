@@ -4,17 +4,6 @@ import com.example.emrtdapplication.BYTE_BIT_SIZE
 import com.example.emrtdapplication.biometrics.BiometricHeader
 import com.example.emrtdapplication.biometrics.BiometricType
 
-const val FACIAL_RECORD_HEADER_SIZE = 14
-const val FORMAT_IDENTIFIER_SIZE = 4
-const val VERSION_NUMBER_SIZE = 4
-const val RECORD_LENGTH_INDEX_1 = 8
-const val RECORD_LENGTH_INDEX_2 = 9
-const val RECORD_LENGTH_INDEX_3 = 10
-const val RECORD_LENGTH_INDEX_4 = 11
-const val NUMBER_OF_FACES_INDEX_1 = 12
-const val NUMBER_OF_FACES_INDEX_2 = 13
-const val INVALID_FACIAL_RECORD_HEADER_SIZE_STRING = "Facial Record Header must have size ${FACIAL_RECORD_HEADER_SIZE}!"
-
 /**
  * Class representing a header of a facial Biometric Data Block according to ISO/IEC 19794-5.
  * @param recordHeader Byte array containing an encoded facial record header

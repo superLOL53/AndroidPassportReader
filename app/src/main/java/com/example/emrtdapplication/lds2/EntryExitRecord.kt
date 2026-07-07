@@ -22,22 +22,6 @@ import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.x509.Certificate
 
-const val TRAVEL_RECORD_SIZE = 4
-const val INVALID_RECORD_SIZE = "Record sequence must be of size $TRAVEL_RECORD_SIZE!"
-const val INVALID_SIGNED_INFO_TAG = "Invalid tag for signed info in an Entry/Exit Record!"
-const val INVALID_TAG = "Invalid tag in an Entry/Exit Record!"
-const val TRAVEL_MODE_AIR_BYTE = 'A'.code.toByte()
-const val TRAVEL_MODE_SEA_BYTE = 'S'.code.toByte()
-const val TRAVEL_MODE_LAND_BYTE = 'L'.code.toByte()
-const val UNSPECIFIED_CERTIFICATE_REFERENCE = "Unspecified certificate reference in Entry/Exit Record!"
-const val UNSPECIFIED_SIGNATURE = "Unspecified signature in Entry/Exit Record!"
-const val UNSPECIFIED_INSPECTOR_REFERENCE = "Unspecified inspector reference in Entry/Exit Record!"
-const val UNSPECIFIED_INSPECTION_LOCATION = "Unspecified inspection location in Entry/Exit Record!"
-const val UNSPECIFIED_INSPECTION_AUTHORITY = "Unspecified inspection authority in Entry/Exit Record!"
-const val UNSPECIFIED_DATE = "Unspecified date in Entry/Exit Record!"
-const val UNSPECIFIED_STATE_ENTRIES = "State entries are not present or mismatch!"
-const val UNSPECIFIED_SIGNED_INFORMATION = "No signed information in the record!"
-
 /**
  * Class representing an Entry or Exit Record. Both have the same format:
  *

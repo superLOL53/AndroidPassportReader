@@ -3,8 +3,6 @@ package com.example.emrtdapplication.common
 import com.example.emrtdapplication.FILE_SUCCESSFUL_READ
 import com.example.emrtdapplication.FILE_UNABLE_TO_READ
 import com.example.emrtdapplication.FILE_UNABLE_TO_SELECT
-import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE
-import com.example.emrtdapplication.PACE_INFO_TYPE_SIZE
 import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.NfcInsByte
@@ -14,10 +12,6 @@ import com.example.emrtdapplication.utils.APDU
 import com.example.emrtdapplication.utils.APDUControl
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.ASN1ObjectIdentifier
-
-const val CARD_ACCESS_ID_1: Byte = 0x01
-const val CARD_ACCESS_ID_2: Byte = 0x1C
-const val UNKNOWN_SECURITY_INFO = "Unknown Security Info in EF.CardAccess!"
 
 /**
  * Implements the EF.CardAccess file. This file is required if PACE is implemented.

@@ -7,7 +7,6 @@ import com.example.emrtdapplication.constants.TlvTags.DG6_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG6_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
 
-
 /**
  * Implements the DG2 file and inherits from [ElementaryFileTemplate]
  *

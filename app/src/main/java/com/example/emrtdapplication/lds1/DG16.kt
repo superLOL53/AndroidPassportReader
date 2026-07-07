@@ -16,7 +16,6 @@ import com.example.emrtdapplication.utils.Person
 import com.example.emrtdapplication.utils.TLV
 import kotlin.experimental.and
 
-
 /**
  * Implements the DG16 file
  *

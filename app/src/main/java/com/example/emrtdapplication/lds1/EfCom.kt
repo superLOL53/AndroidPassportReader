@@ -11,22 +11,6 @@ import com.example.emrtdapplication.constants.TlvTags.VERSION
 import com.example.emrtdapplication.utils.TLV
 
 /**
- * Byte length for value in a TLV holding LDS version information
- */
-const val LDS_VERSION_LENGTH = 0x04
-
-/**
- * Byte length for value in a TLV holding Unicode version information
- */
-const val UNICODE_VERSION_LENGTH = 0x06
-
-const val EF_COM_TAG: Byte = 0x60
-const val EF_COM_SHORT_ID: Byte = 0x1E
-const val VERSION_TAG_SIZE = 2
-const val VERSION_COMPUTATION_DIFFERENCE = 48
-const val VERSION_COMPUTATION_MULTIPLIER = 10
-
-/**
  * Implements the EF.COM file
  *
  * @property ldsVersion

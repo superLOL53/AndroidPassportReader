@@ -2,12 +2,10 @@ package com.example.emrtdapplication.lds1
 
 import android.util.Log
 import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
-import com.example.emrtdapplication.CRL_DISTRIBUTION_POINT_OID
 import com.example.emrtdapplication.CertificationRevocationStatus
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.SUCCESS
-import com.example.emrtdapplication.X509
 import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.MasterList
 import com.example.emrtdapplication.utils.TLV
@@ -33,17 +31,6 @@ import java.security.cert.CertificateFactory
 import java.security.cert.X509CRL
 import java.util.Date
 import kotlin.time.Clock
-
-const val EF_SOD_TAG: Byte = 77
-const val EF_SOD_SHORT_EF_ID: Byte = 0x1D
-const val ORIGINAL_HASH_OID = "1.2.840.113549.1.9.4"
-const val SIGNING_TIME_OID = "1.2.840.113549.1.9.5"
-const val CONTENT_TYPE_OID = "1.2.840.113549.1.9.3"
-const val CONTENT_TYPE_ID = "2.23.136.1.1.1"
-const val UNABLE_TO_CHECK_CRL = "Unable to check CRL list!"
-const val HTTP = "http"
-const val HTTP_COLUMN = "http:"
-const val HTTPS_COLUMN = "https:"
 
 /**
  * Implements the EF.SOD file and performs passive authentication against provided CSCAs

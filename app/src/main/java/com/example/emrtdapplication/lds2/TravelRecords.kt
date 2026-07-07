@@ -1,44 +1,9 @@
 package com.example.emrtdapplication.lds2
 
 import com.example.emrtdapplication.ReadPassport
-import com.example.emrtdapplication.constants.TlvTags
+import com.example.emrtdapplication.constants.TlvTags.DO51
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
-
-/**
- * Travel Records application identifier
- */
-const val APPLICATION_ID = "A0000002472001"
-
-/**
- * First byte of the file identifier for Entry Records
- */
-const val ENTRY_RECORDS_ID_1: Byte = 0x01
-
-/**
- * Second byte of the file identifier for Entry Records
- */
-const val ENTRY_RECORDS_ID_2: Byte = 0x01
-
-/**
- * First byte of the file identifier for Exit Records
- */
-const val EXIT_RECORDS_ID_1: Byte = 0x01
-
-/**
- * Second byte of the file identifier for Exit Records
- */
-const val EXIT_RECORDS_ID_2: Byte = 0x02
-
-/**
- * First byte of the file identifier for Certificate Records
- */
-const val CERTIFICATE_RECORDS_ID_1: Byte = 0x01
-
-/**
- * Second byte of the file identifier for Certificate Records
- */
-const val CERTIFICATE_RECORDS_ID_2: Byte = 0x01A
 
 /**
  * Class representing the Travel Records application
@@ -76,7 +41,7 @@ class TravelRecords: LDS2Application() {
     private fun readEntryRecords() {
         val numberOfEntryRecords = readNumberOfRecords(
             TLV(
-                TlvTags.DO51,
+                DO51,
                 byteArrayOf(ENTRY_RECORDS_ID_1, ENTRY_RECORDS_ID_2)
             )
         )
@@ -99,7 +64,7 @@ class TravelRecords: LDS2Application() {
     private fun readExitRecords() {
         val numberOfEntryRecords = readNumberOfRecords(
             TLV(
-                TlvTags.DO51,
+                DO51,
                 byteArrayOf(EXIT_RECORDS_ID_1, EXIT_RECORDS_ID_2)
             )
         )

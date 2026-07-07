@@ -1,0 +1,102 @@
+package com.example.emrtdapplication.biometrics.face
+
+const val RESERVED_STRING = "Reserved"
+const val MALE_STRING = "Male"
+const val FEMALE_STRING = "Female"
+const val SMILE_STRING = "Smile"
+const val CLOSED_SMILE_STRING = "Smile (closed mouth)"
+const val RAISED_EYEBROWS_STRING = "Raised eyebrows"
+const val EYES_LOOKING_AWAY_STRING = "Eyes looking away from camera"
+const val SQUINTING_STRING = "Squinting"
+const val FROWNING_STRING = "Frowning"
+const val GREEN_STRING = "Green"
+const val BLUE_STRING = "Blue"
+const val NEUTRAL_STRING = "Neutral"
+const val PINK_STRING = "Pink"
+const val MULTI_COLOURED_STRING = "Multi-Coloured"
+const val RED_STRING = "Red"
+const val WHITE_STRING = "White"
+const val GRAY_STRING = "Gray"
+const val BROWN_STRING = "Brown"
+const val BLONDE_STRING = "Blonde"
+const val BLACK_STRING = "Black"
+const val BALD_STRING = "Bald"
+const val FACIAL_INFORMATION_SIZE = 20
+const val FACIAL_INFORMATION_SIZE_STRING = "Size of Facial Information must be ${FACIAL_INFORMATION_SIZE}!"
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1 = 0
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2 = 1
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3 = 2
+const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4 = 3
+const val FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1 = 4
+const val FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2 = 5
+const val FACIAL_INFORMATION_GENDER_INDEX = 6
+const val FACIAL_INFORMATION_EYE_COLOR_INDEX = 7
+const val FACIAL_INFORMATION_HAIR_COLOR_INDEX = 8
+const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_1 = 9
+const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_2 = 10
+const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_3 = 11
+const val FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE = 12
+const val FACIAL_INFORMATION_EXPRESSION_LOW_BYTE = 13
+const val FACIAL_INFORMATION_POSE_ANGLE_START_INDEX = 14
+const val FACIAL_INFORMATION_POSE_ANGLE_END_INDEX = 16
+const val FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX = 17
+const val FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX = 19
+const val FACIAL_RECORD_HEADER_SIZE = 14
+const val FORMAT_IDENTIFIER_SIZE = 4
+const val VERSION_NUMBER_SIZE = 4
+const val RECORD_LENGTH_INDEX_1 = 8
+const val RECORD_LENGTH_INDEX_2 = 9
+const val RECORD_LENGTH_INDEX_3 = 10
+const val RECORD_LENGTH_INDEX_4 = 11
+const val NUMBER_OF_FACES_INDEX_1 = 12
+const val NUMBER_OF_FACES_INDEX_2 = 13
+const val INVALID_FACIAL_RECORD_HEADER_SIZE_STRING = "Facial Record Header must have size ${FACIAL_RECORD_HEADER_SIZE}!"
+const val FEATURE_POINT_TYPE: Byte = 1
+const val FEATURE_POINT_TYPE_INDEX = 0
+const val FEATURE_POINT_POINT_INDEX = 1
+const val FEATURE_POINT_HORIZONTAL_POSITION_INDEX_1 = 2
+const val FEATURE_POINT_HORIZONTAL_POSITION_INDEX_2 = 3
+const val FEATURE_POINT_VERTICAL_POSITION_INDEX_1 = 4
+const val FEATURE_POINT_VERTICAL_POSITION_INDEX_2 = 5
+
+const val IMAGE_INFORMATION_SIZE = 12
+const val IMAGE_INFORMATION_IMAGE_TYPE_INDEX = 0
+const val IMAGE_INFORMATION_IMAGE_DATA_TYPE_INDEX = 1
+const val IMAGE_INFORMATION_WIDTH_INDEX_1 = 2
+const val IMAGE_INFORMATION_WIDTH_INDEX_2 = 3
+const val IMAGE_INFORMATION_HEIGHT_INDEX_1 = 4
+const val IMAGE_INFORMATION_HEIGHT_INDEX_2 = 5
+const val IMAGE_INFORMATION_COLOR_SPACE_INDEX_6 = 6
+const val IMAGE_INFORMATION_SOURCE_TYPE_INDEX = 7
+const val IMAGE_INFORMATION_DEVICE_TYPE_INDEX_1 = 8
+const val IMAGE_INFORMATION_DEVICE_TYPE_INDEX_2 = 9
+const val IMAGE_INFORMATION_QUALITY_INDEX_1 = 10
+const val IMAGE_INFORMATION_QUALITY_INDEX_2 = 11
+const val INVALID_IMAGE_INFORMATION_SIZE_STRING = "Image Information must be of size ${IMAGE_INFORMATION_SIZE}!"
+const val PHOTOGRAPH_UNKNOWN_SOURCE = "Static photograph from an unknown source"
+const val PHOTOGRAPH_DIGITAL_CAMERA = "Static photograph from a digital still-image camera"
+const val PHOTOGRAPH_SCANNER = "Static photograph from a scanner"
+const val VIDEO_FRAME_UNKNOWN_SOURCE = "Single video frame from an unknown source"
+const val VIDEO_FRAME_ANALOGUE_CAMERA = "Single video frame from an analogue video camera"
+const val VIDEO_FRAME_DIGITAL_CAMERA = "Single video frame from a digital video camera"
+const val UNSPECIFIED_STRING = "Unspecified"
+const val VENDOR_SPECIFIC_STRING = "Vendor Specific"
+const val BASIC_STRING = "Basic"
+
+const val FULL_FRONTAL_STRING = "Full Frontal"
+
+const val TOKEN_FRONTAL_STRING = "Token Frontal"
+
+const val OTHER_STRING = "Other"
+
+const val JPEG_STRING = "JPEG"
+
+const val JPEG_2000_STRING = "JPEG2000"
+
+const val RGB_24_BIT_STRING = "24-bit RGB"
+
+const val YUV_422_STRING = "YUV422"
+
+const val GREYSCALE_8_BIT_STRING = "8-bit Greyscale"
+
+const val FEATURE_POINT_SIZE = 8

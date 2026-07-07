@@ -6,10 +6,6 @@ import android.widget.LinearLayout
 import android.widget.TableLayout
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.EXPRESSION
-import com.example.emrtdapplication.EYE_COLOR
-import com.example.emrtdapplication.GENDER
-import com.example.emrtdapplication.HAIR_COLOR
 import com.example.emrtdapplication.R
 import com.example.emrtdapplication.biometrics.face.FacialRecordData
 

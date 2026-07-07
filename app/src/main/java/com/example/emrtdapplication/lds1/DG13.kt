@@ -6,7 +6,6 @@ import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.constants.TlvTags.DG13_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG13_SHORT_EF_ID
 
-
 /**
  * Implements the DG13 file
  *

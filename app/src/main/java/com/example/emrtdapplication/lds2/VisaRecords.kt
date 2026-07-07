@@ -6,21 +6,6 @@ import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
 /**
- * Visa Records application identifier
- */
-const val VISA_RECORD_APPLICATION_ID = "A0000002472002"
-
-/**
- * First byte of the Visa Record file identifier
- */
-const val VISA_RECORD_ID_1: Byte = 0x01
-
-/**
- * Second byte of the Visa Record file identifier
- */
-const val VISA_RECORD_ID_2: Byte = 0x03
-
-/**
  * Class representing the Visa Records application
  *
  * @property applicationIdentifier The identifier of the application

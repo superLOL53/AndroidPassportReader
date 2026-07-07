@@ -5,20 +5,9 @@ import android.view.Gravity
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TableRow
-import com.example.emrtdapplication.ADDRESS
-import com.example.emrtdapplication.BIRTH_PLACE
-import com.example.emrtdapplication.CUSTODY_INFORMATION
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.FULL_NAME
-import com.example.emrtdapplication.OTHER_NAME
-import com.example.emrtdapplication.OTHER_TD_NUMBERS
-import com.example.emrtdapplication.PERSONAL_NUMBER
-import com.example.emrtdapplication.PROFESSION
 import com.example.emrtdapplication.R
-import com.example.emrtdapplication.SUMMARY
-import com.example.emrtdapplication.TELEPHONE
-import com.example.emrtdapplication.TITLE
 import com.example.emrtdapplication.display.lds2.records.BIRTH_DATE
 
 object DG11Display: CreateView() {

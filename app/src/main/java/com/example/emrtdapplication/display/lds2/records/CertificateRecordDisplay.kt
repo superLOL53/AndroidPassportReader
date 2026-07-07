@@ -2,7 +2,6 @@ package com.example.emrtdapplication.display.lds2.records
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.CERTIFICATE_RECORD
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.display.utils.CertificateDisplay
 import com.example.emrtdapplication.lds2.CertificateRecord

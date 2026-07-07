@@ -77,7 +77,7 @@ object TlvTags {
     const val INSPECTION_RESULT: Byte = 0x4D
     const val CERTIFICATE_BODY: Byte = 0x4E
     const val CONDITIONS: Byte = 0x4E
-    const val INTERNATIONAL_AID:Byte = 0x4F
+    const val INTERNATIONAL_AID: Byte = 0x4F
     const val PERSON_TAG_DATE: Byte = 0x50
     const val DO51: Byte = 0x51
     const val PERSON_TAG_NAME: Byte = 0x51

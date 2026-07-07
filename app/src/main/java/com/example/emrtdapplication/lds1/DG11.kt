@@ -7,9 +7,7 @@ import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.FILLER_CHARACTER
-import com.example.emrtdapplication.NAMES_MIN_SEQUENCE
 import com.example.emrtdapplication.SUCCESS
-import com.example.emrtdapplication.UNABLE_TO_DECODE_IMAGE
 import com.example.emrtdapplication.constants.TlvTags.BIRTHDATE
 import com.example.emrtdapplication.constants.TlvTags.BIRTH_PLACE
 import com.example.emrtdapplication.constants.TlvTags.CUSTODY_INFORMATION
@@ -27,7 +25,6 @@ import com.example.emrtdapplication.constants.TlvTags.PROFESSION
 import com.example.emrtdapplication.constants.TlvTags.TELEPHONE_NUMBER
 import com.example.emrtdapplication.constants.TlvTags.TITLE
 import com.example.emrtdapplication.utils.TLV
-
 
 /**
  * Implements the DG2 file

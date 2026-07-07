@@ -1,7 +1,6 @@
 package com.example.emrtdapplication.common
 
 import com.example.emrtdapplication.FAILURE
-import com.example.emrtdapplication.INVALID_ARGUMENT
 import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.ZERO_BYTE
 import com.example.emrtdapplication.constants.NfcClassByte
@@ -28,55 +27,6 @@ import org.spongycastle.crypto.params.ECPublicKeyParameters
 import java.math.BigInteger
 import java.security.SecureRandom
 import javax.crypto.Cipher
-/**
- * Error code for no password to initialize PACE
- */
-const val NO_PASSWORD = -1
-
-/**
- * Error code for when no PACE protocol OID is given/supported
- */
-const val NO_PACE_OID = -2
-
-/**
- * Error code indicating a failure in setting up PACE
- */
-const val INVALID_MSE_COMMAND = -3
-
-/**
- * Error code indicating a failure in retrieving a nonce from the eMRTD
- */
-const val INVALID_GENERAL_AUTHENTICATE = -4
-
-/**
- * Error code indicating a failure in extracting the nonce from the eMRTD
- */
-const val INVALID_NONCE = -5
-
-/**
- * Constant for generating positive BigInteger numbers
- */
-const val POSITIVE_NUMBER = 1
-
-const val TOKEN_DATA_TAG_1: Byte = 0x7F
-const val TOKEN_DATA_TAG_2: Byte = 0x49
-const val SEQUENCE_COUNTER_SIZE = 16
-const val IV_VECTOR_SIZE = 16
-const val CHIP_AUTHENTICATION_DATA_SEQUENCE_INDEX = 1
-const val PACE_MRZ_ID: Byte = 1
-const val PACE_CAN_ID: Byte = 2
-const val PACE_KEY_COMPUTATION_SEED: Byte = 3
-const val P_192 = "P-192"
-const val P_224 = "P-224"
-const val P_256 = "P-256"
-const val P_384 = "P-384"
-const val P_521 = "P-521"
-const val BP_P_192 = "brainpoolp192r1"
-const val BP_P_224 = "brainpoolp224r1"
-const val BP_P_256 = "brainpoolp256r1"
-const val BP_P_320 = "brainpoolp320r1"
-const val BP_P_384 = "brainpoolp384r1"
-const val BP_P_512 = "brainpoolp512r1"
 
 /**
  * Implements the PACE protocol.

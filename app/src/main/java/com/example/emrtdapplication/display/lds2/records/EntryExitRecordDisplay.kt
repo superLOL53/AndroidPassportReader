@@ -2,20 +2,8 @@ package com.example.emrtdapplication.display.lds2.records
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.CERTIFICATE_REFERENCE
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.lds2.EntryExitRecord
-
-const val CONDITIONS = "Conditions"
-const val TRAVEL_MODE = "Travel Mode"
-const val INSPECTION_RESULT = "Inspection Result"
-const val VISA_STATUS = "Visa Status"
-const val INSPECTION_REFERENCE = "Inspection Reference"
-const val INSPECTION_LOCATION = "Inspection Location"
-const val INSPECTION_AUTHORITY = "Inspection Authority"
-const val DATE = "Date"
-const val ENTRY_RECORD = "Entry Record "
-const val EXIT_RECORD = "Exit Record "
 
 class EntryExitRecordDisplay(
     private val entryExitRecord: EntryExitRecord,

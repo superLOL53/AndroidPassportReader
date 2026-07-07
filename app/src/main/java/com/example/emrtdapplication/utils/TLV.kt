@@ -8,6 +8,7 @@ import com.example.emrtdapplication.constants.TlvTags.LENGTH_MULTIPLE_BYTES
 import com.example.emrtdapplication.constants.TlvTags.TAG_MULTIPLE_BYTES
 import kotlin.experimental.and
 import kotlin.experimental.or
+
 /**
  * Class representing a Tag-Length-Value (TLV) structure
  * @property tag The tag of the TLV structure

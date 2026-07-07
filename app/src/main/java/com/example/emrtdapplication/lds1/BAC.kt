@@ -15,68 +15,6 @@ import javax.crypto.Cipher
 import kotlin.experimental.xor
 
 /**
- * Additional seed value for encryption key computation
- */
-const val ENCRYPTION_KEY_VALUE_C: Byte = 1
-
-/**
- * Additional seed value for MAC key computation
- */
-const val MAC_COMPUTATION_KEY_VALUE_C: Byte = 2
-
-/**
- * Successful execution of the BAC protocol
- */
-const val BAC_PROTOCOL_SUCCESS = 0
-
-/**
- * Error code for BAC protocol execution attempt without MRZ information
- */
-const val ERROR_UNINITIALIZED_MRZ_INFORMATION = -1
-
-/**
- * Error code for failure to request/get a nonce from the eMRTD
- */
-const val ERROR_NONCE_REQUEST_FAILED = -2
-
-/**
- * General error code for BAC protocol failure
- */
-const val ERROR_BAC_PROTOCOL_FAILED = -3
-
-/**
- * eMRTD returned invalid MAC during BAC protocol execution
- */
-const val ERROR_INVALID_MAC = -4
-
-/**
- * eMRTD returned invalid nonce during BAC protocol execution
- */
-const val ERROR_INVALID_NONCE = -5
-
-/**
- * No MRZ given for BAC protocol initialization
- */
-const val ERROR_NO_MRZ = -6
-
-const val RANDOM_NUMBER_BYTE_LENGTH = 8
-const val SEQUENCE_COUNTER_START_INDEX = 4
-const val SEQUENCE_COUNTER_END_INDEX = 7
-const val BAC_KEY_LENGTH = 16
-const val SESSION_SEED_SIZE = 16
-const val MAC_START_INDEX = 32
-const val MAC_END_INDEX = 39
-const val ENCRYPTED_DATA_END_INDEX = 31
-const val BAC_LAST_RESPONSE_APDU_SIZE = 40
-const val RANDOM_IC_END_INDEX = 15
-const val KEYING_MATERIAL_START_INDEX = 16
-const val KEYING_MATERIAL_END_INDEX = 31
-const val RANDOM_IFD_START_INDEX = 8
-const val RANDOM_IFD_END_INDEX = 15
-const val KEYING_MATERIAL_IFD_SIZE = 16
-const val CONCATENATION_SIZE = 32
-
-/**
  * Implements the Basic Access Control (BAC) protocol
  *
  * @property random Secure random number generator

@@ -15,23 +15,6 @@ import java.security.NoSuchAlgorithmException
 import java.security.Provider
 
 /**
- * First byte of the long identifier for EFs
- */
-const val LONG_EF_ID : Byte = 0x01
-
-/**
- * Modulo value for UByte conversion
- */
-const val U_BYTE_MODULO = 256
-
-/**
- * Modulo value for Byte conversion
- */
-const val BYTE_MODULO = 128
-
-const val TLV_LENGTH_INDEX = 1
-
-/**
  * Abstract class representing elementary files (EFs)
  *
  * @property rawFileContent Content of the EF if it is present in the ePassport, otherwise null

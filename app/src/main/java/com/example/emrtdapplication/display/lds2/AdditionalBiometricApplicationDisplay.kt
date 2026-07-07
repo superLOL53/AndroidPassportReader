@@ -8,6 +8,7 @@ import android.widget.TextView
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
+import com.example.emrtdapplication.display.lds2.records.BiometricFileDisplay
 import com.example.emrtdapplication.display.lds2.records.CertificateRecordDisplay
 
 object AdditionalBiometricApplicationDisplay: CreateView() {

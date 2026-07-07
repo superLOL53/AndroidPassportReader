@@ -6,8 +6,6 @@ import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
 import com.example.emrtdapplication.EF_DIR_OID
 import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.FILE_UNABLE_TO_SELECT
-import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_TYPE_SIZE
-import com.example.emrtdapplication.PACE_INFO_TYPE_SIZE
 import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.SecurityInfo
@@ -23,8 +21,6 @@ import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.ASN1ObjectIdentifier
 import org.spongycastle.asn1.cms.SignedData
 
-const val CARD_SECURITY_ID_1: Byte = 0x01
-const val CARD_SECURITY_ID_2: Byte = 0x1D
 /**
  * Implements the EF.CardSecurity file. Required if PACE with CAM,
  * Terminal Authentication or Chip Authentication is supported.

@@ -8,13 +8,7 @@ import android.widget.TableLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.ENDORSEMENT
-import com.example.emrtdapplication.ISSUING_AUTHORITY
-import com.example.emrtdapplication.OTHER_PERSON
-import com.example.emrtdapplication.PERSONALIZATION_DEVICE_SERIAL_NUMBER
-import com.example.emrtdapplication.PERSONALIZATION_TIME
 import com.example.emrtdapplication.R
-import com.example.emrtdapplication.TAX_EXIT_REQUIREMENTS
 import com.example.emrtdapplication.display.lds2.records.ISSUE_DATE
 
 object DG12Display: CreateView() {

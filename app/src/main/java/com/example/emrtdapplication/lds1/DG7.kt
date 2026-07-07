@@ -7,7 +7,6 @@ import com.example.emrtdapplication.utils.DisplayedSignature
 import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
 
-
 /**
  * Implements the DG2 file and inherits from [ElementaryFileTemplate]
  *

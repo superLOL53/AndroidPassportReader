@@ -9,7 +9,6 @@ import com.example.emrtdapplication.EMRTD
 import com.example.emrtdapplication.R
 import com.google.android.material.switchmaterial.SwitchMaterial
 
-
 class SettingsFragment: Fragment(R.layout.settings) {
     private var view: ScrollView? = null
 

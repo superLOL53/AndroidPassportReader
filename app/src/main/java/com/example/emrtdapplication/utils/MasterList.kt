@@ -7,7 +7,6 @@ import com.example.emrtdapplication.INVALID_MASTER_LIST_CONTENT
 import com.example.emrtdapplication.INVALID_MASTER_LIST_STRING
 import com.example.emrtdapplication.UNABLE_TO_DECODE_CSCA_CERTIFICATES
 import com.example.emrtdapplication.UNABLE_TO_DECODE_MASTER_LIST_CERTIFICATES
-import com.example.emrtdapplication.utils.MasterList.signedData
 import org.spongycastle.asn1.ASN1InputStream
 import org.spongycastle.asn1.ASN1ObjectIdentifier
 import org.spongycastle.asn1.ASN1OctetString

@@ -32,29 +32,6 @@ import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.TLVSequence
 import org.spongycastle.asn1.x509.Certificate
 
-const val VISA_RECORD_SIZE = 4
-const val INVALID_VISA_RECORD_SIZE = "Record sequence must be of size $VISA_RECORD_SIZE!"
-const val EMPTY_VISA_RECORD = "Empty visa record!"
-const val INVALID_TAG_IN_SEQUENCE = "Invalid tag in record sequence!"
-const val UNSPECIFIED_ISSUANCE_PLACE = "Unspecified issuance place in Visa Record!"
-const val UNSPECIFIED_ISSUANCE_DATE = "Unspecified issuance date in Visa Record!"
-const val UNSPECIFIED_EXPIRATION_DATE = "Unspecified expiration date in Visa Record!"
-const val UNSPECIFIED_DOCUMENT_NUMBER = "Unspecified document number in Visa Record!"
-const val UNSPECIFIED_HOLDER_NAME = "Unspecified holder name in Visa Record!"
-const val UNSPECIFIED_SURNAME = "Unspecified surname in Visa Record!"
-const val UNSPECIFIED_GIVEN_NAME = "Unspecified given name in Visa Record!"
-const val UNSPECIFIED_SEX = "Unspecified sex in Visa Record!"
-const val UNSPECIFIED_BIRTH_DATE = "Unspecified birth date in Visa Record!"
-const val UNSPECIFIED_NATIONALITY = "Unspecified nationality in Visa Record!"
-const val UNSPECIFIED_MRZ = "Unspecified MRZ in Visa Record!"
-const val UNSPECIFIED_DOCUMENT_TYPE = "Unspecified document type in Visa Record!"
-const val ILLEGAL_BIOMETRIC_FILE_REFERENCE = "Illegal length for the Biometrics EF file reference"
-const val UNKNOWN_CERTIFICATE_REFERENCE = "Unspecified or invalid certificate reference in Visa Record!"
-const val UNABLE_TO_VERIFY_SIGNATURE_VISA_RECORD = "Unable to verify signature of the Visa Record!"
-const val INVALID_STAY_DURATION = "Invalid length for duration of stays!"
-const val NO_SIGNED_INFORMATION = "No signed information in the record!"
-const val MISSING_STATE_ENTRIES = "State entries are not present or mismatch!"
-
 /**
  * Class representing a single Visa Record. The format is as follows:
  *

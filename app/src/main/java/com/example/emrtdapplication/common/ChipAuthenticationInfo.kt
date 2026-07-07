@@ -6,8 +6,6 @@ import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.utils.TLV
 import java.math.BigInteger
 
-const val CHIP_AUTHENTICATION_INFO_DH_ID = 1
-const val CHIP_AUTHENTICATION_INFO_ECDH_ID = 2
 /**
  * Inherits from [SecurityInfo] and implements the ASN1 Sequence ChipAuthenticationInfo:
  *

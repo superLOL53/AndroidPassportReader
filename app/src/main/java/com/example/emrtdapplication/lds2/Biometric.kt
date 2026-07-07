@@ -12,14 +12,6 @@ import com.example.emrtdapplication.utils.Crypto
 import com.example.emrtdapplication.utils.TLV
 import org.spongycastle.asn1.x509.Certificate
 
-const val BIOMETRIC_RECORD_SIZE = 3
-const val UNABLE_TO_VERIFY_SIGNATURE = "Unable to verify signature for biometric data!"
-const val INVALID_CERTIFICATE_REFERENCE = "Empty or invalid certificate reference!"
-const val EMPTY_SIGNATURE = "Empty signature for Additional Biometrics file!"
-const val EMPTY_BIOMETRIC_DATA = "Empty Biometric Data!"
-const val ILLEGAL_TAG = "Illegal tag for Biometric Data Template!"
-const val BIOMETRIC_TAG_SIZE = 2
-
 /**
  * Class representing a biometric elementary file in the Additional Biometrics application.
  * The structure for the file is as follows:

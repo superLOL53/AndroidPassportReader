@@ -5,7 +5,6 @@ import com.example.emrtdapplication.constants.TlvTags.DG10_SHORT_EF_ID
 import com.example.emrtdapplication.utils.ElementaryFilesTypeTemplate
 import com.example.emrtdapplication.utils.TLV
 
-
 /**
  * Implements the DG2 file
  *

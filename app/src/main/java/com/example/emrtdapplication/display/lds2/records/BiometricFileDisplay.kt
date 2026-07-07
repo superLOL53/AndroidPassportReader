@@ -1,4 +1,4 @@
-package com.example.emrtdapplication.display.lds2
+package com.example.emrtdapplication.display.lds2.records
 
 import android.content.Context
 import android.graphics.text.LineBreaker
@@ -6,8 +6,6 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.example.emrtdapplication.BIOMETRIC_FILE
-import com.example.emrtdapplication.CERTIFICATE_REFERENCE
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.MAX_LINES_IN_DISPLAY
 import com.example.emrtdapplication.R

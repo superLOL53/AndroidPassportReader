@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
 import com.example.emrtdapplication.BYTE_MODULO
-import com.example.emrtdapplication.DO8X_TAG_OVERHEAD_LENGTH
-import com.example.emrtdapplication.INVALID_RESPONSE_MAC
 import com.example.emrtdapplication.U_BYTE_MODULO
 import com.example.emrtdapplication.constants.NfcClassByte
 import com.example.emrtdapplication.constants.TlvTags.DO01

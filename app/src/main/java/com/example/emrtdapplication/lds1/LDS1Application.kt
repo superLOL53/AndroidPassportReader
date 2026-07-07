@@ -4,7 +4,6 @@ import com.example.emrtdapplication.ACTIVE_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_TYPE
 import com.example.emrtdapplication.CHIP_AUTHENTICATION_TYPE
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.EMRTD.mrz
 import com.example.emrtdapplication.FAILURE
 import com.example.emrtdapplication.LDSApplication
 import com.example.emrtdapplication.ReadPassport
@@ -14,24 +13,6 @@ import com.example.emrtdapplication.common.ChipAuthentication
 import com.example.emrtdapplication.common.ChipAuthenticationInfo
 import com.example.emrtdapplication.common.ChipAuthenticationPublicKeyInfo
 import java.math.BigInteger
-
-/**
- * Application identifier for the LDS1 application
- */
-const val APPLICATION_ID = "A0000002471001"
-
-/**
- * Constant value for incrementing the progress bar while reading from the eMRTD
- */
-const val INCREMENT_PROGRESS_BAR = 3
-
-const val READING_FILES = "Reading files..."
-const val READING_EF_SOD = "Reading EF.SOD file..."
-const val PERFORMING_ACTIVE_AUTHENTICATION = "Performing Active Authentication..."
-const val PERFORMING_CHIP_AUTHENTICATION = "Performing Chip Authentication..."
-const val PERFORMING_PASSIVE_AUTHENTICATION = "Performing Passive Authentication..."
-const val READING_DG = "Reading DG"
-const val FILE = " file..."
 
 /**
  * Class representing the LDS1 application on the eMRTD
@@ -161,7 +142,7 @@ class LDS1Application: LDSApplication() {
      * @return [SUCCESS] or [FAILURE] if the protocol failed
      */
     fun performBACProtocol(): Int {
-        if (bac.init(mrz) != SUCCESS) {
+        if (bac.init(EMRTD.mrz) != SUCCESS) {
             return FAILURE
         }
         return bac.bacProtocol()

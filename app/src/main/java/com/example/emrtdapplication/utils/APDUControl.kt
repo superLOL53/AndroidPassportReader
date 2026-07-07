@@ -4,100 +4,11 @@ import android.nfc.Tag
 import android.nfc.tech.IsoDep
 import android.util.Log
 import com.example.emrtdapplication.ANDROID_LOG_INFO_TAG
+import com.example.emrtdapplication.NfcUse
 import com.example.emrtdapplication.ZERO_BYTE
 import com.example.emrtdapplication.constants.NfcRespondCodeSW1
 import com.example.emrtdapplication.constants.NfcRespondCodeSW2
-import com.example.emrtdapplication.NfcUse
-import com.example.emrtdapplication.utils.APDUControl.encryptionKey
-import com.example.emrtdapplication.utils.APDUControl.encryptionKeyMAC
-import com.example.emrtdapplication.utils.APDUControl.isAES
-import com.example.emrtdapplication.utils.APDUControl.isoDep
-import com.example.emrtdapplication.utils.APDUControl.isoDepSupport
-import com.example.emrtdapplication.utils.APDUControl.maxCommandLength
-import com.example.emrtdapplication.utils.APDUControl.maxResponseLength
-import com.example.emrtdapplication.utils.APDUControl.maxTransceiveLength
-import com.example.emrtdapplication.utils.APDUControl.nfcTechUse
-import com.example.emrtdapplication.utils.APDUControl.sendEncryptedAPDU
-import com.example.emrtdapplication.utils.APDUControl.ssc
 import java.io.IOException
-
-/**
- * Initialization of the NFC IsoDep was successful
- */
-const val INIT_SUCCESS = 0
-
-/**
- * Connection to the discovered NFC Tag was a success
- */
-const val CONNECT_SUCCESS = 1
-
-/**
- * Closing the NFC Tag connection was a success
- */
-const val CLOSE_SUCCESS = 2
-
-/**
- * Discovered tag was null
- */
-const val ERROR_NO_NFC_TAG = -1
-
-/**
- * Discovered tag does not support IsoDep, which is mandatory for eMRTDs
- */
-const val ERROR_NO_ISO_DEP_SUPPORT = -2
-
-/**
- * Error code for NFC tag connection establishment failure
- */
-const val ERROR_UNABLE_TO_CONNECT = -3
-
-/**
- * Error code for uninitialized connection attempt to the NFC tag
- */
-const val ERROR_ISO_DEP_NOT_SELECTED = -4
-
-/**
- * Error code for failure in closing NFC connection
- */
-const val ERROR_UNABLE_TO_CLOSE = -5
-
-/**
- * NFC response timeout setting
- */
-const val TIME_OUT = 50000
-
-/**
- * Byte array size for APDU response codes
- */
-const val RESPOND_CODE_SIZE = 2
-
-/**
- * Minimum size for a response APDU with a MAC
- */
-const val MIN_APDU_SIZE_FOR_MAC_VERIFICATION = 13
-
-/**
- * Padding size for encryption and MAC ciphers
- */
-const val PADDING_SIZE = 8
-
-/**
- * DES key size in bytes
- */
-const val SINGLE_KEY_SIZE_3DES = 8
-
-/**
- * Response APDU data offset counting from the end
- */
-const val APDU_NO_DATA_SIZE = 17
-
-const val SENDING_APDU = "Sending APDU: "
-
-const val RECEIVED_APDU = "Received APDU: "
-
-const val SENDING_SECURED_APDU = "Sending secured APDU: "
-
-const val RECEIVED_SECURED_APDU = "Received secured APDU: "
 
 /**
  * Class for sending and receiving APDUs from the ePassport

@@ -6,8 +6,6 @@ import com.example.emrtdapplication.CHIP_AUTHENTICATION_PUBLIC_KEY_INFO_OID
 import com.example.emrtdapplication.EF_DIR_OID
 import com.example.emrtdapplication.ElementaryFileTemplate
 import com.example.emrtdapplication.FAILURE
-import com.example.emrtdapplication.PACE_DOMAIN_PARAMETER_INFO_OID_SIZE
-import com.example.emrtdapplication.PACE_INFO_OID_SIZE
 import com.example.emrtdapplication.PACE_OID
 import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.SecurityInfo
@@ -23,7 +21,6 @@ import com.example.emrtdapplication.constants.TlvTags.DG14_FILE_TAG
 import com.example.emrtdapplication.constants.TlvTags.DG14_SHORT_EF_ID
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
-
 
 /**
  * Implements the DG14 file

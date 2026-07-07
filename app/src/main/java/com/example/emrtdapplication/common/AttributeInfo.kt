@@ -15,26 +15,6 @@ import com.example.emrtdapplication.utils.TLVSequence
 import kotlin.experimental.and
 
 /**
- * Constants for the class AttributeInfo
- */
-const val CARD_CAPABILITY_TAG: Byte = 0x47
-const val SUPPORT_RECORD_NUMBER: Byte = 0x02
-const val SUPPORT_SHORT_EF_ID: Byte = 0x04
-const val SUPPORT_DF_FULL_NAME_SELECTION: Byte = 0x80.toByte()
-const val UNIT_SIZE: Byte = 0x01
-const val MASK_UNIT_SIZE: Byte = 0xF
-const val SUPPORT_COMMAND_CHAINING: Byte = 0x80.toByte()
-const val SUPPORT_EXTENDED_LENGTHS: Byte = 0x40
-const val EXTENDED_LENGTH_INFO_IN_ATRINFO: Byte = 0x20
-const val EXTENDED_LENGTH_TAG_1: Byte = 0x7F
-const val EXTENDED_LENGTH_TAG_2: Byte = 0x66
-const val AI_ID_1: Byte = 0x2F
-const val AI_ID_2: Byte = 0x01
-const val AI_MIN_LENGTH = 12
-const val CARD_CAPABILITIES_LENGTH = 3
-const val EXTENDED_LENGTH_INFO_SEQUENCE_LENGTH = 2
-
-/**
  * Implements the EF.ATR/INFO EF. The file is optional if only LDS1
  * application is present on the ePassport
  * @property supportFullDFNameSelection Indicates support for full DF name selection

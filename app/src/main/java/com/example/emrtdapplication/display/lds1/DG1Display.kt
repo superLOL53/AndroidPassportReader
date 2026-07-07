@@ -4,11 +4,7 @@ import android.content.Context
 import android.widget.LinearLayout
 import android.widget.TableRow
 import com.example.emrtdapplication.CreateView
-import com.example.emrtdapplication.DOCUMENT_CODE
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.ISSUER
-import com.example.emrtdapplication.NAME
-import com.example.emrtdapplication.OPTIONAL_DATA
 import com.example.emrtdapplication.display.lds2.records.BIRTH_DATE
 import com.example.emrtdapplication.display.lds2.records.DOCUMENT_NUMBER
 import com.example.emrtdapplication.display.lds2.records.EXPIRATION_DATE

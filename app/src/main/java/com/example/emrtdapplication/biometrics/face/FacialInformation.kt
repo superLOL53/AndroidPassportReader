@@ -1,51 +1,7 @@
 package com.example.emrtdapplication.biometrics.face
 
-import com.example.emrtdapplication.BALD_STRING
-import com.example.emrtdapplication.BLACK_STRING
-import com.example.emrtdapplication.BLONDE_STRING
-import com.example.emrtdapplication.BLUE_STRING
-import com.example.emrtdapplication.BROWN_STRING
 import com.example.emrtdapplication.BYTE_BIT_SIZE
-import com.example.emrtdapplication.CLOSED_SMILE_STRING
-import com.example.emrtdapplication.EYES_LOOKING_AWAY_STRING
-import com.example.emrtdapplication.FEMALE_STRING
-import com.example.emrtdapplication.FROWNING_STRING
-import com.example.emrtdapplication.GRAY_STRING
-import com.example.emrtdapplication.GREEN_STRING
-import com.example.emrtdapplication.MALE_STRING
-import com.example.emrtdapplication.MULTI_COLOURED_STRING
-import com.example.emrtdapplication.NEUTRAL_STRING
-import com.example.emrtdapplication.PINK_STRING
-import com.example.emrtdapplication.RAISED_EYEBROWS_STRING
-import com.example.emrtdapplication.RED_STRING
-import com.example.emrtdapplication.RESERVED_STRING
-import com.example.emrtdapplication.SMILE_STRING
-import com.example.emrtdapplication.SQUINTING_STRING
 import com.example.emrtdapplication.UNKNOWN_STRING
-import com.example.emrtdapplication.UNSPECIFIED_STRING
-import com.example.emrtdapplication.VENDOR_SPECIFIC_STRING
-import com.example.emrtdapplication.WHITE_STRING
-
-const val FACIAL_INFORMATION_SIZE = 20
-const val FACIAL_INFORMATION_SIZE_STRING = "Size of Facial Information must be ${FACIAL_INFORMATION_SIZE}!"
-const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_1 = 0
-const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_2 = 1
-const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_3 = 2
-const val FACIAL_INFORMATION_IMAGE_BLOCK_LENGTH_INDEX_4 = 3
-const val FACIAL_INFORMATION_FEATURE_POINTS_INDEX_1 = 4
-const val FACIAL_INFORMATION_FEATURE_POINTS_INDEX_2 = 5
-const val FACIAL_INFORMATION_GENDER_INDEX = 6
-const val FACIAL_INFORMATION_EYE_COLOR_INDEX = 7
-const val FACIAL_INFORMATION_HAIR_COLOR_INDEX = 8
-const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_1 = 9
-const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_2 = 10
-const val FACIAL_INFORMATION_FEATURE_MASK_INDEX_3 = 11
-const val FACIAL_INFORMATION_EXPRESSION_HIGH_BYTE = 12
-const val FACIAL_INFORMATION_EXPRESSION_LOW_BYTE = 13
-const val FACIAL_INFORMATION_POSE_ANGLE_START_INDEX = 14
-const val FACIAL_INFORMATION_POSE_ANGLE_END_INDEX = 16
-const val FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_START_INDEX = 17
-const val FACIAL_INFORMATION_POSE_ANGLE_UNCERTAINTY_END_INDEX = 19
 
 /**
  * Class representing facial information in a facial data record according to ISO/IEC 19794-5

@@ -6,14 +6,7 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import com.example.emrtdapplication.CreateView
-import com.example.emrtdapplication.END_DATE
-import com.example.emrtdapplication.ISSUER
 import com.example.emrtdapplication.R
-import com.example.emrtdapplication.SERIAL_NUMBER
-import com.example.emrtdapplication.SIGNATURE_ALGORITHM_ID_STRING
-import com.example.emrtdapplication.START_DATE
-import com.example.emrtdapplication.SUBJECT
-import com.example.emrtdapplication.VERSION
 import org.spongycastle.asn1.x509.Certificate
 
 class CertificateDisplay(val certificate: Certificate): CreateView() {

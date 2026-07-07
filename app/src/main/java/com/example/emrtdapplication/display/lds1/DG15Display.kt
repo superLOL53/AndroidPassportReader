@@ -2,10 +2,8 @@ package com.example.emrtdapplication.display.lds1
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.ALGORITHM_IDENTIFIER
 import com.example.emrtdapplication.CreateView
 import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.PUBLIC_KEY
 
 object DG15Display: CreateView() {
 

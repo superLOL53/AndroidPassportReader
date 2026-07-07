@@ -2,24 +2,10 @@ package com.example.emrtdapplication.display.lds1
 
 import android.content.Context
 import android.widget.LinearLayout
-import com.example.emrtdapplication.CHIP_AUTHENTICATION_STATUS
-import com.example.emrtdapplication.CRL_STATUS
-import com.example.emrtdapplication.CSCA_STRING
-import com.example.emrtdapplication.CreateView
-import com.example.emrtdapplication.DATE_FORMAT
-import com.example.emrtdapplication.DOCUMENT_SIGNER_CERTIFICATE
-import com.example.emrtdapplication.EMRTD
-import com.example.emrtdapplication.EXPIRED
-import com.example.emrtdapplication.FAILURE_STRING
-import com.example.emrtdapplication.INVALID_HASH
-import com.example.emrtdapplication.INVALID_SIGNATURE
-import com.example.emrtdapplication.PASSIVE_AUTHENTICATION_STATUS
-import com.example.emrtdapplication.REVOKED
-import com.example.emrtdapplication.SUCCESS
-import com.example.emrtdapplication.UNDETERMINED
-import com.example.emrtdapplication.UNREVOKED
-import com.example.emrtdapplication.VERIFIED
 import com.example.emrtdapplication.CertificationRevocationStatus
+import com.example.emrtdapplication.CreateView
+import com.example.emrtdapplication.EMRTD
+import com.example.emrtdapplication.SUCCESS
 import com.example.emrtdapplication.display.utils.CertificateDisplay
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

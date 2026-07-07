@@ -7,15 +7,6 @@ import com.example.emrtdapplication.constants.TlvTags
 import com.example.emrtdapplication.utils.TLV
 import org.bouncycastle.asn1.ASN1ObjectIdentifier
 
-const val INVALID_TYPE =
-    "Active Authentication Info must have type of Active Authentication Info"
-const val ILLEGAL_REQUIRED_DATA_ACTIVE_AUTHENTICATION_INFO =
-    "Illegal required data for Active Authentication Info!"
-const val ILLEGAL_OPTIONAL_DATA =
-    "Illegal optional data for Active Authentication Info!"
-const val ILLEGAL_OID =
-    "Illegal OID in Active Authentication Info!"
-
 /**
  * Implements the ASN1 ActiveAuthenticationInfo Sequence:
  *

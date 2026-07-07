@@ -1,18 +1,6 @@
 package com.example.emrtdapplication
 
 import android.nfc.Tag
-import com.example.emrtdapplication.EMRTD.additionalBiometrics
-import com.example.emrtdapplication.EMRTD.ai
-import com.example.emrtdapplication.EMRTD.ca
-import com.example.emrtdapplication.EMRTD.cs
-import com.example.emrtdapplication.EMRTD.dir
-import com.example.emrtdapplication.EMRTD.idPaceOid
-import com.example.emrtdapplication.EMRTD.ldS1Application
-import com.example.emrtdapplication.EMRTD.mrz
-import com.example.emrtdapplication.EMRTD.pace
-import com.example.emrtdapplication.EMRTD.showDetails
-import com.example.emrtdapplication.EMRTD.travelRecords
-import com.example.emrtdapplication.EMRTD.visaRecords
 import com.example.emrtdapplication.common.AttributeInfo
 import com.example.emrtdapplication.common.CardAccess
 import com.example.emrtdapplication.common.CardSecurity

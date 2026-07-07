@@ -5,8 +5,6 @@ import android.graphics.BitmapFactory
 import com.example.emrtdapplication.biometrics.BiometricData
 import com.example.emrtdapplication.biometrics.BiometricType
 
-const val UNABLE_TO_DECODE_STRING = "Unable to decode facial feature!"
-
 /**
  * Class representing face biometrics data.
  * @param facialRecord Byte array containing a facial record according to ISO\IEC 19794-5
@@ -73,7 +71,7 @@ class FacialRecordData(
                         )
             )
         } catch (_: Exception) {
-            throw IllegalArgumentException(UNABLE_TO_DECODE_STRING)
+            throw IllegalArgumentException("Unable to decode facial feature!")
         }
     }
 }
